@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.entity;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class RawOffer {
@@ -10,6 +11,8 @@ public class RawOffer {
     private double price;
     private Optional<Currency> currency;
     private String genre;
+    private String catNumber;
+    private boolean inStock;
     private String offerLink;
     private String imageLink;
 
@@ -61,6 +64,22 @@ public class RawOffer {
         this.genre = genre;
     }
 
+    public String getCatNumber() {
+        return catNumber;
+    }
+
+    public void setCatNumber(String catNumber) {
+        this.catNumber = catNumber;
+    }
+
+    public boolean isInStock() {
+        return inStock;
+    }
+
+    public void setInStock(boolean inStock) {
+        this.inStock = inStock;
+    }
+
     public String getOfferLink() {
         return offerLink;
     }
@@ -77,6 +96,7 @@ public class RawOffer {
         this.imageLink = imageLink;
     }
 
+
     @Override
     public String toString() {
         return "\nRawOffer{" +
@@ -85,10 +105,34 @@ public class RawOffer {
                 ", artist='" + artist + '\'' +
                 ", price=" + price +
                 ", currency=" + currency +
+                ", genre='" + genre + '\'' +
+                ", catNumber='" + catNumber + '\'' +
+                ", inStock=" + inStock +
                 ", offerLink='" + offerLink + '\'' +
                 ", imageLink='" + imageLink + '\'' +
-                ", genre='" + genre + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RawOffer)) return false;
+        RawOffer rawOffer = (RawOffer) o;
+        return shopId == rawOffer.shopId &&
+                Double.compare(rawOffer.price, price) == 0 &&
+                inStock == rawOffer.inStock &&
+                Objects.equals(release, rawOffer.release) &&
+                Objects.equals(artist, rawOffer.artist) &&
+                Objects.equals(currency, rawOffer.currency) &&
+                Objects.equals(genre, rawOffer.genre) &&
+                Objects.equals(catNumber, rawOffer.catNumber) &&
+                Objects.equals(offerLink, rawOffer.offerLink) &&
+                Objects.equals(imageLink, rawOffer.imageLink);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(shopId, release, artist, price, currency, genre, catNumber, inStock, offerLink, imageLink);
     }
 
 }

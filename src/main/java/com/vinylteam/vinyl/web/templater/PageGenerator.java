@@ -147,7 +147,9 @@ public class PageGenerator {
 
         String discogsLink = attributes.get("discogsLink");
         if (discogsLink != null) {
-            context.setVariable("discogsLink", discogsLink);
+            if (!discogsLink.equals("")){
+                context.setVariable("discogsLink", discogsLink);
+            }
         }
     }
 

@@ -66,11 +66,12 @@ class CatalogueServletTest {
 
     @Test
     @DisplayName("Checks if all right methods are called & user is authed")
-    void doGetWithAuthedUserTest() throws IOException {
+    void doGetWithAuthedUserAndWantListIsNotEmptyTest() throws IOException {
         //prepare
         when(mockedUniqueVinylService.findManyRandom(50)).thenReturn(
                 new ArrayList<>(Collections.nCopies(50, new UniqueVinyl())));
         when(mockedRequest.getSession(false)).thenReturn(mockedHttpSession);
+        when(mockedRequest.getParameter("wantlist")).thenReturn(null);
         when(mockedHttpSession.getAttribute("user")).thenReturn(mockedUser);
         when(mockedUser.getRole()).thenReturn(Role.USER);
         when(mockedResponse.getWriter()).thenReturn(mockedPrintWriter);
@@ -81,9 +82,34 @@ class CatalogueServletTest {
         inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_OK);
         inOrderRequest.verify(mockedRequest).getSession(false);
+        inOrderRequest.verify(mockedRequest).getParameter("wantlist");
         verify(mockedHttpSession).getAttribute("user");
         verify(mockedUser, times(1)).getRole();
         assertEquals(Role.USER, mockedUser.getRole());
+        inOrderResponse.verify(mockedResponse).getWriter();
+    }
+
+    @Test
+    @DisplayName("Checks if all right methods are called & user is authed, but wantlist is empty. Return random vinyl list")
+    void doGetWithAuthedUserAndEmptyWantListLoadCatalogPageTest() throws IOException {
+        //prepare
+        when(mockedUniqueVinylService.findManyRandom(50)).thenReturn(
+                new ArrayList<>(Collections.nCopies(50, new UniqueVinyl())));
+        when(mockedRequest.getSession(false)).thenReturn(mockedHttpSession);
+        when(mockedRequest.getParameter("wantlist")).thenReturn("empty");
+        when(mockedHttpSession.getAttribute("user")).thenReturn(mockedUser);
+        when(mockedUser.getRole()).thenReturn(Role.USER);
+        when(mockedResponse.getWriter()).thenReturn(mockedPrintWriter);
+        //when
+        catalogueServlet.doGet(mockedRequest, mockedResponse);
+        //then
+        verify(mockedUniqueVinylService).findManyRandom(50);
+        inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
+        inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_OK);
+        inOrderRequest.verify(mockedRequest).getSession(false);
+        inOrderRequest.verify(mockedRequest).getParameter("wantlist");
+        verify(mockedHttpSession, times(0)).getAttribute("user");
+        verify(mockedUser, times(0)).getRole();
         inOrderResponse.verify(mockedResponse).getWriter();
     }
 

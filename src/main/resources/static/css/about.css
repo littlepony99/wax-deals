@@ -1,0 +1,13 @@
+.about-content{
+  padding: 3.55em 0;
+}
+
+.about-body{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-body__title{
+  padding-bottom: 15px;
+}

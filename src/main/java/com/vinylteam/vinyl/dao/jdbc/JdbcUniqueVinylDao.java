@@ -22,7 +22,7 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     private static final String SELECT_BY_ID = SELECT_ALL + " WHERE id=?";
     private static final String SELECT_MANY_RANDOM = SELECT_ALL + " WHERE has_offers ORDER BY random() LIMIT ?";
     private static final String SELECT_MANY_BY_FULL_NAME_MATCH = SELECT_ALL + " WHERE full_name ILIKE ? AND has_offers";
-    private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist=? AND has_offers";
+    private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist ILIKE ? AND has_offers";
     private final HikariDataSource dataSource;
 
     public JdbcUniqueVinylDao(HikariDataSource dataSource) {

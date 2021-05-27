@@ -22,6 +22,8 @@ public class OfferRowMapper implements RowMapper<Offer> {
             offer.setPrice(resultSet.getDouble("price"));
             offer.setCurrency(Optional.of(Currency.valueOf(resultSet.getString("currency"))));
             offer.setGenre(resultSet.getString("genre"));
+            offer.setCatNumber(resultSet.getString("cat_number"));
+            offer.setInStock(resultSet.getBoolean("in_stock"));
             offer.setOfferLink(resultSet.getString("link_to_offer"));
             log.debug("Resulting Offer object {'offer':{}}", offer);
             return offer;
@@ -29,6 +31,7 @@ public class OfferRowMapper implements RowMapper<Offer> {
             log.error("Error while getting data from result set into Offer object {'offer':{}}", offer, e);
             throw new RuntimeException(e);
         }
+
     }
 
 }

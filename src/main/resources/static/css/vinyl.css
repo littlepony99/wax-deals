@@ -101,7 +101,7 @@
   height: 100%;
 }
 
-.on-stock{
+.in-stock{
   background: url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M10.7217 24.4599C10.4544 24.7288 10.0898 24.8788 9.71097 24.8788C9.33218 24.8788 8.96752 24.7288 8.70024 24.4599L0.628271 16.3867C-0.209424 15.549 -0.209424 14.1906 0.628271 13.3545L1.639 12.3435C2.47696 11.5058 3.83376 11.5058 4.67146 12.3435L9.71097 17.3833L23.3285 3.76548C24.1664 2.92778 25.5246 2.92778 26.3609 3.76548L27.3717 4.77647C28.2094 5.61417 28.2094 6.97228 27.3717 7.80866L10.7217 24.4599Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='28' height='28' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A") no-repeat center;
 }
 
@@ -113,7 +113,7 @@
   color: #8D8989;
 }
 
-.under-order{
+.on-order{
   background: url("data:image/svg+xml,%3Csvg width='25' height='25' viewBox='0 0 25 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12.5' cy='12.5' r='12.5' fill='white'/%3E%3C/svg%3E%0A") no-repeat center;
 }
 
@@ -150,6 +150,7 @@
 
 .item-body{
   height: 4.44em;
+  text-align:center;
 }
 
 .shop-list__item-image{

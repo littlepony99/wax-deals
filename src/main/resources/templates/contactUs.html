@@ -20,7 +20,7 @@
                 <nav class="header__menu" role="navigation">
                     <ul class="header__menu-list">
                         <li>
-                            <a href="#" class="header__menu-item">about</a>
+                            <a href="/about" class="header__menu-item">about</a>
                         </li>
                         <li th:switch="${userRole}">
                             <div th:case="null">
@@ -39,7 +39,7 @@
                             <a href="/stores" class="header__menu-item">stores</a>
                         </li>
                         <li>
-                            <a href="/contact" class="header__menu-item">contact</a>
+                            <a href="/contact" class="header__menu-item header__menu-item_active">contact</a>
                         </li>
                     </ul>
                 </nav>

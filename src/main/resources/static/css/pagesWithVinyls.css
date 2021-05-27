@@ -146,6 +146,7 @@
   flex-wrap: wrap;
   margin: 0 -1.3em;
   align-content: flex-start;
+  justify-content: center;
 }
 
 .other-vinyls__item{

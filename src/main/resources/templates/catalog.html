@@ -25,7 +25,7 @@
                 <nav class="header__menu" role="navigation">
                     <ul class="header__menu-list">
                         <li>
-                            <a href="#" class="header__menu-item">about</a>
+                            <a href="/about" class="header__menu-item">about</a>
                         </li>
                         <li th:switch="${userRole}">
                             <div th:case="null">
@@ -108,9 +108,9 @@
                         <p class="search-none__one">Now your want list is empty.</p>
                         <p class="search-none__two">Useful tips:</p>
                         <ul class="search-none__ul-search">
-                            <li>You can add your discogs username and we will show vinyls according to your discogs want list</li>
-                            <li>You can add the record on the website <a href="https://www.discogs.com/" target="_blank">www.discogs.com</a> to the want list</li>
-                            <li>Or on our website click the star on the record</li>
+                            <li>You can <a href="/editProfile" class="underline-link">add your discogs username</a> and we will show vinyls according to your discogs want list</li>
+                            <li>You can add the record on the website <a href="https://www.discogs.com/" class="underline-link" target="_blank">www.discogs.com</a> to the want list</li>
+                            <li>Or <a href="/catalog?wantlist=empty" class="underline-link">on our website</a> click the star on the record</li>
                         </ul>
                         <p class="search-none__three">Thank you.</p>
                     </div>

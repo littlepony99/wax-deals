@@ -21,7 +21,7 @@ class DecksParserTest {
 
     @BeforeAll
     void beforeAll() {
-        String testUrl = "https://www.decks.de/decks/workfloor/lists/list_db.php";
+        String testUrl = "https://www.decks.de/track/sault-untitled/ci7-9g";
         Optional<Document> testOptionalDocument = decksParser.getDocument(testUrl);
 
         if (testOptionalDocument.isPresent()) {
@@ -94,6 +94,15 @@ class DecksParserTest {
         String actualReleaseFromDocument = decksParser.getReleaseFromDocument(testDocument);
         //then
         assertNotNull(actualReleaseFromDocument);
+    }
+
+    @Test
+    @DisplayName("Get catalog number from document")
+    void getCatNumberFromDocument() {
+        //when
+        String actualCatalogNumberFromDocument = decksParser.getCatNumberFromDocument(testDocument);
+        //then
+        assertNotNull(actualCatalogNumberFromDocument);
     }
 
     @Test

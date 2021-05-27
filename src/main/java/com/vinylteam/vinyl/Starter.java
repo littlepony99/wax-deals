@@ -8,6 +8,7 @@ import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
 import com.vinylteam.vinyl.util.*;
+import com.vinylteam.vinyl.util.impl.CloneNlParser;
 import com.vinylteam.vinyl.util.impl.DecksParser;
 import com.vinylteam.vinyl.util.impl.JunoVinylParser;
 import com.vinylteam.vinyl.util.impl.VinylUaParser;
@@ -79,7 +80,7 @@ public class Starter {
 //UTIL, FILL IN DATABASE
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
-        List<VinylParser> vinylParsers = List.of(new VinylUaParser(), new JunoVinylParser(), new DecksParser());
+        List<VinylParser> vinylParsers = List.of(new VinylUaParser(), new JunoVinylParser(), new DecksParser(), new CloneNlParser());
         Updater updater = new Updater(uniqueVinylService, offerService, shopsParser, vinylParsers, rawOffersSorter);
         TimerTask updateTask = new TimerTask() {
             @Override
@@ -109,6 +110,7 @@ public class Starter {
         HomeServlet homeServlet = new HomeServlet();
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
+        AboutServlet aboutServlet = new AboutServlet();
 
         Resource resource = JarFileResource.newClassPathResource(RESOURCE_PATH);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -130,6 +132,7 @@ public class Starter {
         servletContextHandler.addServlet(new ServletHolder(homeServlet), "");
         servletContextHandler.addServlet(new ServletHolder(contactUsServlet), "/contact");
         servletContextHandler.addServlet(new ServletHolder(imageCaptchaServlet), "/captcha");
+        servletContextHandler.addServlet(new ServletHolder(aboutServlet), "/about");
 
         servletContextHandler.addServlet(DefaultServlet.class, "/*");
 

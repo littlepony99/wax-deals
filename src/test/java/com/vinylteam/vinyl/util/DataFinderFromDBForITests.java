@@ -26,7 +26,7 @@ public class DataFinderFromDBForITests {
     private final RowMapper<Offer> offerRowMapper = new OfferRowMapper();
     private static final String SELECT_ALL_USERS = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name FROM users ORDER BY id";
     private static final String SELECT_ALL_UNIQUE_VINYLS = "SELECT id, release, artist, full_name, link_to_image, has_offers FROM unique_vinyls ORDER BY id";
-    private static final String SELECT_ALL_OFFERS = "SELECT id, unique_vinyl_id, shop_id, price, currency, genre, link_to_offer FROM offers ORDER BY id";
+    private static final String SELECT_ALL_OFFERS = "SELECT id, unique_vinyl_id, shop_id, price, currency, genre, cat_number, in_stock, link_to_offer FROM offers ORDER BY id";
 
     public DataFinderFromDBForITests(HikariDataSource dataSource) {
         this.dataSource = dataSource;

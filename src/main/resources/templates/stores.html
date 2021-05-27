@@ -25,7 +25,7 @@
         <nav class="header__menu" role="navigation">
           <ul class="header__menu-list">
             <li>
-              <a href="#" class="header__menu-item">about</a>
+              <a href="/about" class="header__menu-item">about</a>
             </li>
             <li th:switch="${userRole}">
               <div th:case="null">
@@ -99,7 +99,7 @@
         <div class="shops-content__row">
           <div class="all-shops">
             <div class="all-shops__item" th:each="shop : ${shopList}">
-              <a th:href="@{shop.mainPageLink}" target="_blank">
+              <a th:href="${shop.mainPageLink}" target="_blank">
                 <img th:src="${shop.imageLink}" alt="shop image">
               </a>
             </div>

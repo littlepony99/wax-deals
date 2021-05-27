@@ -11,6 +11,8 @@ public class Offer {
     private double price;
     private Optional<Currency> currency;
     private String genre;
+    private String catNumber;
+    private boolean inStock;
     private String offerLink;
 
     public long getId() {
@@ -61,6 +63,22 @@ public class Offer {
         this.genre = genre;
     }
 
+    public String getCatNumber() {
+        return catNumber;
+    }
+
+    public void setCatNumber(String catNumber) {
+        this.catNumber = catNumber;
+    }
+
+    public boolean isInStock() {
+        return inStock;
+    }
+
+    public void setInStock(boolean inStock) {
+        this.inStock = inStock;
+    }
+
     public String getOfferLink() {
         return offerLink;
     }
@@ -70,35 +88,31 @@ public class Offer {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Offer)) return false;
-        Offer offer = (Offer) o;
-        return id == offer.id &&
-                uniqueVinylId == offer.uniqueVinylId &&
-                shopId == offer.shopId &&
-                Double.compare(offer.price, price) == 0 &&
-                Objects.equals(currency, offer.currency) &&
-                Objects.equals(genre, offer.genre) &&
-                Objects.equals(offerLink, offer.offerLink);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, uniqueVinylId, shopId, price, currency, genre, offerLink);
-    }
-
-    @Override
     public String toString() {
-        return "\nOffer{" +
+        return "Offer{" +
                 "id=" + id +
                 ", uniqueVinylId=" + uniqueVinylId +
                 ", shopId=" + shopId +
                 ", price=" + price +
                 ", currency=" + currency +
                 ", genre='" + genre + '\'' +
+                ", catNumber='" + catNumber + '\'' +
+                ", inStock=" + inStock +
                 ", offerLink='" + offerLink + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Offer)) return false;
+        Offer offer = (Offer) o;
+        return id == offer.id && uniqueVinylId == offer.uniqueVinylId && shopId == offer.shopId && Double.compare(offer.price, price) == 0 && inStock == offer.inStock && Objects.equals(currency, offer.currency) && Objects.equals(genre, offer.genre) && Objects.equals(catNumber, offer.catNumber) && Objects.equals(offerLink, offer.offerLink);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uniqueVinylId, shopId, price, currency, genre, catNumber, inStock, offerLink);
     }
 
 }

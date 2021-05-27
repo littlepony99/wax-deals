@@ -12,6 +12,7 @@ import org.junit.jupiter.api.TestInstance;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,13 +60,25 @@ class VinylUaParserITest {
     @Test
     @DisplayName("Checks that returned hashset of raw offers isn't empty and doesn't contain invalid offers after parsing.")
     void readRawOffersFromAllOfferLinksTest() {
-        assertFalse(vinylUaParser.readRawOffersFromAllOfferLinks(offerLinksSet).isEmpty());
+        Set<RawOffer>  rawOffers = vinylUaParser.readRawOffersFromAllOfferLinks(offerLinksSet);
+        assertEquals(1, rawOffers.size());
+        for (RawOffer rawOffer : rawOffers) {
+            assertTrue(rawOffer.getPrice() > 0.);
+            assertTrue(rawOffer.getCurrency().isPresent());
+            assertFalse(rawOffer.getRelease().isEmpty());
+        }
     }
 
     @Test
-    @DisplayName("Checks that returned raw offer is filled after parsing offer link.")
+    @DisplayName("Checks that returned raw offer is filled after parsing not valid offer link.")
     void getRawOfferFromInvalidOfferLinkTest() {
-        assertEquals("img/goods/no_image.jpg", vinylUaParser.getRawOfferFromOfferLink(invalidOfferLink).getImageLink());
+        RawOffer actualRawOffer = vinylUaParser.getRawOfferFromOfferLink(invalidOfferLink);
+        assertNotNull(actualRawOffer.getCurrency());
+        assertNotNull(actualRawOffer.getRelease());
+        assertEquals("Various Artists", actualRawOffer.getArtist());
+        assertNotNull(actualRawOffer.getGenre());
+        assertNotNull(actualRawOffer.getCatNumber());
+        assertEquals("img/goods/no_image.jpg", actualRawOffer.getImageLink());
     }
 
     @Test
@@ -120,13 +133,13 @@ class VinylUaParserITest {
     @Test
     @DisplayName("Checks that getReleaseFrom-Valid-Document returns not empty release")
     void getReleaseFromValidDocument() {
-        assertNotEquals("", vinylUaParser.getReleaseFromDocument(validLinkDocument));
+        assertFalse(vinylUaParser.getReleaseFromDocument(validLinkDocument).isEmpty());
     }
 
     @Test
     @DisplayName("Checks that getReleaseFrom-Not Valid-Document returns empty release")
     void getReleaseFromNotValidDocument() {
-        assertEquals("", vinylUaParser.getReleaseFromDocument(invalidLinkDocument));
+        assertTrue( vinylUaParser.getReleaseFromDocument(invalidLinkDocument).isEmpty());
     }
 
     @Test
@@ -180,13 +193,25 @@ class VinylUaParserITest {
     @Test
     @DisplayName("Checks that getGenreFrom-Valid-Document returns not empty genre")
     void getGenreFromValidDocument() {
-        assertNotEquals("", vinylUaParser.getGenreFromDocument(validLinkDocument));
+        assertFalse(vinylUaParser.getGenreFromDocument(validLinkDocument).isEmpty());
     }
 
     @Test
     @DisplayName("Checks that getGenreFrom-Not Valid-Document returns empty genre")
     void getGenreFromNotValidDocument() {
-        assertEquals("", vinylUaParser.getGenreFromDocument(invalidLinkDocument));
+        assertTrue(vinylUaParser.getGenreFromDocument(invalidLinkDocument).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Checks that getCatNumberFrom-Valid-Document returns not empty catNumber")
+    void getCatNumberFromValidDocument() {
+        assertFalse(vinylUaParser.getCatNumberFromDocument(validLinkDocument).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Checks that getCatNumberFrom-Not Valid-Document returns empty catNumber")
+    void getCatNumberFromNotValidDocument() {
+        assertTrue(vinylUaParser.getCatNumberFromDocument(invalidLinkDocument).isEmpty());
     }
 
 }

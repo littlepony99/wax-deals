@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/about.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <title>Wax Deals - catalog</title>
+</head>
+<body>
+
+<div class="wrapper">
+    <!-- header -->
+
+    <header class="header">
+
+
+        <!-- header menu -->
+
+
+        <div class="header__row">
+            <nav class="header__menu" role="navigation">
+                <ul class="header__menu-list">
+                    <li>
+                        <a href="/about" class="header__menu-item header__menu-item_active">about</a>
+                    </li>
+                    <li th:switch="${userRole}">
+                        <div th:case="null">
+                            <a href="catalog" class="header__menu-item">catalog</a>
+                        </div>
+                        <div th:case="*">
+                            <a href="catalog" class="header__menu-item">wantlist</a>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="/" class="header__logo">
+                            <img src="img/svg/wax_deals.svg" alt="wax deals logo">
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/stores" class="header__menu-item">stores</a>
+                    </li>
+                    <li>
+                        <a href="/contact" class="header__menu-item">contact</a>
+                    </li>
+                </ul>
+            </nav>
+            <div th:switch="${userRole}" class="head__login-signs">
+                <div th:case="null">
+                    <a href="/signIn" class="head__login-buttons">
+                        <span class="tooltiptext">LogIn</span>
+                        <img
+                                src="data:image/svg+xml,%3Csvg width='19' height='25' viewBox='0 0 19 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15.1463 0H4.51519C4.22717 0 3.99341 0.234146 3.99341 0.522646V2.09058C3.99341 2.37909 4.22717 2.61323 4.51519 2.61323H15.1463C15.833 2.61323 16.3911 3.17272 16.3911 3.86V21.14C16.3911 21.8275 15.8325 22.3868 15.1463 22.3868H4.51519C4.22717 22.3868 3.99341 22.6209 3.99341 22.9094V24.4774C3.99341 24.7659 4.22717 25 4.51519 25H15.1463C17.2716 25 19 23.2682 19 21.14V3.86027C19 1.73179 17.2713 0 15.1463 0Z' fill='%23F6A325'/%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M14.736 11.9172L9.32784 6.50007C9.17346 6.34544 8.96771 6.26056 8.74831 6.26056C8.52868 6.26056 8.32304 6.34556 8.16866 6.50007L7.67765 6.99202C7.52339 7.14641 7.43841 7.35262 7.43841 7.5725C7.43841 7.79225 7.52339 8.00542 7.67765 8.15981L10.8327 11.327H0.809026C0.357091 11.327 0 11.6814 0 12.1342V12.8297C0 13.2825 0.357091 13.6726 0.809026 13.6726H10.8685L7.67777 16.8574C7.52351 17.0121 7.43853 17.2127 7.43853 17.4325C7.43853 17.6522 7.52351 17.8557 7.67777 18.0102L8.16879 18.5006C8.32316 18.6552 8.5288 18.7395 8.74844 18.7395C8.96783 18.7395 9.17358 18.6541 9.32796 18.4995L14.7361 13.0825C14.8908 12.9273 14.9759 12.7203 14.9753 12.5001C14.9758 12.2793 14.8908 12.0721 14.736 11.9172Z' fill='%23F6A325'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='14.9753' height='15' fill='white' transform='translate(0 5)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A"
+                                alt="sign in">
+                    </a>
+                    <a href="/signUp" class="head__login-buttons">
+                        <span class="tooltiptext">Registration</span>
+                        <img
+                                src="data:image/svg+xml,%3Csvg width='25' height='25' viewBox='0 0 25 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M12.3218 13.0426C13.9762 13.0426 15.4088 12.4492 16.5794 11.2785C17.7499 10.1079 18.3433 8.67571 18.3433 7.02109C18.3433 5.36705 17.7499 3.93463 16.5792 2.76372C15.4085 1.59337 13.976 1 12.3218 1C10.6672 1 9.23494 1.59337 8.0644 2.76391C6.89386 3.93444 6.30029 5.36686 6.30029 7.02109C6.30029 8.67571 6.89386 10.1081 8.06459 11.2787C9.23532 12.449 10.6677 13.0426 12.3218 13.0426Z' fill='%23F6A325'/%3E%3Cpath d='M22.8071 20.1478C22.7733 19.6606 22.705 19.1292 22.6045 18.5681C22.503 18.0028 22.3724 17.4683 22.216 16.9799C22.0544 16.475 21.8347 15.9764 21.5631 15.4986C21.2812 15.0027 20.9501 14.5709 20.5785 14.2155C20.19 13.8438 19.7143 13.5449 19.1642 13.3269C18.6161 13.1101 18.0086 13.0002 17.3587 13.0002C17.1035 13.0002 16.8567 13.1049 16.3801 13.4152C16.0867 13.6065 15.7436 13.8278 15.3606 14.0725C15.0331 14.2812 14.5895 14.4767 14.0415 14.6537C13.5068 14.8267 12.964 14.9144 12.4282 14.9144C11.8925 14.9144 11.3498 14.8267 10.8146 14.6537C10.2672 14.4769 9.82356 14.2814 9.49645 14.0727C9.11708 13.8303 8.77376 13.609 8.47602 13.415C7.99995 13.1047 7.75294 13 7.49774 13C6.84772 13 6.24042 13.1101 5.69244 13.3271C5.14274 13.5447 4.66685 13.8436 4.27795 14.2157C3.90659 14.5713 3.57528 15.0029 3.29375 15.4986C3.02234 15.9764 2.80261 16.4748 2.64087 16.98C2.48466 17.4685 2.354 18.0028 2.25253 18.5681C2.15202 19.1285 2.08373 19.6601 2.04997 20.1483C2.01678 20.6267 2 21.1232 2 21.6246C2 22.9296 2.41485 23.9861 3.23291 24.7652C4.04086 25.5341 5.10993 25.9241 6.40998 25.9241H18.4476C19.7477 25.9241 20.755 26.1496 21.5631 25.3806C22.3814 24.602 22.8576 22.93 22.8576 21.6244C22.8574 21.1207 22.8405 20.6238 22.8071 20.1478Z' fill='%23F6A325'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='25' height='25' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A"
+                                alt="sign up">
+                    </a>
+                </div>
+                <div th:case="*">
+                    <a href="/signOut" class="head__login-buttons">
+                        <span class="tooltiptext">Log out</span>
+                        <img
+                                src="data:image/svg+xml,%3Csvg width='19' height='25' viewBox='0 0 19 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.86001 25H14.5087C14.7972 25 15.0313 24.7659 15.0313 24.4774V22.9094C15.0313 22.6209 14.7972 22.3868 14.5087 22.3868H3.86001C3.1722 22.3868 2.61323 21.8273 2.61323 21.14L2.61323 3.86C2.61323 3.17246 3.17273 2.61323 3.86001 2.61323H14.5087C14.7972 2.61323 15.0313 2.37909 15.0313 2.09059V0.522648C15.0313 0.234148 14.7972 0 14.5087 0H3.86001C1.73127 0 1.90735e-06 1.73179 1.90735e-06 3.86L1.90735e-06 21.1397C1.90735e-06 23.2682 1.73153 25 3.86001 25Z' fill='%23F6A325'/%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M18.7603 11.9172L13.3433 6.50001C13.1886 6.34538 12.9825 6.2605 12.7628 6.2605C12.5428 6.2605 12.3368 6.3455 12.1822 6.50001L11.6904 6.99196C11.5358 7.14634 11.4507 7.35256 11.4507 7.57244C11.4507 7.79219 11.5358 8.00536 11.6904 8.15975L14.8506 11.3269H4.81042C4.35774 11.3269 4.00006 11.6813 4.00006 12.1341V12.8296C4.00006 13.2824 4.35774 13.6725 4.81042 13.6725H14.8864L11.6905 16.8574C11.536 17.012 11.4509 17.2126 11.4509 17.4325C11.4509 17.6521 11.536 17.8556 11.6905 18.0102L12.1823 18.5005C12.3369 18.6552 12.5429 18.7394 12.7629 18.7394C12.9827 18.7394 13.1888 18.6541 13.3434 18.4994L18.7604 13.0824C18.9154 12.9273 19.0007 12.7202 19.0001 12.5001C19.0005 12.2792 18.9154 12.072 18.7603 11.9172Z' fill='%23F6A325'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='15' height='15' fill='white' transform='translate(4.00006 5)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A"
+                                alt="sign out">
+                    </a>
+                    <a href="/profile" class="head__login-buttons">
+                        <span class="tooltiptext">Profile</span>
+                        <img
+                                src="data:image/svg+xml,%3Csvg width='35' height='25' viewBox='0 0 35 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30.9896 0.00012207H4.01057C1.79823 0.00012207 6.10352e-05 1.71267 6.10352e-05 3.81965V21.1806C6.10352e-05 23.2876 1.79823 25.0001 4.01057 25.0001H30.9896C33.2019 25.0001 35.0001 23.2876 35.0001 21.1806V3.81965C35.0001 1.71267 33.2019 0.00012207 30.9896 0.00012207ZM10.9376 5.55559C12.9472 5.55559 14.5833 7.11402 14.5833 9.02798C14.5833 10.9417 12.9472 12.5001 10.9376 12.5001C8.9279 12.5001 7.29182 10.9417 7.29182 9.02798C7.29182 7.11402 8.9279 5.55559 10.9376 5.55559ZM17.5001 18.403C17.5001 18.978 17.0101 19.4447 16.4063 19.4447H5.46881C4.86506 19.4447 4.37506 18.978 4.37506 18.403V17.7085C4.37506 15.6015 6.17323 13.8889 8.38557 13.8889H13.4896C15.7019 13.8889 17.5001 15.6015 17.5001 17.7085V18.403ZM29.5313 19.4447H21.5106C20.9068 19.4447 20.4168 18.978 20.4168 18.403C20.4168 17.828 20.9068 17.3613 21.5106 17.3613H29.5313C30.1351 17.3613 30.6251 17.828 30.6251 18.403C30.6251 18.978 30.1351 19.4447 29.5313 19.4447ZM29.5313 13.8889H21.5106C20.9068 13.8889 20.4168 13.4223 20.4168 12.8473C20.4168 12.2723 20.9068 11.8056 21.5106 11.8056H29.5313C30.1351 11.8056 30.6251 12.2723 30.6251 12.8473C30.6251 13.4223 30.1351 13.8889 29.5313 13.8889ZM29.5313 8.33346H21.5106C20.9068 8.33346 20.4168 7.86679 20.4168 7.29179C20.4168 6.71679 20.9068 6.25012 21.5106 6.25012H29.5313C30.1351 6.25012 30.6251 6.71679 30.6251 7.29179C30.6251 7.86679 30.1351 8.33346 29.5313 8.33346Z' fill='%23F6A325'/%3E%3C/svg%3E%0A"
+                                alt="profile">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+
+        <!-- content of main -->
+
+        <div class="container sub-container">
+            <div class="about-content">
+
+                <div class="about-body">
+                    <h2 class="about-body__title">Who we are</h2>
+                    <p>We're a company Wax Deals from Ukraine.</p>
+                    <p>On wax-deals.com you can fast find the availabilities and prices of your next record.</p>
+                    <p>Music, especially pressed on vinyl, is our passion.</p>
+                    <br>
+                    <br>
+                    <h2 class="about-body__title">Our aim</h2>
+                    <p>Our aim is to provide the best service for customers.</p>
+                    <p>We want to make it easy to find your favorite vinyls and make it as comfortable as possible for you.</p>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__row">
+                <nav class="footer__social-nav">
+                    <ul class="footer__social-icons">
+                        <li>
+                            <a href="#" class="footer__social-icon facebook"></a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer__social-icon instagram"></a>
+                        </li>
+                        <li>
+                            <a href="#" class="footer__social-icon youtube"></a>
+                        </li>
+                    </ul>
+                </nav>
+                <p class="copyright">&copy; 2021 Wax Deals. All rights reserved</p>
+            </div>
+        </div>
+    </footer>
+</div>
+</body>
+</html>

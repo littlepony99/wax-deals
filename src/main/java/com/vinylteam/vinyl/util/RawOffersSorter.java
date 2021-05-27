@@ -50,14 +50,16 @@ public class RawOffersSorter {
             Iterator<RawOffer> rawOfferIterator = rawOffers.iterator();
             while (rawOfferIterator.hasNext()) {
                 RawOffer rawOffer = rawOfferIterator.next();
-                if (Objects.equals(uniqueVinyl.getRelease(), rawOffer.getRelease()) &&
-                        Objects.equals(uniqueVinyl.getArtist(), rawOffer.getArtist())) {
+                if (Objects.equals(uniqueVinyl.getRelease().toLowerCase(), rawOffer.getRelease().toLowerCase()) &&
+                        Objects.equals(uniqueVinyl.getArtist().toLowerCase(), rawOffer.getArtist().toLowerCase())) {
                     Offer offer = new Offer();
                     offer.setUniqueVinylId(uniqueVinyl.getId());
                     offer.setShopId(rawOffer.getShopId());
                     offer.setPrice(rawOffer.getPrice());
                     offer.setCurrency(rawOffer.getCurrency());
                     offer.setGenre(rawOffer.getGenre());
+                    offer.setCatNumber(rawOffer.getCatNumber());
+                    offer.setInStock(rawOffer.isInStock());
                     offer.setOfferLink(rawOffer.getOfferLink());
                     offers.add(offer);
                     uniqueVinyl.setHasOffers(true);

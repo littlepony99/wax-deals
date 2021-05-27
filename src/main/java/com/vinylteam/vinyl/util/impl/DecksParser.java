@@ -39,6 +39,8 @@ public class DecksParser implements VinylParser {
             rawOffer.setPrice(getPriceFromDocument(offerDocument.get()));
             rawOffer.setCurrency(getOptionalCurrencyFromDocument(offerDocument.get()));
             rawOffer.setGenre(getGenreFromDocument(offerDocument.get()));
+            rawOffer.setCatNumber(getCatNumberFromDocument(offerDocument.get()));
+            rawOffer.setInStock(getInStockInfoFromDocument(offerDocument.get()));
             rawOffer.setOfferLink(offerLink);
             rawOffer.setImageLink(getHighResImageLinkFromDocument(offerDocument.get()));
         }
@@ -61,6 +63,23 @@ public class DecksParser implements VinylParser {
         }
         log.info("Got genres from Decks.de: {}", genreLinks.size());
         return genreLinks;
+    }
+
+    String getCatNumberFromDocument(Document offerDocument) {
+        Element iframeElement = offerDocument.select("iframe").first();
+        String[] catNumbers = iframeElement.parents().get(0).getElementsByClass("detail_label").text().split("[/ ]");
+        String catNumber = catNumbers[catNumbers.length - 1];
+        return catNumber;
+    }
+
+    boolean getInStockInfoFromDocument(Document offerDocument) {
+        boolean inStock = true;
+        Element iframeElement = offerDocument.select("iframe").first();
+        String inStockText = iframeElement.parents().get(0).getElementsByClass("stockBlockaround").text();
+        if ("out of stock".contains(inStockText)){
+            inStock = false;
+        }
+        return inStock;
     }
 
     private String getHighResImageLinkFromDocument(Document offerDocument) {

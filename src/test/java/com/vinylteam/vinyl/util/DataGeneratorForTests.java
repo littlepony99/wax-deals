@@ -60,6 +60,8 @@ public class DataGeneratorForTests {
         offer.setPrice(uniqueVinylId * 10. + shopId);
         offer.setCurrency(Optional.of(Currency.UAH));
         offer.setGenre("genre" + uniqueVinylId);
+        offer.setCatNumber("SHOP" + shopId + "REL" + uniqueVinylId);
+        offer.setInStock(true);
         offer.setOfferLink("shop" + offer.getShopId() + "/release" + offer.getUniqueVinylId());
         return offer;
     }
@@ -76,6 +78,8 @@ public class DataGeneratorForTests {
         rawOffer.setPrice(number * 10. + shopId);
         rawOffer.setCurrency(Optional.of(Currency.UAH));
         rawOffer.setGenre("genre" + number);
+        rawOffer.setCatNumber("SHOP" + shopId + "REL" + number);
+        rawOffer.setInStock(true);
         rawOffer.setOfferLink("shop" + rawOffer.getShopId() + "/" + rawOffer.getRelease());
         rawOffer.setImageLink("/image" + number);
         return rawOffer;
@@ -122,6 +126,8 @@ public class DataGeneratorForTests {
                 offer.setPrice((i + 1) * 10. + j + 1);
                 offer.setCurrency(Optional.of(Currency.UAH));
                 offer.setGenre("genre" + (i + 1));
+                offer.setCatNumber("SHOP" + offer.getShopId() + "REL" + (i + 1));
+                offer.setInStock(true);
                 offer.setOfferLink("shop" + offer.getShopId() + "/release" + (i + 1));
                 offers.add(offer);
             }
@@ -156,6 +162,8 @@ public class DataGeneratorForTests {
                 rawOffer.setPrice((i + 1) * 10. + j + 1);
                 rawOffer.setCurrency(Optional.of(Currency.UAH));
                 rawOffer.setGenre("genre" + i);
+                rawOffer.setCatNumber("SHOP" + rawOffer.getShopId() + "REL" + (i + 1));
+                rawOffer.setInStock(true);
                 rawOffer.setOfferLink("shop" + rawOffer.getShopId() + "/" + rawOffer.getRelease());
                 rawOffer.setImageLink("/image" + (i + 1));
                 rawOffers.add(rawOffer);
@@ -166,6 +174,8 @@ public class DataGeneratorForTests {
                 offer.setPrice(rawOffer.getPrice());
                 offer.setCurrency(rawOffer.getCurrency());
                 offer.setGenre(rawOffer.getGenre());
+                offer.setCatNumber(rawOffer.getCatNumber());
+                offer.setInStock(rawOffer.isInStock());
                 offer.setOfferLink(rawOffer.getOfferLink());
                 offers.add(offer);
             }

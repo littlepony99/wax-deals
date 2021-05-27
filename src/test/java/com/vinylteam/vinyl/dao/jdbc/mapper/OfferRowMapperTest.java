@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,8 @@ class OfferRowMapperTest {
         when(vinylResult.getDouble("price")).thenReturn(1000.0);
         when(vinylResult.getString("currency")).thenReturn("EUR");
         when(vinylResult.getString("genre")).thenReturn("rock");
+        when(vinylResult.getString("cat_number")).thenReturn("WD 1");
+        when(vinylResult.getBoolean("in_stock")).thenReturn(true);
         when(vinylResult.getString("link_to_offer")).thenReturn("https://vinylsite.com/there/release1");
         //when
         Offer offer = rowMapper.mapRow(vinylResult);
@@ -38,6 +41,8 @@ class OfferRowMapperTest {
         assertEquals(1000.0, offer.getPrice());
         assertEquals(Currency.EUR, offer.getCurrency().get());
         assertEquals("rock", offer.getGenre());
+        assertEquals("WD 1", offer.getCatNumber());
+        assertTrue(offer.isInStock());
         assertEquals("https://vinylsite.com/there/release1", offer.getOfferLink());
     }
 

@@ -22,6 +22,7 @@ public class VinylUaParser implements VinylParser {
     private static final String SELECTOR_ARTIST = "div.boxed div.col-sm-7 > h4.normal-text > span.text-ellipsis > a";
     private static final String SELECTOR_PRICE_DETAILS = "div.boxed div.col-sm-4 > button.btn-success > b";
     private static final String SELECTOR_GENRE = "div.boxed div.col-xs-12 table.list-meta td.text-right:contains(Жанр:) + td";
+    private static final String SELECTOR_CATALOGUE_NUMBER = "div.boxed div.col-xs-12 table.list-meta td.text-right:contains(Компания:) + td > p.margin-none > a + span";
     private static final String SELECTOR_GENRE_ANCHORS = "nav#intro div#bs-example-navbar-collapse-1 > ul.nav > li.dropdown > ul.dropdown-menu > li > a";
     private static final String SELECTOR_PAGE_ANCHORS = "div.pagination-wrapper > ul.pagination > li:not(.nav-pagi) > a";
     private static final String SELECTOR_OFFER_ANCHORS = "div.row > div.col-sm-9 > div.row div.vinyl-release > div.boxed > p > a";
@@ -131,6 +132,8 @@ public class VinylUaParser implements VinylParser {
         rawOffer.setPrice(getPriceFromDocument(document));
         rawOffer.setCurrency(getOptionalCurrencyFromDocument(document));
         rawOffer.setGenre(getGenreFromDocument(document));
+        rawOffer.setCatNumber(getCatNumberFromDocument(document));
+        rawOffer.setInStock(true);
         rawOffer.setOfferLink(offerLink);
         rawOffer.setImageLink(getHighResImageLinkFromDocument(document));
         log.debug("Parsed page link {'offerLink':{}}", offerLink);
@@ -145,7 +148,7 @@ public class VinylUaParser implements VinylParser {
 
     String getArtistFromDocument(Document document) {
         String artist = document.select(SELECTOR_ARTIST).text();
-        if (artist.equals("")) {
+        if (artist.isEmpty()) {
             artist = "Various Artists";
         }
         log.debug("Got artist from page by offer link  {'artist':{}, 'offerLink':{}}", artist, document.location());
@@ -204,11 +207,17 @@ public class VinylUaParser implements VinylParser {
         return genre;
     }
 
+    String getCatNumberFromDocument(Document document) {
+        String catNumber = document.select(SELECTOR_CATALOGUE_NUMBER).text();
+        log.debug("Got catNumber from page by offer link {'catNumber':{}, 'offerLink':{}}", catNumber, document.location());
+        return catNumber;
+    }
+
     boolean isValid(RawOffer rawOffer) {
         boolean isValid = false;
         if (rawOffer.getPrice() != 0.
                 && rawOffer.getCurrency().isPresent()
-                && !("".equals(rawOffer.getRelease()))
+                && !rawOffer.getRelease().isEmpty()
                 && rawOffer.getOfferLink() != null) {
             isValid = true;
         }

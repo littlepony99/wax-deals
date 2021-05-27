@@ -10,6 +10,7 @@ import java.util.Properties;
 @Slf4j
 public class MailSender {
 
+    private static final String PRODUCTION_ENVIRONMENT = "PROD";
     private String username;
     private Session session;
 
@@ -17,11 +18,18 @@ public class MailSender {
         this.username = username;
 
         Properties properties = new Properties();
-        properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", port);
-        properties.put("mail.smtp.auth", auth);
         properties.put("mail.smtp.socketFactory.port", port);
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+        String env = System.getenv("env");
+        if (PRODUCTION_ENVIRONMENT.equals(env)) {
+            properties.put("mail.smtps.host", host);
+            properties.put("mail.smtps.auth", auth);
+        } else {
+            properties.put("mail.smtp.host", host);
+            properties.put("mail.smtp.auth", auth);
+        }
 
         session = Session.getInstance(properties,
                 new javax.mail.Authenticator() {

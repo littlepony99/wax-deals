@@ -71,6 +71,13 @@ public class OneVinylOffersServlet extends HttpServlet {
                 if (offer.getShopId() == shop.getId()) {
                     OneVinylOffersServletResponse offersResponse = new OneVinylOffersServletResponse();
                     offersResponse.setPrice(offer.getPrice());
+                    if (offer.getCurrency().isPresent()) {
+                        offersResponse.setCurrency(offer.getCurrency().get().getSymbol());
+                    } else {
+                        offersResponse.setCurrency("");
+                    }
+                    offersResponse.setCatNumber(offer.getCatNumber());
+                    offersResponse.setInStock(offer.isInStock());
                     offersResponse.setOfferLink(offer.getOfferLink());
                     offersResponse.setShopImageLink(shop.getSmallImageLink());
                     offersResponseList.add(offersResponse);
