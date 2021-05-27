@@ -1,0 +1,1 @@
+[![Build Status](https://travis-ci.com/littlepony99/wax-deals.svg?branch=develop)](https://travis-ci.com/littlepony99/wax-deals)

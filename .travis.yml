@@ -2,16 +2,12 @@ language: java
 jdk: "-openjdk11"
 env:
   global:
-    - CODECOV_TOKEN='9b3f4403-014a-4ea3-b09a-bc93708a17b8'
-    - env='DEV'
+  - CODECOV_TOKEN='9b3f4403-014a-4ea3-b09a-bc93708a17b8'
+  - env='DEV'
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
-#notifications:
-#  slack:
-#    secure: KNtJy/QBo+i6qXnyCw86FD+zrK+raEtbWqsJOZZ6d9H88tYU1KmrYiqka+m/ycXugZtQ50kRdIEzV6B2QHT0ORRE06yPuiwaUZqVZNuXsIQGASvODjy+Z6uOVQf18bV5mKEjSShEv1YetRUr/GrXBN+kRtZkGhfiUsB8+QgaSsH3ZUMUeH85ElnB2AlAyJTMfDAC/QK6FmODOwrLQEzzfpO7Qmk0aXGhfQOkgJ+eCV041ENl6KIt11W4sPgn9Jj00BOaBnUEDu40g5zYq+mrpE/+c1OuVK0m75stfGSFSrDPi+CKrCYG+wj2qLIwQIdzAOsGL4epGs0usT8OusBguXVRYRTXHrxQQL4S0uPavni2R6r1PTBtCH8iAh+aN+a6/S00fu1h/PAK54rgLli5Y32keK5jt3z7veWGl1Ly+oXWuchYAdOoTinWvq4S1GMkkA5z+4C5irUNCF2faxTtHt5iO4tNplhqBUWMqA96iCHz1tIZr9fvPYOnmHKCI71pU/UkXpNeEqXpVbiJ0HTnzfLviur7Gbg4uzS7Y9vHFgYuNiMl5+fh1ISN+PFzt448SWoSBDzOUiKJxKxhr+q5cy3GF5Kgja2bIhuN5bVlWvMmf3PqXAOU3+VqycnNjYq7PJABV7XEiOeTyLkA1OS3cDFsrOih6qvP2hcgM7j2uLI=
-#  email: glushkov18@gmail.com
+- bash <(curl -s https://codecov.io/bash)
 services:
-  - postgresql
+- postgresql
 deploy:
   provider: heroku
   app: wax-deals
@@ -19,4 +15,4 @@ deploy:
     branch: develop
   strategy: git
   api_key:
-    secure: u68eGuIPSuV9OIVw2/wpWvq7MZUnxcx6SViz2iGu4Ss0b2yMYLRF8Ev6fGHhoiKOkBqnW503+CbA6dmOVBoKr5ETJCMqVdqamV0CJ2C2k3jq8v3UywhAq+7l7Z4IxRHfmm8nLFc5xUOQ6B6Fy3zZgJZN7MsjPr4UrfJ86qVdHbrhROWw/R5T8mLJf6pmvrYTiaqvGXiasYXo12zCv6+LCn9lmA4SDKR4pJZDWe5ifWQa3DQ19xQMnDN578d5uQiuS2jxKyWw9Iy9Qx4FRUR2DLOXDdNd8epqBMDcxPMsO9kCuL4F0Yjc+KZFIDB6bO0zp+xUyY86zKZGxvQe6SUdApORW9p8sFJA80Jx+8+4wpJSvc+bsyq/8DeYLwaJiNqVHs9MIB9m519Ko8dzU/w2UxPVlrKKro+CFxOQHEvZXpkRV/LtiNHFPvQ4IrIepnOpy9J10QdKqe/GqCIAKkniGxtRnZ4EtPAym8LVYu/bIf5MQfqNEbodvdmSfnCtmr9QXNent26xoN5v+LXOpjYmTlY8ea6d5QjnGrnn2WIupBq/QtErQN6vmGG5EJQs8E1PxPmIzAcrSm1SOnRod33OCYD2PSMjM2fsXB6xHf2/6er4/Qa3pfyyDJNQ80WQicJ4XuMYyqnqhFpqasBKrA6Qxgy+DengCIO+4f7IRm0/7Aw=
+    secure: cRIzYn1oLvYWdWEsDSf5qJWx6FJlqQ0XNrs1FuZJEa8E/xm89C/4xKGwWk7H87z4C8dbOE6pvcvpj7pj5RZB9Q9TJiFyUuLWmdpCVVnigkNcRasJmktxVPsNqR17wfSV/K3SR3ktyC4Vh2tPbaolTFOXC4tKQ3t61CO5m8m1FTcgfnOsFfo9PEJA6ceDS+Gn9zQloe9/hq/FeEpl7iU/8eLoNgEvlwgOBaaJiCpF9Biob4h7o7KWUKYzgDUUYKffwoRdd1kP6RLigxzP/jwD3xV69evrwPKtL2dLdSBFEovSTlKr2ij1ysAi5vdWqZID2lEvxvvwKUGh0+QPV6QLXI7Zm0X85jcHJ9MjcEFk7lEFr/fiWp1egjJ7X+z5PAMkcw3kwZ76ZVVAWj5PgrqtIH0ymsJjypoVlIkYsjSkUW8SJfb0xH4JsISKT0sIFVw075gty9f44iO1oTrvxs7MY5WsZlWcrfC1fp/0vTRAo4N1XmSDQ3vUuzAO2Eaaz0VLBc0hj3I8ii+hjgvqkCey5aSJZT4sBn6XG/YQwa9JrBVdkVEb+CHJDiQywAPllelVzppQVNzRn5X4/phQ+qVbv+efX+qupWK2nZ9gpNxKaHD4dlZsNRCCs1O4e2kj89o7o8Vl8SintG+Hru1nU9y3RGYpmyBajnD4CWVlpXyoIug=
