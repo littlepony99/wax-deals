@@ -1,0 +1,18 @@
+codecov:
+  token: "9b3f4403-014a-4ea3-b09a-bc93708a17b8"
+  require_ci_to_pass: yes
+
+coverage:
+  notify:
+    slack:
+      default:
+        url: "https://hooks.slack.com/services/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"
+        branches:
+          - "develop"
+  precision: 2
+  round: down
+  range: "70...100"
+
+ignore:
+  - "src/main/java/com/vinylteam/vinyl/discogs4j"
+  - "src/main/java/com/vinylteam/vinyl/entity"
