@@ -1,0 +1,22 @@
+/* main of sign in page */
+
+.content-sign-in{
+  height: 23.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-sign-in__column{
+  height: 19.61em;
+  width: 19.44em;
+}
+
+.sign-in-user{
+  height: 14.39em;
+}
+
+.sign-in-user__fields{
+  height: 9em;
+}

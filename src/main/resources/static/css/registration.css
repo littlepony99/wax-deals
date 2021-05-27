@@ -1,0 +1,22 @@
+/* main of registration page */
+
+.content-registration-page{
+  height: 30.70em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.content-registration-page__column{
+  height: 27.92em;
+  width: 19.44em;
+}
+
+.registration-page-user{
+  height: 22.67em;
+}
+
+.registration-page-user__fields{
+  height: 16.11em;
+}

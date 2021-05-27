@@ -1,0 +1,18 @@
+/* main of contactUs page */
+
+.content-contact-us-page{
+  height: 36.17em;
+}
+
+.content-contact-us-page__column{
+  height: 33.39em;
+  width: 19.44em;
+}
+
+.contact-us-page-user{
+  height: 28.05em;
+}
+
+.contact-us-page-user__fields{
+  height: 21.67em;
+}

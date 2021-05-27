@@ -1,0 +1,169 @@
+/* main of vinyl page */
+
+.shops-list{
+  width: 46.88em;
+  height: 35.39em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1 1 auto;
+}
+
+.shop-list__row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: thin solid rgba(255, 255, 255, 0.5);
+  width: 97%;
+}
+
+.shop-list__row:last-child{
+  border-bottom: none;
+}
+
+.shop-list__item{
+  height: 3.05em;
+  width: 10.2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.shop-list__first-item-title{
+  height: 1.42em;
+  width: 4.08em;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+.discogs-link{
+  display: flex;
+  justify-content: center;
+  width: 6.65em;
+}
+
+.shop-list__second-item-title{
+  height: 2.5em;
+}
+
+.shop-list__row-first-title{
+  height: 2.11em;
+  display: flex;
+  text-align: center;
+  line-height: 1.1;
+  justify-content: flex-start;
+}
+
+.shop-list__row-second-title{
+  height: 2.56em;
+  width: 45.5em;
+  text-align: center;
+  line-height: 2.56em;
+}
+
+.shop-list__title{
+  text-transform: capitalize;
+  align-self: flex-start;
+}
+
+.shop-list__column{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.shop-list__scrollbar{
+  overflow: auto;
+}
+
+/* scrollbar */
+.shop-list__scrollbar::-webkit-scrollbar {
+  width: 10px; /* width for vertical scrolling */
+  background-color: rgba(196, 196, 196, 0.5);
+  border-radius: 5px;
+}
+
+/* scrollbar slider */
+.shop-list__scrollbar::-webkit-scrollbar-thumb {
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  box-shadow: inset 1px 1px 10px #f3faf7;
+}
+
+.shop-list__scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(151, 151, 151, 0.53);
+}
+
+.shop-list__item-image img{
+  width: 100%;
+  height: 100%;
+}
+
+.on-stock{
+  background: url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M10.7217 24.4599C10.4544 24.7288 10.0898 24.8788 9.71097 24.8788C9.33218 24.8788 8.96752 24.7288 8.70024 24.4599L0.628271 16.3867C-0.209424 15.549 -0.209424 14.1906 0.628271 13.3545L1.639 12.3435C2.47696 11.5058 3.83376 11.5058 4.67146 12.3435L9.71097 17.3833L23.3285 3.76548C24.1664 2.92778 25.5246 2.92778 26.3609 3.76548L27.3717 4.77647C28.2094 5.61417 28.2094 6.97228 27.3717 7.80866L10.7217 24.4599Z' fill='white'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='28' height='28' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A") no-repeat center;
+}
+
+.out-of-stock{
+  background: url("data:image/svg+xml,%3Csvg width='22' height='22' viewBox='0 0 22 22' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cg clip-path='url(%23clip0)'%3E%3Cpath d='M21.6918 1.95347L20.1721 0.451821C19.7609 0.0406058 19.0815 0.0406058 18.6524 0.451821L11.0717 8.0323L3.34821 0.308789C2.93682 -0.102604 2.25742 -0.102604 1.8285 0.308789L0.308797 1.8285C-0.102597 2.23971 -0.102597 2.91911 0.308797 3.3482L8.01461 11.054L0.451828 18.6526C0.0406134 19.0638 0.0406134 19.7432 0.451828 20.1723L1.97154 21.692C2.38275 22.1032 3.06215 22.1032 3.49124 21.692L11.0717 14.1113L18.6524 21.692C19.0636 22.1032 19.743 22.1032 20.1721 21.692L21.6918 20.1723C22.103 19.761 22.103 19.0816 21.6918 18.6526L14.0933 11.0719L21.6739 3.49141C22.103 3.06196 22.103 2.38256 21.6918 1.95347Z' fill='%238D8989'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0'%3E%3Crect width='22' height='22' fill='white'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E%0A") no-repeat center;
+}
+
+.out-of-stock-text{
+  color: #8D8989;
+}
+
+.under-order{
+  background: url("data:image/svg+xml,%3Csvg width='25' height='25' viewBox='0 0 25 25' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12.5' cy='12.5' r='12.5' fill='white'/%3E%3C/svg%3E%0A") no-repeat center;
+}
+
+.shop-list__item-price{
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.shop-list__item-direction{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.shop-list__shop-width{
+  width: 10.83em;
+}
+
+.shop-list__catalog-width{
+  width: 9.88em;
+}
+
+.shop-list__stock-width{
+  width: 4.5em;
+}
+
+.shop-list__price-width{
+  width: 8.9em;
+}
+
+.shop-list__go-to-shop-width{
+  width: 10.16em;
+}
+
+.item-body{
+  height: 4.44em;
+}
+
+.shop-list__item-image{
+  flex: 0 0 10.83em;
+  height: 2.78em;
+}
+
+.content-title{
+  text-align: center;
+  font-size: 1.33em;
+  line-height: 1.37;
+  font-weight: bold;
+  height: 5.72em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

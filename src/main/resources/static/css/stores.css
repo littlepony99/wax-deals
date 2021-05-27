@@ -1,0 +1,28 @@
+/* main of stores page */
+
+.shops-content{
+  padding: 3.55em 0;
+  max-width: 62em;
+  margin: 0 auto;
+}
+
+.shops-content__row{
+  margin: -4.61em 0;
+}
+
+.all-shops{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 0 -3.3em;
+  align-content: flex-start;
+}
+
+.all-shops__item{
+  padding: 0 3.3em;
+  height: 10.5em;
+  flex: 0 0 33%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

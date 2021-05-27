@@ -1,2 +1,8 @@
-/.idea
+.idea
+target
+logs
 *.iml
+*.log
+src/main/resources/dev.application.properties
+src/test/resources/dev.application.properties
+src/main/java/com/vinylteam/vinyl/Main.java

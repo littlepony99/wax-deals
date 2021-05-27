@@ -1,0 +1,102 @@
+/* registration form */
+
+.user{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.user__fields-wrapper{
+  flex: 1 1 auto;
+  width: 100%;
+}
+
+.user__fields{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.user__label{
+  width: 100%;
+}
+
+.user__submit-label{
+  height: 2.25em;
+}
+
+/* setting the color and transparent settings for the placeholder */
+.user__input::-webkit-input-placeholder {color:#8D8989; opacity:1;}/* webkit */
+.user__input::-moz-placeholder          {color:#8D8989; opacity:1;}/* Firefox 19+ */
+.user__input:-moz-placeholder           {color:#8D8989; opacity:1;}/* Firefox 18- */
+.user__input:-ms-input-placeholder      {color:#8D8989; opacity:1;}/* IE */
+.user__input:focus::-webkit-input-placeholder {opacity:0;}/* webkit */
+.user__input:focus::-moz-placeholder          {opacity:0;}/* Firefox 19+ */
+.user__input:focus:-moz-placeholder           {opacity:0;}/* Firefox 18- */
+.user__input:focus:-ms-input-placeholder      {opacity:0;}/* IE */
+
+.user__input{
+  font-size: 14px;
+  line-height: 19px;
+  color: #8D8989;
+  height: 3.57em;
+  width: 100%;
+  padding-left: 1.07em;
+}
+
+.input-message {
+  height: 10.71em;
+  padding-top: 0.79em;
+  resize: none;
+}
+
+.user__submit-buttons {
+  display: flex;
+  align-self: flex-start;
+  justify-content: center;
+  width: 50%;
+}
+
+.delete-profile-button{
+  position: absolute;
+  right: 1em;
+  bottom: 0;
+}
+
+.user__submit-input {
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 25px;
+  height: 2.22em;
+  width: 7.77em;
+  color: #fff;
+  background-color: #F6A325;
+  cursor: pointer;
+}
+
+.delete-user-button {
+  background-color: #394A57;
+}
+
+.user__submit-input:hover{
+  background-color: #D78D1E;
+}
+
+.user__submit-input:active{
+  background-color: #D78D1E;
+  border: 1px solid #FFFFFF;
+}
+
+.content-user__title{
+  height: 5.28em;
+}
+
+.discogs-logo{
+  position: absolute;
+  right: -5em;
+  bottom: 0.5em;
+}

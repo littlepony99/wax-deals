@@ -1,0 +1,14 @@
+/* main of home page */
+
+.content-home{
+  height: 26.5em;
+}
+
+.content-home__column{
+  height: 20.95em;
+  width: 52.55em;
+}
+
+.content-home__title h1{
+  text-align: center;
+}

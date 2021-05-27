@@ -1,0 +1,18 @@
+/* main of profile page */
+
+.content-profile{
+  height: 22.59em;
+}
+
+.content-profile__column{
+  height: 18.64em;
+  width: 19.44em;
+}
+
+.profile-user{
+  height: 13.36em;
+}
+
+.profile-user__fields{
+  height: 7.22em;
+}

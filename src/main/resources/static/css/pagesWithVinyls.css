@@ -1,0 +1,188 @@
+/* main of page with vinyls */
+
+.vinyls-content{
+  padding: 3.55em 0;
+}
+
+.vinyls-content__row{
+  display: flex;
+}
+
+.first-vinyls-row{
+  display: flex;
+}
+
+.first-vinyls-row-one-vinyl{
+  border-bottom: thin solid rgba(255, 255, 255, 0.5);
+  padding-bottom: 20px;
+}
+
+.first-vinyl__wrapper{
+  width: 33em;
+  display: flex;
+}
+
+.first-vinyl__item{
+  flex: 0 0 30.45em;
+  position: relative;
+}
+
+.first-vinyl__image{
+  height: 30.45em;
+}
+
+.first-vinyl__image img{
+  max-width: 100%;
+  height: 100%;
+  width: 100%;
+}
+
+.first-vinyl__release{
+  font-size: 1.34em;
+  line-height: 1.37;
+  width: 548px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tip-text {
+  visibility: hidden;
+  color: #fff;
+  font-size: 14px;
+  line-height: 19px;
+  white-space: pre-wrap;
+  position: absolute;
+  z-index: 1;
+  top:625px;
+  left: 0;
+}
+
+.vinyl-tip-text {
+  top:665px;
+}
+
+.first-vinyl__release:hover .tip-text {
+  visibility: visible;
+}
+
+.first-vinyl__artist{
+  font-size: 2em;
+  line-height: 1.36;
+  width: 548px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.first-vinyl__artist:hover .tip-text {
+  visibility: visible;
+}
+
+.search-none{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-none__one{
+  font-weight: bold;
+  font-size: 28px;
+  line-height: 38px;
+  padding-bottom: 34px;
+}
+
+.search-none__two{
+  font-weight: bold;
+  font-size: 26px;
+  line-height: 35px;
+  padding-bottom: 10px;
+}
+
+.search-none__ul-search{
+  font-weight: bold;
+  font-size: 24px;
+  line-height: 33px;
+  padding-bottom: 23px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-none__ul-search li{
+  list-style: disc;
+}
+
+.search-none__three{
+  font-weight: bold;
+  font-size: 26px;
+  line-height: 35px;
+}
+
+.vinyl{
+  display: flex;
+  flex-direction: column;
+}
+
+.other-vinyls__artist{
+  font-weight: bold;
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.other-vinyls__release{
+  font-size: 0.89em;
+  line-height: 1.38;
+  width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.other-vinyls{
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -1.3em;
+  align-content: flex-start;
+}
+
+.other-vinyls__item{
+  padding: 0 1.3em;
+  height: 18.5em;
+  flex: 0 0 20%;
+  position: relative;
+}
+
+.tip-text-other
+{
+  font-weight: normal;
+  top: 295px;
+  left: 24px;
+}
+
+.other-vinyls__artist:hover .tip-text-other {
+  visibility: visible;
+}
+
+.other-vinyls__release:hover .tip-text-other {
+  visibility: visible;
+}
+
+.other-vinyls__image{
+  height: 13.89em;
+  width: 13.89em;
+}
+
+.other-vinyls__image img{
+  max-width: 100%;
+  height: 100%;
+  width: 100%;
+}
+
+.vinyls-content__no-result{
+  font-size: 3em;
+  font-weight: bold;
+  color: #F6A325;
+}
