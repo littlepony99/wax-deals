@@ -9,6 +9,8 @@ import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
 import com.vinylteam.vinyl.util.*;
 import com.vinylteam.vinyl.util.impl.*;
+import com.vinylteam.vinyl.util.impl.ShopsParser;
+import com.vinylteam.vinyl.util.impl.VinylParser;
 import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import com.vinylteam.vinyl.web.handler.DefaultErrorHandler;
 import com.vinylteam.vinyl.web.servlets.*;
