@@ -2,8 +2,10 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.OfferDao;
 import com.vinylteam.vinyl.entity.Offer;
+import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
+import com.vinylteam.vinyl.util.impl.VinylParser;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -71,7 +73,7 @@ public class DefaultOfferService implements OfferService {
         List<Integer> shopsIds = new ArrayList<>();
         if (offers != null) {
             for (Offer offer : offers) {
-                if (!shopsIds.contains(Integer.valueOf(offer.getShopId()))) {
+                if (!shopsIds.contains(offer.getShopId())) {
                     shopsIds.add(offer.getShopId());
                 }
             }
@@ -80,6 +82,18 @@ public class DefaultOfferService implements OfferService {
         }
         log.debug("Resulting list of shop id-s is {'shopIds':{}}", shopsIds);
         return shopsIds;
+    }
+
+    public void mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer) {
+        if (shopParser.isValid(dynamicOffer)) {
+            var actualPrice = dynamicOffer.getPrice();
+            var actualCurrency = dynamicOffer.getCurrency();
+            offer.setInStock(dynamicOffer.isInStock());
+            offer.setCurrency(actualCurrency);
+            offer.setPrice(actualPrice);
+        } else {
+            offer.setInStock(false);
+        }
     }
 
 }

@@ -5,27 +5,31 @@ import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.spy;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CloneNlParserTest {
 
-    private CloneNlParser parser = new CloneNlParser();
+    private CloneNlParser parser;
     private Element vinylElement;
-    private DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
+    private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-    @BeforeAll
+    @BeforeEach
     void init() throws IOException {
-        File testHtml = new File(this.getClass().getClassLoader().getResource("cloneNLItem.html").getPath());
+        parser = new CloneNlParser();
+        setVinylElement("HtmlPages/cloneNLItem.html");
+    }
+
+    private void setVinylElement(String fromResourceFile) throws IOException {
+        File testHtml = new File(this.getClass().getClassLoader().getResource(fromResourceFile).getPath());
         vinylElement = Jsoup.parse(testHtml, null).select("DIV.release").first();
     }
 
@@ -46,9 +50,9 @@ class CloneNlParserTest {
     }
 
     @Test
-    @DisplayName("Checks whether RawOffer is received from HTML Element that represents one vinyl Item")
+    @DisplayName("Checks whether RawOffer is received from HTML Element that represents one vinyl Item from the listed on the page")
     void getRawOffersFromAllOfferLinksTest() {
-        var rawOffer = parser.getRawOfferFromElement(vinylElement);
+        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser.DefaultDetailedVinylParser());
         assertNotNull(rawOffer);
         assertEquals("The Paul Breitner EP", rawOffer.getRelease());
         assertEquals("https://clone.nl/item36449.html", rawOffer.getOfferLink());
@@ -60,69 +64,21 @@ class CloneNlParserTest {
     }
 
     @Test
-    @DisplayName("Checks whether genres are received from HTML Element that represents one vinyl Item")
-    void getGenreFromDocument() throws IOException {
-        var genre = parser.getGenreFromDocument(vinylElement);
-        assertNotNull(genre);
+    @DisplayName("Checks whether RawOffer is received from HTML Element that represents one vinyl Item from one vinyl page")
+    void getRawOffersFromOneVinylPageLinkTest() throws IOException {
+        File testHtml = new File(this.getClass().getClassLoader().getResource("HtmlPages/cloneNLItemOnePage.html").getPath());
+        vinylElement = Jsoup.parse(testHtml, null).select("DIV").first();
+        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser.OnePageDetailedVinylParser());
+        assertNotNull(rawOffer);
+        assertEquals("The Paul Breitner EP", rawOffer.getRelease());
+        assertTrue(rawOffer.getOfferLink().isEmpty());
+        assertEquals("https://clone.nl/platen/artwork/large/plaatimage36037.jpg", rawOffer.getImageLink());
+        assertEquals(Currency.EUR, rawOffer.getCurrency().get());
+        assertEquals(11.49d, rawOffer.getPrice());
+        assertEquals("Various Artists", rawOffer.getArtist());
+        assertTrue(rawOffer.getGenre().contains("House"));
     }
 
-    @Test
-    @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getReleaseFromDocument() throws IOException {
-        String release = parser.getReleaseFromDocument(vinylElement);
-        assertEquals("The Paul Breitner EP", release);
-    }
-
-    @Test
-    @DisplayName("Checks whether artist is received from HTML Element that represents one vinyl Item")
-    void getArtistFromDocument() throws IOException {
-        String artist = parser.getArtistFromDocument(vinylElement);
-        assertNotNull(artist);
-    }
-
-    @Test
-    @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getCatNumberFromDocument() throws IOException {
-        String catalogNumber = parser.getCatNumberFromDocument(vinylElement);
-        assertEquals("Rothmans7", catalogNumber);
-    }
-
-    @Test
-    @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getInStockInfoFromDocument() throws IOException {
-        boolean inStock = parser.getInStockInfoFromDocument(vinylElement);
-        assertTrue(inStock);
-    }
-
-    @Test
-    @DisplayName("Checks whether currency is received from HTML Element that represents one vinyl Item")
-    void getOptionalCurrencyFromDocumentTest() throws IOException {
-        var currency = parser.getOptionalCurrencyFromDocument(vinylElement);
-        assertTrue(currency.isPresent());
-    }
-
-    @Test
-    @DisplayName("Checks whether price is received from HTML Element that represents one vinyl Item")
-    void getPriceFromDocumentTest() throws IOException {
-        var price = parser.getPriceFromDocument(vinylElement);
-        assertEquals(11.49d, price);
-    }
-
-    @Test
-    @DisplayName("Checks whether high resolution image link is received from HTML Element that represents one vinyl Item")
-    void getHighResImageLinkFromDocumentTest() throws IOException {
-        String highResolutionImageLink = parser.getHighResImageLinkFromDocument(vinylElement);
-        assertNotNull(highResolutionImageLink);
-        assertFalse(highResolutionImageLink.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Checks whether offer link is received from HTML Element that represents one vinyl Item")
-    void getgetOfferLinkFromDocumentTest() throws IOException {
-        String offerLink = parser.getOfferLinkFromDocument(vinylElement);
-        assertNotNull(offerLink);
-        assertFalse(offerLink.isEmpty());
-    }
 
     @Test
     @DisplayName("Checks that when price==0, isValid returns false")
@@ -132,6 +88,33 @@ class CloneNlParserTest {
         rawOfferZeroPrice.setPrice(0.);
         //when
         assertFalse(parser.isValid(rawOfferZeroPrice));
+    }
+
+    @Test
+    @DisplayName("Checks for actual price of vinyl, the vinyl is not in stock")
+    void getActualPriceWhenNoOffer() throws IOException {
+        String fromResourceFile = "HtmlPages/cloneNLItemNotInStock.html";
+        setVinylElement(fromResourceFile);
+        double oldPrice = 0.44;
+        String offerUrl = "https://clone.nl/item63738.html";
+        parser = spy(parser);
+        Mockito.doReturn(Optional.of(vinylElement.ownerDocument())).when(parser).getDocument(offerUrl);
+        double actualPrice = parser.getRawOfferFromOfferLink(offerUrl).getPrice();
+        assertEquals(0, actualPrice);
+    }
+
+    @Test
+    @DisplayName("Checks for actual price of vinyl, the vinyl is non-accessible due to network issues")
+    void getActualPriceWhenNoResponseForPriceRequest() throws IOException {
+        String fromResourceFile = "HtmlPages/cloneNLItemNotInStock.html";
+        setVinylElement(fromResourceFile);
+        String offerUrl = "https://clone.nl/item63738.html";
+        parser = spy(parser);
+        Mockito.doReturn(Optional.ofNullable(null)).when(parser).getDocument(offerUrl);
+        RawOffer rawOfferFromOfferLink = parser.getRawOfferFromOfferLink(offerUrl);
+        double actualPrice = rawOfferFromOfferLink.getPrice();
+        assertFalse(parser.isValid(rawOfferFromOfferLink));
+        assertEquals(0, actualPrice);
     }
 
 }

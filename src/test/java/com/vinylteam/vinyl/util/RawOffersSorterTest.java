@@ -188,4 +188,65 @@ class RawOffersSorterTest {
         assertEquals(expectedOffers, actualOffers);
     }
 
+    @Test
+    @DisplayName("Return empty String when parameter is null")
+    void getParametersForComparisonWhenParameterIsNullTest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison(null);
+        //then
+        assertTrue(parameterForComparison.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Return first word 'the' when String is 'ThE'")
+    void getParametersForComparisonWhenStringContainsOnlyOneWordAndItIsTheTest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison("ThE");
+        //then
+        assertEquals("the", parameterForComparison);
+    }
+
+    @Test
+    @DisplayName("Return first word 'a' when String is 'A'")
+    void getParametersForComparisonWhenStringContainsOnlyOneWordAndItIsATest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison("A");
+        //then
+        assertEquals("a", parameterForComparison);
+    }
+
+    @Test
+    @DisplayName("Return second word 'artist' when String is 'The Artist'")
+    void getParametersForComparisonWhenStringContainsTwoWordsWithArticleTheTest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison("The Artist");
+        //then
+        assertEquals("artist", parameterForComparison);
+    }
+
+    @Test
+    @DisplayName("Return second word 'release' when String is 'A Release'")
+    void getParametersForComparisonWhenStringContainsTwoWordsWithArticleATest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison("A Release");
+        //then
+        assertEquals("release", parameterForComparison);
+    }
+
+    @Test
+    @DisplayName("Return first word 'best' when String is 'BEST RELEASE is here'")
+    void getParametersForComparisonWhenStringContainsManyWordsWithoutArticleTest() {
+        //when
+        String parameterForComparison = sorter.getParametersForComparison("BEST RELEASE is here");
+        //then
+        assertEquals("best", parameterForComparison);
+    }
+
+    private UniqueVinyl createVinyl(String artist, String release) {
+        UniqueVinyl vinyl = new UniqueVinyl();
+        vinyl.setArtist(artist);
+        vinyl.setRelease(release);
+        return vinyl;
+    }
+
 }

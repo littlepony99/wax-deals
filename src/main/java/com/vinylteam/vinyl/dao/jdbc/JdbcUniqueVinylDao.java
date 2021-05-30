@@ -18,15 +18,33 @@ import java.util.List;
 public class JdbcUniqueVinylDao implements UniqueVinylDao {
 
     private static final RowMapper<UniqueVinyl> rowMapper = new UniqueVinylRowMapper();
-    private static final String SELECT_ALL = "SELECT id, release, artist, full_name, link_to_image FROM public.unique_vinyls";
+    private static final String SELECT_ALL = "SELECT id, release, artist, full_name, link_to_image, has_offers FROM public.unique_vinyls";
     private static final String SELECT_BY_ID = SELECT_ALL + " WHERE id=?";
     private static final String SELECT_MANY_RANDOM = SELECT_ALL + " WHERE has_offers ORDER BY random() LIMIT ?";
     private static final String SELECT_MANY_BY_FULL_NAME_MATCH = SELECT_ALL + " WHERE full_name ILIKE ? AND has_offers";
     private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist ILIKE ? AND has_offers";
+    private static final String UPDATE_UNIQUE_VINYL_FALSE = "UPDATE unique_vinyls SET has_offers=FALSE WHERE has_offers=TRUE AND id = ?";
+
     private final HikariDataSource dataSource;
 
     public JdbcUniqueVinylDao(HikariDataSource dataSource) {
         this.dataSource = dataSource;
+    }
+
+    @Override
+    public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
+        if (vinyl.getHasOffers()){
+            return vinyl;
+        }
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement upsertUniqueVinyl = connection.prepareStatement(UPDATE_UNIQUE_VINYL_FALSE)) {
+            setVinylParameters(upsertUniqueVinyl, vinyl);
+            int rows = upsertUniqueVinyl.executeUpdate();
+            log.info("Unique vinyl(s) updated as having no any offer {}", rows);
+        } catch (SQLException e) {
+            log.error("Error while updating database with one uniqueVinyl {'uniqueVinyl':{}}", vinyl, e);
+        }
+        return vinyl;
     }
 
     @Override
@@ -142,6 +160,10 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
         }
         log.debug("Resulting uniqueVinyls are {'uniqueVinyls':{}}", uniqueVinyls);
         return uniqueVinyls;
+    }
+
+    void setVinylParameters(PreparedStatement upsertUniqueVinyls, UniqueVinyl uniqueVinyl) throws SQLException {
+        upsertUniqueVinyls.setLong(1, uniqueVinyl.getId());
     }
 
 }

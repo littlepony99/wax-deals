@@ -2,9 +2,12 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.OfferDao;
 import com.vinylteam.vinyl.entity.Offer;
+import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.util.impl.CloneNlParser;
+import com.vinylteam.vinyl.util.impl.VinylParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ class DefaultOfferServiceTest {
     private final OfferService offerService = new DefaultOfferService(mockedOfferDao);
     private final List<Offer> offers = dataGenerator.getOffersList();
     private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
+    private final VinylParser parser = new CloneNlParser();
 
     @BeforeEach
     void beforeEach() {
@@ -156,6 +160,40 @@ class DefaultOfferServiceTest {
         List<Integer> actualIds = offerService.getListOfShopIds(null);
         //then
         assertTrue(actualIds.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Checks that offers are merged during dynamic update")
+    void mergeOfferChangesTest() {
+        //prepare
+        Offer dbOffer = dataGenerator.getOfferWithUniqueVinylIdAndShopId(12, 4);
+        RawOffer webOffer = dataGenerator.getRawOfferWithShopIdAndNumber(4, 12);
+        double newWebPrice = webOffer.getPrice() - 2d;
+        webOffer.setPrice(newWebPrice);
+        assertNotEquals(webOffer.getPrice(), dbOffer.getPrice());
+        //when
+        offerService.mergeOfferChanges(dbOffer, parser, webOffer);
+        //then
+        assertEquals(webOffer.getPrice(), dbOffer.getPrice());
+        assertEquals(webOffer.getCurrency(), dbOffer.getCurrency());
+        assertEquals(newWebPrice, dbOffer.getPrice());
+    }
+
+    @Test
+    @DisplayName("Checks that offers are not merged during dynamic update since new offer is not valid (as though the link is no more existing)")
+    void noMergeOfferChangesTest() {
+        //prepare
+        Offer dbOffer = dataGenerator.getOfferWithUniqueVinylIdAndShopId(12, 4);
+        RawOffer webOffer = new RawOffer();
+        assertTrue(dbOffer.isInStock());
+        double dbPrice = dbOffer.getPrice();
+        assertNotEquals(webOffer.getPrice(), dbOffer.getPrice());
+        //when
+        offerService.mergeOfferChanges(dbOffer, parser, webOffer);
+        //then
+        assertNotEquals(webOffer.getPrice(), dbOffer.getPrice());
+        assertEquals(dbPrice, dbOffer.getPrice());
+        assertFalse(dbOffer.isInStock());
     }
 
 }

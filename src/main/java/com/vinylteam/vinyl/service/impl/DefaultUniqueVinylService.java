@@ -18,6 +18,11 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     }
 
     @Override
+    public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
+        return vinylDao.updateOneUniqueVinylAsHavingNoOffer(vinyl);
+    }
+
+    @Override
     public List<UniqueVinyl> findAll() {
         List<UniqueVinyl> gottenUniqueVinyls = vinylDao.findAll();
         log.debug("Resulting list with that amount of unique vinyls from db is {'uniqueVinyls':{}}", gottenUniqueVinyls);

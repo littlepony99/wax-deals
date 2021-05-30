@@ -8,10 +8,7 @@ import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
 import com.vinylteam.vinyl.util.*;
-import com.vinylteam.vinyl.util.impl.CloneNlParser;
-import com.vinylteam.vinyl.util.impl.DecksParser;
-import com.vinylteam.vinyl.util.impl.JunoVinylParser;
-import com.vinylteam.vinyl.util.impl.VinylUaParser;
+import com.vinylteam.vinyl.util.impl.*;
 import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import com.vinylteam.vinyl.web.handler.DefaultErrorHandler;
 import com.vinylteam.vinyl.web.servlets.*;
@@ -81,6 +78,7 @@ public class Starter {
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
         List<VinylParser> vinylParsers = List.of(new VinylUaParser(), new JunoVinylParser(), new DecksParser(), new CloneNlParser());
+        ParserHolder parserHolder = new ParserHolder(vinylParsers);
         Updater updater = new Updater(uniqueVinylService, offerService, shopsParser, vinylParsers, rawOffersSorter);
         TimerTask updateTask = new TimerTask() {
             @Override
@@ -101,7 +99,7 @@ public class Starter {
         SignUpServlet signUpServlet = new SignUpServlet(userService);
         CatalogueServlet catalogueServlet = new CatalogueServlet(uniqueVinylService, discogsService);
         SearchResultsServlet searchResultsServlet = new SearchResultsServlet(uniqueVinylService);
-        OneVinylOffersServlet oneVinylOffersServlet = new OneVinylOffersServlet(uniqueVinylService, offerService, shopService, discogsService);
+        OneVinylOffersServlet oneVinylOffersServlet = new OneVinylOffersServlet(uniqueVinylService, offerService, shopService, discogsService, parserHolder);
         SignOutServlet signOutServlet = new SignOutServlet();
         ProfileServlet profileServlet = new ProfileServlet();
         ShopServlet shopServlet = new ShopServlet(shopService);

@@ -19,6 +19,7 @@ public class UniqueVinylRowMapper implements RowMapper<UniqueVinyl> {
             uniqueVinyl.setArtist(resultSet.getString("artist"));
             uniqueVinyl.setFullName(resultSet.getString("full_name"));
             uniqueVinyl.setImageLink(resultSet.getString("link_to_image"));
+            uniqueVinyl.setHasOffers(resultSet.getBoolean("has_offers"));
             log.debug("Resulting UniqueVinyl object {'uniqueVinyl':{}}", uniqueVinyl);
             return uniqueVinyl;
         } catch (SQLException e) {

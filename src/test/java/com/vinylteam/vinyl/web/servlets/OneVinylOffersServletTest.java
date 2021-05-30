@@ -5,6 +5,9 @@ import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.ShopService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
+import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.util.impl.ParserHolder;
+import com.vinylteam.vinyl.util.impl.VinylParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -31,8 +34,10 @@ class OneVinylOffersServletTest {
     private final InOrder inOrderUniqueVinylService = inOrder(mockedUniqueVinylService);
     private final InOrder inOrderOfferService = inOrder(mockedOfferService);
     private final DiscogsService discogsService = mock(DiscogsService.class);
+    private final VinylParser parser = mock(VinylParser.class);
+    private final ParserHolder parserHolder = new ParserHolder(List.of(parser));
     private final OneVinylOffersServlet oneVinylOffersServlet = new OneVinylOffersServlet(mockedUniqueVinylService,
-            mockedOfferService, mockedShopService, discogsService);
+            mockedOfferService, mockedShopService, discogsService, parserHolder);
 
     private final HttpServletRequest mockedRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedResponse = mock(HttpServletResponse.class);
@@ -74,6 +79,9 @@ class OneVinylOffersServletTest {
         when(mockedOfferService.findManyByUniqueVinylId(1)).thenReturn(offers);
         when(mockedOfferService.getListOfShopIds(offers)).thenReturn(shopsIds);
         when(mockedShopService.getManyByListOfIds(shopsIds)).thenReturn(shopsByIds);
+        RawOffer returnedOffer = new RawOffer();
+        returnedOffer.setPrice(12.11d);
+        when(parser.getRawOfferFromOfferLink(any())).thenReturn(returnedOffer);
 
         when(mockedUniqueVinyl.getArtist()).thenReturn("artist1");
         when(mockedUniqueVinylService.findManyByArtist("artist1")).thenReturn(uniqueVinyls);
@@ -90,6 +98,7 @@ class OneVinylOffersServletTest {
         inOrderOfferService.verify(mockedOfferService).findManyByUniqueVinylId(1);
         inOrderOfferService.verify(mockedOfferService).getListOfShopIds(offers);
         verify(mockedShopService).getManyByListOfIds(shopsIds);
+        verify(parser).getRawOfferFromOfferLink(any());
 
         verify(mockedUniqueVinyl, times(4)).getArtist();
         inOrderUniqueVinylService.verify(mockedUniqueVinylService).findManyByArtist("artist1");
@@ -129,6 +138,7 @@ class OneVinylOffersServletTest {
         inOrderOfferService.verify(mockedOfferService).findManyByUniqueVinylId(1L);
         inOrderOfferService.verify(mockedOfferService).getListOfShopIds(offers);
         verify(mockedShopService).getManyByListOfIds(shopsIds);
+        verify(parser).getRawOfferFromOfferLink(any());
 
         verify(mockedUniqueVinyl, times(4)).getArtist();
         inOrderUniqueVinylService.verify(mockedUniqueVinylService).findManyByArtist("artist1");
@@ -166,10 +176,29 @@ class OneVinylOffersServletTest {
         inOrderOfferService.verify(mockedOfferService).findManyByUniqueVinylId(1L);
         inOrderOfferService.verify(mockedOfferService).getListOfShopIds(offers);
         verify(mockedShopService).getManyByListOfIds(shopsIds);
+        verify(parser).getRawOfferFromOfferLink(any());
 
         verify(mockedUniqueVinyl, times(4)).getArtist();
         inOrderUniqueVinylService.verify(mockedUniqueVinylService).findManyByArtist("artist1");
         verify(mockedResponse).getWriter();
+    }
+
+    @Test
+    @DisplayName("Checks if all data from offer are copied into OneVinylOfferResponse")
+    void getOfferResponseFromOfferTest() {
+        var generator = new DataGeneratorForTests();
+        var offers = generator.getOffersList();
+        var shop = new Shop();
+        shop.setId(4);
+        shop.setSmallImageLink("imageLink");
+        for (Offer offer : offers) {
+            var offerResponse = oneVinylOffersServlet.getOfferResponseFromOffer(offer, shop);
+            assertEquals(offer.getPrice(), offerResponse.getPrice());
+            assertEquals(offer.getOfferLink(), offerResponse.getOfferLink());
+            assertEquals(offer.getCurrency().get().getSymbol(), offerResponse.getCurrency());
+            assertEquals(offer.getCatNumber(), offerResponse.getCatNumber());
+            assertEquals(shop.getSmallImageLink(), offerResponse.getShopImageLink());
+        }
     }
 
 }

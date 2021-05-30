@@ -5,6 +5,8 @@ import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
+import com.vinylteam.vinyl.util.impl.ShopsParser;
+import com.vinylteam.vinyl.util.impl.VinylParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

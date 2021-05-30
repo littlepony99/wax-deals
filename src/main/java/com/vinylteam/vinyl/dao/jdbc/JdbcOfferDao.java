@@ -27,6 +27,7 @@ public class JdbcOfferDao implements OfferDao {
     private static final RowMapper<Offer> rowMapper = new OfferRowMapper();
     private static final String PREPARED_STATEMENT = "Prepared statement {'preparedStatement':{}}";
     private static final String EXECUTED_STATEMENT = "Executed statement {'statement':{}}";
+
     private final HikariDataSource dataSource;
 
     public JdbcOfferDao(HikariDataSource dataSource) {
@@ -94,12 +95,7 @@ public class JdbcOfferDao implements OfferDao {
             prepareTables.executeUpdate(TRUNCATE_RESTART_IDENTITY);
             log.debug(EXECUTED_STATEMENT, TRUNCATE_RESTART_IDENTITY);
             for (UniqueVinyl uniqueVinyl : uniqueVinyls) {
-                upsertUniqueVinyls.setLong(1, uniqueVinyl.getId());
-                upsertUniqueVinyls.setString(2, uniqueVinyl.getRelease());
-                upsertUniqueVinyls.setString(3, uniqueVinyl.getArtist());
-                upsertUniqueVinyls.setString(4, uniqueVinyl.getFullName());
-                upsertUniqueVinyls.setString(5, uniqueVinyl.getImageLink());
-                upsertUniqueVinyls.setBoolean(6, uniqueVinyl.getHasOffers());
+                setVinylParameters(upsertUniqueVinyls, uniqueVinyl);
                 log.debug(PREPARED_STATEMENT, upsertUniqueVinyls);
                 upsertUniqueVinyls.addBatch();
             }
@@ -133,6 +129,14 @@ public class JdbcOfferDao implements OfferDao {
         }
         log.info("Database updated, couldn't add {} offers", notAddedOffers.size());
         return notAddedOffers;
+    }
+    void setVinylParameters(PreparedStatement upsertUniqueVinyls, UniqueVinyl uniqueVinyl) throws SQLException {
+        upsertUniqueVinyls.setLong(1, uniqueVinyl.getId());
+        upsertUniqueVinyls.setString(2, uniqueVinyl.getRelease());
+        upsertUniqueVinyls.setString(3, uniqueVinyl.getArtist());
+        upsertUniqueVinyls.setString(4, uniqueVinyl.getFullName());
+        upsertUniqueVinyls.setString(5, uniqueVinyl.getImageLink());
+        upsertUniqueVinyls.setBoolean(6, uniqueVinyl.getHasOffers());
     }
 
 }

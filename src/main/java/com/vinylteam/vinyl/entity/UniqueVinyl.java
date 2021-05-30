@@ -80,13 +80,12 @@ public class UniqueVinyl {
                 Objects.equals(release, uniqueVinyl.release) &&
                 Objects.equals(artist, uniqueVinyl.artist) &&
                 Objects.equals(fullName, uniqueVinyl.fullName) &&
-                Objects.equals(imageLink, uniqueVinyl.imageLink) &&
-                hasOffers == uniqueVinyl.hasOffers;
+                Objects.equals(imageLink, uniqueVinyl.imageLink);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, release, artist, fullName, imageLink, hasOffers);
+        return Objects.hash(id, release, artist, fullName, imageLink);
     }
 
 }

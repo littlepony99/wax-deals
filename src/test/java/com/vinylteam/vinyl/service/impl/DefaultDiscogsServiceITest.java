@@ -39,7 +39,6 @@ class DefaultDiscogsServiceITest {
         vinylListWithOneMatch.add(createVinyl("The Detectors", "No Freedom No Liberty"));
         vinylListWithOneMatch.add(createVinyl("Paul Jacobs", "Soul Grabber Part 2 (Remixes)"));
         vinylListWithOneMatch.add(createVinyl("Donnell & Douglas", "The Club Is Open"));
-
         vinylListWithNoMatch.add(createVinyl("Charis", "The Music, The Feelin'"));
         vinylListWithNoMatch.add(createVinyl("Paul Jacobs", "Soul Grabber Part 2 (Remixes)"));
         vinylListWithNoMatch.add(createVinyl("Donnell & Douglas", "The Club Is Open"));
@@ -51,7 +50,6 @@ class DefaultDiscogsServiceITest {
     void getDiscogsMatchListWhenDiscogsUsernameIsNullTest() {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList(null, vinylListWithOneMatch);
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -61,7 +59,6 @@ class DefaultDiscogsServiceITest {
     void getDiscogsMatchListWhenDiscogsUsernameIsEmptyStringTest() {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("", vinylListWithOneMatch);
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -72,7 +69,6 @@ class DefaultDiscogsServiceITest {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("discogsUserName",
                 null);
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -83,7 +79,6 @@ class DefaultDiscogsServiceITest {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("discogsUserName",
                 new ArrayList<>());
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -94,7 +89,6 @@ class DefaultDiscogsServiceITest {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("not_exit_user_name",
                 vinylListWithOneMatch);
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -105,7 +99,6 @@ class DefaultDiscogsServiceITest {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("Anthony_Hopkins",
                 vinylListWithNoMatch);
-
         //then
         assertTrue(listAfterMatching.isEmpty());
     }
@@ -116,7 +109,6 @@ class DefaultDiscogsServiceITest {
         //when
         List<UniqueVinyl> listAfterMatching = defaultDiscogsService.getDiscogsMatchList("Anthony_Hopkins",
                 vinylListWithOneMatch);
-
         //then
         assertEquals(1, listAfterMatching.size());
     }
@@ -127,7 +119,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink(null, "No Freedom No Liberty",
                 "null - No Freedom No Liberty");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -138,7 +129,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("The Detectors", null,
                 "The Detectors - null");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -149,7 +139,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("null", "null",
                 null);
-
         //then
         assertEquals("", discogsLink);
     }
@@ -160,7 +149,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("", "No Freedom No Liberty",
                 " - No Freedom No Liberty");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -171,7 +159,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("The Detectors", "",
                 "The Detectors - ");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -182,7 +169,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("empty", "empty",
                 "");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -191,9 +177,8 @@ class DefaultDiscogsServiceITest {
     @DisplayName("Return empty String when no link on Discogs")
     void getDiscogsLinkWhenNoSearchReleaseOnDiscogsTest() throws ParseException {
         //when
-        String discogsLink = defaultDiscogsService.getDiscogsLink("no_existed_artist", "no_existed_release",
-                "no_existed_release - no_existed_artist");
-
+        String discogsLink = defaultDiscogsService.getDiscogsLink("qwedsazxcvfr", "qwedsazxcvfr",
+                "qwedsazxcvfr - qwedsazxcvfr");
         //then
         assertEquals("", discogsLink);
     }
@@ -204,7 +189,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("artist", "release",
                 "No Freedom No Liberty - The Detectors");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -215,7 +199,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("artist", "No Freedom No Liberty",
                 "No Freedom No Liberty - The Detectors");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -226,7 +209,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("The Detectors", "release",
                 "No Freedom No Liberty - The Detectors");
-
         //then
         assertEquals("", discogsLink);
     }
@@ -237,7 +219,6 @@ class DefaultDiscogsServiceITest {
         //when
         String discogsLink = defaultDiscogsService.getDiscogsLink("The Detectors", "No Freedom No Liberty",
                 "No Freedom No Liberty - The Detectors");
-
         //then
         assertEquals("https://www.discogs.com/ru/The-Detectors-No-Freedom-No-Liberty/release/2288564", discogsLink);
     }
@@ -247,7 +228,6 @@ class DefaultDiscogsServiceITest {
     void getDiscogsVinylInfoWhenDiscogsUserNameIsNullTest() {
         //when
         Optional<List<DiscogsVinylInfo>> discogsVinylInfoList = defaultDiscogsService.getDiscogsVinylInfo(null);
-
         //then
         assertEquals(Optional.empty(), discogsVinylInfoList);
     }
@@ -257,7 +237,6 @@ class DefaultDiscogsServiceITest {
     void getDiscogsVinylInfoWhenDiscogsUserNameIsEmptyStringTest() {
         //when
         Optional<List<DiscogsVinylInfo>> discogsVinylInfoList = defaultDiscogsService.getDiscogsVinylInfo("");
-
         //then
         assertEquals(Optional.empty(), discogsVinylInfoList);
     }
@@ -268,7 +247,6 @@ class DefaultDiscogsServiceITest {
         //when
         Optional<List<DiscogsVinylInfo>> discogsVinylInfoList = defaultDiscogsService
                 .getDiscogsVinylInfo("not_exist_discogs_user_name");
-
         //then
         assertEquals(Optional.empty(), discogsVinylInfoList);
     }
@@ -279,7 +257,6 @@ class DefaultDiscogsServiceITest {
         //when
         Optional<List<DiscogsVinylInfo>> discogsVinylInfoList = defaultDiscogsService
                 .getDiscogsVinylInfo("Anthony_Hopkins");
-
         //then
         assertEquals(3, discogsVinylInfoList.get().size());
     }
@@ -289,7 +266,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenParameterIsNullTest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison(null);
-
         //then
         assertEquals("", parameterForComparison);
     }
@@ -299,7 +275,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenStringContainsOnlyOneWordAndItIsTheTest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison("ThE");
-
         //then
         assertEquals("the", parameterForComparison);
     }
@@ -309,7 +284,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenStringContainsOnlyOneWordAndItIsATest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison("A");
-
         //then
         assertEquals("a", parameterForComparison);
     }
@@ -319,7 +293,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenStringContainsTwoWordsWithArticleTheTest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison("The Artist");
-
         //then
         assertEquals("artist", parameterForComparison);
     }
@@ -329,7 +302,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenStringContainsTwoWordsWithArticleATest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison("A Release");
-
         //then
         assertEquals("release", parameterForComparison);
     }
@@ -339,7 +311,6 @@ class DefaultDiscogsServiceITest {
     void getParametersForComparisonWhenStringContainsManyWordsWithoutArticleTest() {
         //when
         String parameterForComparison = defaultDiscogsService.getParametersForComparison("BEST RELEASE is here");
-
         //then
         assertEquals("best", parameterForComparison);
     }

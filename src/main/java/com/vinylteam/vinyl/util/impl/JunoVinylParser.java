@@ -3,13 +3,10 @@ package com.vinylteam.vinyl.util.impl;
 import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.util.PriceUtils;
-import com.vinylteam.vinyl.util.VinylParser;
 import lombok.extern.slf4j.Slf4j;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,7 +15,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toSet;
 
 @Slf4j
-public class JunoVinylParser implements VinylParser {
+public class JunoVinylParser extends VinylParser {
 
     private static final String BASE_LINK = "https://www.juno.co.uk";
     private static final String CATALOG_ROOT_LINK = BASE_LINK + "/all/";
@@ -39,6 +36,7 @@ public class JunoVinylParser implements VinylParser {
     private static final String SELECTOR_SCRIPT_HIGH_RES_IMAGE_LINK = BASE_SELECTOR_OFFER_DETAILS + " > div.order-2 > div#artwork-carousel > div#artwork-carousel-jwc > div.jw-scroller.jws-transform > div.jw-page + div.jw-page > img";
 
     private static final Pattern PAGE_NUMBER_PATTERN = Pattern.compile("/([0-9]+)/");
+    private static final int SHOP_ID = 2;
 
     @Override
     public List<RawOffer> getRawOffersList() {
@@ -127,7 +125,7 @@ public class JunoVinylParser implements VinylParser {
             var inStock = getInStockFromDocument(document);
 
             var rawOffer = new RawOffer();
-            rawOffer.setShopId(2);
+            rawOffer.setShopId(SHOP_ID);
             rawOffer.setRelease(release);
             rawOffer.setArtist(artist);
             rawOffer.setPrice(price);
@@ -236,26 +234,9 @@ public class JunoVinylParser implements VinylParser {
         return false;
     }
 
-    boolean isValid(RawOffer rawOffer) {
-        boolean isValid = false;
-        if (rawOffer.getPrice() != 0.
-                && rawOffer.getCurrency().isPresent()
-                && !(rawOffer.getRelease().isEmpty())
-                && rawOffer.getOfferLink() != null) {
-            isValid = true;
-        } else {
-            log.error("Raw offer isn't valid {'rawOffer':{}}", rawOffer);
-        }
-        return isValid;
-    }
-
-    Optional<Document> getDocument(String url) {
-        try {
-            return Optional.ofNullable(Jsoup.connect(url).get());
-        } catch (IOException e) {
-            log.warn("Page represented by the link will be skipped, since some error happened while getting document by link {'link':{}}", url, e);
-            return Optional.empty();
-        }
+    @Override
+    public long getShopId() {
+        return SHOP_ID;
     }
 
 }

@@ -198,6 +198,18 @@
             <artifactId>mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
+        <!--Thymeleaf-->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>${thymeleaf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.octo.captcha</groupId>
+            <artifactId>jcaptcha-all</artifactId>
+            <version>${jcaptcha.version}</version>
+        </dependency>
 
         <!--TESTS-->
 
@@ -234,19 +246,6 @@
             <artifactId>system-lambda</artifactId>
             <version>${system.lambda.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <!--Thymeleaf-->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
-            <version>${thymeleaf.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.octo.captcha</groupId>
-            <artifactId>jcaptcha-all</artifactId>
-            <version>${jcaptcha.version}</version>
         </dependency>
     </dependencies>
 </project>

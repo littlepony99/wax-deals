@@ -1,23 +1,26 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.DatabasePreparerForITests;
 import org.junit.jupiter.api.*;
+import org.mockito.InOrder;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcUniqueVinylDaoITest {
 
     private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();
-    private final UniqueVinylDao uniqueVinylDao = new JdbcUniqueVinylDao(databasePreparer.getDataSource());
+    private final JdbcUniqueVinylDao uniqueVinylDao = new JdbcUniqueVinylDao(databasePreparer.getDataSource());
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
     private final List<Shop> shops = dataGenerator.getShopsList();
     private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
@@ -266,6 +269,28 @@ class JdbcUniqueVinylDaoITest {
         List<UniqueVinyl> actualUniqueVinyls = uniqueVinylDao.findManyByArtist("artist1");
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Checks whether upsertOneUniqueVinyl set hasOffers = false for existing Vinyl")
+    void upsertOneUniqueVinylTest() {
+        UniqueVinyl vinyl = uniqueVinyls.get(2);
+        UniqueVinyl dbVinyl = uniqueVinylDao.findById(vinyl.getId());
+        assertTrue(dbVinyl.getHasOffers());
+        dbVinyl.setHasOffers(false);
+        uniqueVinylDao.updateOneUniqueVinylAsHavingNoOffer(dbVinyl);
+        UniqueVinyl dbVinylAfterUpdate = uniqueVinylDao.findById(vinyl.getId());
+        assertFalse(dbVinylAfterUpdate.getHasOffers());
+    }
+
+    @Test
+    @DisplayName("Checks whether setVinylParameters call PreparedStatement`s methods and does it in the right order")
+    void setVinylParametersTest() throws SQLException {
+        var uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(34);
+        var statement = mock(PreparedStatement.class);
+        uniqueVinylDao.setVinylParameters(statement, uniqueVinyl);
+        InOrder inOrderStatement = inOrder(statement);
+        inOrderStatement.verify(statement).setLong(1, uniqueVinyl.getId());
     }
 
 }

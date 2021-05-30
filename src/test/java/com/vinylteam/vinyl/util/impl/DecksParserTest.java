@@ -2,13 +2,15 @@ package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.RawOffer;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import java.util.HashSet;
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,45 +19,23 @@ import static org.junit.jupiter.api.Assertions.*;
 class DecksParserTest {
 
     private final DecksParser decksParser = new DecksParser();
-    private Document testDocument;
+    private Document startPageDocument;
+    private Document offerPageDocument;
 
     @BeforeAll
-    void beforeAll() {
-        String testUrl = "https://www.decks.de/track/sault-untitled/ci7-9g";
-        Optional<Document> testOptionalDocument = decksParser.getDocument(testUrl);
+    void beforeAll() throws IOException {
+        File startHtml = new File(this.getClass().getClassLoader().getResource("HtmlPages/decks/decks_start_page.html").getPath());
+        startPageDocument = Jsoup.parse(startHtml, null);
+        File offerHtml = new File(this.getClass().getClassLoader().getResource("HtmlPages/decks/decks_release.html").getPath());
+        offerPageDocument = Jsoup.parse(offerHtml, null);
 
-        if (testOptionalDocument.isPresent()) {
-            testDocument = testOptionalDocument.get();
-        } else {
-            throw new RuntimeException("Haven`t get document from link: ".concat(testUrl));
-        }
-    }
-
-    @Test
-    @DisplayName("Returns offer link from offer link")
-    void getRawOfferFromOfferLink() {
-        //prepare
-        String testOfferLink = "https://www.decks.de/track/industries_of_the_blend-the_folly_of_molly_ep/cho-t8";
-        //when
-        RawOffer actualRawOfferFromOfferLink = decksParser.getRawOfferFromOfferLink(testOfferLink);
-        //then
-        assertNotNull(actualRawOfferFromOfferLink);
-    }
-
-    @Test
-    @DisplayName("Get genre links")
-    void getGenresLinks() {
-        //when
-        HashSet<String> actualGenresLinks = decksParser.getGenresLinks();
-        //then
-        assertNotNull(actualGenresLinks);
     }
 
     @Test
     @DisplayName("Get genre from document")
     void getGenreFromDocument() {
         //when
-        String actualGenreFromDocument = decksParser.getGenreFromDocument(testDocument);
+        String actualGenreFromDocument = decksParser.getGenreFromDocument(startPageDocument);
         //then
         assertNotNull(actualGenreFromDocument);
     }
@@ -64,7 +44,7 @@ class DecksParserTest {
     @DisplayName("Get optional currency from document")
     void getOptionalCurrencyFromDocument() {
         //when
-        Optional<Currency> actualOptionalCurrencyFromDocument = decksParser.getOptionalCurrencyFromDocument(testDocument);
+        Optional<Currency> actualOptionalCurrencyFromDocument = decksParser.getOptionalCurrencyFromDocument(offerPageDocument);
         //then
         assertTrue(actualOptionalCurrencyFromDocument.isPresent());
     }
@@ -73,7 +53,7 @@ class DecksParserTest {
     @DisplayName("Get price from document")
     void getPriceFromDocument() {
         //when
-        double actualPriceFromDocument = decksParser.getPriceFromDocument(testDocument);
+        double actualPriceFromDocument = decksParser.getPriceFromDocument(offerPageDocument);
         //then
         assertNotEquals(0.0d, actualPriceFromDocument);
     }
@@ -82,7 +62,7 @@ class DecksParserTest {
     @DisplayName("Get artist from documents")
     void getArtistFromDocument() {
         //when
-        String actualArtistFromDocument = decksParser.getArtistFromDocument(testDocument);
+        String actualArtistFromDocument = decksParser.getArtistFromDocument(offerPageDocument);
         //then
         assertNotNull(actualArtistFromDocument);
     }
@@ -91,7 +71,7 @@ class DecksParserTest {
     @DisplayName("Get release from document")
     void getReleaseFromDocument() {
         //when
-        String actualReleaseFromDocument = decksParser.getReleaseFromDocument(testDocument);
+        String actualReleaseFromDocument = decksParser.getReleaseFromDocument(offerPageDocument);
         //then
         assertNotNull(actualReleaseFromDocument);
     }
@@ -100,21 +80,27 @@ class DecksParserTest {
     @DisplayName("Get catalog number from document")
     void getCatNumberFromDocument() {
         //when
-        String actualCatalogNumberFromDocument = decksParser.getCatNumberFromDocument(testDocument);
+        String actualCatalogNumberFromDocument = decksParser.getCatNumberFromDocument(offerPageDocument);
         //then
         assertNotNull(actualCatalogNumberFromDocument);
     }
 
     @Test
-    @DisplayName("Read raw offer from offer links")
-    void readRawOffersFromAllOfferLinks() {
-        //prepare
-        HashSet<String> testOfferLinks = new HashSet<>();
-        testOfferLinks.add("https://www.decks.de/track/industries_of_the_blend-the_folly_of_molly_ep/cho-t8");
+    @DisplayName("Get stock info from document")
+    void getInStockInfoFromDocument() {
         //when
-        HashSet<RawOffer> actualRawOffers = decksParser.readRawOffersFromAllOfferLinks(testOfferLinks);
+        boolean actualStockInfoFromDocument = decksParser.getInStockInfoFromDocument(offerPageDocument);
         //then
-        assertNotNull(actualRawOffers);
+        assertTrue(actualStockInfoFromDocument);
+    }
+
+    @Test
+    @DisplayName("Get link to image")
+    void getHighResImageLinkFromDocument() {
+        //when
+        String imageLink = decksParser.getHighResImageLinkFromDocument(offerPageDocument);
+        //then
+        assertNotNull(imageLink);
     }
 
     @Test
@@ -190,41 +176,6 @@ class DecksParserTest {
         boolean actual = decksParser.isValid(testRawOffer);
         //then
         assertFalse(actual);
-    }
-
-    @Test
-    @DisplayName("Returns offer links")
-    void getOfferLinks() {
-        //prepare
-        HashSet<String> testGenreLinks = new HashSet<>();
-        testGenreLinks.add("https://www.decks.de/decks/workfloor/lists/list_db.php/decks/workfloor/lists/list_db.php?wo=ten&now_Sub=hc&now_Was=news&now_Date=nodate&aktuell=0");
-        //when
-        HashSet<String> actualOfferLinks = decksParser.getOfferLinks(testGenreLinks);
-        //then
-        assertNotNull(actualOfferLinks);
-    }
-
-    @Test
-    @DisplayName("Returns page links")
-    void getPageLinks() {
-        //prepare
-        HashSet<String> testGenreLinks = new HashSet<>();
-        testGenreLinks.add("https://www.decks.de/decks/workfloor/lists/list_db.php?wo=ten&now_Sub=hc&now_Was=news&now_Date=nodate&aktuell=0");
-        //when
-        HashSet<String> actualPageLinks = decksParser.getPageLinks(testGenreLinks);
-        //then
-        assertNotNull(actualPageLinks);
-    }
-
-    @Test
-    @DisplayName("Returns document from https://www.decks.de")
-    void getDocument() {
-        //prepare
-        String testUrl = "https://www.decks.de/decks/workfloor/lists/list_db.php";
-        //when
-        Optional<Document> actualDocument = decksParser.getDocument(testUrl);
-        //then
-        assertTrue(actualDocument.isPresent());
     }
 
 }
