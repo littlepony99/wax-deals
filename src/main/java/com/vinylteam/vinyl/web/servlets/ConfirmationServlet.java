@@ -50,7 +50,7 @@ public class ConfirmationServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
             attributes.put("token", tokenAsString);
-            PageGenerator.getInstance().process("confirmation-signIn", attributes, response.getWriter());
+            PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
         }
     }
 
@@ -85,7 +85,7 @@ public class ConfirmationServlet extends HttpServlet {
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
                     attributes.put("token", tokenAsString);
                     attributes.put("message", "Sorry, login or password is not correct, please check yours credentials and try again.");
-                    PageGenerator.getInstance().process("confirmation-signIn", attributes, response.getWriter());
+                    PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
                 } else {
                     User user = optionalUser.get();
                     userService.update(user.getEmail(), user.getEmail(), password, user.getDiscogsUserName());
