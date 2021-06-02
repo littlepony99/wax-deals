@@ -12,6 +12,8 @@ public interface UserService {
 
     boolean delete(User user);
 
+    Optional<User> findById(long id);
+
     Optional<User> getByEmail(String email);
 
     Optional<User> signInCheck(String email, String password);

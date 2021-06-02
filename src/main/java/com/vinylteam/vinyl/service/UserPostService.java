@@ -8,4 +8,7 @@ public interface UserPostService {
 
     boolean add(UserPost post);
 
+    String addRecoveryUserToken(long userId);
+
+    long getRecoveryUserId(String token);
 }

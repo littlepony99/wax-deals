@@ -5,6 +5,8 @@ import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.util.MailSender;
 
+import java.util.UUID;
+
 public class DefaultUserPostService implements UserPostService {
 
     private final static String PROJECT_MAIL = "waxdealsproject@gmail.com";
@@ -28,6 +30,26 @@ public class DefaultUserPostService implements UserPostService {
     @Override
     public boolean add(UserPost post) {
         return userPostDao.add(post);
+    }
+
+    @Override
+    public String addRecoveryUserToken(long userId){
+        boolean isAdded;
+        String recoveryToken = UUID.randomUUID().toString();
+        if (userPostDao.getRecoveryUserToken(userId).isEmpty()){
+            isAdded = userPostDao.addRecoveryUserToken(userId, recoveryToken);
+        } else {
+            isAdded = userPostDao.updateRecoveryUserToken(userId, recoveryToken);
+        }
+        if (!isAdded){
+            recoveryToken="";
+        }
+        return recoveryToken;
+    }
+
+    @Override
+    public long getRecoveryUserId(String token){
+        return userPostDao.getRecoveryUserId(token);
     }
 
     protected String createContactUsMessage(String recipient, String subject, String mailBody) {

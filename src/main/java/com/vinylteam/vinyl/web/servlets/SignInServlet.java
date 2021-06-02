@@ -45,7 +45,13 @@ public class SignInServlet extends HttpServlet {
         String password = request.getParameter("password");
         Map<String, String> attributes = new HashMap<>();
         attributes.put("email", email);
-
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                attributes.put("userRole", user.getRole().toString());
+            }
+        }
         Optional<User> optionalUser = userService.signInCheck(email, password);
         log.debug("Received a optional with User with password verification by the passed " +
                 "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
@@ -55,7 +61,7 @@ public class SignInServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_OK);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
                 User user = optionalUser.get();
-                HttpSession session = request.getSession(true);
+                session = request.getSession(true);
                 session.setMaxInactiveInterval(60 * 60 * 5);
                 session.setAttribute("user", user);
                 response.sendRedirect("/");

@@ -84,6 +84,16 @@ public class PageGenerator {
             context.setVariable("message", message);
         }
 
+        String errorMessage = attributes.get("errorMessage");
+        if (errorMessage != null) {
+            context.setVariable("errorMessage", errorMessage);
+        }
+
+        String recoveryToken = attributes.get("recoveryToken");
+        if (recoveryToken != null) {
+            context.setVariable("recoveryToken", recoveryToken);
+        }
+
 // for catalog page
 
         context.setVariable("vinylList", vinylList);

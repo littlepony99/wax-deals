@@ -42,6 +42,13 @@ public class SignUpServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Map<String, String> attributes = new HashMap<>();
         response.setContentType("text/html;charset=utf-8");
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                attributes.put("userRole", user.getRole().toString());
+            }
+        }
         String email = request.getParameter("email");
         String password = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");

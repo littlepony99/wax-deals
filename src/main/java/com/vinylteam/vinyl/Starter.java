@@ -26,10 +26,13 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.JarFileResource;
 import org.eclipse.jetty.util.resource.Resource;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
 public class Starter {
@@ -73,7 +76,7 @@ public class Starter {
                 propertiesReader.getProperty("mail.smtp.password"),
                 propertiesReader.getProperty("mail.smtp.host"),
                 propertiesReader.getProperty("mail.smtp.port"),
-                propertiesReader.getProperty("mail.smtp.username"));
+                propertiesReader.getProperty("mail.smtp.auth"));
         UserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
         CaptchaService defaultCaptchaService = new DefaultCaptchaService();
 //UTIL, FILL IN DATABASE
@@ -111,6 +114,8 @@ public class Starter {
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
         AboutServlet aboutServlet = new AboutServlet();
+        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(userService, userPostService, mailSender);
+        NewPasswordServlet newPasswordServlet = new NewPasswordServlet(userService, userPostService);
 
         Resource resource = JarFileResource.newClassPathResource(RESOURCE_PATH);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -133,6 +138,8 @@ public class Starter {
         servletContextHandler.addServlet(new ServletHolder(contactUsServlet), "/contact");
         servletContextHandler.addServlet(new ServletHolder(imageCaptchaServlet), "/captcha");
         servletContextHandler.addServlet(new ServletHolder(aboutServlet), "/about");
+        servletContextHandler.addServlet(new ServletHolder(recoveryPasswordServlet), "/recoveryPassword");
+        servletContextHandler.addServlet(new ServletHolder(newPasswordServlet), "/newPassword");
 
         servletContextHandler.addServlet(DefaultServlet.class, "/*");
 

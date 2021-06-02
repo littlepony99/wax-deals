@@ -90,4 +90,17 @@ public class DefaultUserService implements UserService {
         return optionalUser;
     }
 
+    @Override
+    public Optional<User> findById(long id){
+        Optional<User> optionalUser = Optional.empty();
+        if (id > 0){
+            optionalUser = userDao.findById(id);
+            log.debug("Attempted to get optional with user found by id from db {'id':{}, 'optional':{}}", id, optionalUser);
+        } else {
+            log.error("Passed id is 0 or less, returning empty optional");
+        }
+        log.debug("Resulting optional is {'optional':{}}", optionalUser);
+        return optionalUser;
+    }
+
 }

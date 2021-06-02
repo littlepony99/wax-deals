@@ -27,6 +27,9 @@ public class JdbcUserDao implements UserDao {
     private static final String UPDATE = "UPDATE public.users" +
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
             " WHERE email = ?";
+    private static final String FIND_BY_ID = "SELECT id, email, salt, iterations, password, status, role, discogs_user_name" +
+            " FROM public.users" +
+            " WHERE id=?";
 
     private final HikariDataSource dataSource;
 
@@ -147,6 +150,26 @@ public class JdbcUserDao implements UserDao {
             throw new RuntimeException(e);
         }
         log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
+        return Optional.ofNullable(user);
+    }
+
+    @Override
+    public Optional<User> findById(long id) {
+        User user = null;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_ID)) {
+            findByEmailStatement.setLong(1, id);
+            try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    user = userRowMapper.mapRow(resultSet);
+                    if (resultSet.next()) {
+                        throw new RuntimeException("More than one user was found for id");
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return Optional.ofNullable(user);
     }
 
