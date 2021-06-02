@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
 import jakarta.servlet.http.HttpServlet;
@@ -17,9 +18,11 @@ import java.util.Map;
 public class SignUpServlet extends HttpServlet {
 
     private final UserService userService;
+    private final ConfirmationService confirmationService;
 
-    public SignUpServlet(UserService userService) {
+    public SignUpServlet(UserService userService, ConfirmationService confirmationService) {
         this.userService = userService;
+        this.confirmationService = confirmationService;
     }
 
     @Override
@@ -52,11 +55,13 @@ public class SignUpServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
             attributes.put("message", "Sorry, the password is empty!");
+            PageGenerator.getInstance().process("registration", attributes, response.getWriter());
         } else {
             if (!password.equals(confirmPassword)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
                 attributes.put("message", "Sorry, the passwords don't match!");
+                PageGenerator.getInstance().process("registration", attributes, response.getWriter());
             } else {
                 boolean isAdded = userService.add(email, password, discogsUserName);
                 log.debug("Got result of adding user with " +
@@ -64,16 +69,18 @@ public class SignUpServlet extends HttpServlet {
                 if (isAdded) {
                     response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                    attributes.put("message", "Please confirm your registration. To do this, follow the link that we sent you by email - " + email);
+                    attributes.put("message", "Please confirm your registration. To do this, follow the link that we sent on your email");
                     attributes.remove("email");
                     attributes.remove("discogsUserName");
+                    confirmationService.sendMessageWithLinkToUserEmail(userService.findByEmail(email).get());
+                    PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
                     attributes.put("message", "Sorry, but the user couldn't be registered. Check email, password or discogs username!");
+                    PageGenerator.getInstance().process("registration", attributes, response.getWriter());
                 }
             }
         }
-        PageGenerator.getInstance().process("registration", attributes, response.getWriter());
     }
 }

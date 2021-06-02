@@ -9,8 +9,6 @@ import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
 import com.vinylteam.vinyl.util.*;
 import com.vinylteam.vinyl.util.impl.*;
-import com.vinylteam.vinyl.util.impl.ShopsParser;
-import com.vinylteam.vinyl.util.impl.VinylParser;
 import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import com.vinylteam.vinyl.web.handler.DefaultErrorHandler;
 import com.vinylteam.vinyl.web.servlets.*;
@@ -62,18 +60,20 @@ public class Starter {
         OfferDao offerDao = new JdbcOfferDao(dataSource);
         ShopDao shopDao = new JdbcShopDao(dataSource);
         UserPostDao userPostDao = new JdbcUserPostDao(dataSource);
+        ConfirmationTokenDao confirmationTokenDao = new JdbcConfirmationTokenDao(dataSource);
 
 //SERVICE
-        SecurityService securityService = new DefaultSecurityService();
-        UserService userService = new DefaultUserService(userDao, securityService);
-        UniqueVinylService uniqueVinylService = new DefaultUniqueVinylService(uniqueVinylDao);
-        OfferService offerService = new DefaultOfferService(offerDao);
-        ShopService shopService = new DefaultShopService(shopDao);
         MailSender mailSender = new MailSender(propertiesReader.getProperty("mail.smtp.username"),
                 propertiesReader.getProperty("mail.smtp.password"),
                 propertiesReader.getProperty("mail.smtp.host"),
                 propertiesReader.getProperty("mail.smtp.port"),
-                propertiesReader.getProperty("mail.smtp.username"));
+                propertiesReader.getProperty("mail.smtp.auth"));
+        SecurityService securityService = new DefaultSecurityService();
+        UserService userService = new DefaultUserService(userDao, securityService);
+        ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender);
+        UniqueVinylService uniqueVinylService = new DefaultUniqueVinylService(uniqueVinylDao);
+        OfferService offerService = new DefaultOfferService(offerDao);
+        ShopService shopService = new DefaultShopService(shopDao);
         UserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
         CaptchaService defaultCaptchaService = new DefaultCaptchaService();
 //UTIL, FILL IN DATABASE
@@ -97,8 +97,9 @@ public class Starter {
 
 //WEB
         SecurityFilter securityFilter = new SecurityFilter();
-        SignInServlet signInServlet = new SignInServlet(userService);
-        SignUpServlet signUpServlet = new SignUpServlet(userService);
+        SignInServlet signInServlet = new SignInServlet(userService, confirmationService);
+        SignUpServlet signUpServlet = new SignUpServlet(userService, confirmationService);
+        ConfirmationServlet confirmationServlet = new ConfirmationServlet(userService, confirmationService);
         CatalogueServlet catalogueServlet = new CatalogueServlet(uniqueVinylService, discogsService);
         SearchResultsServlet searchResultsServlet = new SearchResultsServlet(uniqueVinylService);
         OneVinylOffersServlet oneVinylOffersServlet = new OneVinylOffersServlet(uniqueVinylService, offerService, shopService, discogsService, parserHolder);
@@ -121,6 +122,7 @@ public class Starter {
                 EnumSet.of(DispatcherType.REQUEST));
         servletContextHandler.addServlet(new ServletHolder(signInServlet), "/signIn");
         servletContextHandler.addServlet(new ServletHolder(signUpServlet), "/signUp");
+        servletContextHandler.addServlet(new ServletHolder(confirmationServlet), "/emailConfirmation");
         servletContextHandler.addServlet(new ServletHolder(catalogueServlet), "/catalog");
         servletContextHandler.addServlet(new ServletHolder(searchResultsServlet), "/search");
         servletContextHandler.addServlet(new ServletHolder(oneVinylOffersServlet), "/oneVinyl");

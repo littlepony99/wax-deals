@@ -7,13 +7,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.Instant;
 
 public class ImageCaptchaServlet extends HttpServlet {
     private DefaultCaptchaService captchaService = new DefaultCaptchaService();
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String captchaId = request.getSession().getId();
-
+        System.out.println("captcha get. " + Instant.now());
         byte[] captchaChallengeAsJpeg = captchaService.getCaptcha(captchaId);
 
         response.setContentType("image/jpeg");

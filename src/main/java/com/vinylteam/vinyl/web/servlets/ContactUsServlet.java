@@ -63,8 +63,10 @@ public class ContactUsServlet extends HttpServlet {
             boolean isPostProcessed = userPostService.processAdd(post);
             if (isPostProcessed) {
                 response.setStatus(HttpServletResponse.SC_OK);
+                log.info("Post added");
             } else {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                log.info("Post not added");
             }
             response.sendRedirect("/");
         } else {

@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
 import jakarta.servlet.http.HttpServlet;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class SignInServlet extends HttpServlet {
 
     private final UserService userService;
+    private final ConfirmationService confirmationService;
 
-    public SignInServlet(UserService userService) {
+    public SignInServlet(UserService userService, ConfirmationService confirmationService) {
         this.userService = userService;
+        this.confirmationService = confirmationService;
     }
 
     @Override
@@ -64,12 +67,13 @@ public class SignInServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
                 attributes.put("message", "Sorry, your email has not been verified. Please go to your mailbox and follow the link to confirm your registration.");
-                PageGenerator.getInstance().process("signIn", attributes, response.getWriter());
+                confirmationService.sendMessageWithLinkToUserEmail(userService.findByEmail(email).get());
+                PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
             }
         } else {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-            attributes.put("message", "Sorry, login or password is not correct, please check yours credentials and try again.");
+            attributes.put("message", "Sorry, login or password is not correct, please, check your credentials and try again.");
             PageGenerator.getInstance().process("signIn", attributes, response.getWriter());
         }
     }

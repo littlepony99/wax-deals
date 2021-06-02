@@ -27,10 +27,10 @@ class MailSenderTest {
         String password = "vinyl2021!";
         String auth = "true";
         String host = "smtp.gmail.com";
-        String port = "465";
+        String port = "587";
 
         MailSender mailSender = new MailSender(username, password, host, port, auth);
-        boolean result = mailSender.sendMail("alexeysheleg22@gmail.com", "hello, dude", "Test email");
+        boolean result = mailSender.sendMail("SapsanoviyZmey@gmail.com", "hello, dude", "Test email");
         Assertions.assertTrue(result);
     }
 

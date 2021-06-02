@@ -96,7 +96,6 @@ public class RawOffer {
         this.imageLink = imageLink;
     }
 
-
     @Override
     public String toString() {
         return "\nRawOffer{" +

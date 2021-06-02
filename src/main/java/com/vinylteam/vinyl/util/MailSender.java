@@ -2,7 +2,10 @@ package com.vinylteam.vinyl.util;
 
 import lombok.extern.slf4j.Slf4j;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
@@ -11,8 +14,8 @@ import java.util.Properties;
 public class MailSender {
 
     private static final String PRODUCTION_ENVIRONMENT = "PROD";
-    private String username;
-    private Session session;
+    private final String username;
+    private final Session session;
 
     public MailSender(String username, String password, String host, String port, String auth) {
         this.username = username;
@@ -21,6 +24,8 @@ public class MailSender {
         properties.put("mail.smtp.port", port);
         properties.put("mail.smtp.socketFactory.port", port);
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        properties.put("mail.transport.protocol", "smtp");
+        properties.put("mail.smtp.starttls.enable", "true");
 
         String env = System.getenv("env");
         if (PRODUCTION_ENVIRONMENT.equals(env)) {
@@ -34,7 +39,8 @@ public class MailSender {
         session = Session.getInstance(properties,
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(username, password);
+                        PasswordAuthentication passwordAuthentication = new PasswordAuthentication(username, password);
+                        return passwordAuthentication;
                     }
                 });
     }
@@ -53,7 +59,7 @@ public class MailSender {
             Transport.send(message);
             log.info("Email sent successfully for recipient : {}", recipient);
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Can't send email to recipient : {}  due to error : {}", recipient, e.toString());
             return false;
         }

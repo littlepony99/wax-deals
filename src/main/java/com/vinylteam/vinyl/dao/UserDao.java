@@ -12,6 +12,8 @@ public interface UserDao {
 
     boolean update(String email, User user);
 
-    Optional<User> getByEmail(String email);
+    Optional<User> findByEmail(String email);
+
+    Optional<User> findById(long id);
 
 }

@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
+import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
@@ -16,17 +17,20 @@ import java.util.Optional;
 @Slf4j
 public class JdbcUserDao implements UserDao {
 
-    private final UserRowMapper userRowMapper = new UserRowMapper();
-    private final static String FIND_BY_EMAIL = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
+    private static final RowMapper<User> ROW_MAPPER = new UserRowMapper();
+    private static final String FIND_BY_EMAIL = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
             " FROM public.users" +
-            " WHERE email=?";
+            " WHERE email ILIKE ?";
+    private static final String FIND_BY_ID = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
+            " FROM public.users" +
+            " WHERE id=?";
     private static final String INSERT = "INSERT INTO public.users" +
             " (email, password, salt, iterations, role, status, discogs_user_name)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?)";
-    private static final String DELETE = "DELETE FROM users WHERE email = ?";
+    private static final String DELETE = "DELETE FROM users WHERE email ILIKE ?";
     private static final String UPDATE = "UPDATE public.users" +
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
-            " WHERE email = ?";
+            " WHERE email ILIKE ?";
 
     private final HikariDataSource dataSource;
 
@@ -52,7 +56,7 @@ public class JdbcUserDao implements UserDao {
                 isAdded = true;
             }
         } catch (PSQLException e) {
-            log.debug("Database error while adding user to public.users", e);
+            log.warn("Database error while adding user to public.users", e);
             isAdded = false;
         } catch (SQLException e) {
             log.error("Error while adding user to public.users", e);
@@ -126,7 +130,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public Optional<User> getByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         User user = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
@@ -134,7 +138,7 @@ public class JdbcUserDao implements UserDao {
             log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
             try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    user = userRowMapper.mapRow(resultSet);
+                    user = ROW_MAPPER.mapRow(resultSet);
                     if (resultSet.next()) {
                         RuntimeException e = new RuntimeException();
                         log.error("More than one user was found for email: {}", email, e);
@@ -144,6 +148,31 @@ public class JdbcUserDao implements UserDao {
             }
         } catch (SQLException e) {
             log.error("SQLException retrieving user by email from public.users", e);
+            throw new RuntimeException(e);
+        }
+        log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
+        return Optional.ofNullable(user);
+    }
+
+    @Override
+    public Optional<User> findById(long id) {
+        User user = null;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_ID)) {
+            findByEmailStatement.setLong(1, id);
+            log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
+            try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    user = ROW_MAPPER.mapRow(resultSet);
+                    if (resultSet.next()) {
+                        RuntimeException e = new RuntimeException();
+                        log.error("More than one user was found for id {'id':{}}", id, e);
+                        throw e;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            log.error("SQLException while retrieving user by id from public.users {'id':{}}", id, e);
             throw new RuntimeException(e);
         }
         log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));

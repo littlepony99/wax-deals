@@ -119,22 +119,22 @@ class DefaultUserServiceTest {
         //prepare
         String email = "user1@wax-deals.com";
         Optional optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(email)).thenReturn(optionalUserFromDB);
+        when(mockedUserDao.findByEmail(email)).thenReturn(optionalUserFromDB);
         //when
-        Optional actualOptional = userService.getByEmail(email);
+        Optional actualOptional = userService.findByEmail(email);
         //then
         assertEquals(optionalUserFromDB, actualOptional);
-        verify(mockedUserDao).getByEmail(email);
+        verify(mockedUserDao).findByEmail(email);
     }
 
     @Test
     @DisplayName("Checks if .getByEmail(...) doesn't call userDao.getByEmail() when email is null and returns empty optional")
     void getByEmailNullEmailTest() {
         //when
-        Optional actualOptional = userService.getByEmail(null);
+        Optional actualOptional = userService.findByEmail(null);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(null);
+        verify(mockedUserDao, never()).findByEmail(null);
     }
 
     @Test
@@ -147,7 +147,7 @@ class DefaultUserServiceTest {
         Optional<User> actualOptional = userService.signInCheck(null, password);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(null);
+        verify(mockedUserDao, never()).findByEmail(null);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(any(), eq(password.toCharArray()));
     }
 
@@ -161,7 +161,7 @@ class DefaultUserServiceTest {
         Optional<User> actualOptional = userService.signInCheck(email, null);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(email);
+        verify(mockedUserDao, never()).findByEmail(email);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(any(), eq(null));
 
     }
@@ -173,12 +173,12 @@ class DefaultUserServiceTest {
         //prepare
         String newEmail = "user2@wax-deals.com";
         String newPassword = "password2";
-        when(mockedUserDao.getByEmail(newEmail)).thenReturn(Optional.empty());
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.empty());
         //when
         Optional<User> actualOptional = userService.signInCheck(newEmail, newPassword);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao).getByEmail(newEmail);
+        verify(mockedUserDao).findByEmail(newEmail);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(eq(null), eq(newPassword.toCharArray()));
     }
 
@@ -189,14 +189,14 @@ class DefaultUserServiceTest {
         //prepare
         String existingEmail = "user1@wax-deals.com";
         String wrongPassword = "password3";
-        Optional<User> optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(existingEmail)).thenReturn(optionalUserFromDB);
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(wrongPassword.toCharArray()))).thenReturn(false);
         //when
         Optional<User> actualOptional = userService.signInCheck(existingEmail, wrongPassword);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao).getByEmail(existingEmail);
+        verify(mockedUserDao).findByEmail(existingEmail);
         verify(mockedSecurityService).checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(wrongPassword.toCharArray()));
     }
 
@@ -208,13 +208,13 @@ class DefaultUserServiceTest {
         String existingEmail = "user1@wax-deals.com";
         String rightPassword = "password1";
         Optional<User> optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(existingEmail)).thenReturn(optionalUserFromDB);
+        when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()))).thenReturn(true);
         //when
         Optional<User> actualOptional = userService.signInCheck("user1@wax-deals.com", "password1");
         //then
         assertEquals(optionalUserFromDB, actualOptional);
-        verify(mockedUserDao).getByEmail(existingEmail);
+        verify(mockedUserDao).findByEmail(existingEmail);
         verify(mockedSecurityService).checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()));
     }
 
@@ -324,6 +324,32 @@ class DefaultUserServiceTest {
         verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
         verify(mockedUser).setStatus(true);
         verify(mockedUserDao).update(eq(existingUser), eq(mockedUser));
+    }
+
+    @Test
+    @DisplayName("Checks that when id>0 UserDao.findById(id) is called, it's result is returned")
+    void findById() {
+        //prepare
+        long id = 1;
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        when(mockedUserDao.findById(id)).thenReturn(optionalUserFromDB);
+        //when
+        Optional<User> actualOptional = userService.findById(id);
+        //then
+        assertEquals(optionalUserFromDB, actualOptional);
+        verify(mockedUserDao).findById(id);
+    }
+
+    @Test
+    @DisplayName("Checks that when id>0 UserDao.findById(id) is called, it's result is returned")
+    void findByInvalidId() {
+        //prepare
+        long id = -1;
+        //when
+        Optional<User> actualOptional = userService.findById(id);
+        //then
+        assertTrue(actualOptional.isEmpty());
+        verify(mockedUserDao, never()).findById(id);
     }
 
 }

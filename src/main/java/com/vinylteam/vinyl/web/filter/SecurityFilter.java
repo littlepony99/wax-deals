@@ -19,7 +19,7 @@ public class SecurityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        List<String> allowedUrls = List.of("/", "/catalog", "/search", "/oneVinyl", "/signIn", "/signUp",
+        List<String> allowedUrls = List.of("/", "/catalog", "/search", "/oneVinyl", "/signIn", "/signUp", "/emailConfirmation",
                 "/recoveryPassword", "/stores", "/contact", "/captcha", "/about");
 
         String uri = httpServletRequest.getRequestURI();

@@ -2,9 +2,11 @@ package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class DataGeneratorForTests {
 
@@ -25,12 +27,13 @@ public class DataGeneratorForTests {
             throw new RuntimeException("Don't generate template user from number < 1! number: " + number);
         }
         User user = new User();
+        user.setId((long) number);
         user.setEmail("user" + number + "@wax-deals.com");
         user.setPassword("hash" + number);
         user.setSalt("salt" + number);
         user.setIterations(number);
         user.setRole(Role.USER);
-        user.setStatus(true);
+        user.setStatus(false);
         user.setDiscogsUserName("discogsUserName" + number);
         return user;
     }
@@ -83,6 +86,15 @@ public class DataGeneratorForTests {
         rawOffer.setOfferLink("shop" + rawOffer.getShopId() + "/" + rawOffer.getRelease());
         rawOffer.setImageLink("/image" + number);
         return rawOffer;
+    }
+
+    public ConfirmationToken getConfirmationTokenWithUserId(long userId) {
+        ConfirmationToken confirmationToken = new ConfirmationToken();
+        confirmationToken.setId(userId);
+        confirmationToken.setUserId(userId);
+        confirmationToken.setToken(UUID.randomUUID());
+        confirmationToken.setTimestamp(new Timestamp(userId));
+        return confirmationToken;
     }
 
     public List<Shop> getShopsList() {
@@ -145,11 +157,24 @@ public class DataGeneratorForTests {
             user.setSalt("salt" + (i + 1));
             user.setIterations(i + 1);
             user.setRole(Role.USER);
-            user.setStatus(true);
+            user.setStatus(false);
             user.setDiscogsUserName("discogsUserName" + (i + 1));
             users.add(user);
         }
         return users;
+    }
+
+    public List<ConfirmationToken> getConfirmationTokensList() {
+        List<ConfirmationToken> confirmationTokens = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            ConfirmationToken confirmationToken = new ConfirmationToken();
+            confirmationToken.setId(i + 1L);
+            confirmationToken.setUserId(i + 1L);
+            confirmationToken.setToken(UUID.randomUUID());
+            confirmationToken.setTimestamp(new Timestamp(i + 1L));
+            confirmationTokens.add(confirmationToken);
+        }
+        return confirmationTokens;
     }
 
     public void fillListsForRawOffersSorterTest(List<RawOffer> rawOffers, List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {

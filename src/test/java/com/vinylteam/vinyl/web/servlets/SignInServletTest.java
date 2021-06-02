@@ -2,7 +2,9 @@ package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.service.impl.DefaultConfirmationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -23,7 +25,8 @@ import static org.mockito.Mockito.*;
 class SignInServletTest {
 
     private final UserService mockedUserService = mock(UserService.class);
-    private final SignInServlet signInServlet = new SignInServlet(mockedUserService);
+    private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
+    private final SignInServlet signInServlet = new SignInServlet(mockedUserService, mockedConfirmationService);
 
     private final HttpServletRequest mockedHttpServletRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedHttpServletResponse = mock(HttpServletResponse.class);
@@ -35,6 +38,8 @@ class SignInServletTest {
 
     @BeforeEach
     void beforeEach() {
+        reset(mockedUserService);
+        reset(mockedConfirmationService);
         reset(mockedHttpServletRequest);
         reset(mockedHttpServletResponse);
         reset(mockedHttpSession);
@@ -127,10 +132,14 @@ class SignInServletTest {
             "when email and password are right, and user's email is not verified(user's status==false).")
     void doPostWithNotVerifiedUserRightPasswordTest() throws IOException {
         //prepare
-        when(mockedHttpServletRequest.getParameter("email")).thenReturn("notverifieduser@vinyl.com");
+        User notVerifiedUser = new User();
+        notVerifiedUser.setEmail("notverifieduser@vinyl.com");
+        when(mockedHttpServletRequest.getParameter("email")).thenReturn(notVerifiedUser.getEmail());
         when(mockedHttpServletRequest.getParameter("password")).thenReturn("right password");
-        when(mockedUserService.signInCheck("notverifieduser@vinyl.com", "right password")).thenReturn(Optional.of(mockedUser));
+        when(mockedUserService.signInCheck(notVerifiedUser.getEmail(), "right password")).thenReturn(Optional.of(mockedUser));
         when(Optional.of(mockedUser).get().getStatus()).thenReturn(false);
+        when(mockedUserService.findByEmail(notVerifiedUser.getEmail())).thenReturn(Optional.of(notVerifiedUser));
+        when(mockedConfirmationService.sendMessageWithLinkToUserEmail(notVerifiedUser)).thenReturn(true);
         when(mockedHttpServletResponse.getWriter()).thenReturn(printWriter);
         //when
         signInServlet.doPost(mockedHttpServletRequest, mockedHttpServletResponse);
@@ -139,6 +148,8 @@ class SignInServletTest {
         inOrderRequest.verify(mockedHttpServletRequest).getParameter("email");
         inOrderRequest.verify(mockedHttpServletRequest).getParameter("password");
         verify(mockedUserService).signInCheck("notverifieduser@vinyl.com", "right password");
+        verify(mockedUserService).findByEmail(notVerifiedUser.getEmail());
+        verify(mockedConfirmationService).sendMessageWithLinkToUserEmail(notVerifiedUser);
         inOrderResponse.verify(mockedHttpServletResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedHttpServletResponse).getWriter();
     }

@@ -84,7 +84,7 @@ public class EditProfileServlet extends HttpServlet {
                             discogsUserName = newDiscogsUserName;
                             HttpSession newSession = request.getSession(true);
                             newSession.setMaxInactiveInterval(60 * 60 * 5);
-                            newSession.setAttribute("user", userService.getByEmail(email).orElse(user));
+                            newSession.setAttribute("user", userService.findByEmail(email).orElse(user));
                         } else {
                             log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
                             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

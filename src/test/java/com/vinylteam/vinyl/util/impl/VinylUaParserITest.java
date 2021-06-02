@@ -60,7 +60,7 @@ class VinylUaParserITest {
     @Test
     @DisplayName("Checks that returned hashset of raw offers isn't empty and doesn't contain invalid offers after parsing.")
     void readRawOffersFromAllOfferLinksTest() {
-        Set<RawOffer>  rawOffers = vinylUaParser.readRawOffersFromAllOfferLinks(offerLinksSet);
+        Set<RawOffer> rawOffers = vinylUaParser.readRawOffersFromAllOfferLinks(offerLinksSet);
         assertEquals(1, rawOffers.size());
         for (RawOffer rawOffer : rawOffers) {
             assertTrue(rawOffer.getPrice() > 0.);
@@ -139,7 +139,7 @@ class VinylUaParserITest {
     @Test
     @DisplayName("Checks that getReleaseFrom-Not Valid-Document returns empty release")
     void getReleaseFromNotValidDocument() {
-        assertTrue( vinylUaParser.getReleaseFromDocument(invalidLinkDocument).isEmpty());
+        assertTrue(vinylUaParser.getReleaseFromDocument(invalidLinkDocument).isEmpty());
     }
 
     @Test

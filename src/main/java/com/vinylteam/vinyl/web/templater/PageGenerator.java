@@ -84,6 +84,11 @@ public class PageGenerator {
             context.setVariable("message", message);
         }
 
+        String token = attributes.get("token");
+        if (token != null) {
+            context.setVariable("token", token);
+        }
+
 // for catalog page
 
         context.setVariable("vinylList", vinylList);
@@ -147,7 +152,7 @@ public class PageGenerator {
 
         String discogsLink = attributes.get("discogsLink");
         if (discogsLink != null) {
-            if (!discogsLink.equals("")){
+            if (!discogsLink.equals("")) {
                 context.setVariable("discogsLink", discogsLink);
             }
         }

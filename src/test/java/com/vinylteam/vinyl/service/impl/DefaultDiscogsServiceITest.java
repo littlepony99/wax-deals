@@ -44,7 +44,6 @@ class DefaultDiscogsServiceITest {
         vinylListWithNoMatch.add(createVinyl("Donnell & Douglas", "The Club Is Open"));
     }
 
-
     @Test
     @DisplayName("Return empty list if discogs username is null")
     void getDiscogsMatchListWhenDiscogsUsernameIsNullTest() {

@@ -40,11 +40,24 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
+    public Optional<User> findById(long id) {
+        Optional<User> optionalUser = Optional.empty();
+        if (id > 0) {
+            optionalUser = userDao.findById(id);
+            log.debug("Attempted to get optional with user found by id from db {'id':{}, 'optional':{}}", id, optionalUser);
+        } else {
+            log.error("Passed id is invalid, returning empty optional {'id':{}}", id);
+        }
+        log.debug("Resulting optional is {'optional':{}}", optionalUser);
+        return optionalUser;
+    }
+
+    @Override
     public boolean update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
         boolean isUpdated = false;
         if (newEmail != null && newPassword != null && oldEmail != null) {
             User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray(), newDiscogsUserName);
-            if (oldEmail.equals(newEmail)) {
+            if (oldEmail.equalsIgnoreCase(newEmail)) {
                 changedUser.setStatus(true);
             }
             isUpdated = userDao.update(oldEmail, changedUser);
@@ -59,10 +72,10 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> getByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         Optional<User> optionalUser = Optional.empty();
         if (email != null) {
-            optionalUser = userDao.getByEmail(email);
+            optionalUser = userDao.findByEmail(email);
             log.debug("Attempted to get optional with user found by email from db {'email':{}, 'optional':{}}", email, optionalUser);
         } else {
             log.error("Passed email is null, returning empty optional");
@@ -75,7 +88,7 @@ public class DefaultUserService implements UserService {
     public Optional<User> signInCheck(String email, String password) {
         Optional<User> optionalUser = Optional.empty();
         if (email != null && password != null) {
-            Optional<User> optionalUserFromDataBase = userDao.getByEmail(email);
+            Optional<User> optionalUserFromDataBase = userDao.findByEmail(email);
             log.debug("Got optional with user from db by email {'email':{}, 'optionalUser':{}}",
                     email, optionalUserFromDataBase);
             if (optionalUserFromDataBase.isPresent()) {

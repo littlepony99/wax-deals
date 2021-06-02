@@ -24,7 +24,7 @@ public class JdbcOfferDao implements OfferDao {
     private static final String SELECT_ALL = "SELECT id, unique_vinyl_id, shop_id, price, currency, genre, cat_number, in_stock, link_to_offer FROM public.offers";
     private static final String SELECT_MANY_BY_UNIQUE_VINYL_ID = SELECT_ALL + " WHERE unique_vinyl_id=?";
     private static final String TRUNCATE_RESTART_IDENTITY = "TRUNCATE offers RESTART IDENTITY";
-    private static final RowMapper<Offer> rowMapper = new OfferRowMapper();
+    private static final RowMapper<Offer> ROW_MAPPER = new OfferRowMapper();
     private static final String PREPARED_STATEMENT = "Prepared statement {'preparedStatement':{}}";
     private static final String EXECUTED_STATEMENT = "Executed statement {'statement':{}}";
 
@@ -45,7 +45,7 @@ public class JdbcOfferDao implements OfferDao {
                 boolean isResultSetEmpty = true;
                 while (resultSet.next()) {
                     isResultSetEmpty = false;
-                    Offer offer = rowMapper.mapRow(resultSet);
+                    Offer offer = ROW_MAPPER.mapRow(resultSet);
                     offers.add(offer);
                 }
                 if (isResultSetEmpty) {
@@ -107,7 +107,7 @@ public class JdbcOfferDao implements OfferDao {
                 insertValidOffers.setString(4, offer.getCurrency().get().toString());
                 insertValidOffers.setString(5, offer.getGenre());
                 insertValidOffers.setString(6, offer.getCatNumber());
-                insertValidOffers.setBoolean(7,offer.isInStock());
+                insertValidOffers.setBoolean(7, offer.isInStock());
                 insertValidOffers.setString(8, offer.getOfferLink());
                 log.debug(PREPARED_STATEMENT, insertValidOffers);
                 insertValidOffers.addBatch();

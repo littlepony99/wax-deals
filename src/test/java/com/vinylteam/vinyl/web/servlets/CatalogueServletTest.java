@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.servlets;
 
-
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
