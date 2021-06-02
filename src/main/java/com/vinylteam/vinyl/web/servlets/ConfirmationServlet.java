@@ -50,7 +50,7 @@ public class ConfirmationServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
             attributes.put("token", tokenAsString);
-            PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
+            PageGenerator.getInstance().process("confirmation-signIn", attributes, response.getWriter());
         }
     }
 
@@ -83,8 +83,9 @@ public class ConfirmationServlet extends HttpServlet {
                 if (optionalUser.isEmpty()) {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+                    attributes.put("token", tokenAsString);
                     attributes.put("message", "Sorry, login or password is not correct, please check yours credentials and try again.");
-                    PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
+                    PageGenerator.getInstance().process("confirmation-signIn", attributes, response.getWriter());
                 } else {
                     User user = optionalUser.get();
                     userService.update(user.getEmail(), user.getEmail(), password, user.getDiscogsUserName());
@@ -101,6 +102,7 @@ public class ConfirmationServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
                 attributes.put("message", "Sorry, this isn't your confirmation link. Try to log in again.");
+                attributes.put("token", tokenAsString);
                 PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
             }
         }

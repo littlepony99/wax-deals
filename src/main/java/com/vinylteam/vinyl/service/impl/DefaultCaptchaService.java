@@ -20,7 +20,7 @@ public class DefaultCaptchaService implements CaptchaService {
             ImageIO.write(challenge, "jpeg", jpegOutputStream);
             return jpegOutputStream.toByteArray();
         } catch (Exception e) {
-            //log.error("Error during captcha generation!", e);
+            log.error("Error during captcha generation!", e);
             throw new RuntimeException(e);
         }
     }

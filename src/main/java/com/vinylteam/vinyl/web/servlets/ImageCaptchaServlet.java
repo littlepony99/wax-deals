@@ -14,7 +14,6 @@ public class ImageCaptchaServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String captchaId = request.getSession().getId();
-        System.out.println("captcha get. " + Instant.now());
         byte[] captchaChallengeAsJpeg = captchaService.getCaptcha(captchaId);
 
         response.setContentType("image/jpeg");
