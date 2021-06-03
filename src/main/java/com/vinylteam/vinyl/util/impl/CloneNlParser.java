@@ -2,14 +2,13 @@ package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.RawOffer;
+import com.vinylteam.vinyl.util.DetailedVinylParser;
 import com.vinylteam.vinyl.util.PriceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -19,7 +18,6 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 public class CloneNlParser extends VinylParser {
 
-    //TODO: Tests for PriceUtils
     protected static final String BASE_LINK = "https://clone.nl";
     private static final String CATALOG_ROOT_LINK = BASE_LINK + "/genres";
     private static final String START_PAGE_LINK = CATALOG_ROOT_LINK;
@@ -161,28 +159,6 @@ public class CloneNlParser extends VinylParser {
     @Override
     public long getShopId() {
         return SHOP_ID;
-    }
-
-    public interface DetailedVinylParser {
-
-        String getGenreFromDocument(Element document);
-
-        String getReleaseFromDocument(Element document);
-
-        String getArtistFromDocument(Element document);
-
-        String getCatNumberFromDocument(Element document);
-
-        Boolean getInStockInfoFromDocument(Element document);
-
-        Optional<Currency> getOptionalCurrencyFromDocument(Element document);
-
-        double getPriceFromDocument(Element document);
-
-        String getHighResImageLinkFromDocument(Element document);
-
-        String getOfferLinkFromDocument(Element document);
-
     }
 
     public static class DefaultDetailedVinylParser implements DetailedVinylParser {

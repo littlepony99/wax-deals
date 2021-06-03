@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.util.impl;
 
+import com.vinylteam.vinyl.util.DetailedVinylParser;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.DisplayName;
@@ -16,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CloneNlDetailedParserTest {
 
-    private CloneNlParser.DetailedVinylParser detailedParser = new CloneNlParser.DefaultDetailedVinylParser();
+    private DetailedVinylParser detailedParser = new CloneNlParser.DefaultDetailedVinylParser();
 
     static Element getVinylElement(String elementResource) {
         File testHtml = new File(CloneNlDetailedParserTest.class.getClassLoader().getResource(elementResource).getPath());
@@ -37,14 +38,14 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether genres are received from HTML Element that represents one vinyl Item")
-    void getGenreFromDocument(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getGenreFromDocument(DetailedVinylParser detailedParser, Element vinylElement) {
         var genre = detailedParser.getGenreFromDocument(vinylElement);
         assertNotNull(genre);
     }
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getReleaseFromDocument(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getReleaseFromDocument(DetailedVinylParser detailedParser, Element vinylElement) {
         String release = detailedParser.getReleaseFromDocument(vinylElement);
         assertEquals("The Paul Breitner EP", release);
     }
@@ -52,7 +53,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether artist is received from HTML Element that represents one vinyl Item")
-    void getArtistFromDocument(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getArtistFromDocument(DetailedVinylParser detailedParser, Element vinylElement) {
         String artist = detailedParser.getArtistFromDocument(vinylElement);
         assertNotNull(artist);
     }
@@ -60,7 +61,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getCatNumberFromDocument(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getCatNumberFromDocument(DetailedVinylParser detailedParser, Element vinylElement) {
         String catalogNumber = detailedParser.getCatNumberFromDocument(vinylElement);
         assertEquals("Rothmans7", catalogNumber);
     }
@@ -68,7 +69,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether release is received from HTML Element that represents one vinyl Item")
-    void getInStockInfoFromDocument(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getInStockInfoFromDocument(DetailedVinylParser detailedParser, Element vinylElement) {
         boolean inStock = detailedParser.getInStockInfoFromDocument(vinylElement);
         assertTrue(inStock);
     }
@@ -76,7 +77,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether currency is received from HTML Element that represents one vinyl Item")
-    void getOptionalCurrencyFromDocumentTest(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getOptionalCurrencyFromDocumentTest(DetailedVinylParser detailedParser, Element vinylElement) {
         var currency = detailedParser.getOptionalCurrencyFromDocument(vinylElement);
         assertTrue(currency.isPresent());
     }
@@ -84,7 +85,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether price is received from HTML Element that represents one vinyl Item")
-    void getPriceFromDocumentTest(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) {
+    void getPriceFromDocumentTest(DetailedVinylParser detailedParser, Element vinylElement) {
         var price = detailedParser.getPriceFromDocument(vinylElement);
         assertEquals(11.49d, price);
     }
@@ -92,7 +93,7 @@ public class CloneNlDetailedParserTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether high resolution image link is received from HTML Element that represents one vinyl Item")
-    void getHighResImageLinkFromDocumentTest(CloneNlParser.DetailedVinylParser detailedParser, Element vinylElement) throws IOException {
+    void getHighResImageLinkFromDocumentTest(DetailedVinylParser detailedParser, Element vinylElement) throws IOException {
         String highResolutionImageLink = detailedParser.getHighResImageLinkFromDocument(vinylElement);
         assertNotNull(highResolutionImageLink);
         assertFalse(highResolutionImageLink.isEmpty());
