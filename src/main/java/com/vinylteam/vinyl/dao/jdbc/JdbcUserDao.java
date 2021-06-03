@@ -19,16 +19,16 @@ public class JdbcUserDao implements UserDao {
 
     private static final RowMapper<User> ROW_MAPPER = new UserRowMapper();
     private static final String FIND_BY_EMAIL = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
-            " FROM public.users" +
+            " FROM users" +
             " WHERE email ILIKE ?";
     private static final String FIND_BY_ID = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
-            " FROM public.users" +
+            " FROM users" +
             " WHERE id=?";
-    private static final String INSERT = "INSERT INTO public.users" +
+    private static final String INSERT = "INSERT INTO users" +
             " (email, password, salt, iterations, role, status, discogs_user_name)" +
             " VALUES (?, ?, ?, ?, ?, ?, ?)";
     private static final String DELETE = "DELETE FROM users WHERE email ILIKE ?";
-    private static final String UPDATE = "UPDATE public.users" +
+    private static final String UPDATE = "UPDATE users" +
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
             " WHERE email ILIKE ?";
 
@@ -56,10 +56,10 @@ public class JdbcUserDao implements UserDao {
                 isAdded = true;
             }
         } catch (PSQLException e) {
-            log.warn("Database error while adding user to public.users", e);
+            log.warn("Database error while adding user to users", e);
             isAdded = false;
         } catch (SQLException e) {
-            log.error("Error while adding user to public.users", e);
+            log.error("Error while adding user to users", e);
             throw new RuntimeException(e);
         }
         if (isAdded) {
@@ -82,10 +82,10 @@ public class JdbcUserDao implements UserDao {
                 isDeleted = true;
             }
         } catch (PSQLException e) {
-            log.error("Database error while delete user from public.users", e);
+            log.error("Database error while delete user from users", e);
             isDeleted = false;
         } catch (SQLException e) {
-            log.error("Error while delete user from public.users", e);
+            log.error("Error while delete user from users", e);
             isDeleted = false;
         }
         if (isDeleted) {
@@ -115,10 +115,10 @@ public class JdbcUserDao implements UserDao {
                 isUpdated = true;
             }
         } catch (PSQLException e) {
-            log.debug("Database error while edit user to public.users", e);
+            log.debug("Database error while edit user to users", e);
             isUpdated = false;
         } catch (SQLException e) {
-            log.error("Error while updating user in public.users", e);
+            log.error("Error while updating user in users", e);
             throw new RuntimeException(e);
         }
         if (isUpdated) {
@@ -147,7 +147,7 @@ public class JdbcUserDao implements UserDao {
                 }
             }
         } catch (SQLException e) {
-            log.error("SQLException retrieving user by email from public.users", e);
+            log.error("SQLException retrieving user by email from users", e);
             throw new RuntimeException(e);
         }
         log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
@@ -172,7 +172,7 @@ public class JdbcUserDao implements UserDao {
                 }
             }
         } catch (SQLException e) {
-            log.error("SQLException while retrieving user by id from public.users {'id':{}}", id, e);
+            log.error("SQLException while retrieving user by id from users {'id':{}}", id, e);
             throw new RuntimeException(e);
         }
         log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));

@@ -190,6 +190,64 @@ class JdbcConfirmationTokenDaoITest {
     }
 
     @Test
+    @DisplayName("Returns true when there exists confirmation token with same id and it gets updated with valid unique uuid token and timestamp")
+    void update() throws SQLException {
+        //prepare
+        ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
+        expectedConfirmationToken.setToken(UUID.randomUUID());
+        //when
+        boolean actualIsUpdated = confirmationTokenDao.update(expectedConfirmationToken);
+        //then
+        assertTrue(actualIsUpdated);
+        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
+        assertEquals(2, actualConfirmationTokens.size());
+        ConfirmationToken actualConfirmationToken = actualConfirmationTokens.get(0);
+        assertEquals(expectedConfirmationToken.getId(), actualConfirmationToken.getId());
+        assertEquals(expectedConfirmationToken.getUserId(), actualConfirmationToken.getUserId());
+        assertEquals(expectedConfirmationToken.getToken(), actualConfirmationToken.getToken());
+        assertTrue(actualConfirmationToken.getTimestamp().compareTo(confirmationTokens.get(0).getTimestamp()) > 0);
+    }
+
+    @Test
+    @DisplayName("Throws Runtime Exception when confirmation token with by id of passed confirmation token doesn't exist")
+    void updateWithTokenWithNonExistentId() throws SQLException {
+        //prepare
+        ConfirmationToken confirmationTokenNonExistentId = dataGenerator.getConfirmationTokenWithUserId(3);
+        confirmationTokenNonExistentId.setToken(UUID.randomUUID());
+        //when
+        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenNonExistentId));
+        //
+        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
+        assertEquals(confirmationTokens, actualConfirmationTokens);
+    }
+
+    @Test
+    @DisplayName("Throws Runtime Exception when updating confirmation token with uuid token that already exists in the table in another confirmation token")
+    void updateWithTokenWithDuplicateUUIDToken() throws SQLException {
+        //prepare
+        ConfirmationToken confirmationTokenDuplicateToken = dataGenerator.getConfirmationTokenWithUserId(1);
+        confirmationTokenDuplicateToken.setToken(confirmationTokens.get(1).getToken());
+        //when
+        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenDuplicateToken));
+        //then
+        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
+        assertEquals(confirmationTokens, actualConfirmationTokens);
+    }
+
+    @Test
+    @DisplayName("Throws Runtime Exception when updating confirmation token with null token")
+    void updateWithTokenWithNullUUIDToken() throws SQLException {
+        //prepare
+        ConfirmationToken confirmationTokenDuplicateToken = dataGenerator.getConfirmationTokenWithUserId(1);
+        confirmationTokenDuplicateToken.setToken(null);
+        //when
+        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenDuplicateToken));
+        //then
+        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
+        assertEquals(confirmationTokens, actualConfirmationTokens);
+    }
+
+    @Test
     @DisplayName("Returns true when there is user with given user_id and status false and a token for it's user_id that gets deleted")
     void deleteTokenByUserId() throws SQLException {
         //prepare

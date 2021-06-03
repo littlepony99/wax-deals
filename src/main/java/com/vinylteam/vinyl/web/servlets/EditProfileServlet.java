@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.servlets;
 
+import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.UserService;
@@ -83,7 +84,7 @@ public class EditProfileServlet extends HttpServlet {
                             email = newEmail;
                             discogsUserName = newDiscogsUserName;
                             HttpSession newSession = request.getSession(true);
-                            newSession.setMaxInactiveInterval(60 * 60 * 5);
+                            newSession.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
                             newSession.setAttribute("user", userService.findByEmail(email).orElse(user));
                         } else {
                             log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);

@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.servlets;
 
+import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
@@ -91,7 +92,7 @@ public class ConfirmationServlet extends HttpServlet {
                     userService.update(user.getEmail(), user.getEmail(), password, user.getDiscogsUserName());
                     confirmationService.deleteByUserId(user.getId());
                     HttpSession session = request.getSession(true);
-                    session.setMaxInactiveInterval(60 * 60 * 5);
+                    session.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
                     session.setAttribute("user", user);
                     response.setStatus(HttpServletResponse.SC_OK);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);

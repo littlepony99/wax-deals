@@ -18,7 +18,7 @@ import java.util.List;
 public class JdbcUniqueVinylDao implements UniqueVinylDao {
 
     private static final RowMapper<UniqueVinyl> rowMapper = new UniqueVinylRowMapper();
-    private static final String SELECT_ALL = "SELECT id, release, artist, full_name, link_to_image, has_offers FROM public.unique_vinyls";
+    private static final String SELECT_ALL = "SELECT id, release, artist, full_name, link_to_image, has_offers FROM unique_vinyls";
     private static final String SELECT_BY_ID = SELECT_ALL + " WHERE id=?";
     private static final String SELECT_MANY_RANDOM = SELECT_ALL + " WHERE has_offers ORDER BY random() LIMIT ?";
     private static final String SELECT_MANY_BY_FULL_NAME_MATCH = SELECT_ALL + " WHERE full_name ILIKE ? AND has_offers";
@@ -32,14 +32,14 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     }
 
     @Override
-    public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
+    public UniqueVinyl updateHasOffersFalse(UniqueVinyl vinyl) {
         if (vinyl.getHasOffers()){
             return vinyl;
         }
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement upsertUniqueVinyl = connection.prepareStatement(UPDATE_UNIQUE_VINYL_FALSE)) {
-            setVinylParameters(upsertUniqueVinyl, vinyl);
-            int rows = upsertUniqueVinyl.executeUpdate();
+             PreparedStatement updateStatement = connection.prepareStatement(UPDATE_UNIQUE_VINYL_FALSE)) {
+            setVinylParameters(updateStatement, vinyl);
+            int rows = updateStatement.executeUpdate();
             log.info("Unique vinyl(s) updated as having no any offer {}", rows);
         } catch (SQLException e) {
             log.error("Error while updating database with one uniqueVinyl {'uniqueVinyl':{}}", vinyl, e);

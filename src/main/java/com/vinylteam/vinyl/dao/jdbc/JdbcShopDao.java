@@ -18,9 +18,9 @@ public class JdbcShopDao implements ShopDao {
 
     private static final ShopRowMapper shopRowMapper = new ShopRowMapper();
     private static final String SELECT_SHOPS_BY_IDS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image " +
-            "FROM public.shops WHERE id IN ()  ORDER BY shop_order NULLS FIRST";
+            "FROM shops WHERE id IN ()  ORDER BY shop_order NULLS FIRST";
 
-    private static final String SELECT_ALL_SHOPS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image FROM public.shops ORDER BY shop_order NULLS FIRST";
+    private static final String SELECT_ALL_SHOPS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image FROM shops ORDER BY shop_order NULLS FIRST";
 
     private final HikariDataSource dataSource;
 

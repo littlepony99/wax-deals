@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @Slf4j
 public class JdbcUserPostDao implements UserPostDao {
 
-    private static final String INSERT = "INSERT INTO public.user_posts" +
+    private static final String INSERT = "INSERT INTO user_posts" +
             " (name, email, theme, message, created_at)" +
             " VALUES (?, ?, ?, ?, ?)";
 
@@ -40,10 +40,10 @@ public class JdbcUserPostDao implements UserPostDao {
                 isAdded = true;
             }
         } catch (PSQLException e) {
-            log.error("Database error while adding user post to public.user_posts", e);
+            log.error("Database error while adding user post to user_posts", e);
             isAdded = false;
         } catch (SQLException e) {
-            log.error("Error while adding user post to public.user_posts", e);
+            log.error("Error while adding user post to user_posts", e);
             throw new RuntimeException(e);
         }
         if (isAdded) {

@@ -32,13 +32,13 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("findByUserId trows RuntimeException and doesn't call dao findByUserId when id <= 0")
+    @DisplayName("findByUserId trows IllegalArgumentException and doesn't call dao findByUserId when id <= 0")
     void findByInvalidUserId() {
         //prepare
         long userId = -1L;
         when(mockedConfirmationDao.findByUserId(userId)).thenReturn(Optional.of(new ConfirmationToken()));
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.findByUserId(userId));
+        assertThrows(IllegalArgumentException.class, () -> confirmationService.findByUserId(userId));
         //then
         verify(mockedConfirmationDao, never()).findByUserId(userId);
     }
@@ -58,12 +58,12 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("addByUserId trows RuntimeException and doesn't call dao add method when id <= 0")
+    @DisplayName("addByUserId trows IllegalArgumentException and doesn't call dao add method when id <= 0")
     void addByInvalidUserId() {
         //prepare
         long userId = -1L;
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.addByUserId(userId));
+        assertThrows(IllegalArgumentException.class, () -> confirmationService.addByUserId(userId));
         //then
         verify(mockedConfirmationDao, never()).add(any());
     }
@@ -82,14 +82,36 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("sendMessageWithLinkToUserEmail trows RuntimeException and doesn't call any dao methods or mailSender.sendMessage when user is null")
-    void sendMessageWithLinkToUserEmailNullUser() {
+    @DisplayName("update returns result of dao update method when confirmationToken isn't null")
+    void update() {
+        //prepare
+        ConfirmationToken confirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
+        when(mockedConfirmationDao.update(confirmationToken)).thenReturn(true);
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null));
+        boolean actualIsUpdated = confirmationService.update(confirmationToken);
+        //then
+        assertTrue(actualIsUpdated);
+        verify(mockedConfirmationDao).update(confirmationToken);
     }
 
     @Test
-    @DisplayName("sendMessageWithLinkToUserEmail trows RuntimeException and doesn't call any dao methods or mailSender.sendMessage when user email is null")
+    @DisplayName("update throws NullPointerException and doesn't call dao update when confirmationToken is null")
+    void updateNullConfirmationToken() {
+        //when
+        assertThrows(NullPointerException.class, () -> confirmationService.update(null));
+        //then
+        verify(mockedConfirmationDao, never()).update(null);
+    }
+
+    @Test
+    @DisplayName("sendMessageWithLinkToUserEmail trows NullPointerException and doesn't call any dao methods or mailSender.sendMessage when user is null")
+    void sendMessageWithLinkToUserEmailNullUser() {
+        //when
+        assertThrows(NullPointerException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null));
+    }
+
+    @Test
+    @DisplayName("sendMessageWithLinkToUserEmail trows NullPointerException and doesn't call any dao methods or mailSender.sendMessage when user email is null")
     void sendMessageWithLinkToUserEmailNullEmail() {
         //prepare
         User userNullEmail = dataGenerator.getUserWithNumber(1);
@@ -97,7 +119,7 @@ class DefaultConfirmationServiceTest {
         when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.empty());
         when(mockedConfirmationDao.add(any())).thenReturn(false);
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(userNullEmail));
+        assertThrows(NullPointerException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(userNullEmail));
         //then
         verify(mockedConfirmationDao, never()).findByUserId(1);
         verify(mockedConfirmationDao, never()).add(any());
@@ -105,7 +127,7 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("sendMessageWithLinkToUserEmail trows RuntimeException, calls dao findByUserId, add methods, doesn't call mailSender.sendMessage " +
+    @DisplayName("sendMessageWithLinkToUserEmail trows IllegalStateException, calls dao findByUserId, add methods, doesn't call mailSender.sendMessage " +
             "when there is no token for that user in db, but adding new token fails")
     void sendMessageWithLinkToUserEmailFailToAddToken() {
         //prepare
@@ -113,7 +135,7 @@ class DefaultConfirmationServiceTest {
         when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.empty());
         when(mockedConfirmationDao.add(any())).thenReturn(false);
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(user));
+        assertThrows(IllegalStateException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(user));
         //then
         inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
         inOrderConfirmationDao.verify(mockedConfirmationDao).add(any());
@@ -128,12 +150,15 @@ class DefaultConfirmationServiceTest {
         User user = dataGenerator.getUserWithNumber(1);
         ConfirmationToken confirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
         when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.of(confirmationToken));
+        when(mockedConfirmationDao.update(confirmationToken)).thenReturn(true);
         when(mockedMailSender.sendMail(eq(user.getEmail()), anyString(), anyString())).thenReturn(true);
         //when
         boolean actualIsSent = confirmationService.sendMessageWithLinkToUserEmail(user);
         //then
         inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
         inOrderConfirmationDao.verify(mockedConfirmationDao, never()).add(any());
+        inOrderConfirmationDao.verify(mockedConfirmationDao).update(confirmationToken);
+        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
         verify(mockedMailSender).sendMail(eq(user.getEmail()), anyString(), anyString());
         assertTrue(actualIsSent);
     }
@@ -141,7 +166,7 @@ class DefaultConfirmationServiceTest {
     @Test
     @DisplayName("sendMessageWithLinkToUserEmail returns result of mailSender.sendMessage, calls dao findByUserId, calls add successfully " +
             "when there is no token for that user in db")
-    void sendMessageWithLinkToUserEmailTokenDoesNotExistDB() {
+    void sendMessageWithLinkToUserEmailTokenDoesNotExistInDB() {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         ConfirmationToken addedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
@@ -161,12 +186,12 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
-    @DisplayName("deleteByUserId trows RuntimeException and doesn't call dao deleteByUserId method when id <= 0")
+    @DisplayName("deleteByUserId trows IllegalArgumentException and doesn't call dao deleteByUserId method when id <= 0")
     void deleteByInvalidUserId() {
         //prepare
         long userId = -1L;
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.deleteByUserId(userId));
+        assertThrows(IllegalArgumentException.class, () -> confirmationService.deleteByUserId(userId));
         //then
         verify(mockedConfirmationDao, never()).deleteByUserId(userId);
     }

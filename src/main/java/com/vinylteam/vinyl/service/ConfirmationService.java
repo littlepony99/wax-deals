@@ -14,6 +14,8 @@ public interface ConfirmationService {
 
     boolean addByUserId(long userId);
 
+    boolean update(ConfirmationToken confirmationToken);
+
     boolean sendMessageWithLinkToUserEmail(User user);
 
     boolean deleteByUserId(long userId);

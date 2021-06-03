@@ -32,15 +32,15 @@ import java.util.TimerTask;
 @Slf4j
 public class Starter {
 
-    private static final PropertiesReader propertiesReader = new PropertiesReader();
-    private static final String RESOURCE_PATH = propertiesReader.getProperty("resource.path");
+    public static final PropertiesReader PROPERTIES_READER = new PropertiesReader();
+    private static final String RESOURCE_PATH = PROPERTIES_READER.getProperty("resource.path");
 
     public static void main(String[] args) throws Exception {
         DiscogsService discogsService = new DefaultDiscogsService(
-                propertiesReader.getProperty("consumer.key"),
-                propertiesReader.getProperty("consumer.secret"),
-                propertiesReader.getProperty("user.agent"),
-                propertiesReader.getProperty("callback.url"), new ObjectMapper()
+                PROPERTIES_READER.getProperty("consumer.key"),
+                PROPERTIES_READER.getProperty("consumer.secret"),
+                PROPERTIES_READER.getProperty("user.agent"),
+                PROPERTIES_READER.getProperty("callback.url"), new ObjectMapper()
         );
 
 //DAO

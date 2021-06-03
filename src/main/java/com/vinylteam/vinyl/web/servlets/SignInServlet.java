@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.servlets;
 
+import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
@@ -59,7 +60,7 @@ public class SignInServlet extends HttpServlet {
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
                 User user = optionalUser.get();
                 HttpSession session = request.getSession(true);
-                session.setMaxInactiveInterval(60 * 60 * 5);
+                session.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
                 session.setAttribute("user", user);
                 response.sendRedirect("/");
             } else {

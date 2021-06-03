@@ -19,6 +19,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
             "WHERE EXISTS (SELECT * FROM users WHERE id=? AND status=FALSE)";
     private static final String SELECT_BY_TOKEN = "SELECT id, user_id, token, created_at FROM confirmation_tokens WHERE token=?";
     private static final String SELECT_BY_USER_ID = "SELECT id, user_id, token, created_at FROM confirmation_tokens WHERE user_id=?";
+    private static final String UPDATE = "UPDATE confirmation_tokens SET token=?, created_at=? WHERE id=?";
     private static final String DELETE_BY_USER_ID_WHEN_USER_STATUS = "DELETE FROM confirmation_tokens WHERE user_id=? AND " +
             "EXISTS (SELECT * FROM users WHERE users.id=? AND users.status)";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
@@ -30,9 +31,9 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
     @Override
     public Optional<ConfirmationToken> findByToken(UUID token) {
-        ConfirmationToken confirmationToken = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement findByEmailStatement = connection.prepareStatement(SELECT_BY_TOKEN)) {
+            ConfirmationToken confirmationToken = null;
             findByEmailStatement.setObject(1, token);
             log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
             try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
@@ -40,12 +41,12 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
                     confirmationToken = ROW_MAPPER.mapRow(resultSet);
                 }
             }
+            log.debug("Resulting optional with confirmation token is {'Optional.ofNullable(confirmationToken)':{}}", Optional.ofNullable(confirmationToken));
+            return Optional.ofNullable(confirmationToken);
         } catch (SQLException e) {
             log.error("SQLException retrieving confirmation token by email from confirmation_tokens", e);
             throw new RuntimeException(e);
         }
-        log.debug("Resulting optional with confirmation token is {'Optional.ofNullable(confirmationToken)':{}}", Optional.ofNullable(confirmationToken));
-        return Optional.ofNullable(confirmationToken);
     }
 
     @Override
@@ -93,6 +94,30 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
             log.info("Failed to add confirmation token to the database {'confirmationToken':{}}", token);
         }
         return isAdded;
+    }
+
+    @Override
+    public boolean update(ConfirmationToken token) {
+        boolean isUpdated = false;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement updateStatement = connection.prepareStatement(UPDATE)) {
+            updateStatement.setObject(1, token.getToken());
+            updateStatement.setTimestamp(2, Timestamp.from(Instant.now()));
+            updateStatement.setLong(3, token.getId());
+            log.debug("Prepared statement {'preparedStatement':{}}.", updateStatement);
+            int rows = updateStatement.executeUpdate();
+            if (rows > 0) {
+                isUpdated = true;
+            }
+        } catch (SQLException e) {
+            log.error("Error while updating confirmation_token with {'confirmationToken':{}}", token, e);
+        }
+        if (isUpdated) {
+            log.info("Confirmation token is updated in the database {'confirmationToken':{}}", token);
+        } else {
+            log.info("Failed to update confirmation token in the database {'confirmationToken':{}}", token);
+        }
+        return isUpdated;
     }
 
     @Override
