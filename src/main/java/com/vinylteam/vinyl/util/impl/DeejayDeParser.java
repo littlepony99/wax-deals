@@ -17,7 +17,6 @@ public class DeejayDeParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://www.deejay.de";
     protected static final String START_PAGE_LINK = BASE_LINK + "/m_All/sm_News/stock_1/perpage_160";
-    //protected static final String START_PAGE_LINK = BASE_LINK + "/m_All/sm_News/substyles_211_223_312_305_309_403_405/stock_1/perpage_160";
 
     private static final int SHOP_ID = 6;
     private static final String PRELIMINARY_PAGE_LINK_SELECTOR = "UL.pagination";
