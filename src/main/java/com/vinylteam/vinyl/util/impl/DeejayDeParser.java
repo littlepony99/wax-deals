@@ -42,14 +42,14 @@ public class DeejayDeParser extends VinylParser {
     private final ParserConfiguration onePageConf = ParserConfiguration
             .builder()
             .highResolutionImageSelector("DIV#content DIV.cover.tipp DIV.img.allbig A")
-            .offerLinkSelector("DIV#content DIV.ordertitel A")///?
-            .artistSelector("DIV#content DIV.artist > H1[itemprop=publisher]")///
-            .releaseSelector("DIV#content DIV.title > H1[itemprop=inalbum name]")///
-            .vinylGenresSelector("DIV#content DIV.artikel > DIV.styles[itemprop=genre] > A")///
-            .priceDetailsSelector("DIV#content DIV.order DIV.kaufen > SPAN.price") ///
-            .catalogNumberSelector("DIV#content DIV.label > H1[itemprop=alternateName]")///
+            .offerLinkSelector("DIV#content DIV.ordertitel A")
+            .artistSelector("DIV#content DIV.artist > H1[itemprop=publisher]")
+            .releaseSelector("DIV#content DIV.title > H1[itemprop=inalbum name]")
+            .vinylGenresSelector("DIV#content DIV.artikel > DIV.styles[itemprop=genre] > A")
+            .priceDetailsSelector("DIV#content DIV.order DIV.kaufen > SPAN.price")
+            .catalogNumberSelector("DIV#content DIV.label > H1[itemprop=alternateName]")
             .inStockMarker("In Stock")
-            .inStockMarkerSelector("DIV#content DIV.order DIV.stock SPAN.first")///
+            .inStockMarkerSelector("DIV#content DIV.order DIV.stock SPAN.first")
             .build();
 
     @Getter
