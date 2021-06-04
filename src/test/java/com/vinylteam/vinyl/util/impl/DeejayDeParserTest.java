@@ -13,10 +13,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
-import static com.vinylteam.vinyl.util.impl.DeejayDeParser.START_PAGE_LINK;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DeejayDeParserTest {
+
+    private static final String START_PAGE_LINK = DeejayDeParser.BASE_LINK + "/m_All/sm_News/substyles_211_223_312_305_309_403_405/stock_1/perpage_160";
 
     private DeejayDeParser parser;
 
@@ -49,7 +50,7 @@ class DeejayDeParserTest {
         assertNotNull(rawOffer);
         assertEquals("Dixon Ep", rawOffer.getRelease());
         assertEquals("https://www.deejay.de/Bazmann_Dixon_Ep_RWL007__969033", rawOffer.getOfferLink());
-        assertEquals("https://www.deejay.de/images/m/3/3//969033.jpg", rawOffer.getImageLink());
+        assertEquals("https://www.deejay.de/images/xl/3/3//969033.jpg", rawOffer.getImageLink());
         assertEquals(Currency.EUR, rawOffer.getCurrency().get());
         assertEquals(10.04d, rawOffer.getPrice());
         assertEquals("Bazmann", rawOffer.getArtist());
