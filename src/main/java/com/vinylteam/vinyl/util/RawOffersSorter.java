@@ -47,6 +47,8 @@ public class RawOffersSorter {
 
     void addOffersSortingByVinyl(List<RawOffer> rawOffers, UniqueVinyl uniqueVinyl, List<Offer> offers) {
         if (rawOffers != null && uniqueVinyl != null && offers != null) {
+            String preparedVinylRelease = getParametersForComparison(uniqueVinyl.getRelease());
+            String preparedVinylArtist = getParametersForComparison(uniqueVinyl.getArtist());
             int percentMatching = 75;
             String uniqueVinylRelease = uniqueVinyl.getRelease();
             char lastCharInRawRelease = uniqueVinylRelease.charAt(uniqueVinylRelease.length() - 1);
@@ -65,8 +67,8 @@ public class RawOffersSorter {
                         currentMatching++;
                     }
                 }
-                if (Objects.equals(getParametersForComparison(uniqueVinyl.getRelease()), getParametersForComparison(rawOffer.getRelease())) &&
-                        Objects.equals(getParametersForComparison(uniqueVinyl.getArtist()), getParametersForComparison(rawOffer.getArtist()))) {
+                if (Objects.equals(preparedVinylRelease, getParametersForComparison(rawOffer.getRelease())) &&
+                        Objects.equals(preparedVinylArtist, getParametersForComparison(rawOffer.getArtist()))) {
                     if (((float) currentMatching) / preparedFullNameForMatching.length * 100 > percentMatching) {
                         Offer offer = new Offer();
                         offer.setUniqueVinylId(uniqueVinyl.getId());
@@ -78,7 +80,7 @@ public class RawOffersSorter {
                         offer.setInStock(rawOffer.isInStock());
                         offer.setOfferLink(rawOffer.getOfferLink());
                         offers.add(offer);
-                        uniqueVinyl.setHasOffers(true);
+                        //uniqueVinyl.setHasOffers(true);
                         log.debug("Added new offer {'offer':{}}", offer);
                         rawOfferIterator.remove();
                     }
