@@ -7,10 +7,11 @@ import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
-import com.vinylteam.vinyl.util.*;
+import com.vinylteam.vinyl.util.MailSender;
+import com.vinylteam.vinyl.util.PropertiesReader;
+import com.vinylteam.vinyl.util.RawOffersSorter;
+import com.vinylteam.vinyl.util.Updater;
 import com.vinylteam.vinyl.util.impl.*;
-import com.vinylteam.vinyl.util.impl.ShopsParser;
-import com.vinylteam.vinyl.util.impl.VinylParser;
 import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import com.vinylteam.vinyl.web.handler.DefaultErrorHandler;
 import com.vinylteam.vinyl.web.servlets.*;
@@ -26,13 +27,10 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.JarFileResource;
 import org.eclipse.jetty.util.resource.Resource;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.groupingBy;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Slf4j
 public class Starter {
@@ -65,6 +63,7 @@ public class Starter {
         OfferDao offerDao = new JdbcOfferDao(dataSource);
         ShopDao shopDao = new JdbcShopDao(dataSource);
         UserPostDao userPostDao = new JdbcUserPostDao(dataSource);
+        RecoveryPasswordDao recoveryPasswordDao = new JdbcRecoveryPasswordDao(dataSource);
 
 //SERVICE
         SecurityService securityService = new DefaultSecurityService();
@@ -79,6 +78,7 @@ public class Starter {
                 propertiesReader.getProperty("mail.smtp.auth"));
         UserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
         CaptchaService defaultCaptchaService = new DefaultCaptchaService();
+        RecoveryPasswordService recoveryPasswordService = new DefaultRecoveryPasswordService(recoveryPasswordDao, userService);
 //UTIL, FILL IN DATABASE
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
@@ -114,8 +114,8 @@ public class Starter {
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
         AboutServlet aboutServlet = new AboutServlet();
-        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(userService, userPostService, mailSender);
-        NewPasswordServlet newPasswordServlet = new NewPasswordServlet(userService, userPostService);
+        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(recoveryPasswordService, mailSender);
+        ChangePasswordServlet changePasswordServlet = new ChangePasswordServlet(recoveryPasswordService);
 
         Resource resource = JarFileResource.newClassPathResource(RESOURCE_PATH);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -139,7 +139,7 @@ public class Starter {
         servletContextHandler.addServlet(new ServletHolder(imageCaptchaServlet), "/captcha");
         servletContextHandler.addServlet(new ServletHolder(aboutServlet), "/about");
         servletContextHandler.addServlet(new ServletHolder(recoveryPasswordServlet), "/recoveryPassword");
-        servletContextHandler.addServlet(new ServletHolder(newPasswordServlet), "/newPassword");
+        servletContextHandler.addServlet(new ServletHolder(changePasswordServlet), "/newPassword");
 
         servletContextHandler.addServlet(DefaultServlet.class, "/*");
 

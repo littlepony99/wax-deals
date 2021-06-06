@@ -7,7 +7,7 @@ create table recovery_password
         constraint user_id_fk
             references users
             unique,
-    token varchar(500) not null
+    token varchar(500) not null unique
 );
 
 UPDATE public.shops

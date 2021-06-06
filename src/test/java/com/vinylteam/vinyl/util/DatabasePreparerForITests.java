@@ -1,17 +1,14 @@
 package com.vinylteam.vinyl.util;
 
-import com.vinylteam.vinyl.entity.Offer;
-import com.vinylteam.vinyl.entity.Shop;
-import com.vinylteam.vinyl.entity.UniqueVinyl;
-import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.entity.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -22,11 +19,16 @@ public class DatabasePreparerForITests {
     private static final String TRUNCATE_OFFERS = "TRUNCATE public.offers RESTART IDENTITY";
     private static final String TRUNCATE_USERS_CASCADE = "TRUNCATE public.users RESTART IDENTITY CASCADE";
     private static final String TRUNCATE_USERS_POSTS_CASCADE = "TRUNCATE public.user_posts RESTART IDENTITY CASCADE";
+    private static final String TRUNCATE_RECOVERY_PASSWORD = "TRUNCATE public.recovery_password RESTART IDENTITY CASCADE";
     private static final String INSERT_IN_SHOPS = "INSERT INTO public.shops(id, link_to_main_page, link_to_image, name, link_to_small_image) VALUES(?, ?, ?, ?, ?)";
     private static final String INSERT_IN_UNIQUE_VINYLS = "INSERT INTO public.unique_vinyls(id, release, artist, full_name, link_to_image, has_offers) VALUES(?, ?, ?, ?, ?, ?)";
     private static final String INSERT_IN_OFFERS = "INSERT INTO public.offers(unique_vinyl_id, shop_id, price, currency, genre, cat_number, in_stock, link_to_offer) " +
             "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String INSERT_IN_USERS = "INSERT INTO public.users (email, password, salt, iterations, status, role, discogs_user_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_RECOVERY_TOKEN = "INSERT INTO public.recovery_password" +
+            " (user_id, token, created_at, token_lifetime)" +
+            " VALUES (?, ?, ?, ?)" +
+            " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?, token_lifetime = ?";
     private final PropertiesReader propertiesReader = new PropertiesReader();
     private final HikariDataSource dataSource;
     private final HikariConfig config = new HikariConfig();
@@ -88,6 +90,13 @@ public class DatabasePreparerForITests {
             truncateShops.executeUpdate(TRUNCATE_SHOPS_CASCADE);
             truncateUniqueVinyls.executeUpdate(TRUNCATE_UNIQUE_VINYLS_CASCADE);
             truncateOffers.executeUpdate(TRUNCATE_OFFERS);
+        }
+    }
+
+    public void truncateCascadeRecoveryPassword() throws SQLException {
+        try(Connection connection = dataSource.getConnection();
+        Statement truncateRecovery = connection.createStatement()){
+            truncateRecovery.executeUpdate(TRUNCATE_RECOVERY_PASSWORD);
         }
     }
 
@@ -162,6 +171,19 @@ public class DatabasePreparerForITests {
             }
             insertUsers.executeBatch();
             connection.commit();
+        }
+    }
+
+    public void insertRecoveryToken(RecoveryToken recoveryToken) throws SQLException {
+        try(Connection connection = dataSource.getConnection();
+        PreparedStatement insertRecovery = connection.prepareStatement(INSERT_RECOVERY_TOKEN)){
+            insertRecovery.setLong(1, recoveryToken.getUserId());
+            insertRecovery.setString(2, recoveryToken.getToken());
+            insertRecovery.setTimestamp(3, Timestamp.from(Instant.now()));
+            insertRecovery.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
+            insertRecovery.setString(5, recoveryToken.getToken());
+            insertRecovery.setTimestamp(6, Timestamp.from(Instant.now()));
+            insertRecovery.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
         }
     }
 
