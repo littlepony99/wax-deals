@@ -209,19 +209,6 @@ class JdbcConfirmationTokenDaoITest {
     }
 
     @Test
-    @DisplayName("Throws Runtime Exception when confirmation token with by id of passed confirmation token doesn't exist")
-    void updateWithTokenWithNonExistentId() throws SQLException {
-        //prepare
-        ConfirmationToken confirmationTokenNonExistentId = dataGenerator.getConfirmationTokenWithUserId(3);
-        confirmationTokenNonExistentId.setToken(UUID.randomUUID());
-        //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenNonExistentId));
-        //
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(confirmationTokens, actualConfirmationTokens);
-    }
-
-    @Test
     @DisplayName("Throws Runtime Exception when updating confirmation token with uuid token that already exists in the table in another confirmation token")
     void updateWithTokenWithDuplicateUUIDToken() throws SQLException {
         //prepare

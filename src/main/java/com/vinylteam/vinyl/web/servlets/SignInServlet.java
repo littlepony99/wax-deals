@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -17,15 +18,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 public class SignInServlet extends HttpServlet {
 
     private final UserService userService;
     private final ConfirmationService confirmationService;
-
-    public SignInServlet(UserService userService, ConfirmationService confirmationService) {
-        this.userService = userService;
-        this.confirmationService = confirmationService;
-    }
+    private final Integer sessionMaxInactiveInterval;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -60,7 +58,7 @@ public class SignInServlet extends HttpServlet {
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
                 User user = optionalUser.get();
                 HttpSession session = request.getSession(true);
-                session.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
+                session.setMaxInactiveInterval(sessionMaxInactiveInterval);
                 session.setAttribute("user", user);
                 response.sendRedirect("/");
             } else {

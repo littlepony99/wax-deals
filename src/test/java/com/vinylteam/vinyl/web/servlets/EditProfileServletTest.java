@@ -26,7 +26,7 @@ class EditProfileServletTest {
 
     private final SecurityService mockedSecurityService = mock(SecurityService.class);
     private final UserService mockedUserService = mock(UserService.class);
-    private final EditProfileServlet editProfileServlet = new EditProfileServlet(mockedSecurityService, mockedUserService);
+    private final EditProfileServlet editProfileServlet = new EditProfileServlet(mockedSecurityService, mockedUserService, 18000);
 
     private final HttpServletRequest mockedRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedResponse = mock(HttpServletResponse.class);

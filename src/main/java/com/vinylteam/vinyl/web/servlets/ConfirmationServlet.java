@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -19,15 +20,12 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@RequiredArgsConstructor
 public class ConfirmationServlet extends HttpServlet {
 
     private final UserService userService;
     private final ConfirmationService confirmationService;
-
-    public ConfirmationServlet(UserService userService, ConfirmationService confirmationService) {
-        this.userService = userService;
-        this.confirmationService = confirmationService;
-    }
+    private final Integer sessionMaxInactiveInterval;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -92,7 +90,7 @@ public class ConfirmationServlet extends HttpServlet {
                     userService.update(user.getEmail(), user.getEmail(), password, user.getDiscogsUserName());
                     confirmationService.deleteByUserId(user.getId());
                     HttpSession session = request.getSession(true);
-                    session.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
+                    session.setMaxInactiveInterval(sessionMaxInactiveInterval);
                     session.setAttribute("user", user);
                     response.setStatus(HttpServletResponse.SC_OK);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);

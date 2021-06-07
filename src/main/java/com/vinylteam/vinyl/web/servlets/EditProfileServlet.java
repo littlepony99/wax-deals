@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -16,15 +17,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
+@RequiredArgsConstructor
 public class EditProfileServlet extends HttpServlet {
 
-    private SecurityService securityService;
-    private UserService userService;
+    private final SecurityService securityService;
+    private final UserService userService;
+    private final Integer sessionMaxInactiveInterval;
 
-    public EditProfileServlet(SecurityService securityService, UserService userService) {
-        this.securityService = securityService;
-        this.userService = userService;
-    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -84,7 +83,7 @@ public class EditProfileServlet extends HttpServlet {
                             email = newEmail;
                             discogsUserName = newDiscogsUserName;
                             HttpSession newSession = request.getSession(true);
-                            newSession.setMaxInactiveInterval(Integer.parseInt(Starter.PROPERTIES_READER.getProperty("session.maxInactiveInterval")));
+                            newSession.setMaxInactiveInterval(sessionMaxInactiveInterval);
                             newSession.setAttribute("user", userService.findByEmail(email).orElse(user));
                         } else {
                             log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);

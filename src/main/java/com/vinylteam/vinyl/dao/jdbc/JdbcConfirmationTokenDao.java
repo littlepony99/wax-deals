@@ -98,26 +98,19 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
     @Override
     public boolean update(ConfirmationToken token) {
-        boolean isUpdated = false;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement updateStatement = connection.prepareStatement(UPDATE)) {
             updateStatement.setObject(1, token.getToken());
             updateStatement.setTimestamp(2, Timestamp.from(Instant.now()));
             updateStatement.setLong(3, token.getId());
             log.debug("Prepared statement {'preparedStatement':{}}.", updateStatement);
-            int rows = updateStatement.executeUpdate();
-            if (rows > 0) {
-                isUpdated = true;
-            }
+            int countRows = updateStatement.executeUpdate();
+            log.info("Confirmation token is updated in the database {'confirmationToken':{}}, rows updated {}", token, countRows);
+            return (countRows > 0);
         } catch (SQLException e) {
             log.error("Error while updating confirmation_token with {'confirmationToken':{}}", token, e);
+            throw new RuntimeException("Error while updating confirmation_token");
         }
-        if (isUpdated) {
-            log.info("Confirmation token is updated in the database {'confirmationToken':{}}", token);
-        } else {
-            log.info("Failed to update confirmation token in the database {'confirmationToken':{}}", token);
-        }
-        return isUpdated;
     }
 
     @Override

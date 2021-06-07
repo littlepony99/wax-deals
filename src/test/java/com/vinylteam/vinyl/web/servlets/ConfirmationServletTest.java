@@ -29,7 +29,7 @@ class ConfirmationServletTest {
 
     private final UserService mockedUserService = mock(DefaultUserService.class);
     private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
-    private final ConfirmationServlet confirmationServlet = new ConfirmationServlet(mockedUserService, mockedConfirmationService);
+    private final ConfirmationServlet confirmationServlet = new ConfirmationServlet(mockedUserService, mockedConfirmationService, 1800);
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
     private final HttpServletRequest mockedRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedResponse = mock(HttpServletResponse.class);

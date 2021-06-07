@@ -121,7 +121,7 @@ class JdbcShopDaoITest {
         //prepare
         List<Integer> ids = List.of(1, 2);
         String expectedStatement = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image " +
-                "FROM public.shops WHERE id IN (1, 2)  ORDER BY shop_order NULLS FIRST";
+                "FROM shops WHERE id IN (1, 2)  ORDER BY shop_order NULLS FIRST";
         //when
         String actualStatement = jdbcShopDao.fillSelectManyByIdsStatement(ids);
         //then
@@ -134,7 +134,7 @@ class JdbcShopDaoITest {
         //prepare
         List<Integer> ids = new ArrayList<>();
         String expectedStatement = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image " +
-                "FROM public.shops WHERE id IN ()  ORDER BY shop_order NULLS FIRST";
+                "FROM shops WHERE id IN ()  ORDER BY shop_order NULLS FIRST";
         //when
         String actualStatement = jdbcShopDao.fillSelectManyByIdsStatement(ids);
         //then

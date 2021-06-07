@@ -82,15 +82,13 @@ public class DefaultConfirmationService implements ConfirmationService {
 
     @Override
     public boolean sendMessageWithLinkToUserEmail(User user) {
-        if (user != null) {
-            NullPointerException e = new NullPointerException("User is null");
+        if (user == null) {
             log.error("User is null, not adding token and sending email with confirmation link.");
-            throw new RuntimeException(e);
+            throw new RuntimeException("User is null");
         }
-        if (user.getEmail() != null) {
-            NullPointerException e = new NullPointerException("User's email is null");
+        if (user.getEmail() == null) {
             log.error("User's email is null, not adding token and sending email with confirmation link.");
-            throw new RuntimeException(e);
+            throw new RuntimeException("User's email is null");
         }
         boolean isSent;
         long userId = user.getId();

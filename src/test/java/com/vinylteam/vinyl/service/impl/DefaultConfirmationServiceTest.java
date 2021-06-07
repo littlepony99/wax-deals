@@ -107,7 +107,7 @@ class DefaultConfirmationServiceTest {
     @DisplayName("sendMessageWithLinkToUserEmail trows NullPointerException and doesn't call any dao methods or mailSender.sendMessage when user is null")
     void sendMessageWithLinkToUserEmailNullUser() {
         //when
-        assertThrows(NullPointerException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null));
+        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null));
     }
 
     @Test
@@ -119,7 +119,7 @@ class DefaultConfirmationServiceTest {
         when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.empty());
         when(mockedConfirmationDao.add(any())).thenReturn(false);
         //when
-        assertThrows(NullPointerException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(userNullEmail));
+        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(userNullEmail));
         //then
         verify(mockedConfirmationDao, never()).findByUserId(1);
         verify(mockedConfirmationDao, never()).add(any());

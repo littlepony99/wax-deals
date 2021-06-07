@@ -97,16 +97,18 @@ public class Starter {
 
 //WEB
         SecurityFilter securityFilter = new SecurityFilter();
-        SignInServlet signInServlet = new SignInServlet(userService, confirmationService);
+
+        Integer sessionMaxInactiveInterval = Integer.parseInt(PROPERTIES_READER.getProperty("session.maxInactiveInterval"));
+        SignInServlet signInServlet = new SignInServlet(userService, confirmationService, sessionMaxInactiveInterval);
         SignUpServlet signUpServlet = new SignUpServlet(userService, confirmationService);
-        ConfirmationServlet confirmationServlet = new ConfirmationServlet(userService, confirmationService);
+        ConfirmationServlet confirmationServlet = new ConfirmationServlet(userService, confirmationService, sessionMaxInactiveInterval);
         CatalogueServlet catalogueServlet = new CatalogueServlet(uniqueVinylService, discogsService);
         SearchResultsServlet searchResultsServlet = new SearchResultsServlet(uniqueVinylService);
         OneVinylOffersServlet oneVinylOffersServlet = new OneVinylOffersServlet(uniqueVinylService, offerService, shopService, discogsService, parserHolder);
         SignOutServlet signOutServlet = new SignOutServlet();
         ProfileServlet profileServlet = new ProfileServlet();
         ShopServlet shopServlet = new ShopServlet(shopService);
-        EditProfileServlet editProfileServlet = new EditProfileServlet(securityService, userService);
+        EditProfileServlet editProfileServlet = new EditProfileServlet(securityService, userService, sessionMaxInactiveInterval);
         DeleteProfileServlet deleteProfileServlet = new DeleteProfileServlet(userService);
         HomeServlet homeServlet = new HomeServlet();
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);

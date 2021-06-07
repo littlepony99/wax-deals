@@ -26,7 +26,7 @@ class SignInServletTest {
 
     private final UserService mockedUserService = mock(UserService.class);
     private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
-    private final SignInServlet signInServlet = new SignInServlet(mockedUserService, mockedConfirmationService);
+    private final SignInServlet signInServlet = new SignInServlet(mockedUserService, mockedConfirmationService, 18000);
 
     private final HttpServletRequest mockedHttpServletRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedHttpServletResponse = mock(HttpServletResponse.class);

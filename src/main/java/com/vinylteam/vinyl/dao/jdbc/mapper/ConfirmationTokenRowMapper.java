@@ -12,17 +12,17 @@ public class ConfirmationTokenRowMapper implements RowMapper<ConfirmationToken> 
 
     @Override
     public ConfirmationToken mapRow(ResultSet resultSet) {
-        ConfirmationToken confirmationToken = new ConfirmationToken();
         try {
+            ConfirmationToken confirmationToken = new ConfirmationToken();
             confirmationToken.setId(resultSet.getLong("id"));
             confirmationToken.setUserId(resultSet.getLong("user_id"));
             confirmationToken.setToken(resultSet.getObject("token", java.util.UUID.class));
             confirmationToken.setTimestamp(resultSet.getTimestamp("created_at"));
+            return confirmationToken;
         } catch (SQLException e) {
-            log.error("Error while getting data from result set into ConfirmationToken object {'confirmationToken':{}}", confirmationToken, e);
+            log.error("Error while getting data from result set into ConfirmationToken object ", e);
             throw new RuntimeException(e);
         }
-        return confirmationToken;
     }
 
 }
