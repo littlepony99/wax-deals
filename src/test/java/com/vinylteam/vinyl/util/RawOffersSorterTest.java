@@ -3,13 +3,18 @@ package com.vinylteam.vinyl.util;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.util.impl.CloneNlParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -240,6 +245,24 @@ class RawOffersSorterTest {
         String parameterForComparison = sorter.getParametersForComparison("BEST RELEASE is here");
         //then
         assertEquals("best", parameterForComparison);
+    }
+
+    static Stream<Arguments> getTestData() {
+        return Stream.of(
+                Arguments.of(3, new String[]{"hello", "variOus", "artist"}, "Hello Vinyl Artist Various"),
+                Arguments.of(0, new String[]{"hello12", "variOus12", "artist12"}, "Hello Vinyl Artist Various"),
+                Arguments.of(1, new String[]{"variOus"}, "Hello Vinyl Artist Various "),
+                Arguments.of(1, new String[]{"variOus", "Various"}, "Hello Vinyl Artist Various "),
+                Arguments.of(1, new String[]{"  variOus ", "  Various    "}, "Hello Vinyl Artist Various ")
+        );
+    }
+
+    @ParameterizedTest(name = "#{index} - Run test with args={0}, {1}, {2}")
+    @MethodSource("getTestData")
+    @DisplayName("Checks whether match counter works correctly")
+    void getMatchNumberTest(int expectedNumber, String[] searchWords, String rawOfferFullName) {
+        int number = sorter.getMatchNumber(searchWords, rawOfferFullName);
+        assertEquals(expectedNumber, number);
     }
 
     private UniqueVinyl createVinyl(String artist, String release) {
