@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.util;
 
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 
 @Value
