@@ -52,12 +52,13 @@ public class RawOffersSorter {
                     rawOffers, uniqueVinyl, offers, e);
             throw e;
         }
-        int percentMatching = 75;
+        int minMatchingRate = 75;
         String uniqueVinylRelease = uniqueVinyl.getRelease();
         char lastCharInRawRelease = uniqueVinylRelease.charAt(uniqueVinylRelease.length() - 1);
         if (lastCharInRawRelease > '0' && lastCharInRawRelease < '9') {
-            percentMatching = 90;
+            minMatchingRate = 90;
         }
+
         String[] preparedFullNameForMatching = Arrays
                 .stream(uniqueVinyl.getFullName().split("[- ()!@$%^&*_={}:;\"']"))
                 .filter(e -> e.trim().length() > 0)
@@ -69,29 +70,39 @@ public class RawOffersSorter {
         while (rawOfferIterator.hasNext()) {
             RawOffer rawOffer = rawOfferIterator.next();
             String rawOfferFullName = rawOffer.getArtist() + " - " + rawOffer.getRelease();
-            int currentMatching = getMatchNumber(preparedFullNameForMatching, rawOfferFullName);
-            if (Objects.equals(preparedVinylRelease, getParametersForComparison(rawOffer.getRelease())) &&
-                    Objects.equals(preparedVinylArtist, getParametersForComparison(rawOffer.getArtist()))) {
-                if (((float) currentMatching) / preparedFullNameForMatching.length * 100 > percentMatching) {
-                    Offer offer = new Offer();
-                    offer.setUniqueVinylId(uniqueVinyl.getId());
-                    offer.setShopId(rawOffer.getShopId());
-                    offer.setPrice(rawOffer.getPrice());
-                    offer.setCurrency(rawOffer.getCurrency());
-                    offer.setGenre(rawOffer.getGenre());
-                    offer.setCatNumber(rawOffer.getCatNumber());
-                    offer.setInStock(rawOffer.isInStock());
-                    offer.setOfferLink(rawOffer.getOfferLink());
-                    offers.add(offer);
-                    log.debug("Added new offer {'offer':{}}", offer);
-                    rawOfferIterator.remove();
-                }
+            int currentMatchingNumber = getMatchingNumber(preparedFullNameForMatching, rawOfferFullName);
+            if (isEqualByArtistAndRelease(preparedVinylRelease, preparedVinylArtist, rawOffer) &&
+                    getMatchingRate(currentMatchingNumber, preparedFullNameForMatching.length) > minMatchingRate) {
+                Offer offer = new Offer();
+                offer.setUniqueVinylId(uniqueVinyl.getId());
+                offer.setShopId(rawOffer.getShopId());
+                offer.setPrice(rawOffer.getPrice());
+                offer.setCurrency(rawOffer.getCurrency());
+                offer.setGenre(rawOffer.getGenre());
+                offer.setCatNumber(rawOffer.getCatNumber());
+                offer.setInStock(rawOffer.isInStock());
+                offer.setOfferLink(rawOffer.getOfferLink());
+                offers.add(offer);
+                uniqueVinyl.setHasOffers(true);
+                log.debug("Added new offer {'offer':{}}", offer);
+                rawOfferIterator.remove();
             }
         }
-        uniqueVinyl.setHasOffers(!offers.isEmpty());
     }
 
-    int getMatchNumber(String[] preparedFullNameForMatching, String rawOfferFullName) {
+    boolean isEqualByArtistAndRelease(String vinylRelease, String vinylArtist, RawOffer rawOffer) {
+        return (Objects.equals(vinylRelease, getParametersForComparison(rawOffer.getRelease())) &&
+                Objects.equals(vinylArtist, getParametersForComparison(rawOffer.getArtist())));
+    }
+
+    float getMatchingRate(int currentMatching, int total) {
+        if (total == 0) {
+            return 0;
+        }
+        return ((float) currentMatching) / total * 100;
+    }
+
+    int getMatchingNumber(String[] preparedFullNameForMatching, String rawOfferFullName) {
         return (int) Arrays.stream(preparedFullNameForMatching)
                 .map(preparedItem -> preparedItem.toLowerCase().trim())
                 .distinct()

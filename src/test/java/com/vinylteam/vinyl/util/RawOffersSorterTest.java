@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.util;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
-import com.vinylteam.vinyl.util.impl.CloneNlParser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -260,9 +259,45 @@ class RawOffersSorterTest {
     @ParameterizedTest(name = "#{index} - Run test with args={0}, {1}, {2}")
     @MethodSource("getTestData")
     @DisplayName("Checks whether match counter works correctly")
-    void getMatchNumberTest(int expectedNumber, String[] searchWords, String rawOfferFullName) {
-        int number = sorter.getMatchNumber(searchWords, rawOfferFullName);
-        assertEquals(expectedNumber, number);
+    void getMatchingNumberTest(int expectedMatchingNumber, String[] searchWords, String rawOfferFullName) {
+        int actualNumber = sorter.getMatchingNumber(searchWords, rawOfferFullName);
+        assertEquals(expectedMatchingNumber, actualNumber);
+    }
+
+    static Stream<Arguments> getMatchingRateTestData() {
+        return Stream.of(
+                Arguments.of(100, 9, 9),
+                Arguments.of(100, 2, 2),
+                Arguments.of(50, 1, 2),
+                Arguments.of(83.3f, 5, 6),
+                Arguments.of(0, 5, 0)
+        );
+    }
+
+    @ParameterizedTest(name = "#{index} - Run test with args={0}, {1}, {2}")
+    @MethodSource("getMatchingRateTestData")
+    @DisplayName("Checks whether match rate is evaluated correctly")
+    void getMatchingRateTest(float expectedRate, int currentMatching, int total) {
+        float actualRate = sorter.getMatchingRate(currentMatching, total);
+        assertEquals(expectedRate, actualRate, 0.1);
+    }
+
+    static Stream<Arguments> getTestDataForComparisonByArtistAndReleaseTest() {
+        RawOffer rawOffer1 = new RawOffer();
+        rawOffer1.setRelease("Release");
+        rawOffer1.setArtist("Artist Various");
+        return Stream.of(
+                Arguments.of(true, "release", "artist", rawOffer1),
+                Arguments.of(false, "First Release", "Unknown", rawOffer1)
+        );
+    }
+
+    @ParameterizedTest(name = "#{index} - Run test with args={0}, {1}, {2}")
+    @MethodSource("getTestDataForComparisonByArtistAndReleaseTest")
+    @DisplayName("Checks whether vinyl and rawOffer are compared correctly by release and artist values")
+    void isEqualByArtistAndReleaseTest(boolean expectedResult, String vinylRelease, String vinylArtist, RawOffer rawOffer){
+        boolean resultOfComparison = sorter.isEqualByArtistAndRelease(vinylRelease, vinylArtist, rawOffer);
+        assertEquals(expectedResult, resultOfComparison);
     }
 
     private UniqueVinyl createVinyl(String artist, String release) {
