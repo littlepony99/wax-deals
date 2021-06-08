@@ -8,7 +8,6 @@ public class RecoveryToken {
     private long userId;
     private String token;
     private Timestamp createdAt;
-    private Timestamp lifeTime;
 
     public int getId() {
         return id;
@@ -42,14 +41,6 @@ public class RecoveryToken {
         this.createdAt = createdAt;
     }
 
-    public Timestamp getLifeTime() {
-        return lifeTime;
-    }
-
-    public void setLifeTime(Timestamp lifeTime) {
-        this.lifeTime = lifeTime;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -58,13 +49,12 @@ public class RecoveryToken {
         return id == that.id &&
                 userId == that.userId &&
                 Objects.equals(token, that.token) &&
-                Objects.equals(createdAt, that.createdAt) &&
-                Objects.equals(lifeTime, that.lifeTime);
+                Objects.equals(createdAt, that.createdAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, userId, token, createdAt, lifeTime);
+        return Objects.hash(id, userId, token, createdAt);
     }
 
     @Override
@@ -74,7 +64,6 @@ public class RecoveryToken {
                 ", userId=" + userId +
                 ", token='" + token + '\'' +
                 ", createdAt=" + createdAt +
-                ", lifeTime=" + lifeTime +
                 '}';
     }
 

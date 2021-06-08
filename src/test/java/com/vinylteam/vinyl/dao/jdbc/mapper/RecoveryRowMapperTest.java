@@ -34,6 +34,5 @@ class RecoveryRowMapperTest {
         assertEquals(1L, recoveryToken.getUserId());
         assertEquals("user-recovery-token", recoveryToken.getToken());
         assertEquals(Timestamp.valueOf(createdAt), recoveryToken.getCreatedAt());
-        assertEquals(Timestamp.valueOf(createdAt.plusDays(1)), recoveryToken.getLifeTime());
     }
 }

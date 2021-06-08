@@ -16,10 +16,10 @@ import java.util.Optional;
 public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
 
     private static final String INSERT_TOKEN = "INSERT INTO recovery_password" +
-            " (user_id, token, created_at, token_lifetime)" +
-            " VALUES (?, ?, ?, ?)" +
-            " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?, token_lifetime = ?";
-    private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at, token_lifetime FROM recovery_password" +
+            " (user_id, token, created_at)" +
+            " VALUES (?, ?, ?)" +
+            " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?";
+    private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at FROM recovery_password" +
             " WHERE token = ?";
     private static final String REMOVE_TOKEN = "DELETE FROM recovery_password" +
             " WHERE token = ?";
@@ -39,10 +39,8 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
             addTokenStatement.setLong(1, recoveryToken.getUserId());
             addTokenStatement.setString(2, recoveryToken.getToken());
             addTokenStatement.setTimestamp(3, Timestamp.from(Instant.now()));
-            addTokenStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
-            addTokenStatement.setString(5, recoveryToken.getToken());
-            addTokenStatement.setTimestamp(6, Timestamp.from(Instant.now()));
-            addTokenStatement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
+            addTokenStatement.setString(4, recoveryToken.getToken());
+            addTokenStatement.setTimestamp(5, Timestamp.from(Instant.now()));
             log.debug("Prepared statement {'preparedStatement':{}}.", addTokenStatement);
             int result = addTokenStatement.executeUpdate();
             if (result > 0) {

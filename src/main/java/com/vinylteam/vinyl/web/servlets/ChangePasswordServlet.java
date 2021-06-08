@@ -11,8 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,12 +37,11 @@ public class ChangePasswordServlet extends HttpServlet {
             }
         }
         String token = request.getParameter("token");
-        Timestamp tokenLifetime;
         Optional<RecoveryToken> optionalToken = recoveryPasswordService.getByRecoveryToken(token);
         if (optionalToken.isPresent()) {
             token = optionalToken.get().getToken();
-            tokenLifetime = optionalToken.get().getLifeTime();
-            if (tokenLifetime.compareTo(Timestamp.from(Instant.now())) > 0) {
+            LocalDateTime tokenLifetime = optionalToken.get().getCreatedAt().toLocalDateTime().plusHours(24);
+            if (tokenLifetime.compareTo(LocalDateTime.now()) > 0) {
                 response.setStatus(HttpServletResponse.SC_OK);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
                 attributes.put("recoveryToken", token);

@@ -128,8 +128,7 @@ class ChangePasswordServletTest {
         String token = "some-recovery-token";
         long userId = 1L;
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(userId);
-        recoveryToken.setCreatedAt(Timestamp.from(Instant.now()));
-        recoveryToken.setLifeTime(Timestamp.valueOf(LocalDateTime.now().minusDays(1)));
+        recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusDays(2)));
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
         when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryToken));
@@ -155,7 +154,7 @@ class ChangePasswordServletTest {
         long userId = 1L;
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(userId);
         recoveryToken.setCreatedAt(Timestamp.from(Instant.now()));
-        recoveryToken.setLifeTime(Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
+        // recoveryToken.setLifeTime(Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
         when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryToken));
