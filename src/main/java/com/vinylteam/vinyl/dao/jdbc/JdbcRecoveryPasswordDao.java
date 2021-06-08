@@ -1,0 +1,116 @@
+package com.vinylteam.vinyl.dao.jdbc;
+
+import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
+import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryRowMapper;
+import com.vinylteam.vinyl.entity.RecoveryToken;
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
+import org.postgresql.util.PSQLException;
+
+import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Slf4j
+public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
+
+    private static final String INSERT_TOKEN = "INSERT INTO recovery_password" +
+            " (user_id, token, created_at, token_lifetime)" +
+            " VALUES (?, ?, ?, ?)" +
+            " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?, token_lifetime = ?";
+    private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at, token_lifetime FROM recovery_password" +
+            " WHERE token = ?";
+    private static final String REMOVE_TOKEN = "DELETE FROM recovery_password" +
+            " WHERE token = ?";
+
+    private final RecoveryRowMapper recoveryRowMapper = new RecoveryRowMapper();
+    private final HikariDataSource dataSource;
+
+    public JdbcRecoveryPasswordDao(HikariDataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Override
+    public boolean addRecoveryUserToken(RecoveryToken recoveryToken) {
+        boolean isAdded = false;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement addTokenStatement = connection.prepareStatement(INSERT_TOKEN)) {
+            addTokenStatement.setLong(1, recoveryToken.getUserId());
+            addTokenStatement.setString(2, recoveryToken.getToken());
+            addTokenStatement.setTimestamp(3, Timestamp.from(Instant.now()));
+            addTokenStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
+            addTokenStatement.setString(5, recoveryToken.getToken());
+            addTokenStatement.setTimestamp(6, Timestamp.from(Instant.now()));
+            addTokenStatement.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
+            log.debug("Prepared statement {'preparedStatement':{}}.", addTokenStatement);
+            int result = addTokenStatement.executeUpdate();
+            if (result > 0) {
+                isAdded = true;
+            }
+        } catch (PSQLException e) {
+            log.error("Database error while adding recovery token to recovery_password", e);
+            isAdded = false;
+        } catch (SQLException e) {
+            log.error("Error while adding recovery token to recovery_password", e);
+            throw new RuntimeException(e);
+        }
+        if (isAdded) {
+            log.info("Recovery token is added to the database {'recoveryToken':{}, 'userId':{}}.",
+                    recoveryToken.getToken(), recoveryToken.getUserId());
+        } else {
+            log.info("Failed to add recovery token to the database {'recoveryToken':{}, 'userId':{}}.",
+                    recoveryToken.getToken(), recoveryToken.getUserId());
+        }
+        return isAdded;
+    }
+
+    @Override
+    public Optional<RecoveryToken> getByRecoveryToken(String token) {
+        RecoveryToken recoveryToken = null;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement selectRecoveryTokenStatement = connection.prepareStatement(FIND_BY_TOKEN)) {
+            selectRecoveryTokenStatement.setString(1, token);
+            log.debug("Prepared statement {'preparedStatement':{}}.", selectRecoveryTokenStatement);
+            try (ResultSet resultSet = selectRecoveryTokenStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    recoveryToken = recoveryRowMapper.mapRow(resultSet);
+                    log.info("Get RecoveryToken from recovery_password table in db {'recoveryToken':{}}.", recoveryToken);
+                }
+            }
+        } catch (PSQLException e) {
+            log.error("Database error while getting RecoveryToken by token from recovery_password", e);
+        } catch (SQLException e) {
+            log.error("Error while getting RecoveryToken by token from recovery_password", e);
+            throw new RuntimeException(e);
+        }
+        return Optional.ofNullable(recoveryToken);
+    }
+
+    @Override
+    public boolean removeRecoveryUserToken(String recoveryToken) {
+        boolean isRemoved = false;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement removeStatement = connection.prepareStatement(REMOVE_TOKEN)) {
+            removeStatement.setString(1, recoveryToken);
+            log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
+            int result = removeStatement.executeUpdate();
+            if (result > 0) {
+                isRemoved = true;
+            }
+        } catch (PSQLException e) {
+            log.error("Database error while deleting token from recovery_password", e);
+            isRemoved = false;
+        } catch (SQLException e) {
+            log.error("Error while deleting token from recovery_password", e);
+            throw new RuntimeException(e);
+        }
+        if (isRemoved) {
+            log.info("Recovery token was deleted from the database {'recoveryToken':{}}.", recoveryToken);
+        } else {
+            log.info("Failed to update recovery token to the database {'recoveryToken':{}}.", recoveryToken);
+        }
+        return isRemoved;
+    }
+
+}

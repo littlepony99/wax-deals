@@ -7,7 +7,10 @@ import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.service.impl.*;
-import com.vinylteam.vinyl.util.*;
+import com.vinylteam.vinyl.util.MailSender;
+import com.vinylteam.vinyl.util.PropertiesReader;
+import com.vinylteam.vinyl.util.RawOffersSorter;
+import com.vinylteam.vinyl.util.Updater;
 import com.vinylteam.vinyl.util.impl.*;
 import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import com.vinylteam.vinyl.web.handler.DefaultErrorHandler;
@@ -60,13 +63,14 @@ public class Starter {
         ShopDao shopDao = new JdbcShopDao(dataSource);
         UserPostDao userPostDao = new JdbcUserPostDao(dataSource);
         ConfirmationTokenDao confirmationTokenDao = new JdbcConfirmationTokenDao(dataSource);
-
+        RecoveryPasswordDao recoveryPasswordDao = new JdbcRecoveryPasswordDao(dataSource);
 //SERVICE
         MailSender mailSender = new MailSender(propertiesReader.getProperty("mail.smtp.username"),
                 propertiesReader.getProperty("mail.smtp.password"),
                 propertiesReader.getProperty("mail.smtp.host"),
                 propertiesReader.getProperty("mail.smtp.port"),
                 propertiesReader.getProperty("mail.smtp.auth"));
+
         SecurityService securityService = new DefaultSecurityService();
         ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender, propertiesReader.getProperty("application.link"));
         UserService userService = new DefaultUserService(userDao, securityService, confirmationService);
@@ -75,6 +79,7 @@ public class Starter {
         ShopService shopService = new DefaultShopService(shopDao);
         UserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
         CaptchaService defaultCaptchaService = new DefaultCaptchaService();
+        RecoveryPasswordService recoveryPasswordService = new DefaultRecoveryPasswordService(recoveryPasswordDao, userService);
 //UTIL, FILL IN DATABASE
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
@@ -98,7 +103,7 @@ public class Starter {
         SecurityFilter securityFilter = new SecurityFilter();
 
         Integer sessionMaxInactiveInterval = Integer.parseInt(propertiesReader.getProperty("session.maxInactiveInterval"));
-        SignInServlet signInServlet = new SignInServlet(userService, confirmationService, sessionMaxInactiveInterval);
+        SignInServlet signInServlet = new SignInServlet(userService, sessionMaxInactiveInterval);
         SignUpServlet signUpServlet = new SignUpServlet(userService);
         ConfirmationServlet confirmationServlet = new ConfirmationServlet(userService, confirmationService, sessionMaxInactiveInterval);
         CatalogueServlet catalogueServlet = new CatalogueServlet(uniqueVinylService, discogsService);
@@ -113,6 +118,8 @@ public class Starter {
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
         AboutServlet aboutServlet = new AboutServlet();
+        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(recoveryPasswordService, mailSender);
+        ChangePasswordServlet changePasswordServlet = new ChangePasswordServlet(recoveryPasswordService);
 
         Resource resource = JarFileResource.newClassPathResource(resource_path);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
@@ -136,6 +143,8 @@ public class Starter {
         servletContextHandler.addServlet(new ServletHolder(contactUsServlet), "/contact");
         servletContextHandler.addServlet(new ServletHolder(imageCaptchaServlet), "/captcha");
         servletContextHandler.addServlet(new ServletHolder(aboutServlet), "/about");
+        servletContextHandler.addServlet(new ServletHolder(recoveryPasswordServlet), "/recoveryPassword");
+        servletContextHandler.addServlet(new ServletHolder(changePasswordServlet), "/newPassword");
 
         servletContextHandler.addServlet(DefaultServlet.class, "/*");
 

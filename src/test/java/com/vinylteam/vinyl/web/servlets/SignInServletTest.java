@@ -25,8 +25,7 @@ import static org.mockito.Mockito.*;
 class SignInServletTest {
 
     private final UserService mockedUserService = mock(UserService.class);
-    private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
-    private final SignInServlet signInServlet = new SignInServlet(mockedUserService, mockedConfirmationService, 18000);
+    private final SignInServlet signInServlet = new SignInServlet(mockedUserService, 18000);
 
     private final HttpServletRequest mockedHttpServletRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedHttpServletResponse = mock(HttpServletResponse.class);
@@ -39,7 +38,6 @@ class SignInServletTest {
     @BeforeEach
     void beforeEach() {
         reset(mockedUserService);
-        reset(mockedConfirmationService);
         reset(mockedHttpServletRequest);
         reset(mockedHttpServletResponse);
         reset(mockedHttpSession);

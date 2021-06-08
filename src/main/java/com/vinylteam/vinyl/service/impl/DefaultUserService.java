@@ -131,4 +131,5 @@ public class DefaultUserService implements UserService {
     private void changeUserStatus(User user) {
         confirmationService.deleteByUserId(user.getId());
     }
+
 }

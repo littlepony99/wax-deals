@@ -89,6 +89,16 @@ public class PageGenerator {
             context.setVariable("token", token);
         }
 
+        String errorMessage = attributes.get("errorMessage");
+        if (errorMessage != null) {
+            context.setVariable("errorMessage", errorMessage);
+        }
+
+        String recoveryToken = attributes.get("recoveryToken");
+        if (recoveryToken != null) {
+            context.setVariable("recoveryToken", recoveryToken);
+        }
+
 // for catalog page
 
         context.setVariable("vinylList", vinylList);
@@ -157,5 +167,5 @@ public class PageGenerator {
             }
         }
     }
-
 }
+

@@ -215,4 +215,11 @@ public class DataGeneratorForTests {
         }
     }
 
+    public RecoveryToken getRecoveryTokenWithUserId(long userId) {
+        RecoveryToken recoveryToken = new RecoveryToken();
+        recoveryToken.setUserId(userId);
+        recoveryToken.setToken("some-recovery-token");
+        return recoveryToken;
+    }
+
 }

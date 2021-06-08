@@ -128,9 +128,9 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        User user = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
+            User user = null;
             findByEmailStatement.setString(1, email);
             log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
             try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
@@ -143,37 +143,35 @@ public class JdbcUserDao implements UserDao {
                     }
                 }
             }
+            log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
+            return Optional.ofNullable(user);
         } catch (SQLException e) {
             log.error("SQLException retrieving user by email from users", e);
             throw new RuntimeException(e);
         }
-        log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
-        return Optional.ofNullable(user);
     }
 
     @Override
     public Optional<User> findById(long id) {
-        User user = null;
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_ID)) {
-            findByEmailStatement.setLong(1, id);
-            log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
-            try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
+             PreparedStatement findByIdStatement = connection.prepareStatement(FIND_BY_ID)) {
+            User user = null;
+            findByIdStatement.setLong(1, id);
+            log.debug("Prepared statement {'preparedStatement':{}}.", findByIdStatement);
+            try (ResultSet resultSet = findByIdStatement.executeQuery()) {
                 if (resultSet.next()) {
                     user = ROW_MAPPER.mapRow(resultSet);
                     if (resultSet.next()) {
-                        RuntimeException e = new RuntimeException();
-                        log.error("More than one user was found for id {'id':{}}", id, e);
-                        throw e;
+                        throw new RuntimeException("More than one user was found for id");
                     }
                 }
             }
+            log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
+            return Optional.ofNullable(user);
         } catch (SQLException e) {
-            log.error("SQLException while retrieving user by id from users {'id':{}}", id, e);
+            log.error("SQLException retrieving user by id from users", e);
             throw new RuntimeException(e);
         }
-        log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
-        return Optional.ofNullable(user);
     }
 
 }
