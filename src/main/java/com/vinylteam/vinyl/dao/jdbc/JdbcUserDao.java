@@ -26,7 +26,7 @@ public class JdbcUserDao implements UserDao {
             " WHERE id=?";
     private static final String INSERT = "INSERT INTO users" +
             " (email, password, salt, iterations, role, status, discogs_user_name)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?)";
+            " VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
     private static final String DELETE = "DELETE FROM users WHERE email ILIKE ?";
     private static final String UPDATE = "UPDATE users" +
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
@@ -39,8 +39,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public boolean add(User user) {
-        boolean isAdded = false;
+    public long add(User user) {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement insertStatement = connection.prepareStatement(INSERT)) {
             insertStatement.setString(1, user.getEmail());
@@ -51,23 +50,21 @@ public class JdbcUserDao implements UserDao {
             insertStatement.setBoolean(6, user.getStatus());
             insertStatement.setString(7, user.getDiscogsUserName());
             log.debug("Prepared statement {'preparedStatement':{}}.", insertStatement);
-            int result = insertStatement.executeUpdate();
-            if (result > 0) {
-                isAdded = true;
+            ResultSet resultSet = insertStatement.executeQuery();
+            if (resultSet.next()) {
+                long userId = resultSet.getLong(1);
+                log.info("User is added to the database {'user':{} 'id':{}}.", user, userId);
+                return userId;
             }
+            log.info("Failed to add user to the database {'user':{}}.", user);
+            return -1;
         } catch (PSQLException e) {
             log.warn("Database error while adding user to users", e);
-            isAdded = false;
-        } catch (SQLException e) {
+            return -1;
+        } catch (Exception e) {
             log.error("Error while adding user to users", e);
             throw new RuntimeException(e);
         }
-        if (isAdded) {
-            log.info("User is added to the database {'user':{}}.", user);
-        } else {
-            log.info("Failed to add user to the database {'user':{}}.", user);
-        }
-        return isAdded;
     }
 
     @Override

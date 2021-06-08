@@ -95,7 +95,7 @@ class JdbcUserDaoITest {
         //prepare
         User expectedUser = dataGenerator.getUserWithNumber(3);
         //when
-        assertTrue(userDao.add(expectedUser));
+        assertTrue(userDao.add(expectedUser) > 0);
         //then
         assertEquals(3, dataFinder.findAllUsers().size());
         Optional<User> optionalAddedUser = userDao.findByEmail(expectedUser.getEmail());
@@ -106,7 +106,7 @@ class JdbcUserDaoITest {
     @DisplayName("Adds existing user with the same password")
     void addExistingWithSamePasswordTest() {
         //when
-        assertFalse(userDao.add(users.get(0)));
+        assertTrue(userDao.add(users.get(0)) == -1);
         //then
         assertEquals(2, dataFinder.findAllUsers().size());
     }
@@ -118,7 +118,7 @@ class JdbcUserDaoITest {
         User existentDiscogsUserNameUser = dataGenerator.getUserWithNumber(3);
         existentDiscogsUserNameUser.setDiscogsUserName("discogsUserName1");
         //when
-        assertFalse(userDao.add(existentDiscogsUserNameUser));
+        assertTrue(userDao.add(existentDiscogsUserNameUser) == -1);
         //then
         assertEquals(2, dataFinder.findAllUsers().size());
     }
@@ -131,7 +131,7 @@ class JdbcUserDaoITest {
         existingUserNewPassword.setPassword("hash3");
         existingUserNewPassword.setSalt("salt3");
         //when
-        assertFalse(userDao.add(existingUserNewPassword));
+        assertTrue(userDao.add(existingUserNewPassword) == -1);
         //then
         assertEquals(2, dataFinder.findAllUsers().size());
     }

@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service;
 import com.vinylteam.vinyl.entity.User;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserService {
 
@@ -18,4 +19,5 @@ public interface UserService {
 
     Optional<User> signInCheck(String email, String password);
 
+    Optional<User> signInCheck(String email, String password, UUID token);
 }

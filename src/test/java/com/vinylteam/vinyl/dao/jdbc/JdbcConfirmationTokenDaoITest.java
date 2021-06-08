@@ -119,28 +119,6 @@ class JdbcConfirmationTokenDaoITest {
     }
 
     @Test
-    @DisplayName("Returns false when there is user with status true with this user_id and all fields have valid values")
-    void addUserStatusTrue() throws SQLException {
-        //prepare
-        long userId = 3;
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
-        List<User> listWithUserStatusTrue = dataGenerator.getUsersList();
-        listWithUserStatusTrue.add(dataGenerator.getUserWithNumber((int) userId));
-        listWithUserStatusTrue.get(2).setStatus(true);
-        databasePreparer.insertUsers(listWithUserStatusTrue);
-        databasePreparer.insertConfirmationTokens(confirmationTokens);
-        ConfirmationToken confirmationTokenForVerifiedUser = dataGenerator.getConfirmationTokenWithUserId(userId);
-        //when
-        boolean actualIsAdded = confirmationTokenDao.add(confirmationTokenForVerifiedUser);
-        //then
-        assertFalse(actualIsAdded);
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        assertFalse(actualConfirmationTokens.contains(confirmationTokenForVerifiedUser));
-    }
-
-    @Test
     @DisplayName("Throws Runtime exception when there is user with status false with this user_id and token with same userId exists")
     void addDuplicateUserId() throws SQLException {
         //prepare
@@ -160,9 +138,9 @@ class JdbcConfirmationTokenDaoITest {
         //prepare
         ConfirmationToken confirmationTokenDuplicateUserId = dataGenerator.getConfirmationTokenWithUserId(3);
         //when
-        boolean actualIsAdded = confirmationTokenDao.add(confirmationTokenDuplicateUserId);
+        assertThrows(RuntimeException.class, () -> confirmationTokenDao.add(confirmationTokenDuplicateUserId));
+        ;
         //then
-        assertFalse(actualIsAdded);
         List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
         assertEquals(2, actualConfirmationTokens.size());
         assertFalse(actualConfirmationTokens.contains(confirmationTokenDuplicateUserId));
@@ -235,10 +213,8 @@ class JdbcConfirmationTokenDaoITest {
     }
 
     @Test
-    @DisplayName("Returns true when there is user with given user_id and status false and a token for it's user_id that gets deleted")
+    @DisplayName("Returns true and change status when there is user with given user_id and status false and a token for it's user_id that gets deleted")
     void deleteTokenByUserId() throws SQLException {
-        //prepare
-        databasePreparer.updateUserStatus(2, true);
         //when
         boolean actualIsDeleted = confirmationTokenDao.deleteByUserId(2);
         //then
@@ -246,18 +222,12 @@ class JdbcConfirmationTokenDaoITest {
         List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
         assertEquals(1, actualConfirmationTokens.size());
         assertFalse(actualConfirmationTokens.contains(confirmationTokens.get(1)));
-    }
-
-    @Test
-    @DisplayName("Returns false when there is user with given user_id and status true and a token for it's user_id that gets deleted")
-    void deleteByUserIdWithUnverifiedUser() throws SQLException {
-        //when
-        boolean actualIsDeleted = confirmationTokenDao.deleteByUserId(2);
-        //then
-        assertFalse(actualIsDeleted);
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        assertTrue(actualConfirmationTokens.contains(confirmationTokens.get(1)));
+        List<User> allUsers = dataFinder.findAllUsers();
+        for (User user : allUsers) {
+            if (user.getId() == 2L) {
+                assertTrue(user.getStatus());
+            }
+        }
     }
 
     @Test

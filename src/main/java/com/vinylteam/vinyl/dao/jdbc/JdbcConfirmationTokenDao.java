@@ -15,13 +15,12 @@ import java.util.UUID;
 @Slf4j
 public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
-    private static final String INSERT_WHEN_USER_STATUS = "INSERT INTO confirmation_tokens (user_id, token, created_at) SELECT ?, ?, ? " +
-            "WHERE EXISTS (SELECT * FROM users WHERE id=? AND status=FALSE)";
+    private static final String INSERT = "INSERT INTO confirmation_tokens (user_id, token, created_at) VALUES (?, ?, ?)";
     private static final String SELECT_BY_TOKEN = "SELECT id, user_id, token, created_at FROM confirmation_tokens WHERE token=?";
     private static final String SELECT_BY_USER_ID = "SELECT id, user_id, token, created_at FROM confirmation_tokens WHERE user_id=?";
     private static final String UPDATE = "UPDATE confirmation_tokens SET token=?, created_at=? WHERE id=?";
-    private static final String DELETE_BY_USER_ID_WHEN_USER_STATUS = "DELETE FROM confirmation_tokens WHERE user_id=? AND " +
-            "EXISTS (SELECT * FROM users WHERE users.id=? AND users.status)";
+    private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id=? ";
+    private static final String UPDATE_USER_STATUS = "UPDATE users set status = true WHERE id =?";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
     private final HikariDataSource dataSource;
 
@@ -71,29 +70,19 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
     @Override
     public boolean add(ConfirmationToken token) {
-        boolean isAdded = false;
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement insertStatement = connection.prepareStatement(INSERT_WHEN_USER_STATUS)) {
+             PreparedStatement insertStatement = connection.prepareStatement(INSERT)) {
             insertStatement.setLong(1, token.getUserId());
             insertStatement.setObject(2, token.getToken());
             insertStatement.setTimestamp(3, Timestamp.from(Instant.now()));
-            insertStatement.setLong(4, token.getUserId());
             log.debug("Prepared statement {'preparedStatement':{}}.", insertStatement);
-            int resultInsert = insertStatement.executeUpdate();
-            if (resultInsert > 0) {
-                isAdded = true;
-            }
+            insertStatement.executeUpdate();
+            log.info("Confirmation token is added to the database {'confirmationToken':{}}", token);
+            return true;
         } catch (SQLException e) {
             log.error("Error while adding confirmation token to db {'confirmationToken':{}}", token, e);
             throw new RuntimeException("Error while adding confirmation token to db: " + token, e);
         }
-
-        if (isAdded) {
-            log.info("Confirmation token is added to the database {'confirmationToken':{}}", token);
-        } else {
-            log.info("Failed to add confirmation token to the database {'confirmationToken':{}}", token);
-        }
-        return isAdded;
     }
 
     @Override
@@ -117,14 +106,24 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     public boolean deleteByUserId(long userId) {
         boolean isDeleted = false;
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement removeStatement = connection.prepareStatement(DELETE_BY_USER_ID_WHEN_USER_STATUS)) {
+             PreparedStatement removeStatement = connection.prepareStatement(DELETE);
+             PreparedStatement updateUserStatement = connection.prepareStatement(UPDATE_USER_STATUS)
+        ) {
+            connection.setAutoCommit(false);
+
             removeStatement.setLong(1, userId);
-            removeStatement.setLong(2, userId);
+            updateUserStatement.setLong(1, userId);
             log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
             int result = removeStatement.executeUpdate();
-            if (result > 0) {
+            int resultUpdateUser = updateUserStatement.executeUpdate();
+            if (result > 0 && resultUpdateUser > 0) {
                 isDeleted = true;
+                connection.commit();
+            } else {
+                connection.rollback();
             }
+
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
             log.error("Error while deleting confirmation token from confirmation_tokens", e);
             isDeleted = false;

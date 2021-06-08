@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.servlets;
 
-import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
@@ -66,7 +65,6 @@ public class SignInServlet extends HttpServlet {
                 response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                 log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
                 attributes.put("message", "Sorry, your email has not been verified. Please go to your mailbox and follow the link to confirm your registration.");
-                confirmationService.sendMessageWithLinkToUserEmail(userService.findByEmail(email).get());
                 PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
             }
         } else {

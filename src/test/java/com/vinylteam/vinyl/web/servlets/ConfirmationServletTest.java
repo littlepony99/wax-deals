@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Optional;
+import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -40,7 +42,6 @@ class ConfirmationServletTest {
     private final InOrder inOrderRequest = Mockito.inOrder(mockedRequest);
     private final InOrder inOrderResponse = Mockito.inOrder(mockedResponse);
     private final InOrder inOrderUserService = Mockito.inOrder(mockedUserService);
-    private final InOrder inOrderConfirmationService = Mockito.inOrder(mockedConfirmationService);
 
     @BeforeAll
     void beforeAll() {
@@ -92,26 +93,18 @@ class ConfirmationServletTest {
     void doPostSuccessfulLogIn() throws IOException {
         //prepare
         when(mockedRequest.getParameter("token")).thenReturn(confirmationToken.getToken().toString());
-        when(mockedConfirmationService.findByToken(confirmationToken.getToken())).thenReturn(Optional.of(confirmationToken));
-        when(mockedUserService.findById(confirmationToken.getId())).thenReturn(Optional.of(userByLinkToken));
         when(mockedRequest.getParameter("email")).thenReturn(userByLinkToken.getEmail());
         when(mockedRequest.getParameter("password")).thenReturn("rightPassword");
-        when(mockedUserService.signInCheck(userByLinkToken.getEmail(), "rightPassword")).thenReturn(Optional.of(userByLinkToken));
-        when(mockedUserService.update(userByLinkToken.getEmail(), userByLinkToken.getEmail(), "rightPassword", userByLinkToken.getDiscogsUserName())).thenReturn(true);
+        when(mockedUserService.signInCheck(userByLinkToken.getEmail(), "rightPassword", confirmationToken.getToken())).thenReturn(Optional.of(userByLinkToken));
         when(mockedRequest.getSession(true)).thenReturn(mockedHttpSession);
-        when(mockedConfirmationService.deleteByUserId(userByLinkToken.getId())).thenReturn(true);
         //when
         confirmationServlet.doPost(mockedRequest, mockedResponse);
         //then
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedConfirmationService).findByToken(confirmationToken.getToken());
         inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
-        inOrderUserService.verify(mockedUserService).findById(confirmationToken.getUserId());
         inOrderRequest.verify(mockedRequest).getParameter("email");
         inOrderRequest.verify(mockedRequest).getParameter("password");
-        inOrderUserService.verify(mockedUserService).signInCheck(eq(userByLinkToken.getEmail()), eq("rightPassword"));
-        inOrderUserService.verify(mockedUserService).update(eq(userByLinkToken.getEmail()), eq(userByLinkToken.getEmail()), eq("rightPassword"), eq(userByLinkToken.getDiscogsUserName()));
-        inOrderConfirmationService.verify(mockedConfirmationService).deleteByUserId(userByLinkToken.getId());
+        inOrderUserService.verify(mockedUserService).signInCheck(eq(userByLinkToken.getEmail()), eq("rightPassword"), eq(confirmationToken.getToken()));
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_OK);
         inOrderResponse.verify(mockedResponse).sendRedirect("/");
     }
@@ -120,22 +113,18 @@ class ConfirmationServletTest {
     void doPostFailedLogIn() throws IOException {
         //prepare
         when(mockedRequest.getParameter("token")).thenReturn(confirmationToken.getToken().toString());
-        when(mockedConfirmationService.findByToken(confirmationToken.getToken())).thenReturn(Optional.of(confirmationToken));
-        when(mockedUserService.findById(confirmationToken.getId())).thenReturn(Optional.of(userByLinkToken));
         when(mockedRequest.getParameter("email")).thenReturn(userByLinkToken.getEmail());
         when(mockedRequest.getParameter("password")).thenReturn("wrongPassword");
-        when(mockedUserService.signInCheck(userByLinkToken.getEmail(), "wrongPassword")).thenReturn(Optional.empty());
+        when(mockedUserService.signInCheck(userByLinkToken.getEmail(), "wrongPassword", confirmationToken.getToken())).thenReturn(Optional.empty());
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         confirmationServlet.doPost(mockedRequest, mockedResponse);
         //then
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedConfirmationService).findByToken(confirmationToken.getToken());
         inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
-        inOrderUserService.verify(mockedUserService).findById(confirmationToken.getUserId());
         inOrderRequest.verify(mockedRequest).getParameter("email");
         inOrderRequest.verify(mockedRequest).getParameter("password");
-        inOrderUserService.verify(mockedUserService).signInCheck(eq(userByLinkToken.getEmail()), eq("wrongPassword"));
+        inOrderUserService.verify(mockedUserService).signInCheck(eq(userByLinkToken.getEmail()), eq("wrongPassword"), eq(confirmationToken.getToken()));
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         inOrderResponse.verify(mockedResponse).getWriter();
     }
@@ -144,37 +133,41 @@ class ConfirmationServletTest {
     void doPostWrongEmail() throws IOException {
         //prepare
         when(mockedRequest.getParameter("token")).thenReturn(confirmationToken.getToken().toString());
-        when(mockedConfirmationService.findByToken(confirmationToken.getToken())).thenReturn(Optional.of(confirmationToken));
-        when(mockedUserService.findById(confirmationToken.getId())).thenReturn(Optional.of(userByLinkToken));
+        when(mockedUserService.signInCheck("user2@wax-deals.com", "pp", confirmationToken.getToken())).thenReturn(Optional.empty());
         when(mockedRequest.getParameter("email")).thenReturn("user2@wax-deals.com");
+        when(mockedRequest.getParameter("password")).thenReturn("rightPassword");
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         confirmationServlet.doPost(mockedRequest, mockedResponse);
         //then
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedConfirmationService).findByToken(confirmationToken.getToken());
         inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
-        verify(mockedUserService).findById(confirmationToken.getUserId());
+
         inOrderRequest.verify(mockedRequest).getParameter("email");
-        inOrderRequest.verify(mockedRequest, never()).getParameter("password");
-        inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
+        inOrderRequest.verify(mockedRequest).getParameter("password");
+        inOrderUserService.verify(mockedUserService).signInCheck(eq("user2@wax-deals.com"), eq("rightPassword"), eq(confirmationToken.getToken()));
+        inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         inOrderResponse.verify(mockedResponse).getWriter();
     }
 
     @Test
     void doPostNonExistentToken() throws IOException {
         //prepare
-        when(mockedRequest.getParameter("token")).thenReturn("wrong value");
-        when(mockedConfirmationService.findByToken(eq(null))).thenReturn(Optional.empty());
+        UUID wrongToken = UUID.randomUUID();
+        when(mockedRequest.getParameter("token")).thenReturn(wrongToken.toString());
+        when(mockedRequest.getParameter("email")).thenReturn("user2@wax-deals.com");
+        when(mockedRequest.getParameter("password")).thenReturn("rightPassword");
+        when(mockedUserService.signInCheck("user2@wax-deals.com", "rightPassword", wrongToken)).thenThrow(IllegalArgumentException.class);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
-        confirmationServlet.doPost(mockedRequest, mockedResponse);
+        assertThrows(IllegalArgumentException.class, () -> {
+            confirmationServlet.doPost(mockedRequest, mockedResponse);
+        });
         //then
         verify(mockedRequest).getParameter("token");
-        verify(mockedConfirmationService).findByToken(null);
-        inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
-        inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        inOrderResponse.verify(mockedResponse).getWriter();
+        inOrderRequest.verify(mockedRequest).getParameter("email");
+        inOrderRequest.verify(mockedRequest).getParameter("password");
+        inOrderUserService.verify(mockedUserService).signInCheck(eq("user2@wax-deals.com"), eq("rightPassword"), eq(wrongToken));
     }
 
 }

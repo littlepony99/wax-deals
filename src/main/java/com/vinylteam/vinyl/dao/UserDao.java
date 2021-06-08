@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface UserDao {
 
-    boolean add(User user);
+    long add(User user);
 
     boolean delete(User user);
 

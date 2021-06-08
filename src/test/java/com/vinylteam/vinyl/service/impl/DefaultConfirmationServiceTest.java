@@ -13,6 +13,7 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,7 +22,7 @@ class DefaultConfirmationServiceTest {
 
     private final ConfirmationTokenDao mockedConfirmationDao = mock(ConfirmationTokenDao.class);
     private final MailSender mockedMailSender = mock(MailSender.class);
-    private final ConfirmationService confirmationService = new DefaultConfirmationService(mockedConfirmationDao, mockedMailSender);
+    private final ConfirmationService confirmationService = new DefaultConfirmationService(mockedConfirmationDao, mockedMailSender, "localhost:8080");
     private final InOrder inOrderConfirmationDao = Mockito.inOrder(mockedConfirmationDao);
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
@@ -75,9 +76,9 @@ class DefaultConfirmationServiceTest {
         long userId = 1L;
         when(mockedConfirmationDao.add(any())).thenReturn(true);
         //when
-        boolean actualIsAdded = confirmationService.addByUserId(userId);
+        ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
         //then
-        assertTrue(actualIsAdded);
+        assertNotNull(confirmationToken);
         verify(mockedConfirmationDao).add(any());
     }
 
@@ -107,83 +108,9 @@ class DefaultConfirmationServiceTest {
     @DisplayName("sendMessageWithLinkToUserEmail trows NullPointerException and doesn't call any dao methods or mailSender.sendMessage when user is null")
     void sendMessageWithLinkToUserEmailNullUser() {
         //when
-        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null));
+        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null, UUID.randomUUID().toString()));
     }
 
-    @Test
-    @DisplayName("sendMessageWithLinkToUserEmail trows NullPointerException and doesn't call any dao methods or mailSender.sendMessage when user email is null")
-    void sendMessageWithLinkToUserEmailNullEmail() {
-        //prepare
-        User userNullEmail = dataGenerator.getUserWithNumber(1);
-        userNullEmail.setEmail(null);
-        when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.empty());
-        when(mockedConfirmationDao.add(any())).thenReturn(false);
-        //when
-        assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(userNullEmail));
-        //then
-        verify(mockedConfirmationDao, never()).findByUserId(1);
-        verify(mockedConfirmationDao, never()).add(any());
-        verify(mockedMailSender, never()).sendMail(eq(null), anyString(), anyString());
-    }
-
-    @Test
-    @DisplayName("sendMessageWithLinkToUserEmail trows IllegalStateException, calls dao findByUserId, add methods, doesn't call mailSender.sendMessage " +
-            "when there is no token for that user in db, but adding new token fails")
-    void sendMessageWithLinkToUserEmailFailToAddToken() {
-        //prepare
-        User user = dataGenerator.getUserWithNumber(1);
-        when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.empty());
-        when(mockedConfirmationDao.add(any())).thenReturn(false);
-        //when
-        assertThrows(IllegalStateException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(user));
-        //then
-        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
-        inOrderConfirmationDao.verify(mockedConfirmationDao).add(any());
-        verify(mockedMailSender, never()).sendMail(eq(user.getEmail()), anyString(), anyString());
-    }
-
-    @Test
-    @DisplayName("sendMessageWithLinkToUserEmail returns result of mailSender.sendMessage, calls dao findByUserId, doesn't call add " +
-            "when there is token for that user in db")
-    void sendMessageWithLinkToUserEmailTokenExistsInDB() {
-        //prepare
-        User user = dataGenerator.getUserWithNumber(1);
-        ConfirmationToken confirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        when(mockedConfirmationDao.findByUserId(1)).thenReturn(Optional.of(confirmationToken));
-        when(mockedConfirmationDao.update(confirmationToken)).thenReturn(true);
-        when(mockedMailSender.sendMail(eq(user.getEmail()), anyString(), anyString())).thenReturn(true);
-        //when
-        boolean actualIsSent = confirmationService.sendMessageWithLinkToUserEmail(user);
-        //then
-        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
-        inOrderConfirmationDao.verify(mockedConfirmationDao, never()).add(any());
-        inOrderConfirmationDao.verify(mockedConfirmationDao).update(confirmationToken);
-        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
-        verify(mockedMailSender).sendMail(eq(user.getEmail()), anyString(), anyString());
-        assertTrue(actualIsSent);
-    }
-
-    @Test
-    @DisplayName("sendMessageWithLinkToUserEmail returns result of mailSender.sendMessage, calls dao findByUserId, calls add successfully " +
-            "when there is no token for that user in db")
-    void sendMessageWithLinkToUserEmailTokenDoesNotExistInDB() {
-        //prepare
-        User user = dataGenerator.getUserWithNumber(1);
-        ConfirmationToken addedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        when(mockedConfirmationDao.findByUserId(1))
-                .thenReturn(Optional.empty())
-                .thenReturn(Optional.of(addedConfirmationToken));
-        when(mockedConfirmationDao.add(any())).thenReturn(true);
-        when(mockedMailSender.sendMail(eq(user.getEmail()), anyString(), anyString())).thenReturn(true);
-        //when
-        boolean actualIsSent = confirmationService.sendMessageWithLinkToUserEmail(user);
-        //then
-        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
-        inOrderConfirmationDao.verify(mockedConfirmationDao).add(any());
-        inOrderConfirmationDao.verify(mockedConfirmationDao).findByUserId(1);
-        verify(mockedMailSender).sendMail(eq(user.getEmail()), anyString(), anyString());
-        assertTrue(actualIsSent);
-    }
 
     @Test
     @DisplayName("deleteByUserId trows IllegalArgumentException and doesn't call dao deleteByUserId method when id <= 0")

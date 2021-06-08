@@ -32,21 +32,20 @@ import java.util.TimerTask;
 @Slf4j
 public class Starter {
 
-    public static final PropertiesReader PROPERTIES_READER = new PropertiesReader();
-    private static final String RESOURCE_PATH = PROPERTIES_READER.getProperty("resource.path");
-
     public static void main(String[] args) throws Exception {
+        PropertiesReader propertiesReader = new PropertiesReader();
+
+        String resource_path = propertiesReader.getProperty("resource.path");
         DiscogsService discogsService = new DefaultDiscogsService(
-                PROPERTIES_READER.getProperty("consumer.key"),
-                PROPERTIES_READER.getProperty("consumer.secret"),
-                PROPERTIES_READER.getProperty("user.agent"),
-                PROPERTIES_READER.getProperty("callback.url"), new ObjectMapper()
+                propertiesReader.getProperty("consumer.key"),
+                propertiesReader.getProperty("consumer.secret"),
+                propertiesReader.getProperty("user.agent"),
+                propertiesReader.getProperty("callback.url"), new ObjectMapper()
         );
 
 //DAO
         HikariDataSource dataSource;
         HikariConfig config = new HikariConfig();
-        PropertiesReader propertiesReader = new PropertiesReader();
         config.setJdbcUrl(propertiesReader.getProperty("jdbc.url"));
         config.setUsername(propertiesReader.getProperty("jdbc.user"));
         config.setPassword(propertiesReader.getProperty("jdbc.password"));
@@ -69,8 +68,8 @@ public class Starter {
                 propertiesReader.getProperty("mail.smtp.port"),
                 propertiesReader.getProperty("mail.smtp.auth"));
         SecurityService securityService = new DefaultSecurityService();
-        UserService userService = new DefaultUserService(userDao, securityService);
-        ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender);
+        ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender, propertiesReader.getProperty("application.link"));
+        UserService userService = new DefaultUserService(userDao, securityService, confirmationService);
         UniqueVinylService uniqueVinylService = new DefaultUniqueVinylService(uniqueVinylDao);
         OfferService offerService = new DefaultOfferService(offerDao);
         ShopService shopService = new DefaultShopService(shopDao);
@@ -98,9 +97,9 @@ public class Starter {
 //WEB
         SecurityFilter securityFilter = new SecurityFilter();
 
-        Integer sessionMaxInactiveInterval = Integer.parseInt(PROPERTIES_READER.getProperty("session.maxInactiveInterval"));
+        Integer sessionMaxInactiveInterval = Integer.parseInt(propertiesReader.getProperty("session.maxInactiveInterval"));
         SignInServlet signInServlet = new SignInServlet(userService, confirmationService, sessionMaxInactiveInterval);
-        SignUpServlet signUpServlet = new SignUpServlet(userService, confirmationService);
+        SignUpServlet signUpServlet = new SignUpServlet(userService);
         ConfirmationServlet confirmationServlet = new ConfirmationServlet(userService, confirmationService, sessionMaxInactiveInterval);
         CatalogueServlet catalogueServlet = new CatalogueServlet(uniqueVinylService, discogsService);
         SearchResultsServlet searchResultsServlet = new SearchResultsServlet(uniqueVinylService);
@@ -115,7 +114,7 @@ public class Starter {
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
         AboutServlet aboutServlet = new AboutServlet();
 
-        Resource resource = JarFileResource.newClassPathResource(RESOURCE_PATH);
+        Resource resource = JarFileResource.newClassPathResource(resource_path);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setErrorHandler(new DefaultErrorHandler());
         servletContextHandler.setBaseResource(resource);

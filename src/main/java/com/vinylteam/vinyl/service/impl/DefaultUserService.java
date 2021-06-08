@@ -1,23 +1,24 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.UserDao;
+import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
+@RequiredArgsConstructor
 public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
     private final SecurityService securityService;
-
-    public DefaultUserService(UserDao userDao, SecurityService securityService) {
-        this.userDao = userDao;
-        this.securityService = securityService;
-    }
+    private final ConfirmationService confirmationService;
 
     @Override
     public boolean add(String email, String password, String discogsUserName) {
@@ -25,9 +26,13 @@ public class DefaultUserService implements UserService {
         if (email != null && password != null) {
             User userToAdd = securityService
                     .createUserWithHashedPassword(email, password.toCharArray(), discogsUserName);
-            isAdded = userDao.add(userToAdd);
-            log.debug("Attempted to add created user to db with boolean result {'isAdded':{}}",
-                    isAdded);
+            long userId = userDao.add(userToAdd);
+            if (userId == -1) {
+                return false;
+            }
+            log.debug("Added created user to db with id {'userId':{}}", userId);
+            ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
+            isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
         }
         log.debug("Result of attempting to add user, created from passed email and password" +
                 " if both are not null is {'isAdded': {}, 'email':{}}", isAdded, email);
@@ -97,10 +102,33 @@ public class DefaultUserService implements UserService {
                     log.debug("Hashed password passed as argument matches hashed password " +
                             "of user by passed email {'email':{}}", email);
                     optionalUser = optionalUserFromDataBase;
+                    if (!optionalUser.get().getStatus()) {
+                        Optional<ConfirmationToken> confirmationToken = confirmationService.findByUserId(optionalUser.get().getId());
+                        confirmationToken.ifPresent(token -> confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString()));
+                    }
                 }
             }
         }
         return optionalUser;
     }
 
+    @Override
+    public Optional<User> signInCheck(String email, String password, UUID token) {
+        Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(token);
+        ConfirmationToken confirmationToken = optionalConfirmationTokenByLinkToken.orElseThrow(
+                () -> new IllegalArgumentException("Sorry, something went wrong on our side, we're looking into it. Please, try to login again, or contact us."));
+        User userByLinkToken = userDao.findById(confirmationToken.getUserId()).get();
+        if (userByLinkToken.getEmail().equalsIgnoreCase(email)) {
+            if (securityService.checkPasswordAgainstUserPassword(
+                    userByLinkToken, password.toCharArray())) {
+                changeUserStatus(userByLinkToken);
+                return Optional.of(userByLinkToken);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private void changeUserStatus(User user) {
+        confirmationService.deleteByUserId(user.getId());
+    }
 }

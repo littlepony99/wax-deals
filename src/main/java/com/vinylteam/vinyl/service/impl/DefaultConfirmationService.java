@@ -1,30 +1,27 @@
 package com.vinylteam.vinyl.service.impl;
 
-import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@RequiredArgsConstructor
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;
     private final MailSender mailSender;
+    private final String applicationLink;
+
     private static final String SUBJECT = "Confirm your email on wax-deals.com";
     private static final String MAIL_BODY_BEGINNING = "To confirm click on the link below and log into your account.\n";
     private static final String LINK_PATH = "/emailConfirmation?token=";
     private static final String MAIL_BODY_ENDING = "\n Thank you!\n\nWith kindest regards,\nWax-Deals team";
-
-    public DefaultConfirmationService(ConfirmationTokenDao confirmationTokenDao, MailSender mailSender) {
-        this.confirmationTokenDao = confirmationTokenDao;
-        this.mailSender = mailSender;
-    }
 
     @Override
     public Optional<ConfirmationToken> findByToken(UUID token) {
@@ -44,23 +41,19 @@ public class DefaultConfirmationService implements ConfirmationService {
     }
 
     @Override
-    public boolean addByUserId(long userId) {
-        boolean isAdded;
+    public ConfirmationToken addByUserId(long userId) {
         if (userId <= 0) {
-            IllegalArgumentException e = new IllegalArgumentException();
-            log.error("Id is 0 or less {'userId':{}}", userId, e);
-            throw e;
+            log.error("Id is 0 or less {'userId':{}}", userId);
+            throw new IllegalArgumentException();
         }
         ConfirmationToken newConfirmationToken = new ConfirmationToken();
         newConfirmationToken.setUserId(userId);
         newConfirmationToken.setToken(UUID.randomUUID());
-        isAdded = confirmationTokenDao.add(newConfirmationToken);
-        if (isAdded) {
-            log.debug("Successfully added new confirmation token for user with userId {'userId':{}}", userId);
+        if (confirmationTokenDao.add(newConfirmationToken)) {
+            return newConfirmationToken;
         } else {
-            log.debug("Failed to add new confirmation token for user with userId {'userId':{}}", userId);
+            return null;
         }
-        return isAdded;
     }
 
     @Override
@@ -81,34 +74,16 @@ public class DefaultConfirmationService implements ConfirmationService {
     }
 
     @Override
-    public boolean sendMessageWithLinkToUserEmail(User user) {
-        if (user == null) {
-            log.error("User is null, not adding token and sending email with confirmation link.");
-            throw new RuntimeException("User is null");
-        }
-        if (user.getEmail() == null) {
+    public boolean sendMessageWithLinkToUserEmail(String email, String token) {
+        if (email == null) {
             log.error("User's email is null, not adding token and sending email with confirmation link.");
             throw new RuntimeException("User's email is null");
         }
-        boolean isSent;
-        long userId = user.getId();
-        Optional<ConfirmationToken> userConfirmationToken = confirmationTokenDao.findByUserId(userId);
-        if (userConfirmationToken.isEmpty()) {
-            if (!addByUserId(userId)) {
-                IllegalStateException e = new IllegalStateException();
-                log.error("Couldn't add confirmation token for user after confirming there isn't any in the db {'user':{}}", user, e);
-                throw e;
-            }
-        } else {
-            userConfirmationToken.get().setToken(UUID.randomUUID());
-            update(userConfirmationToken.get());
-        }
-        userConfirmationToken = confirmationTokenDao.findByUserId(userId);
-        isSent = mailSender.sendMail(user.getEmail(), SUBJECT, composeEmail(user.getEmail(), userConfirmationToken.get().getToken()));
+        boolean isSent = mailSender.sendMail(email, SUBJECT, composeEmail(token));
         if (isSent) {
-            log.info("Confirmation email is sent to user {'user':{}}", user);
+            log.info("Confirmation email is sent to email {'email':{}}", email);
         } else {
-            log.info("Failed to send confirmation email to user {'user':{}}", user);
+            log.info("Failed to send confirmation email to email {'email':{}}", email);
         }
         return isSent;
     }
@@ -120,28 +95,15 @@ public class DefaultConfirmationService implements ConfirmationService {
             log.error("Id is 0 or less {'userId':{}}", userId, e);
             throw e;
         }
-        boolean isDeleted = confirmationTokenDao.deleteByUserId(userId);
-        if (isDeleted) {
-            log.debug("Confirmation token for user with userId was deleted {'userId':{}}", userId);
-        } else {
-            log.debug("Confirmation token for user with userId wasn't deleted {'userId':{}}", userId);
-        }
-        return isDeleted;
+        return confirmationTokenDao.deleteByUserId(userId);
     }
 
-    private String composeEmail(String email, UUID token) {
-        StringBuilder confirmationEmailBuilder = new StringBuilder();
-        confirmationEmailBuilder.append(MAIL_BODY_BEGINNING);
-        if (System.getenv("env") == null) {
-            confirmationEmailBuilder.append(Starter.PROPERTIES_READER.getProperty("localLink"));
-            confirmationEmailBuilder.append(Starter.PROPERTIES_READER.getProperty("appPort"));
-        } else {
-            confirmationEmailBuilder.append(Starter.PROPERTIES_READER.getProperty("prodLink"));
-        }
-        confirmationEmailBuilder.append(LINK_PATH);
-        confirmationEmailBuilder.append(token.toString());
-        confirmationEmailBuilder.append(MAIL_BODY_ENDING);
-        return confirmationEmailBuilder.toString();
+    private String composeEmail(String token) {
+        return MAIL_BODY_BEGINNING +
+                applicationLink +
+                LINK_PATH +
+                token +
+                MAIL_BODY_ENDING;
     }
 
 }

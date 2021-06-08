@@ -27,8 +27,7 @@ import static org.mockito.Mockito.*;
 class SignUpServletTest {
 
     private final UserService mockedUserService = mock(DefaultUserService.class);
-    private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
-    private final SignUpServlet signUpServlet = new SignUpServlet(mockedUserService, mockedConfirmationService);
+    private final SignUpServlet signUpServlet = new SignUpServlet(mockedUserService);
 
     private final HttpServletRequest mockedRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedResponse = mock(HttpServletResponse.class);
@@ -41,7 +40,6 @@ class SignUpServletTest {
     @BeforeEach
     void beforeEach() {
         reset(mockedUserService);
-        reset(mockedConfirmationService);
         reset(mockedRequest);
         reset(mockedResponse);
         reset(mockedHttpSession);
@@ -191,7 +189,6 @@ class SignUpServletTest {
         when(mockedRequest.getParameter("discogsUserName")).thenReturn("discogsUserName");
         when(mockedUserService.add(newUser.getEmail(), "password", "discogsUserName")).thenReturn(true);
         when(mockedUserService.findByEmail(newUser.getEmail())).thenReturn(Optional.of(newUser));
-        when(mockedConfirmationService.sendMessageWithLinkToUserEmail(newUser)).thenReturn(true);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         signUpServlet.doPost(mockedRequest, mockedResponse);
@@ -203,8 +200,6 @@ class SignUpServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("discogsUserName");
         verify(mockedUserService, times(1))
                 .add(newUser.getEmail(), "password", "discogsUserName");
-        verify(mockedUserService).findByEmail(newUser.getEmail());
-        verify(mockedConfirmationService).sendMessageWithLinkToUserEmail(newUser);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedResponse).getWriter();
     }

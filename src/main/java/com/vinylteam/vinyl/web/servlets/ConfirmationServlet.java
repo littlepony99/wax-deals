@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.servlets;
 
-import com.vinylteam.vinyl.Starter;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
@@ -30,12 +29,7 @@ public class ConfirmationServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tokenAsString = request.getParameter("token");
-        UUID token = null;
-        try {
-            token = UUID.fromString(tokenAsString);
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid email confirmation link token parameter {'token':{}}", tokenAsString, e);
-        }
+        UUID token = tokenToUUID(tokenAsString);
         Optional<ConfirmationToken> optionalConfirmationToken = confirmationService.findByToken(token);
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
@@ -56,55 +50,39 @@ public class ConfirmationServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tokenAsString = request.getParameter("token");
+        UUID tokenUUID = tokenToUUID(tokenAsString);
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        Optional<User> optionalUser = userService.signInCheck(email, password, tokenUUID);
+        response.setContentType("text/html;charset=utf-8");
+        Map<String, String> attributes = new HashMap<>();
+        log.debug("Received a optional with User with password verification by the passed " +
+                "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
+        if (optionalUser.isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+            attributes.put("token", tokenAsString);
+            attributes.put("message", "Sorry, login or password is not correct, please check yours credentials and try again.");
+            PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
+        } else {
+            User user = optionalUser.get();
+            HttpSession session = request.getSession(true);
+            session.setMaxInactiveInterval(sessionMaxInactiveInterval);
+            session.setAttribute("user", user);
+            response.setStatus(HttpServletResponse.SC_OK);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
+            response.sendRedirect("/");
+        }
+    }
+
+    private UUID tokenToUUID(String tokenAsString) {
         UUID token = null;
         try {
             token = UUID.fromString(tokenAsString);
         } catch (IllegalArgumentException e) {
             log.warn("Invalid email confirmation link token parameter {'token':{}}", tokenAsString, e);
         }
-        Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(token);
-        response.setContentType("text/html;charset=utf-8");
-        Map<String, String> attributes = new HashMap<>();
-        if (optionalConfirmationTokenByLinkToken.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            attributes.put("message", "Sorry, something went wrong on out side, we're looking into it. Please, try to login again, or contact us.");
-            PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
-        } else {
-            ConfirmationToken confirmationTokenByLinkToken = optionalConfirmationTokenByLinkToken.get();
-            User userByLinkToken = userService.findById(confirmationTokenByLinkToken.getUserId()).get();
-            String email = request.getParameter("email");
-            if (userByLinkToken.getEmail().equalsIgnoreCase(email)) {
-                String password = request.getParameter("password");
-                Optional<User> optionalUser = userService.signInCheck(email, password);
-                log.debug("Received a optional with User with password verification by the passed " +
-                        "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
-                if (optionalUser.isEmpty()) {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                    attributes.put("token", tokenAsString);
-                    attributes.put("message", "Sorry, login or password is not correct, please check yours credentials and try again.");
-                    PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
-                } else {
-                    User user = optionalUser.get();
-                    userService.update(user.getEmail(), user.getEmail(), password, user.getDiscogsUserName());
-                    confirmationService.deleteByUserId(user.getId());
-                    HttpSession session = request.getSession(true);
-                    session.setMaxInactiveInterval(sessionMaxInactiveInterval);
-                    session.setAttribute("user", user);
-                    response.setStatus(HttpServletResponse.SC_OK);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-                    response.sendRedirect("/");
-                }
-            } else {
-                log.warn("User tried to confirm wrong email with link {'wrongEmail':{}, 'userByToken':{}}", email, userByLinkToken);
-                response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                attributes.put("message", "Sorry, this isn't your confirmation link. Try to log in again.");
-                attributes.put("token", tokenAsString);
-                PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
-            }
-        }
+        return token;
     }
 
 }

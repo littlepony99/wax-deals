@@ -132,14 +132,14 @@ class SignInServletTest {
             "when email and password are right, and user's email is not verified(user's status==false).")
     void doPostWithNotVerifiedUserRightPasswordTest() throws IOException {
         //prepare
+        String email = "notverifieduser@vinyl.com";
         User notVerifiedUser = new User();
-        notVerifiedUser.setEmail("notverifieduser@vinyl.com");
+        notVerifiedUser.setEmail(email);
         when(mockedHttpServletRequest.getParameter("email")).thenReturn(notVerifiedUser.getEmail());
         when(mockedHttpServletRequest.getParameter("password")).thenReturn("right password");
         when(mockedUserService.signInCheck(notVerifiedUser.getEmail(), "right password")).thenReturn(Optional.of(mockedUser));
         when(Optional.of(mockedUser).get().getStatus()).thenReturn(false);
         when(mockedUserService.findByEmail(notVerifiedUser.getEmail())).thenReturn(Optional.of(notVerifiedUser));
-        when(mockedConfirmationService.sendMessageWithLinkToUserEmail(notVerifiedUser)).thenReturn(true);
         when(mockedHttpServletResponse.getWriter()).thenReturn(printWriter);
         //when
         signInServlet.doPost(mockedHttpServletRequest, mockedHttpServletResponse);
@@ -148,8 +148,6 @@ class SignInServletTest {
         inOrderRequest.verify(mockedHttpServletRequest).getParameter("email");
         inOrderRequest.verify(mockedHttpServletRequest).getParameter("password");
         verify(mockedUserService).signInCheck("notverifieduser@vinyl.com", "right password");
-        verify(mockedUserService).findByEmail(notVerifiedUser.getEmail());
-        verify(mockedConfirmationService).sendMessageWithLinkToUserEmail(notVerifiedUser);
         inOrderResponse.verify(mockedHttpServletResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedHttpServletResponse).getWriter();
     }

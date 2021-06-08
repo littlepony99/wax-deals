@@ -26,6 +26,8 @@ public class MailSender {
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         properties.put("mail.transport.protocol", "smtp");
         properties.put("mail.smtp.starttls.enable", "true");
+        properties.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        properties.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
         String env = System.getenv("env");
         if (PRODUCTION_ENVIRONMENT.equals(env)) {
