@@ -24,8 +24,8 @@ public class PriceUtils {
     }
 
     public static Optional<Currency> getCurrencyFromString(String fullPriceDetails) {
-        if (fullPriceDetails.length() > 0) {
-            String priceDetails = fullPriceDetails;
+        String priceDetails = fullPriceDetails.replaceAll(",", ".").replaceAll("[0123456789. ]", "");
+        if (priceDetails.length() > 0) {
             try {
                 String currency = priceDetails.substring(0, 1);
                 Optional<Currency> optionalCurrency = Currency.getCurrency(currency);

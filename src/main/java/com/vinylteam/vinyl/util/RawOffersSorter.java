@@ -50,24 +50,24 @@ public class RawOffersSorter {
             int percentMatching = 75;
             String uniqueVinylRelease = uniqueVinyl.getRelease();
             char lastCharInRawRelease = uniqueVinylRelease.charAt(uniqueVinylRelease.length() - 1);
-            if (lastCharInRawRelease > '0' && lastCharInRawRelease < '9'){
+            if (lastCharInRawRelease > '0' && lastCharInRawRelease < '9') {
                 percentMatching = 90;
             }
             String[] preparedFullNameForMatching = Arrays.stream(uniqueVinyl.getFullName().split("[- ()!@$%^&*_={}:;\"']")).filter(e -> e.trim().length() > 0).toArray(String[]::new);
             Iterator<RawOffer> rawOfferIterator = rawOffers.iterator();
+            uniqueVinyl.setHasOffers(false);
             while (rawOfferIterator.hasNext()) {
-
                 RawOffer rawOffer = rawOfferIterator.next();
                 String rawOfferFullName = rawOffer.getArtist() + " - " + rawOffer.getRelease();
                 int currentMatching = 0;
                 for (String prepareItem : preparedFullNameForMatching) {
-                    if (rawOfferFullName.toLowerCase().contains(prepareItem.toLowerCase())){
+                    if (rawOfferFullName.toLowerCase().contains(prepareItem.toLowerCase())) {
                         currentMatching++;
                     }
                 }
                 if (Objects.equals(getParametersForComparison(uniqueVinyl.getRelease()), getParametersForComparison(rawOffer.getRelease())) &&
-                        Objects.equals(getParametersForComparison(uniqueVinyl.getArtist()), getParametersForComparison(rawOffer.getArtist()))){
-                    if (((float) currentMatching)/preparedFullNameForMatching.length*100 > percentMatching){
+                        Objects.equals(getParametersForComparison(uniqueVinyl.getArtist()), getParametersForComparison(rawOffer.getArtist()))) {
+                    if (((float) currentMatching) / preparedFullNameForMatching.length * 100 > percentMatching) {
                         Offer offer = new Offer();
                         offer.setUniqueVinylId(uniqueVinyl.getId());
                         offer.setShopId(rawOffer.getShopId());
@@ -84,6 +84,7 @@ public class RawOffersSorter {
                     }
                 }
             }
+            uniqueVinyl.setHasOffers(!offers.isEmpty());
         } else {
             RuntimeException e = new NullPointerException();
             log.error("At least one of passed arguments is null {'rawOffers':{}, 'uniqueVinyl':{}, 'offers':{}}",
