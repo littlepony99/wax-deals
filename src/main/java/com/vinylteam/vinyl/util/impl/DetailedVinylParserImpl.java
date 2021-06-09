@@ -78,8 +78,8 @@ public class DetailedVinylParserImpl implements DetailedVinylParser {
             imageLink = document.select(config.getHighResolutionImageSelector()).attr("href");
         }
 
-        if (imageLink != null && !Objects.equals(imageLink, "")){
-            if (!imageLink.contains("no-cover")){
+        if (imageLink != null && !Objects.equals(imageLink, "")) {
+            if (!imageLink.contains("no-cover")) {
                 log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
             } else {
                 imageLink = "img/goods/no_image.jpg";

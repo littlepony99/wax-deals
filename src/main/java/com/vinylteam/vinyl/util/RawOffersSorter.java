@@ -46,19 +46,12 @@ public class RawOffersSorter {
     }
 
     void addOffersSortingByVinyl(List<RawOffer> rawOffers, UniqueVinyl uniqueVinyl, List<Offer> offers) {
-        if (rawOffers == null || uniqueVinyl == null || offers == null) {
-            RuntimeException e = new NullPointerException();
-            log.error("At least one of passed arguments is null {'rawOffers':{}, 'uniqueVinyl':{}, 'offers':{}}",
-                    rawOffers, uniqueVinyl, offers, e);
-            throw e;
-        }
         int minMatchingRate = 75;
         String uniqueVinylRelease = uniqueVinyl.getRelease();
         char lastCharInRawRelease = uniqueVinylRelease.charAt(uniqueVinylRelease.length() - 1);
         if (lastCharInRawRelease > '0' && lastCharInRawRelease < '9') {
             minMatchingRate = 90;
         }
-
         String[] preparedFullNameForMatching = Arrays
                 .stream(uniqueVinyl.getFullName().split("[- ()!@$%^&*_={}:;\"']"))
                 .filter(e -> e.trim().length() > 0)
@@ -122,4 +115,5 @@ public class RawOffersSorter {
         log.debug("Resulting string is {'resultParam':{}}", paramArray[0]);
         return paramArray[0].toLowerCase();
     }
+
 }
