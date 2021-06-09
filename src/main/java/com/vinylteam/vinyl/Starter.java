@@ -72,14 +72,19 @@ public class Starter {
                 propertiesReader.getProperty("mail.smtp.auth"));
 
         SecurityService securityService = new DefaultSecurityService();
-        ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender, propertiesReader.getProperty("application.link"));
+        String applicationLink = propertiesReader.getProperty("application.link");
+        ConfirmationService confirmationService = new DefaultConfirmationService(confirmationTokenDao, mailSender, applicationLink);
         UserService userService = new DefaultUserService(userDao, securityService, confirmationService);
         UniqueVinylService uniqueVinylService = new DefaultUniqueVinylService(uniqueVinylDao);
         OfferService offerService = new DefaultOfferService(offerDao);
         ShopService shopService = new DefaultShopService(shopDao);
         UserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
         CaptchaService defaultCaptchaService = new DefaultCaptchaService();
-        RecoveryPasswordService recoveryPasswordService = new DefaultRecoveryPasswordService(recoveryPasswordDao, userService);
+        RecoveryPasswordService recoveryPasswordService = new DefaultRecoveryPasswordService(recoveryPasswordDao,
+                userService,
+                mailSender,
+                applicationLink,
+                Integer.parseInt(propertiesReader.getProperty("recoveryToken.live.hours")));
 //UTIL, FILL IN DATABASE
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
@@ -118,7 +123,7 @@ public class Starter {
         ContactUsServlet contactUsServlet = new ContactUsServlet(userPostService, defaultCaptchaService);
         ImageCaptchaServlet imageCaptchaServlet = new ImageCaptchaServlet();
         AboutServlet aboutServlet = new AboutServlet();
-        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(recoveryPasswordService, mailSender);
+        RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(recoveryPasswordService);
         ChangePasswordServlet changePasswordServlet = new ChangePasswordServlet(recoveryPasswordService);
 
         Resource resource = JarFileResource.newClassPathResource(resource_path);

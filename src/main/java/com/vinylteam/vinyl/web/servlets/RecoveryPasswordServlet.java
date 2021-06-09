@@ -1,32 +1,25 @@
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
-import com.vinylteam.vinyl.util.MailSender;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 public class RecoveryPasswordServlet extends HttpServlet {
 
-    private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \nhttps://wax-deals.herokuapp.com/newPassword?token=";
-
     private final RecoveryPasswordService recoveryPasswordService;
-    private final MailSender mailSender;
-
-    public RecoveryPasswordServlet(RecoveryPasswordService recoveryPasswordService, MailSender mailSender) {
-        this.recoveryPasswordService = recoveryPasswordService;
-        this.mailSender = mailSender;
-    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -34,13 +27,7 @@ public class RecoveryPasswordServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         Map<String, String> attributes = new HashMap<>();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                attributes.put("userRole", user.getRole().toString());
-            }
-        }
+        setUserAttributes(request, attributes);
         PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
     }
 
@@ -50,6 +37,23 @@ public class RecoveryPasswordServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf-8");
         String email = request.getParameter("email");
         attributes.put("email", email);
+        setUserAttributes(request, attributes);
+        try {
+            recoveryPasswordService.sendLink(email);
+            log.debug("Successfully send mail for recovery password to email - {'email':{}}", email);
+            response.setStatus(HttpServletResponse.SC_OK);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
+            attributes.put("message", "Follow the link that we sent you by email - " + email);
+        } catch (RecoveryPasswordException e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+            log.error(e.getMessage());
+            attributes.put("message", e.getMessage());
+        }
+        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
+    }
+
+    private void setUserAttributes(HttpServletRequest request, Map<String, String> attributes) {
         HttpSession session = request.getSession(false);
         if (session != null) {
             User user = (User) session.getAttribute("user");
@@ -57,51 +61,5 @@ public class RecoveryPasswordServlet extends HttpServlet {
                 attributes.put("userRole", user.getRole().toString());
             }
         }
-        if (email == null) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-            log.debug("Error. Email is null {'email':{}}.", email);
-            attributes.put("message", "Error. Email is empty. Please enter email correctly.");
-        } else {
-            if (!email.isEmpty()) {
-                Optional<User> user = recoveryPasswordService.getByEmail(email);
-                if (user.isPresent()) {
-                    long userId = user.get().getId();
-                    String recoveryToken = recoveryPasswordService.addRecoveryUserToken(userId);
-                    if (!recoveryToken.isEmpty()) {
-                        String recoveryLink = RECOVERY_MESSAGE + recoveryToken;
-                        String recoveryTopic = "Recovery Password - WaxDeals";
-                        boolean isSent = mailSender.sendMail(email, recoveryTopic, recoveryLink);
-                        if (isSent) {
-                            log.debug("Successfully send mail for recovery password to email - {'email':{}}", email);
-                            response.setStatus(HttpServletResponse.SC_OK);
-                            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-                            attributes.put("message", "Please confirm your email. To do this, follow the link that we sent you by email - " + email);
-                        } else {
-                            log.debug("Failed send mail for recovery password to email - {'email':{}}", email);
-                            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                            attributes.put("message", "Something went wrong. Please contact support.");
-                        }
-                    } else {
-                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                        log.debug("Failed create and add recovery user token to db {'userId':{}}.", userId);
-                        attributes.put("message", "We can't recover your password by this email. Please check your email or contact us.");
-                    }
-                } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                    log.debug("Failed create and add recovery user token to db {'email':{}}.", email);
-                    attributes.put("message", "We can't find matching email. Please check your email or contact us.");
-                }
-            } else {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                log.debug("Error. Email is empty {'email':{}}.", email);
-                attributes.put("message", "Error. Email is empty. Please enter email correctly.");
-            }
-        }
-        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
     }
 }

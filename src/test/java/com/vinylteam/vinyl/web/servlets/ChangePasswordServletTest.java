@@ -3,6 +3,8 @@ package com.vinylteam.vinyl.web.servlets;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.RecoveryPasswordException;
+import com.vinylteam.vinyl.exception.entity.ErrorRecoveryPassword;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +22,6 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -57,8 +58,9 @@ class ChangePasswordServletTest {
         String token = "some-recovery-token";
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.empty());
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()))
+                .when(mockedRecoveryPasswordService).checkToken(token);
         //when
         changePasswordServlet.doGet(mockedRequest, mockedResponse);
         //then
@@ -67,7 +69,7 @@ class ChangePasswordServletTest {
         verify(mockedHttpSession, times(0)).getAttribute("user");
         verify(mockedUser, times(0)).getRole();
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).checkToken(token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -80,8 +82,10 @@ class ChangePasswordServletTest {
         when(mockedRequest.getSession(false)).thenReturn(mockedHttpSession);
         when(mockedHttpSession.getAttribute("user")).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.empty());
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()))
+                .when(mockedRecoveryPasswordService).checkToken(token);
+
         //when
         changePasswordServlet.doGet(mockedRequest, mockedResponse);
         //then
@@ -90,7 +94,7 @@ class ChangePasswordServletTest {
         assertNull(mockedHttpSession.getAttribute("user"));
         verify(mockedUser, times(0)).getRole();
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).checkToken(token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -104,8 +108,10 @@ class ChangePasswordServletTest {
         when(mockedHttpSession.getAttribute("user")).thenReturn(mockedUser);
         when(mockedUser.getRole()).thenReturn(Role.USER);
         when(mockedRequest.getParameter("token")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.empty());
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()))
+                .when(mockedRecoveryPasswordService).checkToken(token);
+
         //when
         changePasswordServlet.doGet(mockedRequest, mockedResponse);
         //then
@@ -116,7 +122,7 @@ class ChangePasswordServletTest {
         verify(mockedUser, times(1)).getRole();
         assertEquals(Role.USER, mockedUser.getRole());
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).checkToken(token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -131,8 +137,10 @@ class ChangePasswordServletTest {
         recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusDays(2)));
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryToken));
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_IS_EXPIRED.getMessage()))
+                .when(mockedRecoveryPasswordService).checkToken(token);
+
         //when
         changePasswordServlet.doGet(mockedRequest, mockedResponse);
         //then
@@ -140,9 +148,8 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getSession(false);
         verify(mockedHttpSession, times(0)).getAttribute("user");
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).checkToken(token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(mockedRecoveryPasswordService).removeRecoveryUserToken(token);
         verify(mockedResponse).getWriter();
     }
 
@@ -154,10 +161,8 @@ class ChangePasswordServletTest {
         long userId = 1L;
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(userId);
         recoveryToken.setCreatedAt(Timestamp.from(Instant.now()));
-        // recoveryToken.setLifeTime(Timestamp.valueOf(LocalDateTime.now().plusDays(1)));
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("token")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryToken));
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         changePasswordServlet.doGet(mockedRequest, mockedResponse);
@@ -166,7 +171,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getSession(false);
         verify(mockedHttpSession, times(0)).getAttribute("user");
         inOrderRequest.verify(mockedRequest).getParameter("token");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).checkToken(token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_OK);
         verify(mockedResponse).getWriter();
     }
@@ -181,6 +186,9 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("confirmPassword")).thenReturn(null);
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.EMPTY_PASSWORD.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword(null, null, token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -191,6 +199,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
+        verify(mockedRecoveryPasswordService).changePassword(null, null, token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -206,6 +215,9 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("confirmPassword")).thenReturn(null);
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.EMPTY_PASSWORD.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword(null, null, token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -216,6 +228,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
+        verify(mockedRecoveryPasswordService).changePassword(null, null, token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -232,6 +245,9 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("confirmPassword")).thenReturn(null);
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.EMPTY_PASSWORD.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword(null, null, token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -244,6 +260,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
+        verify(mockedRecoveryPasswordService).changePassword(null, null, token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -258,6 +275,9 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("");
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.EMPTY_PASSWORD.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword("", "", token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -268,6 +288,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
+        verify(mockedRecoveryPasswordService).changePassword("", "", token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -282,6 +303,9 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("confirmPassword");
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.PASSWORDS_NOT_EQUAL.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword("password", "confirmPassword", token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -292,12 +316,13 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
+        verify(mockedRecoveryPasswordService).changePassword("password", "confirmPassword", token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
 
     @Test
-    @DisplayName("doPost method. Session doesn't exist and recovery password is empty")
+    @DisplayName("doPost method. Session doesn't exist and recovery token not found")
     void doPostWithNoSessionAndRecoveryPasswordIsEmptyTest() throws IOException {
         //prepare
         String token = "some-recovery-token";
@@ -305,8 +330,10 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("password")).thenReturn("password");
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("password");
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.empty());
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword("password", "password", token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -317,57 +344,24 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
+        verify(mockedRecoveryPasswordService).changePassword("password", "password", token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
 
     @Test
-    @DisplayName("doPost method. Session doesn't exist and user is empty")
-    void doPostWithNoSessionAndUserIsEmptyTest() throws IOException {
-        //prepare
-        long userId = 1L;
-        String token = "some-recovery-token";
-        RecoveryToken recoveryTokenWithUserId = dataGenerator.getRecoveryTokenWithUserId(userId);
-        when(mockedRequest.getSession(false)).thenReturn(null);
-        when(mockedRequest.getParameter("password")).thenReturn("password");
-        when(mockedRequest.getParameter("confirmPassword")).thenReturn("password");
-        when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryTokenWithUserId));
-        when(mockedRecoveryPasswordService.findById(userId)).thenReturn(Optional.empty());
-        when(mockedResponse.getWriter()).thenReturn(printWriter);
-        //when
-        changePasswordServlet.doPost(mockedRequest, mockedResponse);
-        //then
-        inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
-        inOrderRequest.verify(mockedRequest).getSession(false);
-        verify(mockedHttpSession, times(0)).getAttribute("user");
-        verify(mockedUser, times(0)).getRole();
-        inOrderRequest.verify(mockedRequest).getParameter("password");
-        inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
-        inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
-        verify(mockedRecoveryPasswordService).findById(userId);
-        inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        verify(mockedResponse).getWriter();
-    }
-
-    @Test
-    @DisplayName("doPost method. Session doesn't exist and user hasn't been updated")
+    @DisplayName("doPost method. Session doesn't exist and user password hasn't been updated")
     void doPostWithNoSessionAndUserHasNotBeenUpdatedTest() throws IOException {
         //prepare
-        String email = user.getEmail();
-        long userId = 1L;
         String token = "some-recovery-token";
-        RecoveryToken recoveryTokenWithUserId = dataGenerator.getRecoveryTokenWithUserId(userId);
         when(mockedRequest.getSession(false)).thenReturn(null);
         when(mockedRequest.getParameter("password")).thenReturn("password");
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("password");
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryTokenWithUserId));
-        when(mockedRecoveryPasswordService.findById(userId)).thenReturn(Optional.of(user));
-        when(mockedRecoveryPasswordService.update(email, email, "password", user.getDiscogsUserName())).thenReturn(false);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
+        doThrow(new RecoveryPasswordException(ErrorRecoveryPassword.UPDATE_PASSWORD_ERROR.getMessage()))
+                .when(mockedRecoveryPasswordService).changePassword("password", "password", token);
+
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
         //then
@@ -378,9 +372,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
-        verify(mockedRecoveryPasswordService).findById(userId);
-        verify(mockedRecoveryPasswordService).update(email, email, "password", user.getDiscogsUserName());
+        verify(mockedRecoveryPasswordService).changePassword("password", "password", token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
         verify(mockedResponse).getWriter();
     }
@@ -397,9 +389,6 @@ class ChangePasswordServletTest {
         when(mockedRequest.getParameter("password")).thenReturn("password");
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("password");
         when(mockedRequest.getParameter("recoveryToken")).thenReturn(token);
-        when(mockedRecoveryPasswordService.getByRecoveryToken(token)).thenReturn(Optional.of(recoveryTokenWithUserId));
-        when(mockedRecoveryPasswordService.findById(userId)).thenReturn(Optional.of(user));
-        when(mockedRecoveryPasswordService.update(email, email, "password", user.getDiscogsUserName())).thenReturn(true);
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         changePasswordServlet.doPost(mockedRequest, mockedResponse);
@@ -411,10 +400,7 @@ class ChangePasswordServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("password");
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("recoveryToken");
-        verify(mockedRecoveryPasswordService).getByRecoveryToken(token);
-        verify(mockedRecoveryPasswordService).findById(userId);
-        verify(mockedRecoveryPasswordService).update(email, email, "password", user.getDiscogsUserName());
-        verify(mockedRecoveryPasswordService).removeRecoveryUserToken(eq(token));
+        verify(mockedRecoveryPasswordService).changePassword("password", "password", token);
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedResponse).getWriter();
     }

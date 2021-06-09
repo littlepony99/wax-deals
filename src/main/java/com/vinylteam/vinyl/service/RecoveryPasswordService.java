@@ -1,21 +1,10 @@
 package com.vinylteam.vinyl.service;
 
-import com.vinylteam.vinyl.entity.RecoveryToken;
-import com.vinylteam.vinyl.entity.User;
-
-import java.util.Optional;
-
 public interface RecoveryPasswordService {
 
-    String addRecoveryUserToken(long userId);
+    void changePassword(String newPassword, String confirmPassword, String token);
 
-    Optional<RecoveryToken> getByRecoveryToken(String token);
+    void sendLink(String email);
 
-    boolean removeRecoveryUserToken(String token);
-
-    Optional<User> getByEmail(String email);
-
-    Optional<User> findById(long userId);
-
-    boolean update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
+    void checkToken(String token);
 }

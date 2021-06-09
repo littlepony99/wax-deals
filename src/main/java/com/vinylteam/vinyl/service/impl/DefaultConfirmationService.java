@@ -79,13 +79,7 @@ public class DefaultConfirmationService implements ConfirmationService {
             log.error("User's email is null, not adding token and sending email with confirmation link.");
             throw new RuntimeException("User's email is null");
         }
-        boolean isSent = mailSender.sendMail(email, SUBJECT, composeEmail(token));
-        if (isSent) {
-            log.info("Confirmation email is sent to email {'email':{}}", email);
-        } else {
-            log.info("Failed to send confirmation email to email {'email':{}}", email);
-        }
-        return isSent;
+        return mailSender.sendMail(email, SUBJECT, composeEmail(token));
     }
 
     @Override
