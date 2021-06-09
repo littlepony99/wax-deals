@@ -65,7 +65,6 @@ class DeejayDeParserTest {
         RawOffer rawOffer = parser.getRawOfferFromElement(vinylElement, parser.getOnePageDetailedParser());
         assertNotNull(rawOffer);
         assertEquals("Dixon Ep", rawOffer.getRelease());
-        //assertTrue(rawOffer.getOfferLink().isEmpty());
         assertEquals("https://www.deejay.de/images/xl/3/3//969033.jpg", rawOffer.getImageLink());
         assertEquals(Currency.EUR, rawOffer.getCurrency().get());
         assertEquals(10.04d, rawOffer.getPrice());

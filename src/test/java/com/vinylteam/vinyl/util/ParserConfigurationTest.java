@@ -9,7 +9,7 @@ class ParserConfigurationTest {
 
     @Test
     @DisplayName("Checks whether builder built configuration correctly")
-    void testParserConfigurationBuilder(){
+    void testParserConfigurationBuilder() {
         String highResolutionImageSelector = "DIV.cover DIV.img A";
         String offerLinkSelector = "DIV.artikel > h3.title > A";
         String artistSelector = "DIV.artikel > h2.artist > INTERPRETS > A";
