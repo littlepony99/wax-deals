@@ -14,8 +14,10 @@ class PriceUtilsTest {
     static Stream<Arguments> getTestData() {
         return Stream.of(
                 Arguments.of(Currency.EUR, 12.49d, "€ 12,49"),
+                Arguments.of(Currency.EUR, 12.49d, "12,49 €"),
                 Arguments.of(Currency.USD, 12.49d, "$ 12.49"),
                 Arguments.of(Currency.USD, 120000000d, "$120_000_000"),
+                Arguments.of(Currency.USD, 120000000d, "$ 120_000_000"),
                 Arguments.of(Currency.GBP, 120.12d, "£120.12")
         );
     }
