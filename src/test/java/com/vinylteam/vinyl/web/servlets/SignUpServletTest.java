@@ -18,6 +18,8 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -202,6 +204,16 @@ class SignUpServletTest {
                 .add(newUser.getEmail(), "password", "discogsUserName");
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedResponse).getWriter();
+    }
+
+    @Test
+    void setBadRequest() {
+        Map<String, String> attributes = new HashMap<>();
+        //when
+        signUpServlet.setBadRequest(mockedResponse, attributes, "Error message");
+        //then
+        verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        assertEquals("Error message", attributes.get("message"));
     }
 
 }
