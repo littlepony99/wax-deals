@@ -58,12 +58,9 @@ public class JdbcUserDao implements UserDao {
             }
             log.info("Failed to add user to the database {'user':{}}.", user);
             return -1;
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
             log.warn("Database error while adding user to users", e);
             return -1;
-        } catch (Exception e) {
-            log.error("Error while adding user to users", e);
-            throw new RuntimeException(e);
         }
     }
 
@@ -77,18 +74,13 @@ public class JdbcUserDao implements UserDao {
             int result = removeStatement.executeUpdate();
             if (result > 0) {
                 isDeleted = true;
+                log.info("User was deleted from database {'user':{}}.", user);
+            } else {
+                log.info("Failed delete user from database {'user':{}}.", user);
             }
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
             log.error("Database error while delete user from users", e);
             isDeleted = false;
-        } catch (SQLException e) {
-            log.error("Error while delete user from users", e);
-            isDeleted = false;
-        }
-        if (isDeleted) {
-            log.info("User was deleted from database {'user':{}}.", user);
-        } else {
-            log.info("Failed delete user from database {'user':{}}.", user);
         }
         return isDeleted;
     }
@@ -110,18 +102,13 @@ public class JdbcUserDao implements UserDao {
             int result = updateStatement.executeUpdate();
             if (result > 0) {
                 isUpdated = true;
+                log.info("User was updated in the database {'user':{}}.", user);
+            } else {
+                log.info("Failed to update user in the database {'user':{}}.", user);
             }
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
             log.debug("Database error while edit user to users", e);
             isUpdated = false;
-        } catch (SQLException e) {
-            log.error("Error while updating user in users", e);
-            throw new RuntimeException(e);
-        }
-        if (isUpdated) {
-            log.info("User was updated in the database {'user':{}}.", user);
-        } else {
-            log.info("Failed to update user in the database {'user':{}}.", user);
         }
         return isUpdated;
     }
@@ -137,9 +124,8 @@ public class JdbcUserDao implements UserDao {
                 if (resultSet.next()) {
                     user = ROW_MAPPER.mapRow(resultSet);
                     if (resultSet.next()) {
-                        RuntimeException e = new RuntimeException();
-                        log.error("More than one user was found for email: {}", email, e);
-                        throw e;
+                        log.error("More than one user was found for email: {}", email);
+                        throw new RuntimeException("More than one user was found for email " + email);
                     }
                 }
             }

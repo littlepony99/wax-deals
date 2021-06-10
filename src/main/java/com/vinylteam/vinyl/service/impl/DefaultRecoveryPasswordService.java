@@ -29,7 +29,7 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     //@Transactional
     public void changePassword(String newPassword, String confirmPassword, String token) {
         checkPassword(newPassword, confirmPassword);
-        RecoveryToken recoveryToken = recoveryPasswordDao.getByRecoveryToken(token)
+        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(token)
                 .orElseThrow(() -> {
                     throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
                 });
@@ -37,7 +37,7 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
                 .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         String email = user.getEmail();
         if (userService.update(email, email, newPassword, user.getDiscogsUserName())) {
-            recoveryPasswordDao.removeRecoveryUserToken(token);
+            recoveryPasswordDao.deleteById(recoveryToken.getId());
         } else {
             throw new RecoveryPasswordException(ErrorRecoveryPassword.UPDATE_PASSWORD_ERROR.getMessage());
         }
@@ -45,14 +45,14 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
 
     @Override
     public void checkToken(String token) {
-        RecoveryToken recoveryToken = recoveryPasswordDao.getByRecoveryToken(token)
+        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(token)
                 .orElseThrow(() -> {
                     throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
                 });
         LocalDateTime tokenLifetime = recoveryToken.getCreatedAt().toLocalDateTime().plusHours(liveTokenHours);
         if (tokenLifetime.compareTo(LocalDateTime.now()) < 0) {
             log.debug("Token lifetime has come to an end.");
-            recoveryPasswordDao.removeRecoveryUserToken(token);
+            recoveryPasswordDao.deleteById(recoveryToken.getId());
             throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_IS_EXPIRED.getMessage());
         }
     }
@@ -97,7 +97,7 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);
         recoveryToken.setToken(token);
-        isAdded = recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        isAdded = recoveryPasswordDao.add(recoveryToken);
         if (!isAdded) {
             throw new RecoveryPasswordException(ErrorRecoveryPassword.ADD_TOKEN_ERROR.getMessage());
         }

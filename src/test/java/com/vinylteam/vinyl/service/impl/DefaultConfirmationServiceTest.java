@@ -99,7 +99,7 @@ class DefaultConfirmationServiceTest {
     @DisplayName("update throws NullPointerException and doesn't call dao update when confirmationToken is null")
     void updateNullConfirmationToken() {
         //when
-        assertThrows(NullPointerException.class, () -> confirmationService.update(null));
+        assertThrows(RuntimeException.class, () -> confirmationService.update(null));
         //then
         verify(mockedConfirmationDao, never()).update(null);
     }

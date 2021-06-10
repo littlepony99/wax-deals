@@ -66,7 +66,7 @@ public class SignUpServlet extends HttpServlet {
                 if (isAdded) {
                     response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                    attributes.put("message", "Please confirm your registration. To do this, follow the link that we sent on your email");
+                    attributes.put("message", "Please confirm your registration. To do this, follow the link that we sent to your email");
                     attributes.remove("email");
                     attributes.remove("discogsUserName");
                     PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
@@ -84,4 +84,5 @@ public class SignUpServlet extends HttpServlet {
         attributes.put("message", message);
         PageGenerator.getInstance().process("registration", attributes, response.getWriter());
     }
+
 }

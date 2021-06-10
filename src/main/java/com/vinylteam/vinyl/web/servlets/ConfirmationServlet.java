@@ -56,7 +56,7 @@ public class ConfirmationServlet extends HttpServlet {
         Optional<User> optionalUser = userService.signInCheck(email, password, tokenUUID);
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
-        log.debug("Received a optional with User with password verification by the passed " +
+        log.debug("Received an optional with User with password verification by the passed " +
                 "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
         if (optionalUser.isEmpty()) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

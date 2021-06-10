@@ -56,7 +56,7 @@ class JdbcRecoveryPasswordDaoITest {
         //prepare
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
         //when
-        boolean isAdded = recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
         assertTrue(isAdded);
     }
@@ -67,7 +67,7 @@ class JdbcRecoveryPasswordDaoITest {
         //prepare
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(3L);
         //when
-        boolean isAdded = recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
         assertFalse(isAdded);
     }
@@ -77,10 +77,10 @@ class JdbcRecoveryPasswordDaoITest {
     void addRecoveryTokenIfTokenWithThisUserAlreadyExist() {
         //prepare
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
         //when
-        boolean isAdded = recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
         assertTrue(isAdded);
     }
@@ -90,10 +90,10 @@ class JdbcRecoveryPasswordDaoITest {
     void addRecoveryTokenIfTokenAlreadyExist() {
         //prepare
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         recoveryToken.setUserId(2L);
         //when
-        boolean isAdded = recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
         assertFalse(isAdded);
     }
@@ -103,9 +103,9 @@ class JdbcRecoveryPasswordDaoITest {
     void getRecoveryTokenByToken() {
         //prepare
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.getByRecoveryToken("some-recovery-token");
+        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken("some-recovery-token");
         //then
         assertTrue(optionalRecoveryToken.isPresent());
     }
@@ -114,9 +114,9 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Try get token if it doesn't exist into recovery_password in db")
     void getRecoveryTokenByTokenIfTokenDoesNotExist() {
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.getByRecoveryToken("non-existed-token");
+        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken("non-existed-token");
         //then
         assertFalse(optionalRecoveryToken.isPresent());
     }
@@ -125,9 +125,9 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Remove token from recovery_password table in db")
     void removeRecoveryToken() {
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         //when
-        boolean isDeleted = recoveryPasswordDao.removeRecoveryUserToken("some-recovery-token");
+        boolean isDeleted = recoveryPasswordDao.deleteById(1);
         //then
         assertTrue(isDeleted);
     }
@@ -136,12 +136,11 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Remove token if it doesn't exist from recovery_password table in db")
     void removeRecoveryTokenIfTokenDoesNotExist() {
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.addRecoveryUserToken(recoveryToken);
+        recoveryPasswordDao.add(recoveryToken);
         //when
-        boolean isDeleted = recoveryPasswordDao.removeRecoveryUserToken("non-existed-token");
+        boolean isDeleted = recoveryPasswordDao.deleteById(1000);
         //then
         assertFalse(isDeleted);
     }
-
 
 }

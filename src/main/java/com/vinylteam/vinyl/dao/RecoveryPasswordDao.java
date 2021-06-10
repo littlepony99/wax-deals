@@ -6,10 +6,10 @@ import java.util.Optional;
 
 public interface RecoveryPasswordDao {
 
-    boolean addRecoveryUserToken(RecoveryToken recoveryToken);
+    boolean add(RecoveryToken recoveryToken);
 
-    Optional<RecoveryToken> getByRecoveryToken(String token);
+    Optional<RecoveryToken> findByToken(String token);
 
-    boolean removeRecoveryUserToken(String token);
+    boolean deleteById(int id);
 
 }

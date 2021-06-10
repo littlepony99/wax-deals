@@ -60,17 +60,10 @@ public class DefaultConfirmationService implements ConfirmationService {
     public boolean update(ConfirmationToken confirmationToken) {
         boolean isUpdated;
         if (confirmationToken == null) {
-            NullPointerException e = new NullPointerException();
-            log.error("Passed confirmation token is null", e);
-            throw e;
+            log.error("Passed confirmation token is null");
+            throw new RuntimeException("Passed confirmation token is null");
         }
-        isUpdated = confirmationTokenDao.update(confirmationToken);
-        if (isUpdated) {
-            log.debug("Successfully updated confirmation token {'confirmationToken':{}}", confirmationToken);
-        } else {
-            log.debug("Failed to update confirmation token {'confirmationToken':{}}", confirmationToken);
-        }
-        return isUpdated;
+        return confirmationTokenDao.update(confirmationToken);
     }
 
     @Override
@@ -85,9 +78,8 @@ public class DefaultConfirmationService implements ConfirmationService {
     @Override
     public boolean deleteByUserId(long userId) {
         if (userId <= 0) {
-            IllegalArgumentException e = new IllegalArgumentException();
-            log.error("Id is 0 or less {'userId':{}}", userId, e);
-            throw e;
+            log.error("Id is 0 or less {'userId':{}}", userId);
+            throw new IllegalArgumentException("Not correct user id=" + userId);
         }
         return confirmationTokenDao.deleteByUserId(userId);
     }

@@ -109,29 +109,29 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
              PreparedStatement removeStatement = connection.prepareStatement(DELETE);
              PreparedStatement updateUserStatement = connection.prepareStatement(UPDATE_USER_STATUS)
         ) {
-            connection.setAutoCommit(false);
+            try {
+                connection.setAutoCommit(false);
 
-            removeStatement.setLong(1, userId);
-            updateUserStatement.setLong(1, userId);
-            log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
-            int result = removeStatement.executeUpdate();
-            int resultUpdateUser = updateUserStatement.executeUpdate();
-            if (result > 0 && resultUpdateUser > 0) {
-                isDeleted = true;
-                connection.commit();
-            } else {
-                connection.rollback();
+                removeStatement.setLong(1, userId);
+                updateUserStatement.setLong(1, userId);
+                log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
+                int countRemoved = removeStatement.executeUpdate();
+                int countUpdatedUser = updateUserStatement.executeUpdate();
+                if (countRemoved > 0 && countUpdatedUser > 0) {
+                    isDeleted = true;
+                    connection.commit();
+                    log.info("Confirmation token by user id was deleted from database {'userId':{}}", userId);
+                } else {
+                    connection.rollback();
+                    log.info("Failed to delete confirmation token by userId from database {'userId':{}, " +
+                            "'countRemoved':{}, 'countUpdatedUser':{}}, transaction roll backed", userId, countRemoved, countUpdatedUser);
+                }
+            } finally {
+                connection.setAutoCommit(true);
             }
-
-            connection.setAutoCommit(true);
         } catch (SQLException e) {
             log.error("Error while deleting confirmation token from confirmation_tokens", e);
             isDeleted = false;
-        }
-        if (isDeleted) {
-            log.info("Confirmation token by user id was deleted from database {'userId':{}}", userId);
-        } else {
-            log.info("Failed to delete confirmation token by userId from database {'userId':{}}", userId);
         }
         return isDeleted;
     }

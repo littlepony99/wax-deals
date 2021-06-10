@@ -7,4 +7,5 @@ public interface UserPostService {
     boolean processAdd(UserPost post);
 
     boolean add(UserPost post);
+
 }

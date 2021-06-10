@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
+import com.vinylteam.vinyl.web.util.WebUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,7 +28,7 @@ public class RecoveryPasswordServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         Map<String, String> attributes = new HashMap<>();
-        setUserAttributes(request, attributes);
+        WebUtils.setUserAttributes(request, attributes);
         PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
     }
 
@@ -37,7 +38,7 @@ public class RecoveryPasswordServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf-8");
         String email = request.getParameter("email");
         attributes.put("email", email);
-        setUserAttributes(request, attributes);
+        WebUtils.setUserAttributes(request, attributes);
         try {
             recoveryPasswordService.sendLink(email);
             log.debug("Successfully send mail for recovery password to email - {'email':{}}", email);
@@ -53,13 +54,4 @@ public class RecoveryPasswordServlet extends HttpServlet {
         PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
     }
 
-    private void setUserAttributes(HttpServletRequest request, Map<String, String> attributes) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                attributes.put("userRole", user.getRole().toString());
-            }
-        }
-    }
 }

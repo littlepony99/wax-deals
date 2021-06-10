@@ -23,7 +23,7 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     private static final String SELECT_MANY_RANDOM = SELECT_ALL + " WHERE has_offers ORDER BY random() LIMIT ?";
     private static final String SELECT_MANY_BY_FULL_NAME_MATCH = SELECT_ALL + " WHERE full_name ILIKE ? AND has_offers";
     private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist ILIKE ? AND has_offers";
-    private static final String UPDATE_UNIQUE_VINYL_FALSE = "UPDATE unique_vinyls SET has_offers=FALSE WHERE has_offers=TRUE AND id = ?";
+    private static final String UPDATE_UNIQUE_VINYL_SET_HAS_OFFERS_FALSE = "UPDATE unique_vinyls SET has_offers=FALSE WHERE has_offers=TRUE AND id = ?";
 
     private final HikariDataSource dataSource;
 
@@ -32,12 +32,12 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     }
 
     @Override
-    public UniqueVinyl updateHasOffersFalse(UniqueVinyl vinyl) {
-        if (vinyl.getHasOffers()){
+    public UniqueVinyl updateSetHasOffersFalse(UniqueVinyl vinyl) {
+        if (vinyl.getHasOffers()) {
             return vinyl;
         }
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement updateStatement = connection.prepareStatement(UPDATE_UNIQUE_VINYL_FALSE)) {
+             PreparedStatement updateStatement = connection.prepareStatement(UPDATE_UNIQUE_VINYL_SET_HAS_OFFERS_FALSE)) {
             setVinylParameters(updateStatement, vinyl);
             int rows = updateStatement.executeUpdate();
             log.info("Unique vinyl(s) updated as having no any offer {}", rows);

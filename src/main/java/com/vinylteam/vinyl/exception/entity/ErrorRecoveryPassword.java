@@ -22,4 +22,5 @@ public enum ErrorRecoveryPassword {
     EMAIL_SEND_ERROR("Something went wrong. Please contact support.");
 
     private String message;
+
 }

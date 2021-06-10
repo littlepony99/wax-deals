@@ -1,13 +1,12 @@
 package com.vinylteam.vinyl.web.servlets;
 
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
+import com.vinylteam.vinyl.web.util.WebUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +24,7 @@ public class ChangePasswordServlet extends HttpServlet {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
-        setUserAttributes(request, attributes);
+        WebUtils.setUserAttributes(request, attributes);
         String token = request.getParameter("token");
         try {
             recoveryPasswordService.checkToken(token);
@@ -44,7 +43,7 @@ public class ChangePasswordServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
-        setUserAttributes(request, attributes);
+        WebUtils.setUserAttributes(request, attributes);
         String newPassword = request.getParameter("password");
         String confirmPassword = request.getParameter("confirmPassword");
         String token = request.getParameter("recoveryToken");
@@ -61,13 +60,4 @@ public class ChangePasswordServlet extends HttpServlet {
         PageGenerator.getInstance().process("signIn", attributes, response.getWriter());
     }
 
-    private void setUserAttributes(HttpServletRequest request, Map<String, String> attributes) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                attributes.put("userRole", user.getRole().toString());
-            }
-        }
-    }
 }

@@ -22,7 +22,7 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at FROM recovery_password" +
             " WHERE token = ?";
     private static final String REMOVE_TOKEN = "DELETE FROM recovery_password" +
-            " WHERE token = ?";
+            " WHERE id = ?";
 
     private final RecoveryRowMapper recoveryRowMapper = new RecoveryRowMapper();
     private final HikariDataSource dataSource;
@@ -32,7 +32,7 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     }
 
     @Override
-    public boolean addRecoveryUserToken(RecoveryToken recoveryToken) {
+    public boolean add(RecoveryToken recoveryToken) {
         boolean isAdded = false;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement addTokenStatement = connection.prepareStatement(INSERT_TOKEN)) {
@@ -45,26 +45,21 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
             int result = addTokenStatement.executeUpdate();
             if (result > 0) {
                 isAdded = true;
+                log.info("Recovery token is added to the database {'recoveryToken':{}, 'userId':{}}.",
+                        recoveryToken.getToken(), recoveryToken.getUserId());
+            } else {
+                log.info("Failed to add recovery token to the database {'recoveryToken':{}, 'userId':{}}.",
+                        recoveryToken.getToken(), recoveryToken.getUserId());
             }
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
             log.error("Database error while adding recovery token to recovery_password", e);
             isAdded = false;
-        } catch (SQLException e) {
-            log.error("Error while adding recovery token to recovery_password", e);
-            throw new RuntimeException(e);
-        }
-        if (isAdded) {
-            log.info("Recovery token is added to the database {'recoveryToken':{}, 'userId':{}}.",
-                    recoveryToken.getToken(), recoveryToken.getUserId());
-        } else {
-            log.info("Failed to add recovery token to the database {'recoveryToken':{}, 'userId':{}}.",
-                    recoveryToken.getToken(), recoveryToken.getUserId());
         }
         return isAdded;
     }
 
     @Override
-    public Optional<RecoveryToken> getByRecoveryToken(String token) {
+    public Optional<RecoveryToken> findByToken(String token) {
         RecoveryToken recoveryToken = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement selectRecoveryTokenStatement = connection.prepareStatement(FIND_BY_TOKEN)) {
@@ -76,37 +71,29 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
                     log.info("Get RecoveryToken from recovery_password table in db {'recoveryToken':{}}.", recoveryToken);
                 }
             }
-        } catch (PSQLException e) {
-            log.error("Database error while getting RecoveryToken by token from recovery_password", e);
         } catch (SQLException e) {
-            log.error("Error while getting RecoveryToken by token from recovery_password", e);
-            throw new RuntimeException(e);
+            log.error("Database error while getting RecoveryToken by token from recovery_password", e);
         }
         return Optional.ofNullable(recoveryToken);
     }
 
     @Override
-    public boolean removeRecoveryUserToken(String recoveryToken) {
+    public boolean deleteById(int id) {
         boolean isRemoved = false;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement removeStatement = connection.prepareStatement(REMOVE_TOKEN)) {
-            removeStatement.setString(1, recoveryToken);
+            removeStatement.setInt(1, id);
             log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
             int result = removeStatement.executeUpdate();
             if (result > 0) {
                 isRemoved = true;
+                log.info("Recovery token was deleted from the database {'recoveryToken':{}}.", id);
+            } else {
+                log.info("Failed to update recovery token to the database {'recoveryToken':{}}.", id);
             }
-        } catch (PSQLException e) {
+        } catch (SQLException e) {
             log.error("Database error while deleting token from recovery_password", e);
             isRemoved = false;
-        } catch (SQLException e) {
-            log.error("Error while deleting token from recovery_password", e);
-            throw new RuntimeException(e);
-        }
-        if (isRemoved) {
-            log.info("Recovery token was deleted from the database {'recoveryToken':{}}.", recoveryToken);
-        } else {
-            log.info("Failed to update recovery token to the database {'recoveryToken':{}}.", recoveryToken);
         }
         return isRemoved;
     }

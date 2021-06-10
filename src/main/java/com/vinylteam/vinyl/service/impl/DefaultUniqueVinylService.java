@@ -19,7 +19,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
-        return vinylDao.updateHasOffersFalse(vinyl);
+        return vinylDao.updateSetHasOffersFalse(vinyl);
     }
 
     @Override

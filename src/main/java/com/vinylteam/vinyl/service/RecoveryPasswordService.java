@@ -7,4 +7,5 @@ public interface RecoveryPasswordService {
     void sendLink(String email);
 
     void checkToken(String token);
+
 }

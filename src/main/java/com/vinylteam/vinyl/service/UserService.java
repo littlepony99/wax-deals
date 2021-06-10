@@ -20,4 +20,5 @@ public interface UserService {
     Optional<User> signInCheck(String email, String password);
 
     Optional<User> signInCheck(String email, String password, UUID token);
+
 }

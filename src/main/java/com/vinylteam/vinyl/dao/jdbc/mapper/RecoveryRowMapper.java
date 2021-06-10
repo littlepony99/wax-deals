@@ -25,4 +25,5 @@ public class RecoveryRowMapper implements RowMapper<RecoveryToken> {
             throw new RuntimeException(e);
         }
     }
+
 }

@@ -38,7 +38,7 @@ public class Starter {
     public static void main(String[] args) throws Exception {
         PropertiesReader propertiesReader = new PropertiesReader();
 
-        String resource_path = propertiesReader.getProperty("resource.path");
+        String resourcePath = propertiesReader.getProperty("resource.path");
         DiscogsService discogsService = new DefaultDiscogsService(
                 propertiesReader.getProperty("consumer.key"),
                 propertiesReader.getProperty("consumer.secret"),
@@ -126,7 +126,7 @@ public class Starter {
         RecoveryPasswordServlet recoveryPasswordServlet = new RecoveryPasswordServlet(recoveryPasswordService);
         ChangePasswordServlet changePasswordServlet = new ChangePasswordServlet(recoveryPasswordService);
 
-        Resource resource = JarFileResource.newClassPathResource(resource_path);
+        Resource resource = JarFileResource.newClassPathResource(resourcePath);
         ServletContextHandler servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         servletContextHandler.setErrorHandler(new DefaultErrorHandler());
         servletContextHandler.setBaseResource(resource);
