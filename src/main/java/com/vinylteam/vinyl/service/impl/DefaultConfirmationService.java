@@ -55,16 +55,12 @@ public class DefaultConfirmationService implements ConfirmationService {
         ConfirmationToken newConfirmationToken = new ConfirmationToken();
         newConfirmationToken.setUserId(userId);
         newConfirmationToken.setToken(UUID.randomUUID());
-        if (confirmationTokenDao.add(newConfirmationToken)) {
-            return newConfirmationToken;
-        } else {
-            return null;
-        }
+        confirmationTokenDao.add(newConfirmationToken);
+        return newConfirmationToken;
     }
 
     @Override
     public boolean update(ConfirmationToken confirmationToken) {
-        boolean isUpdated;
         if (confirmationToken == null) {
             log.error("Passed confirmation token is null");
             throw new RuntimeException("Passed confirmation token is null");

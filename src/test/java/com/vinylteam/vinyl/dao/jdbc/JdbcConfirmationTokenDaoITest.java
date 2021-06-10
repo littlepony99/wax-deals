@@ -108,9 +108,8 @@ class JdbcConfirmationTokenDaoITest {
         databasePreparer.insertConfirmationTokens(confirmationTokens);
         ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(userId);
         //when
-        boolean actualIsAdded = confirmationTokenDao.add(expectedConfirmationToken);
+        assertDoesNotThrow(() -> confirmationTokenDao.add(expectedConfirmationToken));
         //then
-        assertTrue(actualIsAdded);
         List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
         assertEquals(3, actualConfirmationTokens.size());
         assertEquals(expectedConfirmationToken.getUserId(), actualConfirmationTokens.get(2).getUserId());
@@ -139,7 +138,6 @@ class JdbcConfirmationTokenDaoITest {
         ConfirmationToken confirmationTokenDuplicateUserId = dataGenerator.getConfirmationTokenWithUserId(3);
         //when
         assertThrows(RuntimeException.class, () -> confirmationTokenDao.add(confirmationTokenDuplicateUserId));
-        ;
         //then
         List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
         assertEquals(2, actualConfirmationTokens.size());

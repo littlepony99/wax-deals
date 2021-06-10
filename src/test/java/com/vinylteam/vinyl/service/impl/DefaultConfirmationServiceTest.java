@@ -101,7 +101,6 @@ class DefaultConfirmationServiceTest {
     void addByUserId() {
         //prepare
         long userId = 1L;
-        when(mockedConfirmationDao.add(any())).thenReturn(true);
         //when
         ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
         //then

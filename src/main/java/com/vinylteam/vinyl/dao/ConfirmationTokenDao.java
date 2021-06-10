@@ -11,7 +11,7 @@ public interface ConfirmationTokenDao {
 
     Optional<ConfirmationToken> findByUserId(long userId);
 
-    boolean add(ConfirmationToken token);
+    void add(ConfirmationToken token);
 
     boolean update(ConfirmationToken token);
 

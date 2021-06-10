@@ -69,7 +69,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     }
 
     @Override
-    public boolean add(ConfirmationToken token) {
+    public void add(ConfirmationToken token) {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement insertStatement = connection.prepareStatement(INSERT)) {
             insertStatement.setLong(1, token.getUserId());
@@ -78,7 +78,6 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
             log.debug("Prepared statement {'preparedStatement':{}}.", insertStatement);
             insertStatement.executeUpdate();
             log.info("Confirmation token is added to the database {'confirmationToken':{}}", token);
-            return true;
         } catch (SQLException e) {
             log.error("Error while adding confirmation token to db {'confirmationToken':{}}", token, e);
             throw new RuntimeException("Error while adding confirmation token to db: " + token, e);
@@ -98,7 +97,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
             return (countRows > 0);
         } catch (SQLException e) {
             log.error("Error while updating confirmation_token with {'confirmationToken':{}}", token, e);
-            throw new RuntimeException("Error while updating confirmation_token");
+            throw new RuntimeException("Error while updating confirmation_token", e);
         }
     }
 
