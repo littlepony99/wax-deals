@@ -16,7 +16,7 @@ public class RecoveryRowMapper implements RowMapper<RecoveryToken> {
         try {
             recoveryToken.setId(resultSet.getInt("id"));
             recoveryToken.setUserId(resultSet.getLong("user_id"));
-            recoveryToken.setToken(resultSet.getString("token"));
+            recoveryToken.setToken(resultSet.getObject("token", java.util.UUID.class));
             recoveryToken.setCreatedAt(resultSet.getTimestamp("created_at"));
             log.debug("Resulting RecoveryToken object {'user':{}}", recoveryToken);
             return recoveryToken;

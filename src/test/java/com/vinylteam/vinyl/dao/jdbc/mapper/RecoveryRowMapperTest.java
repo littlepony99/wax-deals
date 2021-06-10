@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -22,18 +23,18 @@ class RecoveryRowMapperTest {
         RecoveryRowMapper recoveryRowMapper = new RecoveryRowMapper();
         ResultSet mockedResultSet = mock(ResultSet.class);
         LocalDateTime createdAt = LocalDateTime.now();
+        UUID token = UUID.randomUUID();
         when(mockedResultSet.getInt("id")).thenReturn(1);
         when(mockedResultSet.getLong("user_id")).thenReturn(1L);
-        when(mockedResultSet.getString("token")).thenReturn("user-recovery-token");
+        when(mockedResultSet.getObject("token", java.util.UUID.class)).thenReturn(token);
         when(mockedResultSet.getTimestamp("created_at")).thenReturn(Timestamp.valueOf(createdAt));
-        when(mockedResultSet.getTimestamp("token_lifetime")).thenReturn(Timestamp.valueOf(createdAt.plusDays(1)));
         //when
         RecoveryToken recoveryToken = recoveryRowMapper.mapRow(mockedResultSet);
         //then
         assertEquals(1, recoveryToken.getId());
         assertEquals(1L, recoveryToken.getUserId());
-        assertEquals("user-recovery-token", recoveryToken.getToken());
+        assertEquals(token, recoveryToken.getToken());
         assertEquals(Timestamp.valueOf(createdAt), recoveryToken.getCreatedAt());
     }
-    
+
 }

@@ -5,26 +5,25 @@ import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryRowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.util.PSQLException;
 
 import java.sql.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
 
-    private static final String INSERT_TOKEN = "INSERT INTO recovery_password" +
+    private static final String INSERT_TOKEN = "INSERT INTO recovery_password_tokens" +
             " (user_id, token, created_at)" +
             " VALUES (?, ?, ?)" +
             " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?";
-    private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at FROM recovery_password" +
+    private static final String FIND_BY_TOKEN = "SELECT id, user_id, token, created_at FROM recovery_password_tokens" +
             " WHERE token = ?";
-    private static final String REMOVE_TOKEN = "DELETE FROM recovery_password" +
+    private static final String REMOVE_TOKEN = "DELETE FROM recovery_password_tokens" +
             " WHERE id = ?";
 
-    private final RecoveryRowMapper recoveryRowMapper = new RecoveryRowMapper();
+    private static final RecoveryRowMapper RECOVERY_ROW_MAPPER = new RecoveryRowMapper();
     private final HikariDataSource dataSource;
 
     public JdbcRecoveryPasswordDao(HikariDataSource dataSource) {
@@ -37,15 +36,15 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
         try (Connection connection = dataSource.getConnection();
              PreparedStatement addTokenStatement = connection.prepareStatement(INSERT_TOKEN)) {
             addTokenStatement.setLong(1, recoveryToken.getUserId());
-            addTokenStatement.setString(2, recoveryToken.getToken());
+            addTokenStatement.setObject(2, recoveryToken.getToken());
             addTokenStatement.setTimestamp(3, Timestamp.from(Instant.now()));
-            addTokenStatement.setString(4, recoveryToken.getToken());
+            addTokenStatement.setObject(4, recoveryToken.getToken());
             addTokenStatement.setTimestamp(5, Timestamp.from(Instant.now()));
             log.debug("Prepared statement {'preparedStatement':{}}.", addTokenStatement);
             int result = addTokenStatement.executeUpdate();
             if (result > 0) {
                 isAdded = true;
-                log.info("Recovery token is added to the database {'recoveryToken':{}, 'userId':{}}.",
+                log.info("Recovery token is added or updated to the database {'recoveryToken':{}, 'userId':{}}.",
                         recoveryToken.getToken(), recoveryToken.getUserId());
             } else {
                 log.info("Failed to add recovery token to the database {'recoveryToken':{}, 'userId':{}}.",
@@ -59,15 +58,15 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     }
 
     @Override
-    public Optional<RecoveryToken> findByToken(String token) {
+    public Optional<RecoveryToken> findByToken(UUID token) {
         RecoveryToken recoveryToken = null;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement selectRecoveryTokenStatement = connection.prepareStatement(FIND_BY_TOKEN)) {
-            selectRecoveryTokenStatement.setString(1, token);
+            selectRecoveryTokenStatement.setObject(1, token);
             log.debug("Prepared statement {'preparedStatement':{}}.", selectRecoveryTokenStatement);
             try (ResultSet resultSet = selectRecoveryTokenStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    recoveryToken = recoveryRowMapper.mapRow(resultSet);
+                    recoveryToken = RECOVERY_ROW_MAPPER.mapRow(resultSet);
                     log.info("Get RecoveryToken from recovery_password table in db {'recoveryToken':{}}.", recoveryToken);
                 }
             }
@@ -78,11 +77,11 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     }
 
     @Override
-    public boolean deleteById(int id) {
+    public boolean deleteById(long id) {
         boolean isRemoved = false;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement removeStatement = connection.prepareStatement(REMOVE_TOKEN)) {
-            removeStatement.setInt(1, id);
+            removeStatement.setLong(1, id);
             log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
             int result = removeStatement.executeUpdate();
             if (result > 0) {

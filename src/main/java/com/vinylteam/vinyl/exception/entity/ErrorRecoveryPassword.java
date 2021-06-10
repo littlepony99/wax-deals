@@ -13,6 +13,7 @@ public enum ErrorRecoveryPassword {
     EMPTY_EMAIL("Error. Email is empty. Please enter email correctly."),
     EMAIL_NOT_FOUND_IN_DB("We can't find matching email. Please check your email or contact us."),
 
+    TOKEN_NOT_CORRECT_UUID("Your link is incorrect! Please check the link in the your email"),
     TOKEN_NOT_FOUND_IN_DB("Your link is incorrect! Please check the link in the your email or contact support."),
     TOKEN_IS_EXPIRED("The link you are trying to follow is no longer valid. You need to" +
             " repeat the recovery password process."),

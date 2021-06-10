@@ -218,7 +218,7 @@ public class DataGeneratorForTests {
     public RecoveryToken getRecoveryTokenWithUserId(long userId) {
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);
-        recoveryToken.setToken("some-recovery-token");
+        recoveryToken.setToken(UUID.randomUUID());
         return recoveryToken;
     }
 

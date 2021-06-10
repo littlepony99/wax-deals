@@ -29,7 +29,8 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     //@Transactional
     public void changePassword(String newPassword, String confirmPassword, String token) {
         checkPassword(newPassword, confirmPassword);
-        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(token)
+        UUID tokenUUID = stringToUUD(token);
+        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(tokenUUID)
                 .orElseThrow(() -> {
                     throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
                 });
@@ -45,7 +46,8 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
 
     @Override
     public void checkToken(String token) {
-        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(token)
+        UUID tokenUUID = stringToUUD(token);
+        RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(tokenUUID)
                 .orElseThrow(() -> {
                     throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
                 });
@@ -65,8 +67,16 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
                     throw new RecoveryPasswordException(ErrorRecoveryPassword.EMAIL_NOT_FOUND_IN_DB.getMessage());
                 }
         );
-        String recoveryToken = addRecoveryUserToken(user.getId());
-        sendEmailWithLink(email, recoveryToken);
+        RecoveryToken recoveryToken = addRecoveryUserToken(user.getId());
+        sendEmailWithLink(email, recoveryToken.getToken().toString());
+    }
+
+    UUID stringToUUD(String token) {
+        try {
+            return UUID.fromString(token);
+        } catch (IllegalArgumentException e) {
+            throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_CORRECT_UUID.getMessage());
+        }
     }
 
     void sendEmailWithLink(String email, String recoveryToken) {
@@ -91,9 +101,9 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
         }
     }
 
-    String addRecoveryUserToken(long userId) {
+    RecoveryToken addRecoveryUserToken(long userId) {
         boolean isAdded;
-        String token = UUID.randomUUID().toString();
+        UUID token = UUID.randomUUID();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);
         recoveryToken.setToken(token);
@@ -101,6 +111,6 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
         if (!isAdded) {
             throw new RecoveryPasswordException(ErrorRecoveryPassword.ADD_TOKEN_ERROR.getMessage());
         }
-        return token;
+        return recoveryToken;
     }
 }

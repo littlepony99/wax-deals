@@ -120,17 +120,13 @@ public class DefaultUserService implements UserService {
         if (userByLinkToken.getEmail().equalsIgnoreCase(email)) {
             if (securityService.checkPasswordAgainstUserPassword(
                     userByLinkToken, password.toCharArray())) {
-                changeUserStatus(userByLinkToken);
+                confirmationService.deleteByUserId(userByLinkToken.getId());
                 return Optional.of(userByLinkToken);
             }
         } else {
             log.error("Email is not correct, token was sent to {}", userByLinkToken.getEmail());
         }
         return Optional.empty();
-    }
-
-    private void changeUserStatus(User user) {
-        confirmationService.deleteByUserId(user.getId());
     }
 
 }

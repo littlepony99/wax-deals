@@ -11,6 +11,7 @@ import org.junit.jupiter.api.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,7 +106,7 @@ class JdbcRecoveryPasswordDaoITest {
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
         recoveryPasswordDao.add(recoveryToken);
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken("some-recovery-token");
+        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(recoveryToken.getToken());
         //then
         assertTrue(optionalRecoveryToken.isPresent());
     }
@@ -116,7 +117,7 @@ class JdbcRecoveryPasswordDaoITest {
         recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
         recoveryPasswordDao.add(recoveryToken);
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken("non-existed-token");
+        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(UUID.randomUUID());
         //then
         assertFalse(optionalRecoveryToken.isPresent());
     }

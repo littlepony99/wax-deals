@@ -1,14 +1,10 @@
-create table recovery_password
+create table recovery_password_tokens
 (
-    id                serial       not null
-        constraint recovery_password_pkey
-            primary key,
-    user_id           integer      not null
-        constraint user_id_fk
-            references users
-            unique,
-    token varchar(500) not null unique,
-    created_at timestamp not null
+    id          SERIAL    PRIMARY KEY,
+    user_id     INTEGER   NOT NULL UNIQUE,
+    token       UUID      NOT NULL UNIQUE,
+    created_at  TIMESTAMP without time zone NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 UPDATE shops

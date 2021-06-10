@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,9 +36,9 @@ class DefaultRecoveryPasswordServiceTest {
         long userId = 1L;
         when(mockedRecoveryPasswordDao.add(any())).thenReturn(true);
         //when
-        String token = recoveryPasswordService.addRecoveryUserToken(userId);
+        RecoveryToken token = recoveryPasswordService.addRecoveryUserToken(userId);
         //then
-        assertFalse(token.isEmpty());
+        assertNotNull(token);
     }
 
     @Test
@@ -140,12 +141,12 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Change password - token not found in db")
     void changePasswordTokenNotCorrect() {
-        String token = "recovery-token";
+        UUID token = UUID.randomUUID();
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.empty());
         //when
         Exception exception = assertThrows(RecoveryPasswordException.class,
                 () -> recoveryPasswordService.changePassword("new_password",
-                        "new_password", token));
+                        "new_password", token.toString()));
         //then
         assertEquals(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
         verify(mockedUserService, never()).update(anyString(), anyString(), anyString(), anyString());
@@ -154,8 +155,8 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Change password - error")
     void changePasswordError() {
-        String token = "recovery-token";
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
+        UUID token = recoveryToken.getToken();
         User user = dataGenerator.getUserWithNumber(1);
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         when(mockedUserService.findById(user.getId())).thenReturn(Optional.of(user));
@@ -164,7 +165,7 @@ class DefaultRecoveryPasswordServiceTest {
         //when
         Exception exception = assertThrows(RecoveryPasswordException.class,
                 () -> recoveryPasswordService.changePassword("new_password",
-                        "new_password", token));
+                        "new_password", token.toString()));
         //then
         assertEquals(ErrorRecoveryPassword.UPDATE_PASSWORD_ERROR.getMessage(), exception.getMessage());
         verify(mockedUserService).update(user.getEmail(), user.getEmail(), "new_password",
@@ -174,8 +175,8 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Change password - success")
     void changePasswordSuccess() {
-        String token = "recovery-token";
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
+        UUID token = recoveryToken.getToken();
         User user = dataGenerator.getUserWithNumber(1);
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         when(mockedUserService.findById(user.getId())).thenReturn(Optional.of(user));
@@ -184,7 +185,7 @@ class DefaultRecoveryPasswordServiceTest {
         //when
         assertDoesNotThrow(
                 () -> recoveryPasswordService.changePassword("new_password",
-                        "new_password", token));
+                        "new_password", token.toString()));
         //then
         verify(mockedUserService).update(user.getEmail(), user.getEmail(), "new_password",
                 user.getDiscogsUserName());
@@ -194,11 +195,11 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Check token - token not found in db")
     void checkTokenNotFound() {
-        String token = "recovery-token";
+        UUID token = UUID.randomUUID();
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.empty());
         //when
         Exception exception = assertThrows(RecoveryPasswordException.class,
-                () -> recoveryPasswordService.checkToken(token));
+                () -> recoveryPasswordService.checkToken(token.toString()));
         //then
         assertEquals(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
     }
@@ -206,7 +207,7 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Check token - expired")
     void checkTokenExpired() {
-        String token = "recovery-token";
+        UUID token = UUID.randomUUID();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setToken(token);
         recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusHours(30)));
@@ -214,7 +215,7 @@ class DefaultRecoveryPasswordServiceTest {
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         //when
         Exception exception = assertThrows(RecoveryPasswordException.class,
-                () -> recoveryPasswordService.checkToken(token));
+                () -> recoveryPasswordService.checkToken(token.toString()));
         //then
         assertEquals(ErrorRecoveryPassword.TOKEN_IS_EXPIRED.getMessage(), exception.getMessage());
         verify(mockedRecoveryPasswordDao).deleteById(1);
@@ -223,13 +224,13 @@ class DefaultRecoveryPasswordServiceTest {
     @Test
     @DisplayName("Check token - success")
     void checkTokenSuccess() {
-        String token = "recovery-token";
+        UUID token = UUID.randomUUID();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setToken(token);
         recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusHours(3)));
         when(mockedRecoveryPasswordDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         //when
-        assertDoesNotThrow(() -> recoveryPasswordService.checkToken(token));
+        assertDoesNotThrow(() -> recoveryPasswordService.checkToken(token.toString()));
     }
 
     @Test
@@ -317,4 +318,11 @@ class DefaultRecoveryPasswordServiceTest {
                 () -> recoveryPasswordService.sendLink(email));
     }
 
+    @Test
+    @DisplayName("convert to UUID - correct value")
+    void stringToUUD() {
+        UUID uuid = UUID.randomUUID();
+        UUID result = recoveryPasswordService.stringToUUD(uuid.toString());
+        assertEquals(uuid, result);
+    }
 }
