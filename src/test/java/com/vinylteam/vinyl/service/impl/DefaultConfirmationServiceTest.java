@@ -33,6 +33,33 @@ class DefaultConfirmationServiceTest {
     }
 
     @Test
+    @DisplayName("findByToken - token is not correct")
+    void findByTokenNotCorrectString() {
+        Optional<ConfirmationToken> confirmationToken = confirmationService.findByToken("wrong value");
+        assertTrue(confirmationToken.isEmpty());
+    }
+
+    @Test
+    @DisplayName("findByToken - token is not found")
+    void findByTokenNotCorrect() {
+        Optional<ConfirmationToken> confirmationToken = confirmationService.findByToken(UUID.randomUUID().toString());
+        assertTrue(confirmationToken.isEmpty());
+    }
+
+    @Test
+    @DisplayName("findByToken - token is found")
+    void findByTokenCorrect() {
+        UUID tokenUUID = UUID.randomUUID();
+        Optional<ConfirmationToken> expectedOptional = Optional.of(new ConfirmationToken());
+
+        when(mockedConfirmationDao.findByToken(tokenUUID)).thenReturn(expectedOptional);
+        Optional<ConfirmationToken> confirmationToken = confirmationService.findByToken(tokenUUID.toString());
+
+        assertTrue(confirmationToken.isPresent());
+        assertSame(expectedOptional, confirmationToken);
+    }
+
+    @Test
     @DisplayName("findByUserId trows IllegalArgumentException and doesn't call dao findByUserId when id <= 0")
     void findByInvalidUserId() {
         //prepare

@@ -40,7 +40,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
                     confirmationToken = ROW_MAPPER.mapRow(resultSet);
                 }
             }
-            log.debug("Resulting optional with confirmation token is {'Optional.ofNullable(confirmationToken)':{}}", Optional.ofNullable(confirmationToken));
+            log.info("Resulting optional with confirmation token is {'Optional.ofNullable(confirmationToken)':{}}", Optional.ofNullable(confirmationToken));
             return Optional.ofNullable(confirmationToken);
         } catch (SQLException e) {
             log.error("SQLException retrieving confirmation token by email from confirmation_tokens", e);

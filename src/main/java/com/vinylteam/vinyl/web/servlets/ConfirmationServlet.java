@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,8 +28,7 @@ public class ConfirmationServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tokenAsString = request.getParameter("token");
-        UUID token = tokenToUUID(tokenAsString);
-        Optional<ConfirmationToken> optionalConfirmationToken = confirmationService.findByToken(token);
+        Optional<ConfirmationToken> optionalConfirmationToken = confirmationService.findByToken(tokenAsString);
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
         if (optionalConfirmationToken.isEmpty()) {
@@ -50,10 +48,10 @@ public class ConfirmationServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String tokenAsString = request.getParameter("token");
-        UUID tokenUUID = tokenToUUID(tokenAsString);
         String email = request.getParameter("email");
         String password = request.getParameter("password");
-        Optional<User> optionalUser = userService.signInCheck(email, password, tokenUUID);
+        log.info("Sign in user with email {} and token {}", email, tokenAsString);
+        Optional<User> optionalUser = userService.signInCheck(email, password, tokenAsString);
         response.setContentType("text/html;charset=utf-8");
         Map<String, String> attributes = new HashMap<>();
         log.debug("Received an optional with User with password verification by the passed " +
@@ -73,16 +71,6 @@ public class ConfirmationServlet extends HttpServlet {
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
             response.sendRedirect("/");
         }
-    }
-
-    private UUID tokenToUUID(String tokenAsString) {
-        UUID token = null;
-        try {
-            token = UUID.fromString(tokenAsString);
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid email confirmation link token parameter {'token':{}}", tokenAsString, e);
-        }
-        return token;
     }
 
 }

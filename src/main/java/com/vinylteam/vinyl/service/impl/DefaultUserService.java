@@ -113,7 +113,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> signInCheck(String email, String password, UUID token) {
+    public Optional<User> signInCheck(String email, String password, String token) {
         Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(token);
         ConfirmationToken confirmationToken = optionalConfirmationTokenByLinkToken.orElseThrow(
                 () -> new IllegalArgumentException("Sorry, something went wrong on our side, we're looking into it. Please, try to login again, or contact us."));
@@ -124,6 +124,8 @@ public class DefaultUserService implements UserService {
                 changeUserStatus(userByLinkToken);
                 return Optional.of(userByLinkToken);
             }
+        } else {
+            log.error("Email is not correct, token was sent to {}", userByLinkToken.getEmail());
         }
         return Optional.empty();
     }

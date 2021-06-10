@@ -24,8 +24,14 @@ public class DefaultConfirmationService implements ConfirmationService {
     private static final String MAIL_BODY_ENDING = "\n Thank you!\n\nWith kindest regards,\nWax-Deals team";
 
     @Override
-    public Optional<ConfirmationToken> findByToken(UUID token) {
-        return confirmationTokenDao.findByToken(token);
+    public Optional<ConfirmationToken> findByToken(String token) {
+        try {
+            UUID tokenUUID = UUID.fromString(token);
+            return confirmationTokenDao.findByToken(tokenUUID);
+        } catch (IllegalArgumentException e) {
+            log.warn("Token is incorrect UUID", e);
+            return Optional.empty();
+        }
     }
 
     @Override

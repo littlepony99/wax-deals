@@ -128,10 +128,10 @@ class DefaultUserServiceTest {
     void getByEmailTest() {
         //prepare
         String email = "user1@wax-deals.com";
-        Optional optionalUserFromDB = Optional.of(users.get(0));
+        Optional<User> optionalUserFromDB = Optional.of(users.get(0));
         when(mockedUserDao.findByEmail(email)).thenReturn(optionalUserFromDB);
         //when
-        Optional actualOptional = userService.findByEmail(email);
+        Optional<User> actualOptional = userService.findByEmail(email);
         //then
         assertEquals(optionalUserFromDB, actualOptional);
         verify(mockedUserDao).findByEmail(email);
@@ -141,7 +141,7 @@ class DefaultUserServiceTest {
     @DisplayName("Checks if .getByEmail(...) doesn't call userDao.getByEmail() when email is null and returns empty optional")
     void getByEmailNullEmailTest() {
         //when
-        Optional actualOptional = userService.findByEmail(null);
+        Optional<User> actualOptional = userService.findByEmail(null);
         //then
         assertTrue(actualOptional.isEmpty());
         verify(mockedUserDao, never()).findByEmail(null);
@@ -262,9 +262,10 @@ class DefaultUserServiceTest {
         String existingEmail = "user1@wax-deals.com";
         String rightPassword = "password1";
 
-        when(mockedConfirmationService.findByToken(token)).thenReturn(Optional.empty());
+        when(mockedConfirmationService.findByToken(token.toString())).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> userService.signInCheck(existingEmail, rightPassword, token));
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.signInCheck(existingEmail, rightPassword, token.toString()));
     }
 
     @Test
@@ -275,11 +276,12 @@ class DefaultUserServiceTest {
 
         Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(1));
         Optional<User> optionalUser = Optional.of(users.get(1));
+        String tokenAsString = confirmationToken.get().getToken().toString();
 
-        when(mockedConfirmationService.findByToken(confirmationToken.get().getToken())).thenReturn(confirmationToken);
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
         when(mockedUserDao.findById(2L)).thenReturn(optionalUser);
 
-        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, confirmationToken.get().getToken());
+        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, tokenAsString);
 
         assertTrue(resultUser.isEmpty());
     }
@@ -293,12 +295,13 @@ class DefaultUserServiceTest {
         Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(0));
         Optional<User> optionalUser = Optional.of(users.get(0));
 
-        when(mockedConfirmationService.findByToken(confirmationToken.get().getToken())).thenReturn(confirmationToken);
+        String tokenAsString = confirmationToken.get().getToken().toString();
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
         when(mockedUserDao.findById(1L)).thenReturn(optionalUser);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUser.get()), eq(wrongPassword.toCharArray()))).thenReturn(false);
 
         //when
-        Optional<User> resultUser = userService.signInCheck(existingEmail, wrongPassword, confirmationToken.get().getToken());
+        Optional<User> resultUser = userService.signInCheck(existingEmail, wrongPassword, tokenAsString);
 
         //then
         assertTrue(resultUser.isEmpty());
@@ -312,14 +315,15 @@ class DefaultUserServiceTest {
         Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(0));
         Optional<User> optionalUser = Optional.of(dataGenerator.getUserWithNumber(1));
 
-        when(mockedConfirmationService.findByToken(confirmationToken.get().getToken())).thenReturn(confirmationToken);
+        String tokenAsString = confirmationToken.get().getToken().toString();
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
         when(mockedUserDao.findById(1L)).thenReturn(optionalUser);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUser.get()), eq(rightPassword.toCharArray())))
                 .thenReturn(true);
         when(mockedConfirmationService.deleteByUserId(1L)).thenReturn(true);
 
         //when
-        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, confirmationToken.get().getToken());
+        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, tokenAsString);
 
         //then
         assertTrue(resultUser.isPresent());

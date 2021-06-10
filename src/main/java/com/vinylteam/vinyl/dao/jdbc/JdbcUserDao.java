@@ -6,7 +6,6 @@ import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.util.PSQLException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,7 +58,7 @@ public class JdbcUserDao implements UserDao {
             log.info("Failed to add user to the database {'user':{}}.", user);
             return -1;
         } catch (SQLException e) {
-            log.warn("Database error while adding user to users", e);
+            log.error("Database error while adding user to users", e);
             return -1;
         }
     }
