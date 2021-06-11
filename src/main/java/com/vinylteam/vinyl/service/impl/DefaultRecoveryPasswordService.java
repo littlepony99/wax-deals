@@ -45,9 +45,7 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     public void checkToken(String token) {
         UUID tokenUUID = stringToUUD(token);
         RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(tokenUUID)
-                .orElseThrow(() -> {
-                    throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
-                });
+                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         LocalDateTime tokenLifetime = recoveryToken.getCreatedAt().toLocalDateTime().plusHours(liveTokenHours);
         if (tokenLifetime.compareTo(LocalDateTime.now()) < 0) {
             log.debug("Token lifetime has come to an end.");
@@ -59,11 +57,8 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     @Override
     public void sendLink(String email) {
         checkForNotNull(email, ErrorRecoveryPassword.EMPTY_EMAIL);
-        User user = userService.findByEmail(email).orElseThrow(
-                () -> {
-                    throw new RecoveryPasswordException(ErrorRecoveryPassword.EMAIL_NOT_FOUND_IN_DB.getMessage());
-                }
-        );
+        User user = userService.findByEmail(email)
+                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.EMAIL_NOT_FOUND_IN_DB.getMessage()));
         RecoveryToken recoveryToken = addRecoveryUserToken(user.getId());
         sendEmailWithLink(email, recoveryToken.getToken().toString());
     }

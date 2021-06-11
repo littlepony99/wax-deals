@@ -125,12 +125,14 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
                     log.info("Failed to delete confirmation token by userId from database {'userId':{}, " +
                             "'countRemoved':{}, 'countUpdatedUser':{}}, transaction roll backed", userId, countRemoved, countUpdatedUser);
                 }
+            } catch (SQLException e) {
+                connection.rollback();
+                log.error("Error while deleting confirmation token from confirmation_tokens - rollback transaction", e);
             } finally {
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
             log.error("Error while deleting confirmation token from confirmation_tokens", e);
-            isDeleted = false;
         }
         return isDeleted;
     }
