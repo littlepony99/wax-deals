@@ -84,6 +84,21 @@ public class PageGenerator {
             context.setVariable("message", message);
         }
 
+        String token = attributes.get("token");
+        if (token != null) {
+            context.setVariable("token", token);
+        }
+
+        String errorMessage = attributes.get("errorMessage");
+        if (errorMessage != null) {
+            context.setVariable("errorMessage", errorMessage);
+        }
+
+        String recoveryToken = attributes.get("recoveryToken");
+        if (recoveryToken != null) {
+            context.setVariable("recoveryToken", recoveryToken);
+        }
+
 // for catalog page
 
         context.setVariable("vinylList", vinylList);
@@ -147,10 +162,10 @@ public class PageGenerator {
 
         String discogsLink = attributes.get("discogsLink");
         if (discogsLink != null) {
-            if (!discogsLink.equals("")){
+            if (!discogsLink.equals("")) {
                 context.setVariable("discogsLink", discogsLink);
             }
         }
     }
-
 }
+

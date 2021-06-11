@@ -2,7 +2,9 @@ package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.service.impl.DefaultConfirmationService;
 import com.vinylteam.vinyl.service.impl.DefaultUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +18,9 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -36,6 +41,7 @@ class SignUpServletTest {
 
     @BeforeEach
     void beforeEach() {
+        reset(mockedUserService);
         reset(mockedRequest);
         reset(mockedResponse);
         reset(mockedHttpSession);
@@ -177,11 +183,14 @@ class SignUpServletTest {
             "when email did not exist in database before.")
     void doPostWithNewUserTest() throws IOException {
         //prepare
-        when(mockedRequest.getParameter("email")).thenReturn("newuser@vinyl.com");
+        User newUser = new User();
+        newUser.setEmail("newuser@vinyl.com");
+        when(mockedRequest.getParameter("email")).thenReturn(newUser.getEmail());
         when(mockedRequest.getParameter("password")).thenReturn("password");
         when(mockedRequest.getParameter("confirmPassword")).thenReturn("password");
         when(mockedRequest.getParameter("discogsUserName")).thenReturn("discogsUserName");
-        when(mockedUserService.add("newuser@vinyl.com", "password", "discogsUserName")).thenReturn(true);
+        when(mockedUserService.add(newUser.getEmail(), "password", "discogsUserName")).thenReturn(true);
+        when(mockedUserService.findByEmail(newUser.getEmail())).thenReturn(Optional.of(newUser));
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         signUpServlet.doPost(mockedRequest, mockedResponse);
@@ -192,9 +201,19 @@ class SignUpServletTest {
         inOrderRequest.verify(mockedRequest).getParameter("confirmPassword");
         inOrderRequest.verify(mockedRequest).getParameter("discogsUserName");
         verify(mockedUserService, times(1))
-                .add("newuser@vinyl.com", "password", "discogsUserName");
+                .add(newUser.getEmail(), "password", "discogsUserName");
         inOrderResponse.verify(mockedResponse).setStatus(HttpServletResponse.SC_SEE_OTHER);
         verify(mockedResponse).getWriter();
+    }
+
+    @Test
+    void setBadRequest() {
+        Map<String, String> attributes = new HashMap<>();
+        //when
+        signUpServlet.setBadRequest(mockedResponse, attributes, "Error message");
+        //then
+        verify(mockedResponse).setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        assertEquals("Error message", attributes.get("message"));
     }
 
 }

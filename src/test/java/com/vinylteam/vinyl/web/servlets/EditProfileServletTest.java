@@ -26,7 +26,7 @@ class EditProfileServletTest {
 
     private final SecurityService mockedSecurityService = mock(SecurityService.class);
     private final UserService mockedUserService = mock(UserService.class);
-    private final EditProfileServlet editProfileServlet = new EditProfileServlet(mockedSecurityService, mockedUserService);
+    private final EditProfileServlet editProfileServlet = new EditProfileServlet(mockedSecurityService, mockedUserService, 18000);
 
     private final HttpServletRequest mockedRequest = mock(HttpServletRequest.class);
     private final HttpServletResponse mockedResponse = mock(HttpServletResponse.class);
@@ -279,7 +279,7 @@ class EditProfileServletTest {
         when(mockedSecurityService.checkPasswordAgainstUserPassword(mockedUser, "oldPassword".toCharArray())).thenReturn(true);
         when(mockedUserService.update("test@email.com", "newTest@email.com", "newPassword", "discogsUserName")).thenReturn(true);
         when(mockedRequest.getSession(true)).thenReturn(newMockedHttpSession);
-        when(mockedUserService.getByEmail("newTest@email.com")).thenReturn(Optional.ofNullable(mockedUser));
+        when(mockedUserService.findByEmail("newTest@email.com")).thenReturn(Optional.ofNullable(mockedUser));
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         editProfileServlet.doPost(mockedRequest, mockedResponse);
@@ -303,7 +303,7 @@ class EditProfileServletTest {
         verify(mockedHttpSession).invalidate();
         inOrderRequest.verify(mockedRequest).getSession(true);
         verify(newMockedHttpSession).setMaxInactiveInterval(60 * 60 * 5);
-        verify(mockedUserService).getByEmail("newTest@email.com");
+        verify(mockedUserService).findByEmail("newTest@email.com");
         inOrderResponse.verify(mockedResponse).getWriter();
     }
 
@@ -323,7 +323,7 @@ class EditProfileServletTest {
         when(mockedSecurityService.checkPasswordAgainstUserPassword(mockedUser, "oldPassword".toCharArray())).thenReturn(true);
         when(mockedUserService.update("test@email.com", "newTest@email.com", "oldPassword", "discogsUserName")).thenReturn(true);
         when(mockedRequest.getSession(true)).thenReturn(newMockedHttpSession);
-        when(mockedUserService.getByEmail("newTest@email.com")).thenReturn(Optional.ofNullable(mockedUser));
+        when(mockedUserService.findByEmail("newTest@email.com")).thenReturn(Optional.ofNullable(mockedUser));
         when(mockedResponse.getWriter()).thenReturn(printWriter);
         //when
         editProfileServlet.doPost(mockedRequest, mockedResponse);
@@ -347,7 +347,7 @@ class EditProfileServletTest {
         verify(mockedHttpSession).invalidate();
         inOrderRequest.verify(mockedRequest).getSession(true);
         verify(newMockedHttpSession).setMaxInactiveInterval(60 * 60 * 5);
-        verify(mockedUserService).getByEmail("newTest@email.com");
+        verify(mockedUserService).findByEmail("newTest@email.com");
         inOrderResponse.verify(mockedResponse).getWriter();
     }
 

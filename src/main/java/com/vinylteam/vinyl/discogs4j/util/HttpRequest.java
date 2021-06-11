@@ -1710,7 +1710,6 @@ public class HttpRequest {
         return this;
     }
 
-
     /**
      * Is the response body empty?
      *

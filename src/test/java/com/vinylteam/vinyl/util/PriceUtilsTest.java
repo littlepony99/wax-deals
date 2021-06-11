@@ -7,7 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PriceUtilsTest {
 
@@ -19,7 +19,7 @@ class PriceUtilsTest {
                 Arguments.of(Currency.USD, 120000000d, "$120_000_000"),
                 Arguments.of(Currency.USD, 120000000d, "$ 120_000_000"),
                 Arguments.of(Currency.GBP, 120.12d, "£120.12")
-                );
+        );
     }
 
     @ParameterizedTest

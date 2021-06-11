@@ -1,9 +1,11 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.UserDao;
+import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
+import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -21,14 +24,17 @@ class DefaultUserServiceTest {
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
     private final UserDao mockedUserDao = mock(UserDao.class);
     private final SecurityService mockedSecurityService = mock(DefaultSecurityService.class);
-    private final UserService userService = new DefaultUserService(mockedUserDao, mockedSecurityService);
+    private final ConfirmationService mockedConfirmationService = mock(DefaultConfirmationService.class);
+    private final UserService userService = new DefaultUserService(mockedUserDao, mockedSecurityService, mockedConfirmationService);
     private final List<User> users = dataGenerator.getUsersList();
+    private final List<ConfirmationToken> tokens = dataGenerator.getConfirmationTokensList();
     private final User mockedUser = mock(User.class);
 
     @BeforeEach
     void beforeEach() {
         reset(mockedUserDao);
         reset(mockedSecurityService);
+        reset(mockedConfirmationService);
     }
 
     @Test
@@ -68,7 +74,7 @@ class DefaultUserServiceTest {
         String password = "password1";
         String newDiscogsUserName = "newDiscogsUserName";
         when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
-        when(mockedUserDao.add(users.get(0))).thenReturn(false);
+        when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
@@ -86,7 +92,7 @@ class DefaultUserServiceTest {
         String password = "password123";
         String newDiscogsUserName = "newDiscogsUserName1";
         when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
-        when(mockedUserDao.add(users.get(0))).thenReturn(false);
+        when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
@@ -103,8 +109,12 @@ class DefaultUserServiceTest {
         String newEmail = "user2@wax-deals.com";
         String password = "password2";
         String newDiscogsUserName = "newDiscogsUserName";
+        ConfirmationToken confirmationToken = new ConfirmationToken();
         when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(1));
-        when(mockedUserDao.add(users.get(1))).thenReturn(true);
+        when(mockedUserDao.add(users.get(1))).thenReturn(1L);
+        confirmationToken.setToken(UUID.randomUUID());
+        when(mockedConfirmationService.addByUserId(1L)).thenReturn(confirmationToken);
+        when(mockedConfirmationService.sendMessageWithLinkToUserEmail(newEmail, confirmationToken.getToken().toString())).thenReturn(true);
         //when
         boolean actualIsAdded = userService.add(newEmail, password, newDiscogsUserName);
         //then
@@ -118,23 +128,23 @@ class DefaultUserServiceTest {
     void getByEmailTest() {
         //prepare
         String email = "user1@wax-deals.com";
-        Optional optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(email)).thenReturn(optionalUserFromDB);
+        Optional<User> optionalUserFromDB = Optional.of(users.get(0));
+        when(mockedUserDao.findByEmail(email)).thenReturn(optionalUserFromDB);
         //when
-        Optional actualOptional = userService.getByEmail(email);
+        Optional<User> actualOptional = userService.findByEmail(email);
         //then
         assertEquals(optionalUserFromDB, actualOptional);
-        verify(mockedUserDao).getByEmail(email);
+        verify(mockedUserDao).findByEmail(email);
     }
 
     @Test
     @DisplayName("Checks if .getByEmail(...) doesn't call userDao.getByEmail() when email is null and returns empty optional")
     void getByEmailNullEmailTest() {
         //when
-        Optional actualOptional = userService.getByEmail(null);
+        Optional<User> actualOptional = userService.findByEmail(null);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(null);
+        verify(mockedUserDao, never()).findByEmail(null);
     }
 
     @Test
@@ -147,7 +157,7 @@ class DefaultUserServiceTest {
         Optional<User> actualOptional = userService.signInCheck(null, password);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(null);
+        verify(mockedUserDao, never()).findByEmail(null);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(any(), eq(password.toCharArray()));
     }
 
@@ -161,7 +171,7 @@ class DefaultUserServiceTest {
         Optional<User> actualOptional = userService.signInCheck(email, null);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao, never()).getByEmail(email);
+        verify(mockedUserDao, never()).findByEmail(email);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(any(), eq(null));
 
     }
@@ -173,13 +183,38 @@ class DefaultUserServiceTest {
         //prepare
         String newEmail = "user2@wax-deals.com";
         String newPassword = "password2";
-        when(mockedUserDao.getByEmail(newEmail)).thenReturn(Optional.empty());
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.empty());
         //when
         Optional<User> actualOptional = userService.signInCheck(newEmail, newPassword);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao).getByEmail(newEmail);
+        verify(mockedUserDao).findByEmail(newEmail);
         verify(mockedSecurityService, never()).checkPasswordAgainstUserPassword(eq(null), eq(newPassword.toCharArray()));
+    }
+
+    @Test
+    @DisplayName("Checks if .signInCheck(...) with existent user's email and wrong password as arguments returns Optional.empty()," +
+            " userDao.getByEmail(...) and securityService.checkPasswordAgainstUserPassword(...) are called")
+    void signInCheckExistingNotVerifiedUserWrongPasswordTest() {
+        //prepare
+        String existingEmail = "user1@wax-deals.com";
+        String rightPassword = "password1";
+        User user = users.get(0);
+        user.setId(1L);
+        user.setStatus(false);
+        Optional<User> optionalUserFromDB = Optional.of(user);
+        ConfirmationToken confirmationToken = tokens.get(0);
+        when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()))).thenReturn(true);
+        when(mockedConfirmationService.findByUserId(1L)).thenReturn(Optional.of(confirmationToken));
+        //when
+        Optional<User> actualOptional = userService.signInCheck("user1@wax-deals.com", "password1");
+        //then
+        assertEquals(optionalUserFromDB, actualOptional);
+        verify(mockedUserDao).findByEmail(existingEmail);
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()));
+        verify(mockedConfirmationService).findByUserId(1L);
+        verify(mockedConfirmationService).sendMessageWithLinkToUserEmail("user1@wax-deals.com", confirmationToken.getToken().toString());
     }
 
     @Test
@@ -189,14 +224,14 @@ class DefaultUserServiceTest {
         //prepare
         String existingEmail = "user1@wax-deals.com";
         String wrongPassword = "password3";
-        Optional<User> optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(existingEmail)).thenReturn(optionalUserFromDB);
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(wrongPassword.toCharArray()))).thenReturn(false);
         //when
         Optional<User> actualOptional = userService.signInCheck(existingEmail, wrongPassword);
         //then
         assertTrue(actualOptional.isEmpty());
-        verify(mockedUserDao).getByEmail(existingEmail);
+        verify(mockedUserDao).findByEmail(existingEmail);
         verify(mockedSecurityService).checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(wrongPassword.toCharArray()));
     }
 
@@ -208,14 +243,94 @@ class DefaultUserServiceTest {
         String existingEmail = "user1@wax-deals.com";
         String rightPassword = "password1";
         Optional<User> optionalUserFromDB = Optional.of(users.get(0));
-        when(mockedUserDao.getByEmail(existingEmail)).thenReturn(optionalUserFromDB);
+        optionalUserFromDB.get().setId(1L);
+        optionalUserFromDB.get().setStatus(true);
+        when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()))).thenReturn(true);
+        when(mockedConfirmationService.findByUserId(1L)).thenReturn(Optional.empty());
         //when
         Optional<User> actualOptional = userService.signInCheck("user1@wax-deals.com", "password1");
         //then
         assertEquals(optionalUserFromDB, actualOptional);
-        verify(mockedUserDao).getByEmail(existingEmail);
+        verify(mockedUserDao).findByEmail(existingEmail);
         verify(mockedSecurityService).checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()));
+    }
+
+    @Test
+    @DisplayName("Incorrect token")
+    void signInWithTokenNotCorrectToken() {
+        UUID token = UUID.randomUUID();
+        String existingEmail = "user1@wax-deals.com";
+        String rightPassword = "password1";
+
+        when(mockedConfirmationService.findByToken(token.toString())).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> userService.signInCheck(existingEmail, rightPassword, token.toString()));
+    }
+
+    @Test
+    @DisplayName("User found by token is different")
+    void signInWithTokenNotCorrectUser() {
+        String existingEmail = "user1@wax-deals.com";
+        String rightPassword = "password1";
+
+        Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(1));
+        Optional<User> optionalUser = Optional.of(users.get(1));
+        String tokenAsString = confirmationToken.get().getToken().toString();
+
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
+        when(mockedUserDao.findById(2L)).thenReturn(optionalUser);
+
+        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, tokenAsString);
+
+        assertTrue(resultUser.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Incorrect password")
+    void signInWithTokenNotCorrectPassword() {
+
+        String existingEmail = "user1@wax-deals.com";
+        String wrongPassword = "password3";
+        Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(0));
+        Optional<User> optionalUser = Optional.of(users.get(0));
+
+        String tokenAsString = confirmationToken.get().getToken().toString();
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
+        when(mockedUserDao.findById(1L)).thenReturn(optionalUser);
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUser.get()), eq(wrongPassword.toCharArray()))).thenReturn(false);
+
+        //when
+        Optional<User> resultUser = userService.signInCheck(existingEmail, wrongPassword, tokenAsString);
+
+        //then
+        assertTrue(resultUser.isEmpty());
+    }
+
+    @Test
+    @DisplayName("User found by token is different")
+    void signInWithTokenSuccess() {
+        String existingEmail = "user1@wax-deals.com";
+        String rightPassword = "password1";
+        Optional<ConfirmationToken> confirmationToken = Optional.of(tokens.get(0));
+        Optional<User> optionalUser = Optional.of(dataGenerator.getUserWithNumber(1));
+
+        String tokenAsString = confirmationToken.get().getToken().toString();
+        when(mockedConfirmationService.findByToken(tokenAsString)).thenReturn(confirmationToken);
+        when(mockedUserDao.findById(1L)).thenReturn(optionalUser);
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUser.get()), eq(rightPassword.toCharArray())))
+                .thenReturn(true);
+        when(mockedConfirmationService.deleteByUserId(1L)).thenReturn(true);
+
+        //when
+        Optional<User> resultUser = userService.signInCheck(existingEmail, rightPassword, tokenAsString);
+
+        //then
+        assertTrue(resultUser.isPresent());
+        assertEquals(optionalUser, resultUser);
+
+        verify(mockedConfirmationService).deleteByUserId(1L);
     }
 
     @Test
@@ -324,6 +439,32 @@ class DefaultUserServiceTest {
         verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
         verify(mockedUser).setStatus(true);
         verify(mockedUserDao).update(eq(existingUser), eq(mockedUser));
+    }
+
+    @Test
+    @DisplayName("Checks that when id>0 UserDao.findById(id) is called, it's result is returned")
+    void findById() {
+        //prepare
+        long id = 1;
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        when(mockedUserDao.findById(id)).thenReturn(optionalUserFromDB);
+        //when
+        Optional<User> actualOptional = userService.findById(id);
+        //then
+        assertEquals(optionalUserFromDB, actualOptional);
+        verify(mockedUserDao).findById(id);
+    }
+
+    @Test
+    @DisplayName("Checks that when id>0 UserDao.findById(id) is called, it's result is returned")
+    void findByInvalidId() {
+        //prepare
+        long id = -1;
+        //when
+        Optional<User> actualOptional = userService.findById(id);
+        //then
+        assertTrue(actualOptional.isEmpty());
+        verify(mockedUserDao, never()).findById(id);
     }
 
 }

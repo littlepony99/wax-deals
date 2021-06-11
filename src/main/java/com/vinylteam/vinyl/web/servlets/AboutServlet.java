@@ -1,11 +1,10 @@
 package com.vinylteam.vinyl.web.servlets;
 
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
+import com.vinylteam.vinyl.web.util.WebUtils;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -20,13 +19,7 @@ public class AboutServlet extends HttpServlet {
         response.setContentType("text/html;charset=utf-8");
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         Map<String, String> attributes = new HashMap<>();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                attributes.put("userRole", user.getRole().toString());
-            }
-        }
+        WebUtils.setUserAttributes(request, attributes);
         PageGenerator.getInstance().process("about", attributes, response.getWriter());
     }
 

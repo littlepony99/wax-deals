@@ -13,9 +13,6 @@ public class User {
     private Role role;
     private boolean status;
 
-    public User() {
-    }
-
     public Long getId() {
         return id;
     }
@@ -29,7 +26,11 @@ public class User {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        if (email != null) {
+            this.email = email.toLowerCase();
+        } else {
+            this.email = null;
+        }
     }
 
     public String getPassword() {

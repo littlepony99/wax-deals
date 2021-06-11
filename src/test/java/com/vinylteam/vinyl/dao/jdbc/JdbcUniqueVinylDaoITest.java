@@ -278,7 +278,7 @@ class JdbcUniqueVinylDaoITest {
         UniqueVinyl dbVinyl = uniqueVinylDao.findById(vinyl.getId());
         assertTrue(dbVinyl.getHasOffers());
         dbVinyl.setHasOffers(false);
-        uniqueVinylDao.updateOneUniqueVinylAsHavingNoOffer(dbVinyl);
+        uniqueVinylDao.updateSetHasOffersFalse(dbVinyl);
         UniqueVinyl dbVinylAfterUpdate = uniqueVinylDao.findById(vinyl.getId());
         assertFalse(dbVinylAfterUpdate.getHasOffers());
     }
