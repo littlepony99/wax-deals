@@ -199,10 +199,11 @@ class DefaultUserServiceTest {
         //prepare
         String existingEmail = "user1@wax-deals.com";
         String rightPassword = "password1";
-        Optional<User> optionalUserFromDB = Optional.of(users.get(0));
+        User user = users.get(0);
+        user.setId(1L);
+        user.setStatus(false);
+        Optional<User> optionalUserFromDB = Optional.of(user);
         ConfirmationToken confirmationToken = tokens.get(0);
-        optionalUserFromDB.get().setId(1L);
-        optionalUserFromDB.get().setStatus(false);
         when(mockedUserDao.findByEmail(existingEmail)).thenReturn(optionalUserFromDB);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(eq(optionalUserFromDB.get()), eq(rightPassword.toCharArray()))).thenReturn(true);
         when(mockedConfirmationService.findByUserId(1L)).thenReturn(Optional.of(confirmationToken));

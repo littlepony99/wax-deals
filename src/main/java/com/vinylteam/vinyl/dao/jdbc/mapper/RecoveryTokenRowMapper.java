@@ -8,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Slf4j
-public class RecoveryRowMapper implements RowMapper<RecoveryToken> {
+public class RecoveryTokenRowMapper implements RowMapper<RecoveryToken> {
 
     @Override
     public RecoveryToken mapRow(ResultSet resultSet) {

@@ -26,14 +26,11 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     private final int liveTokenHours;
 
     @Override
-    //@Transactional
     public void changePassword(String newPassword, String confirmPassword, String token) {
         checkPassword(newPassword, confirmPassword);
         UUID tokenUUID = stringToUUD(token);
         RecoveryToken recoveryToken = recoveryPasswordDao.findByToken(tokenUUID)
-                .orElseThrow(() -> {
-                    throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage());
-                });
+                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         User user = userService.findById(recoveryToken.getUserId())
                 .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         String email = user.getEmail();

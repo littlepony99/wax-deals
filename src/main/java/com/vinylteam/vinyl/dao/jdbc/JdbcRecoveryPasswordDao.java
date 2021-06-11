@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryRowMapper;
+import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryTokenRowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     private static final String REMOVE_TOKEN = "DELETE FROM recovery_password_tokens" +
             " WHERE id = ?";
 
-    private static final RecoveryRowMapper RECOVERY_ROW_MAPPER = new RecoveryRowMapper();
+    private static final RecoveryTokenRowMapper RECOVERY_ROW_MAPPER = new RecoveryTokenRowMapper();
     private final HikariDataSource dataSource;
 
     public JdbcRecoveryPasswordDao(HikariDataSource dataSource) {

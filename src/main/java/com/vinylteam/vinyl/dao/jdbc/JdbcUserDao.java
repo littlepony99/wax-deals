@@ -58,7 +58,7 @@ public class JdbcUserDao implements UserDao {
             log.info("Failed to add user to the database {'user':{}}.", user);
             return -1;
         } catch (SQLException e) {
-            log.error("Database error while adding user to users", e);
+            log.error("Error while add user {'user':{}}.", user, e);
             return -1;
         }
     }
@@ -78,7 +78,7 @@ public class JdbcUserDao implements UserDao {
                 log.info("Failed delete user from database {'user':{}}.", user);
             }
         } catch (SQLException e) {
-            log.error("Database error while delete user from users", e);
+            log.error("Error while delete user from users {'user':{}}", user, e);
             isDeleted = false;
         }
         return isDeleted;
@@ -106,7 +106,7 @@ public class JdbcUserDao implements UserDao {
                 log.info("Failed to update user in the database {'user':{}}.", user);
             }
         } catch (SQLException e) {
-            log.debug("Database error while edit user to users", e);
+            log.error("Error while updating user in users by old email to {'email': {}, 'updatedUser':{}}", email, user, e);
             isUpdated = false;
         }
         return isUpdated;

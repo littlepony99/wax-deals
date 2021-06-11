@@ -20,7 +20,7 @@ class RecoveryRowMapperTest {
     @DisplayName("Check if RecoveryToken entity created and all necessary info has been received from ResultSet")
     void mapRowTest() throws SQLException {
         //prepare
-        RecoveryRowMapper recoveryRowMapper = new RecoveryRowMapper();
+        RecoveryTokenRowMapper recoveryRowMapper = new RecoveryTokenRowMapper();
         ResultSet mockedResultSet = mock(ResultSet.class);
         LocalDateTime createdAt = LocalDateTime.now();
         UUID token = UUID.randomUUID();
