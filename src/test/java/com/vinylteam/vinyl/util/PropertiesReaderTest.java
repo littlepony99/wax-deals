@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.util;
 
 import org.junit.jupiter.api.DisplayName;
@@ -42,4 +44,4 @@ class PropertiesReaderTest {
         assertEquals("2", propertiesReader[0].getProperty("jdbc.maximum.pool.size"));
     }
 
-}
+}*/

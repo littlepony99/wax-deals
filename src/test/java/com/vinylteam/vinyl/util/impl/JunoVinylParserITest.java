@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.RawOffer;
@@ -244,4 +246,4 @@ class JunoVinylParserITest {
         assertFalse(parser.getInStockFromDocument(invalidLinkDocument));
     }
 
-}
+}*/

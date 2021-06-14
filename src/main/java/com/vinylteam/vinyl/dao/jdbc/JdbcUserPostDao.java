@@ -2,25 +2,27 @@ package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.util.PSQLException;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
 @Slf4j
+@Repository
 public class JdbcUserPostDao implements UserPostDao {
 
     private static final String INSERT_USER_POST = "INSERT INTO user_posts" +
             " (name, email, theme, message, created_at)" +
             " VALUES (?, ?, ?, ?, ?)";
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcUserPostDao(HikariDataSource dataSource) {
+    public JdbcUserPostDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

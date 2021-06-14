@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,4 +33,4 @@ class AboutServletTest {
         inOrderResponse.verify(mockedResponse).setContentType("text/html;charset=utf-8");
     }
 
-}
+}*/

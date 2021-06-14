@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.Currency;
@@ -78,4 +80,4 @@ class DeejayDeParserTest {
         long shop = parser.getShopId();
         assertEquals(6, shop);
     }
-}
+}*/

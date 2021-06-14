@@ -5,14 +5,16 @@ import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.OfferRowMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Repository
 public class JdbcOfferDao implements OfferDao {
 
     private static final String INSERT_VALID = "INSERT INTO offers (unique_vinyl_id, shop_id, price, currency, genre, cat_number, in_stock, link_to_offer) SELECT * FROM (VALUES(?, ?, ?, ?, ?, ?, ?, ?))" +
@@ -28,9 +30,9 @@ public class JdbcOfferDao implements OfferDao {
     private static final String PREPARED_STATEMENT = "Prepared statement {'preparedStatement':{}}";
     private static final String EXECUTED_STATEMENT = "Executed statement {'statement':{}}";
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcOfferDao(HikariDataSource dataSource) {
+    public JdbcOfferDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -130,6 +132,7 @@ public class JdbcOfferDao implements OfferDao {
         log.info("Database updated, couldn't add {} offers", notAddedOffers.size());
         return notAddedOffers;
     }
+
     void setVinylParameters(PreparedStatement upsertUniqueVinyls, UniqueVinyl uniqueVinyl) throws SQLException {
         upsertUniqueVinyls.setLong(1, uniqueVinyl.getId());
         upsertUniqueVinyls.setString(2, uniqueVinyl.getRelease());

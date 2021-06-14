@@ -22,17 +22,17 @@ public class RecoveryPasswordServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=utf-8");
+        /*response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         Map<String, String> attributes = new HashMap<>();
         WebUtils.setUserAttributes(request, attributes);
-        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
+        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());*/
     }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Map<String, String> attributes = new HashMap<>();
+        /*Map<String, String> attributes = new HashMap<>();
         response.setContentType("text/html;charset=utf-8");
         String email = request.getParameter("email");
         attributes.put("email", email);
@@ -49,7 +49,7 @@ public class RecoveryPasswordServlet extends HttpServlet {
             log.error(e.getMessage());
             attributes.put("message", e.getMessage());
         }
-        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());
+        PageGenerator.getInstance().process("recoveryPassword", attributes, response.getWriter());*/
     }
 
 }

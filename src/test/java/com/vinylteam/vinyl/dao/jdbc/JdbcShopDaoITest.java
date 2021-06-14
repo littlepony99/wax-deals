@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.entity.Shop;
@@ -141,4 +143,4 @@ class JdbcShopDaoITest {
         assertEquals(expectedStatement, actualStatement);
     }
 
-}
+}*/

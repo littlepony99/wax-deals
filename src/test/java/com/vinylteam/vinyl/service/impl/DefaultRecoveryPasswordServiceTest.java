@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
@@ -325,4 +327,4 @@ class DefaultRecoveryPasswordServiceTest {
         UUID result = recoveryPasswordService.stringToUUD(uuid.toString());
         assertEquals(uuid, result);
     }
-}
+}*/

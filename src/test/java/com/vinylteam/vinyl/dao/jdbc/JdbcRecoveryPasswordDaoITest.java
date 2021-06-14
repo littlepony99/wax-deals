@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
@@ -144,4 +146,4 @@ class JdbcRecoveryPasswordDaoITest {
         assertFalse(isDeleted);
     }
 
-}
+}*/

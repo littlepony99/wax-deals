@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.util.impl;
 
 import org.junit.jupiter.api.DisplayName;
@@ -59,4 +61,4 @@ class DeejayDeParserITest {
         assertFalse(allPageLinks.isEmpty());
     }
 
-}
+}*/

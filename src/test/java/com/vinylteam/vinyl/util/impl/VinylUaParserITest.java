@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.util.impl;
+
+/*package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -214,4 +215,4 @@ class VinylUaParserITest {
         assertTrue(vinylUaParser.getCatNumberFromDocument(invalidLinkDocument).isEmpty());
     }
 
-}
+}*/

@@ -23,7 +23,7 @@ public class SignUpServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=utf-8");
+        /*response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         Map<String, String> attributes = new HashMap<>();
@@ -34,12 +34,12 @@ public class SignUpServlet extends HttpServlet {
                 attributes.put("userRole", user.getRole().toString());
             }
         }
-        PageGenerator.getInstance().process("registration", attributes, response.getWriter());
+        PageGenerator.getInstance().process("registration", attributes, response.getWriter());*/
     }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Map<String, String> attributes = new HashMap<>();
+        /*Map<String, String> attributes = new HashMap<>();
         response.setContentType("text/html;charset=utf-8");
         WebUtils.setUserAttributes(request, attributes);
         String email = request.getParameter("email");
@@ -71,13 +71,13 @@ public class SignUpServlet extends HttpServlet {
                     PageGenerator.getInstance().process("registration", attributes, response.getWriter());
                 }
             }
-        }
+        }*/
     }
 
-    void setBadRequest(HttpServletResponse response, Map<String, String> attributes, String message) {
+    /*void setBadRequest(HttpServletResponse response, Map<String, String> attributes, String message) {
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
         attributes.put("message", message);
-    }
+    }*/
 
 }

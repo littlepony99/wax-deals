@@ -3,9 +3,10 @@ package com.vinylteam.vinyl.dao.jdbc;
 import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ShopRowMapper;
 import com.vinylteam.vinyl.entity.Shop;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Repository
 public class JdbcShopDao implements ShopDao {
 
     private static final ShopRowMapper shopRowMapper = new ShopRowMapper();
@@ -22,9 +24,9 @@ public class JdbcShopDao implements ShopDao {
 
     private static final String SELECT_ALL_SHOPS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image FROM shops ORDER BY shop_order NULLS FIRST";
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcShopDao(HikariDataSource dataSource) {
+    public JdbcShopDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

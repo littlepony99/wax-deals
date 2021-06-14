@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -16,6 +17,7 @@ import java.util.Base64;
 import java.util.Random;
 
 @Slf4j
+@Service
 public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();

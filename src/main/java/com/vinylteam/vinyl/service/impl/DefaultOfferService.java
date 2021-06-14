@@ -6,19 +6,19 @@ import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.util.impl.VinylParser;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class DefaultOfferService implements OfferService {
 
     private final OfferDao offerDao;
-
-    public DefaultOfferService(OfferDao offerDao) {
-        this.offerDao = offerDao;
-    }
 
     @Override
     public List<Offer> findManyByUniqueVinylId(long uniqueVinylId) {

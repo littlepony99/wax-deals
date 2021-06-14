@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.Role;
@@ -96,4 +98,4 @@ class ProfileServletTest {
         verify(mockedResponse).getWriter();
     }
 
-}
+}*/

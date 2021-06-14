@@ -6,12 +6,14 @@ import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;

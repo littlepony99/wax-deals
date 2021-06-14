@@ -3,12 +3,14 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.service.CaptchaService;
 import com.vinylteam.vinyl.util.CaptchaValidator;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 
 @Slf4j
+@Service
 public class DefaultCaptchaService implements CaptchaService {
 
     @Override

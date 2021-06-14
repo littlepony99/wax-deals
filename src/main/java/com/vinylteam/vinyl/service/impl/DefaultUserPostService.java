@@ -4,18 +4,17 @@ import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.util.MailSender;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
+@Service
 public class DefaultUserPostService implements UserPostService {
 
     private final static String PROJECT_MAIL = "waxdealsproject@gmail.com";
     private final static String CONTACT_US_DEFAULT_THEME = "Mail from customer";
     private final UserPostDao userPostDao;
     private final MailSender mailSender;
-
-    public DefaultUserPostService(UserPostDao userPostDao, MailSender mailSender) {
-        this.userPostDao = userPostDao;
-        this.mailSender = mailSender;
-    }
 
     @Override
     public boolean processAdd(UserPost post) {

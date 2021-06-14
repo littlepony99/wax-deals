@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
@@ -239,4 +241,4 @@ class JdbcConfirmationTokenDaoITest {
         assertEquals(2, actualConfirmationTokens.size());
     }
 
-}
+}*/

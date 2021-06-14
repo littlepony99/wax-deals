@@ -8,14 +8,19 @@ import com.vinylteam.vinyl.exception.entity.ErrorRecoveryPassword;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.MailSender;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor
+@Service
+@Configuration
+@PropertySource("classpath:application.properties")
 public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/newPassword?token=";
 
@@ -24,6 +29,18 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     private final MailSender mailSender;
     private final String applicationLink;
     private final int liveTokenHours;
+
+    public DefaultRecoveryPasswordService(RecoveryPasswordDao recoveryPasswordDao,
+                                          UserService userService,
+                                          MailSender mailSender,
+                                          @Value("${application.link}") String applicationLink,
+                                          @Value("${recoveryToken.live.hours}") int liveTokenHours) {
+        this.recoveryPasswordDao = recoveryPasswordDao;
+        this.userService = userService;
+        this.mailSender = mailSender;
+        this.applicationLink = applicationLink;
+        this.liveTokenHours = liveTokenHours;
+    }
 
     @Override
     public void changePassword(String newPassword, String confirmPassword, String token) {

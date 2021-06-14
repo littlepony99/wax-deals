@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,4 +61,4 @@ class SignOutServletTest {
         inOrderResponse.verify(mockedResponse).sendRedirect("/");
     }
 
-}
+}*/

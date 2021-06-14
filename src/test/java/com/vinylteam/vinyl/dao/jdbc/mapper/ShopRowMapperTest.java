@@ -1,3 +1,6 @@
+
+/*
+
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
 import com.vinylteam.vinyl.dao.RowMapper;
@@ -36,4 +39,4 @@ class ShopRowMapperTest {
         assertEquals("shop1/small_image.png", actualShop.getSmallImageLink());
     }
 
-}
+}*/

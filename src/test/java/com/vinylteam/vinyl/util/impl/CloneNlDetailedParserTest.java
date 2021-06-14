@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.util.impl;
+
+/*package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.util.DetailedVinylParser;
 import org.jsoup.Jsoup;
@@ -117,4 +118,4 @@ public class CloneNlDetailedParserTest {
         assertTrue(offerLink.isEmpty());
     }
 
-}
+}*/

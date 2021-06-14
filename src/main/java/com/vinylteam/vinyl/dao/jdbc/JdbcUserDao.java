@@ -4,9 +4,10 @@ import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 @Slf4j
+@Repository
 public class JdbcUserDao implements UserDao {
 
     private static final RowMapper<User> ROW_MAPPER = new UserRowMapper();
@@ -31,9 +33,9 @@ public class JdbcUserDao implements UserDao {
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
             " WHERE email ILIKE ?";
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcUserDao(HikariDataSource dataSource) {
+    public JdbcUserDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

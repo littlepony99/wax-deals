@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.service.impl;
+
+/*package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.dao.jdbc.JdbcUniqueVinylDao;
@@ -125,4 +126,4 @@ class DefaultUniqueVinylServiceTest {
         verify(mockedUniqueVinylDao, never()).findById(id);
     }
 
-}
+}*/

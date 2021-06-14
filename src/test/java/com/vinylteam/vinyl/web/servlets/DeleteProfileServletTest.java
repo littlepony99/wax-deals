@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.User;
@@ -106,4 +108,4 @@ class DeleteProfileServletTest {
         inOrderResponse.verify(mockedResponse).sendRedirect("/signUp");
     }
 
-}
+}*/

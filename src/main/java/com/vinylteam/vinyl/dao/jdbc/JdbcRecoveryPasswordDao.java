@@ -3,15 +3,17 @@ package com.vinylteam.vinyl.dao.jdbc;
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryTokenRowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@Repository
 public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
 
     private static final String INSERT_TOKEN = "INSERT INTO recovery_password_tokens" +
@@ -24,9 +26,9 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
             " WHERE id = ?";
 
     private static final RecoveryTokenRowMapper RECOVERY_ROW_MAPPER = new RecoveryTokenRowMapper();
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcRecoveryPasswordDao(HikariDataSource dataSource) {
+    public JdbcRecoveryPasswordDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

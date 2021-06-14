@@ -3,19 +3,19 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.UniqueVinylService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class DefaultUniqueVinylService implements UniqueVinylService {
 
     private final UniqueVinylDao vinylDao;
-
-    public DefaultUniqueVinylService(UniqueVinylDao vinylDao) {
-        this.vinylDao = vinylDao;
-    }
 
     @Override
     public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {

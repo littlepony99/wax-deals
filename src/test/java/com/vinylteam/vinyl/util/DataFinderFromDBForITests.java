@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.util;
+
+/*package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenRowMapper;
@@ -14,6 +15,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,7 @@ import java.util.Optional;
 @Slf4j
 public class DataFinderFromDBForITests {
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
     private final RowMapper<User> userRowMapper = new UserRowMapper();
     private final RowMapper<UniqueVinyl> uniqueVinylRowMapper = new UniqueVinylRowMapper();
     private final RowMapper<Offer> offerRowMapper = new OfferRowMapper();
@@ -35,7 +37,7 @@ public class DataFinderFromDBForITests {
     private static final String FIND_BY_RECOVERY_TOKEN = "SELECT id, user_id, token, created_at, token_lifetime FROM recovery_password_tokens" +
             " WHERE token = ?";
 
-    public DataFinderFromDBForITests(HikariDataSource dataSource) {
+    public DataFinderFromDBForITests(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -118,4 +120,4 @@ public class DataFinderFromDBForITests {
         return Optional.ofNullable(recoveryToken);
     }
 
-}
+}*/

@@ -27,22 +27,22 @@ public class ConfirmationServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String tokenAsString = request.getParameter("token");
-        Optional<ConfirmationToken> optionalConfirmationToken = confirmationService.findByToken(tokenAsString);
-        response.setContentType("text/html;charset=utf-8");
-        Map<String, String> attributes = new HashMap<>();
-        if (optionalConfirmationToken.isEmpty()) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_NOT_FOUND);
-            attributes.put("message", "Sorry, such confirmation link does not exist. Maybe your email is already verified? Try to log in! " +
-                    "If you haven't verified your email and you can't use confirmation link, please, contact us through the form.");
-            PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-            attributes.put("token", tokenAsString);
-            PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
-        }
+//        String tokenAsString = request.getParameter("token");
+//        Optional<ConfirmationToken> optionalConfirmationToken = confirmationService.findByToken(tokenAsString);
+//        response.setContentType("text/html;charset=utf-8");
+//        Map<String, String> attributes = new HashMap<>();
+//        if (optionalConfirmationToken.isEmpty()) {
+//            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+//            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_NOT_FOUND);
+//            attributes.put("message", "Sorry, such confirmation link does not exist. Maybe your email is already verified? Try to log in! " +
+//                    "If you haven't verified your email and you can't use confirmation link, please, contact us through the form.");
+//            PageGenerator.getInstance().process("confirmation-directions", attributes, response.getWriter());
+//        } else {
+//            response.setStatus(HttpServletResponse.SC_OK);
+//            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
+//            attributes.put("token", tokenAsString);
+//            PageGenerator.getInstance().process("confirmation-signin", attributes, response.getWriter());
+//        }
     }
 
     @Override

@@ -1,3 +1,5 @@
+/*
+
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
 import com.vinylteam.vinyl.entity.RecoveryToken;
@@ -37,4 +39,4 @@ class RecoveryRowMapperTest {
         assertEquals(Timestamp.valueOf(createdAt), recoveryToken.getCreatedAt());
     }
 
-}
+}*/

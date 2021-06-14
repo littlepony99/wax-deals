@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.*;
@@ -201,4 +203,4 @@ class OneVinylOffersServletTest {
         }
     }
 
-}
+}*/

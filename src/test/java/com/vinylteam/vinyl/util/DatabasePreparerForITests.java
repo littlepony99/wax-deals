@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
@@ -6,6 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -33,7 +36,7 @@ public class DatabasePreparerForITests {
             " VALUES (?, ?, ?, ?)" +
             " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?, token_lifetime = ?";
     private final PropertiesReader propertiesReader = new PropertiesReader();
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
     private final HikariConfig config = new HikariConfig();
 
     public DatabasePreparerForITests() {
@@ -46,7 +49,7 @@ public class DatabasePreparerForITests {
         log.info("Configured and created HikariDataSource object {'dataSource':{}}", dataSource);
     }
 
-    public HikariDataSource getDataSource() {
+    public DataSource getDataSource() {
         return dataSource;
     }
 
@@ -231,3 +234,4 @@ public class DatabasePreparerForITests {
     }
 
 }
+*/

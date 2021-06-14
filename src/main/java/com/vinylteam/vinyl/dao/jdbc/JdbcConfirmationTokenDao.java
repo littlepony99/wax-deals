@@ -4,15 +4,17 @@ import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenRowMapper;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@Repository
 public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
     private static final String INSERT = "INSERT INTO confirmation_tokens (user_id, token, created_at) VALUES (?, ?, ?)";
@@ -22,9 +24,9 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id=? ";
     private static final String UPDATE_USER_STATUS = "UPDATE users set status = true WHERE id =?";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcConfirmationTokenDao(HikariDataSource dataSource) {
+    public JdbcConfirmationTokenDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

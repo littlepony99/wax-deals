@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.entity.Offer;
@@ -262,4 +264,4 @@ class JdbcOfferDaoITest {
         inOrderStatement.verify(statement).setBoolean(6, uniqueVinyl.getHasOffers());
     }
 
-}
+}*/

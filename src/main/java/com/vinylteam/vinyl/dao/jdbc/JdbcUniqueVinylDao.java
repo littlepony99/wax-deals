@@ -4,9 +4,10 @@ import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UniqueVinylRowMapper;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Repository
 public class JdbcUniqueVinylDao implements UniqueVinylDao {
 
     private static final RowMapper<UniqueVinyl> rowMapper = new UniqueVinylRowMapper();
@@ -25,9 +27,9 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist ILIKE ? AND has_offers";
     private static final String UPDATE_UNIQUE_VINYL_SET_HAS_OFFERS_FALSE = "UPDATE unique_vinyls SET has_offers=FALSE WHERE has_offers=TRUE AND id = ?";
 
-    private final HikariDataSource dataSource;
+    private final DataSource dataSource;
 
-    public JdbcUniqueVinylDao(HikariDataSource dataSource) {
+    public JdbcUniqueVinylDao(DataSource dataSource) {
         this.dataSource = dataSource;
     }
 

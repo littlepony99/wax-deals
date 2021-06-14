@@ -3,19 +3,19 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.service.ShopService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class DefaultShopService implements ShopService {
 
     private final ShopDao shopDao;
-
-    public DefaultShopService(ShopDao shopDao) {
-        this.shopDao = shopDao;
-    }
 
     public List<Shop> getManyByListOfIds(List<Integer> ids) {
         List<Shop> shops;

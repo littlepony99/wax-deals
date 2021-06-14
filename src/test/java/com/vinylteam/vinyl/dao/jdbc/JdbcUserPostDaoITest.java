@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserPostDao;
@@ -41,4 +43,4 @@ class JdbcUserPostDaoITest {
         assertTrue(userPostDao.add(expectedUserPost));
     }
 
-}
+}*/

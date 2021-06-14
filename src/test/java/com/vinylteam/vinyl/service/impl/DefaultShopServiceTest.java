@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.service.impl;
+
+/*package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.dao.jdbc.JdbcShopDao;
@@ -59,4 +60,4 @@ class DefaultShopServiceTest {
         verify(mockedShopDao, never()).getManyByListOfIds(null);
     }
 
-}
+}*/
