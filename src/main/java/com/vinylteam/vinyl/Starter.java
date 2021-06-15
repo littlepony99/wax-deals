@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-@Slf4j
+//@Slf4j
+//@Configuration
+//@PropertySource("classpath:application.properties")
 @SpringBootApplication
-@Configuration
-@PropertySource(ignoreResourceNotFound=true,value="classpath:application.properties")
 public class Starter {
 
     public static void main(String[] args) throws Exception {
@@ -174,17 +174,17 @@ public class Starter {
 //        return discogsService;
 //    }
 
-    @Bean
-    public MailSender getMailSender(@Value("${mail.smtp.username}") String mailUserName,
-                                    @Value("${mail.smtp.password}") String mailUserPassword,
-                                    @Value("${mail.smtp.host}") String maliHost,
-                                    @Value("${mail.smtp.port}") String mailPort,
-                                    @Value("${mail.smtp.auth}") String mailAuth) {
-        MailSender mailSender = new MailSender(mailUserName,
-                mailUserPassword,
-                maliHost,
-                mailPort,
-                mailAuth);
-        return mailSender;
-    }
+//    @Bean
+//    public MailSender getMailSender(@Value("${mail.smtp.username}") String mailUserName,
+//                                    @Value("${mail.smtp.password}") String mailUserPassword,
+//                                    @Value("${mail.smtp.host}") String maliHost,
+//                                    @Value("${mail.smtp.port}") String mailPort,
+//                                    @Value("${mail.smtp.auth}") String mailAuth) {
+//        MailSender mailSender = new MailSender(mailUserName,
+//                mailUserPassword,
+//                maliHost,
+//                mailPort,
+//                mailAuth);
+//        return mailSender;
+//    }
 }
