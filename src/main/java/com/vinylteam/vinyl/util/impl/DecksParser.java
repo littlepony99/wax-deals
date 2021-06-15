@@ -6,10 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Slf4j
+@Service
 public class DecksParser extends VinylParser {
 
     private static final String BASE_LINK = "https://www.decks.de";

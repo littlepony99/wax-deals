@@ -5,12 +5,11 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;

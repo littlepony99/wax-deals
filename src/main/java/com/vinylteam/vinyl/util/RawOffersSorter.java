@@ -4,10 +4,12 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Slf4j
+@Service
 public class RawOffersSorter {
 
     public List<Offer> getOffersUpdateUniqueVinyls(List<RawOffer> rawOffers, List<UniqueVinyl> uniqueVinyls) {

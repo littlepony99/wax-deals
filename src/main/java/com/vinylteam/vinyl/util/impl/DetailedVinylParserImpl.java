@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.util.PriceUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
+@Service
 public class DetailedVinylParserImpl implements DetailedVinylParser {
 
     private final ParserConfiguration config;

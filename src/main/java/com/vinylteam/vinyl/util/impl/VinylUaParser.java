@@ -8,11 +8,13 @@ import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
 @Slf4j
+@Service
 public class VinylUaParser extends VinylParser {
 
     private static final String START_LINK = "http://vinyl.ua";

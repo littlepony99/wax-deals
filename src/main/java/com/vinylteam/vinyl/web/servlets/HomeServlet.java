@@ -2,12 +2,11 @@ package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,18 +16,18 @@ public class HomeServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        Map<String, String> attributes = new HashMap<>();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                attributes.put("userRole", user.getRole().toString());
-            }
-        }
-        PageGenerator.getInstance().process("index", attributes, response.getWriter());
+//        response.setContentType("text/html;charset=utf-8");
+//        response.setStatus(HttpServletResponse.SC_OK);
+//        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
+//        Map<String, String> attributes = new HashMap<>();
+//        HttpSession session = request.getSession(false);
+//        if (session != null) {
+//            User user = (User) session.getAttribute("user");
+//            if (user != null) {
+//                attributes.put("userRole", user.getRole().toString());
+//            }
+//        }
+//        PageGenerator.getInstance().process("index", attributes, response.getWriter());
     }
 
 }

@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.util.PriceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -15,6 +16,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toSet;
 
 @Slf4j
+@Service
 public class JunoVinylParser extends VinylParser {
 
     private static final String BASE_LINK = "https://www.juno.co.uk";

@@ -1,11 +1,12 @@
-package com.vinylteam.vinyl.web.handler;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+/*package com.vinylteam.vinyl.web.handler;
+
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,4 +28,4 @@ public class DefaultErrorHandler extends ErrorPageErrorHandler {
                 "{'status':{}}", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
-}
+}*/

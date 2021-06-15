@@ -4,12 +4,12 @@ import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.web.templater.PageGenerator;
 import com.vinylteam.vinyl.web.util.WebUtils;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

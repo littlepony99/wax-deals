@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.filter;
 
 import com.vinylteam.vinyl.entity.Role;
@@ -46,4 +48,4 @@ public class SecurityFilter implements Filter {
         }
     }
 
-}
+}*/

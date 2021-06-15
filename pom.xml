@@ -25,7 +25,6 @@
 
         <!--Dependencies-->
         <postgresql.version>42.2.17</postgresql.version>
-        <jetty.version>11.0.2</jetty.version>
         <jsoup.version>1.13.1</jsoup.version>
         <logback.classic.version>1.2.3</logback.classic.version>
         <slf4j.api.version>1.7.30</slf4j.api.version>
@@ -151,11 +150,6 @@
             <artifactId>spring-boot-starter-jdbc</artifactId>
             <version>2.5.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>5.3.8</version>
-        </dependency>
 
         <!--Spring boot Thymeleaf-->
         <dependency>
@@ -188,18 +182,6 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${hikari.cp.version}</version>
-        </dependency>
-        <!--JETTY-SERVER-->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
-        <!--JETTY-SERVLET-->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
         <!--JSOUP-->
         <dependency>
