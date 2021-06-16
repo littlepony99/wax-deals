@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
 public class DetailedVinylParserImpl implements DetailedVinylParser {
 
     private final ParserConfiguration config;

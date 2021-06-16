@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.util.WebUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -18,13 +17,17 @@ import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Slf4j
-@RequiredArgsConstructor
 @Controller
 @RequestMapping("/signIn")
 public class SignInController {
     private final UserService userService;
-    @Value("${session.maxInactiveInterval}")
     private final Integer sessionMaxInactiveInterval;
+
+    public SignInController(UserService userService,
+                            @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval) {
+        this.userService = userService;
+        this.sessionMaxInactiveInterval = sessionMaxInactiveInterval;
+    }
 
     @GetMapping
     public String getSignInPage(HttpServletRequest request,

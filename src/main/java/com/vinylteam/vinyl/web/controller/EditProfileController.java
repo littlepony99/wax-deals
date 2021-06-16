@@ -3,8 +3,8 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.UserService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,13 +16,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
-@RequiredArgsConstructor
 @Controller
 @RequestMapping("/editProfile")
 public class EditProfileController {
     private final SecurityService securityService;
     private final UserService userService;
     private final Integer sessionMaxInactiveInterval;
+
+    public EditProfileController(SecurityService securityService,
+                                 UserService userService,
+                                 @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval) {
+        this.securityService = securityService;
+        this.userService = userService;
+        this.sessionMaxInactiveInterval = sessionMaxInactiveInterval;
+    }
 
     @GetMapping
     public String getEditProfilePage(HttpServletRequest request,

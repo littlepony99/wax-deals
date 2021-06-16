@@ -4,8 +4,8 @@ import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +18,6 @@ import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Slf4j
-@RequiredArgsConstructor
 @Controller
 @RequestMapping("/emailConfirmation")
 public class ConfirmationController {
@@ -26,6 +25,14 @@ public class ConfirmationController {
     private final UserService userService;
     private final ConfirmationService confirmationService;
     private final Integer sessionMaxInactiveInterval;
+
+    public ConfirmationController(UserService userService,
+                                  ConfirmationService confirmationService,
+                                  @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval) {
+        this.userService = userService;
+        this.confirmationService = confirmationService;
+        this.sessionMaxInactiveInterval = sessionMaxInactiveInterval;
+    }
 
     @GetMapping
     public String getConfirmationPage(HttpServletRequest request,

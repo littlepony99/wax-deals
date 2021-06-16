@@ -5,61 +5,43 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-dependencies</artifactId>
+        <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.5.1</version>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.example</groupId>
     <artifactId>wax-deals</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <!--Plugins-->
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.plugin.vesrion>3.8.1</maven.compiler.plugin.vesrion>
-        <maven.surefire.plugin.version>2.22.2</maven.surefire.plugin.version>
+        <java.version>11</java.version>
         <jacoco.maven.plugin.version>0.8.6</jacoco.maven.plugin.version>
 
         <!--Dependencies-->
         <postgresql.version>42.2.17</postgresql.version>
         <jsoup.version>1.13.1</jsoup.version>
-        <logback.classic.version>1.2.3</logback.classic.version>
-        <slf4j.api.version>1.7.30</slf4j.api.version>
-        <hikari.cp.version>3.4.5</hikari.cp.version>
-        <jackson.databind.version>2.11.3</jackson.databind.version>
         <javax.mail.version>1.4.7</javax.mail.version>
-        <thymeleaf.version>3.0.12.RELEASE</thymeleaf.version>
         <jcaptcha.version>1.0-RC6</jcaptcha.version>
 
         <!--Test Dependencies-->
-        <junit.jupiter.engine.version>5.7.1</junit.jupiter.engine.version>
-        <mockito.version>3.8.0</mockito.version>
         <flyway.version>7.7.2</flyway.version>
         <system.lambda.version>1.2.0</system.lambda.version>
-        <lombok.version>1.18.20</lombok.version>
-
     </properties>
 
     <build>
-        <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
-
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.plugin.vesrion}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin.version}</version>
             </plugin>
 
             <plugin>
@@ -93,43 +75,6 @@
                     <baselineOnMigrate>true</baselineOnMigrate>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.vinylteam.vinyl.Starter</mainClass>
-                                </transformer>
-                            </transformers>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <finalName>vinyl</finalName>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 
@@ -155,6 +100,13 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
         <!--Spring boot TEST-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -166,98 +118,45 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
+
         <!--POSTGRES-->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
         </dependency>
-        <!--HIKARICP-->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>${hikari.cp.version}</version>
-        </dependency>
+
         <!--JSOUP-->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
         </dependency>
+
         <!--JSON-Simple-->
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
         </dependency>
-        <!--LOGBACK-->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>${logback.classic.version}</version>
-        </dependency>
-        <!--SLF4J-->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.api.version}</version>
-        </dependency>
-        <!--JSON-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson.databind.version}</version>
-        </dependency>
+
         <!-- Mail sender -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
             <version>${javax.mail.version}</version>
         </dependency>
-        <!--Thymeleaf-->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
-            <version>${thymeleaf.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>com.octo.captcha</groupId>
-            <artifactId>jcaptcha-all</artifactId>
-            <version>${jcaptcha.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>com.octo.captcha</groupId>-->
+        <!--            <artifactId>jcaptcha-all</artifactId>-->
+        <!--            <version>${jcaptcha.version}</version>-->
+        <!--        </dependency>-->
 
         <!--TESTS-->
 
-        <!--JUNIT-->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.engine.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.jupiter.engine.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <!--MOCKITO-->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
         <!--FLYWAY CORE-->
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -265,6 +164,7 @@
             <version>${flyway.version}</version>
             <scope>test</scope>
         </dependency>
+
         <!--SYSTEM-LAMBDA-->
         <dependency>
             <groupId>com.github.stefanbirkner</groupId>
@@ -272,5 +172,6 @@
             <version>${system.lambda.version}</version>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 </project>

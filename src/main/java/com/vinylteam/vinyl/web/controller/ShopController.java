@@ -19,7 +19,7 @@ import javax.servlet.http.HttpSession;
 @RequestMapping("/stores")
 public class ShopController {
 
-    private ShopService shopService;
+    private final ShopService shopService;
 
     @GetMapping
     public String getShopPage(HttpServletRequest request,

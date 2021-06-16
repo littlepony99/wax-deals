@@ -17,7 +17,6 @@ import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 @Service
-@Configuration
 public class DeejayDeParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://www.deejay.de";
