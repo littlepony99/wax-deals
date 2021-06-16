@@ -17,6 +17,7 @@ public class Starter {
         //FIXME clean and tidy project
         //FIXME fix MailSender
         //FIXME fix if discogs userName is null then is problem in db
+        //FIXME if recovery token is not correct we must don't show password form ??? - HOW WORK MESSENGER
         //FIXME if user was added and mail wasn't sent then user receive message that WaxDeals couldn't create profile
 
     /*    TimerTask updateTask = new TimerTask() {

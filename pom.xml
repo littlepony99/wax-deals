@@ -21,7 +21,7 @@
         <!--Dependencies-->
         <postgresql.version>42.2.17</postgresql.version>
         <jsoup.version>1.13.1</jsoup.version>
-        <javax.mail.version>1.4.7</javax.mail.version>
+<!--        <javax.mail.version>1.4.7</javax.mail.version>-->
         <jcaptcha.version>1.0-RC6</jcaptcha.version>
 
         <!--Test Dependencies-->
@@ -144,10 +144,15 @@
 
         <!-- Mail sender -->
         <dependency>
-            <groupId>javax.mail</groupId>
-            <artifactId>mail</artifactId>
-            <version>${javax.mail.version}</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>2.5.1</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>javax.mail</groupId>-->
+<!--            <artifactId>mail</artifactId>-->
+<!--            <version>${javax.mail.version}</version>-->
+<!--        </dependency>-->
 
         <!--        <dependency>-->
         <!--            <groupId>com.octo.captcha</groupId>-->
