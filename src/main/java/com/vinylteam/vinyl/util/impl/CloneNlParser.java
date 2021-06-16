@@ -199,7 +199,7 @@ public class CloneNlParser extends VinylParser {
         }
 
         public Optional<Currency> getOptionalCurrencyFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
+            List<String> pricesBlock = getPriceDetailsFromDocument(document);
             if (pricesBlock.isEmpty()) {
                 return Optional.empty();
             }
@@ -209,7 +209,7 @@ public class CloneNlParser extends VinylParser {
         }
 
         public double getPriceFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
+            List<String> pricesBlock = getPriceDetailsFromDocument(document);
             if (pricesBlock.isEmpty()) {
                 return 0d;
             }
@@ -218,7 +218,12 @@ public class CloneNlParser extends VinylParser {
             return PriceUtils.getPriceFromString(fullPriceDetails);
         }
 
-    public String getHighResImageLinkFromDocument(Element document) {
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return document.select(PRICE_DETAILS_SELECTOR).eachText();
+        }
+
+        public String getHighResImageLinkFromDocument(Element document) {
         String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
         if (imageLink != null && !Objects.equals(imageLink, "")){
             if (!imageLink.contains("no-cover")){
@@ -274,7 +279,7 @@ public class CloneNlParser extends VinylParser {
         }
 
         public Optional<Currency> getOptionalCurrencyFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
+            List<String> pricesBlock = getPriceDetailsFromDocument(document);
             if (pricesBlock.isEmpty()) {
                 return Optional.empty();
             }
@@ -284,13 +289,18 @@ public class CloneNlParser extends VinylParser {
         }
 
         public double getPriceFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
+            List<String> pricesBlock = getPriceDetailsFromDocument(document);
             if (pricesBlock.isEmpty()) {
                 return 0d;
             }
             String fullPriceDetails = pricesBlock.get(0);
             log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
             return PriceUtils.getPriceFromString(fullPriceDetails);
+        }
+
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return document.select(PRICE_DETAILS_SELECTOR).eachText();
         }
 
         public String getHighResImageLinkFromDocument(Element document) {

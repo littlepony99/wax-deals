@@ -98,7 +98,6 @@ public class RawOffersSorter {
     int getMatchingNumber(String[] preparedFullNameForMatching, String rawOfferFullName) {
         return (int) Arrays.stream(preparedFullNameForMatching)
                 .map(preparedItem -> preparedItem.toLowerCase().trim())
-                .distinct()
                 .filter(preparedItem -> rawOfferFullName.toLowerCase().contains(preparedItem))
                 .count();
     }
