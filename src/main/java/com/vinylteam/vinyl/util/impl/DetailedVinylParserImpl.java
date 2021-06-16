@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DetailedVinylParserImpl implements DetailedVinylParser {
 
-    final ParserConfiguration config;
+    protected final ParserConfiguration config;
 
     @Override
     public String getGenreFromDocument(Element document) {

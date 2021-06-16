@@ -16,7 +16,7 @@ public class PriceUtils {
                 log.debug("Got price from price details {'price':{}, 'priceDetails':{}}", price, fullPriceDetails);
                 return price;
             } catch (Exception e) {
-                log.error("Error while getting price from price details from link {'priceDetails':{}}", fullPriceDetails);
+                log.error("Error while getting price from price details from link {'priceDetails':{}}", fullPriceDetails, e);
             }
         }
         log.warn("Can't find price from price details from link, returning 0. {'priceDetails':{}}", fullPriceDetails);
@@ -32,7 +32,7 @@ public class PriceUtils {
                 log.debug("Got optional with currency from price details {'optionalCurrency':{}, 'priceDetails':{}}", optionalCurrency, priceDetails);
                 return optionalCurrency;
             } catch (Exception e) {
-                log.error("Error while getting optional with currency from price details from link {'priceDetails':{}}", priceDetails);
+                log.error("Error while getting optional with currency from price details from link {'priceDetails':{}}", priceDetails, e);
             }
         }
         log.warn("Can't find currency description from price details from link, returning empty optional {'priceDetails':{}}", fullPriceDetails);

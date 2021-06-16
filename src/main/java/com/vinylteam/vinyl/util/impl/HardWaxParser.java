@@ -205,7 +205,7 @@ public class HardWaxParser extends VinylParser {
         return "";
     }
 
-    class HardWaxDetailedParserImpl extends DetailedVinylParserImpl {
+    private class HardWaxDetailedParserImpl extends DetailedVinylParserImpl {
 
         public HardWaxDetailedParserImpl(ParserConfiguration config) {
             super(config);
@@ -225,5 +225,6 @@ public class HardWaxParser extends VinylParser {
             String inStockText = document.select(config.getInStockMarkerSelector()).text();
             return !inStockText.contains(config.getInStockMarker());
         }
+        
     }
 }

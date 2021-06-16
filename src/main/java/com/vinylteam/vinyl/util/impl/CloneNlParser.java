@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 public class CloneNlParser extends VinylParser {
 
-    protected static final String BASE_LINK = "https://clone.nl";
+    static final String BASE_LINK = "https://clone.nl";
     private static final String CATALOG_ROOT_LINK = BASE_LINK + "/genres";
     private static final String START_PAGE_LINK = CATALOG_ROOT_LINK;
     private static final String GENRES_SELECTOR = "DIV > H1:contains(Genres) + P > A[href*=genre/]";
@@ -165,6 +165,7 @@ public class CloneNlParser extends VinylParser {
     public RawOffer getRawOfferFromElement(Element releaseElement, DetailedVinylParser detailedParser) {
         String imageLink = detailedParser.getHighResImageLinkFromDocument(releaseElement);
         String offerLink = detailedParser.getOfferLinkFromDocument(releaseElement);
+        offerLink = !offerLink.isEmpty()? BASE_LINK + offerLink: offerLink;
         double price = detailedParser.getPriceFromDocument(releaseElement);
         Optional<Currency> priceCurrency = detailedParser.getOptionalCurrencyFromDocument(releaseElement);
         String artist = detailedParser.getArtistFromDocument(releaseElement);
