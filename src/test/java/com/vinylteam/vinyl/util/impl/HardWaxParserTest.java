@@ -18,13 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HardWaxParserTest {
 
     private HardWaxParser parser;
-
     private Element vinylElement;
 
     @Test
     @DisplayName("Checks whether RawOffer is received from HTML Element that represents one vinyl Item from the listed on the page")
     void getRawOffersFromAllOfferLinksTest() {
-        RawOffer rawOffer = parser.getRawOfferFromElement(vinylElement, parser.getDetailedParser());
+        RawOffer rawOffer = parser.getRawOfferFromElement(vinylElement, parser.getListParser());
         assertNotNull(rawOffer);
         assertEquals("Sleepwalker", rawOffer.getRelease());
         assertEquals("https://hardwax.com/14863/o-yuki-conjugate/sleepwalker/", rawOffer.getOfferLink());
@@ -41,7 +40,7 @@ class HardWaxParserTest {
     void getRawOffersFromOneVinylPageLinkTest() throws IOException {
         File testHtml = new File(this.getClass().getClassLoader().getResource("HtmlPages/hardwaxOnePageItem.html").getPath());
         vinylElement = Jsoup.parse(testHtml, null).select("DIV#content").first();
-        RawOffer rawOffer = parser.getRawOfferFromElement(vinylElement, parser.getOnePageDetailedParser());
+        RawOffer rawOffer = parser.getRawOfferFromElement(vinylElement, parser.getOnePageParser());
         assertNotNull(rawOffer);
         assertEquals("Sleepwalker", rawOffer.getRelease());
         assertEquals("https://hardwax.com/14863/o-yuki-conjugate/sleepwalker/", rawOffer.getOfferLink());

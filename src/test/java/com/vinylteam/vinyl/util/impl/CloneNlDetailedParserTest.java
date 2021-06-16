@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CloneNlDetailedParserTest {
 
-    private DetailedVinylParser detailedParser = new CloneNlParser.DefaultDetailedVinylParser();
+    private DetailedVinylParser detailedParser = new CloneNlParser().getListParser();
 
     static Element getVinylElement(String elementResource) {
         File testHtml = new File(CloneNlDetailedParserTest.class.getClassLoader().getResource(elementResource).getPath());
@@ -30,8 +30,8 @@ public class CloneNlDetailedParserTest {
 
     static Stream<Arguments> getTestData() {
         return Stream.of(
-                Arguments.of(new CloneNlParser.DefaultDetailedVinylParser(), getVinylElement("HtmlPages/cloneNLItem.html")),
-                Arguments.of(new CloneNlParser.OnePageDetailedVinylParser(), getVinylElement("HtmlPages/cloneNLItemOnePage.html"))
+                Arguments.of(new CloneNlParser().getListParser(), getVinylElement("HtmlPages/cloneNLItem.html")),
+                Arguments.of(new CloneNlParser().getOnePageParser(), getVinylElement("HtmlPages/cloneNLItemOnePage.html"))
                 );
     }
 
@@ -103,7 +103,7 @@ public class CloneNlDetailedParserTest {
     @DisplayName("Checks whether offer link is received from HTML Element that is a part of list")
     void getOfferLinkFromDocumentTest()  {
         var vinylElement = getVinylElement("HtmlPages/cloneNLItem.html");
-        String offerLink = new CloneNlParser.DefaultDetailedVinylParser().getOfferLinkFromDocument(vinylElement);
+        String offerLink = new CloneNlParser().getListParser().getOfferLinkFromDocument(vinylElement);
         assertNotNull(offerLink);
         assertFalse(offerLink.isEmpty());
     }
@@ -112,7 +112,7 @@ public class CloneNlDetailedParserTest {
     @DisplayName("Checks whether offer link is empty from HTML Element that represents one vinyl Item")
     void getOfferLinkFromOnePAgeDocumentTest()  {
         var vinylElement = getVinylElement("HtmlPages/cloneNLItemOnePage.html");
-        String offerLink = new CloneNlParser.OnePageDetailedVinylParser().getOfferLinkFromDocument(vinylElement);
+        String offerLink = new CloneNlParser().getOnePageParser().getOfferLinkFromDocument(vinylElement);
         assertNotNull(offerLink);
         assertTrue(offerLink.isEmpty());
     }

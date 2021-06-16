@@ -33,9 +33,9 @@ public class HardWaxParser extends VinylParser {
     private static final String PRELIMINARY_PAGE_LINK_SELECTOR = "DIV.fleft A:contains(Last)";
 
 
-    private final ParserConfiguration conf = ParserConfiguration
+    private final ParserConfiguration listParserConfiguration = ParserConfiguration
             .builder()
-            .highResolutionImageSelector("DIV.listing.block DIV.picture > A > IMG.thumbnail")//x. -> xbig
+            .highResolutionImageSelector("DIV.listing.block DIV.picture > A > IMG.thumbnail")
             .offerLinkSelector("DIV.listing.block DIV.picture > A")
             .artistSelector("DIV.listing.block DIV.textblock DIV.linebig > STRONG > A")
             .releaseSelector("DIV.listing.block DIV.textblock DIV.linebig")
@@ -46,7 +46,7 @@ public class HardWaxParser extends VinylParser {
             .inStockMarkerSelector("DIV.add_order")
             .build();
 
-    private final ParserConfiguration onePageConf = ParserConfiguration
+    private final ParserConfiguration onePageParserConfiguration = ParserConfiguration
             .builder()
             .highResolutionImageSelector("DIV#content DIV.record.block DIV.picture.big > IMG[id*=bigimage.x]")
             .offerLinkSelector("DIV#content DIV.record.block DIV.linesmall > A[href*=label] + A")
@@ -60,17 +60,17 @@ public class HardWaxParser extends VinylParser {
             .build();
 
     @Getter
-    private final DetailedVinylParser detailedParser = new HardWaxDetailedParserImpl(conf);
+    private final DetailedVinylParser listParser = new HardWaxDetailedParserImpl(listParserConfiguration);
 
     @Getter
-    private final DetailedVinylParser onePageDetailedParser = new HardWaxDetailedParserImpl(onePageConf);
+    private final DetailedVinylParser onePageParser = new HardWaxDetailedParserImpl(onePageParserConfiguration);
 
     @Override
     public RawOffer getRawOfferFromOfferLink(String offerLink) {
         return getDocument(offerLink)
                 .stream()
                 .flatMap(doc -> doc.select(ONE_VINYL_FROM_ONE_PAGE_SELECTOR).stream())
-                .map(oneVinyl -> getRawOfferFromElement(oneVinyl, onePageDetailedParser))
+                .map(oneVinyl -> getRawOfferFromElement(oneVinyl, onePageParser))
                 .findFirst()
                 .orElse(new RawOffer());
     }
@@ -188,7 +188,7 @@ public class HardWaxParser extends VinylParser {
                 .stream()
                 .map(document -> document.select(OFFER_LIST_SELECTOR))
                 .flatMap(offersList -> offersList.select(ONE_VINYL_SELECTOR).stream())
-                .map(releaseElement -> getRawOfferFromElement(releaseElement, detailedParser))
+                .map(releaseElement -> getRawOfferFromElement(releaseElement, listParser))
                 .filter(this::isValid)
                 .collect(toSet());
         offerLinks.forEach(offer -> offer.setGenre(genre));
