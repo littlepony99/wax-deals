@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -11,6 +12,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
 @Slf4j
+@Service
 public class MailSender {
 
     private static final String PRODUCTION_ENVIRONMENT = "PROD";

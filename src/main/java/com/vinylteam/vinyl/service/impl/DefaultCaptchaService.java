@@ -15,22 +15,23 @@ public class DefaultCaptchaService implements CaptchaService {
 
     @Override
     public byte[] getCaptcha(String captchaId) {
-        try (ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream()) {
-            BufferedImage challenge =
-                    CaptchaValidator.getImageCaptchaService().getImageChallengeForID(captchaId);
-
-            ImageIO.write(challenge, "jpeg", jpegOutputStream);
-            return jpegOutputStream.toByteArray();
-        } catch (Exception e) {
-            log.error("Error during captcha generation!", e);
-            throw new RuntimeException(e);
-        }
+//        try (ByteArrayOutputStream jpegOutputStream = new ByteArrayOutputStream()) {
+//            BufferedImage challenge =
+//                    CaptchaValidator.getImageCaptchaService().getImageChallengeForID(captchaId);
+//
+//            ImageIO.write(challenge, "jpeg", jpegOutputStream);
+//            return jpegOutputStream.toByteArray();
+//        } catch (Exception e) {
+//            log.error("Error during captcha generation!", e);
+//            throw new RuntimeException(e);
+//        }
+        return null;
     }
 
     @Override
     public boolean validateCaptcha(String captchaId, String response) {
-        return CaptchaValidator.getImageCaptchaService().validateResponseForID(captchaId,
-                response);
+//        return CaptchaValidator.getImageCaptchaService().validateResponseForID(captchaId,
+        return false;
     }
 
 }
