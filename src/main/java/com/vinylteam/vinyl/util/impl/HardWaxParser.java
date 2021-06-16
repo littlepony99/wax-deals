@@ -40,7 +40,7 @@ public class HardWaxParser extends VinylParser {
             .artistSelector("DIV.listing.block DIV.textblock DIV.linebig > STRONG > A")
             .releaseSelector("DIV.listing.block DIV.textblock DIV.linebig")
             .vinylGenresSelector("DIV.product_footer_a > DIV.style > A")
-            .priceDetailsSelector("DIV.listing.block DIV.textblock DIV.add_order A")
+            .priceDetailsSelector("DIV.listing.block DIV.textblock DIV.add_order ")
             .catalogNumberSelector("DIV.listing.block DIV.textblock DIV.linesmall > A")
             .inStockMarker("out of stock")
             .inStockMarkerSelector("DIV.add_order")
@@ -48,7 +48,7 @@ public class HardWaxParser extends VinylParser {
 
     private final ParserConfiguration onePageConf = ParserConfiguration
             .builder()
-            .highResolutionImageSelector("DIV#content DIV.record.block DIV.picture.big > IMG[id*=bigimage.x]")//x. -> xbig
+            .highResolutionImageSelector("DIV#content DIV.record.block DIV.picture.big > IMG[id*=bigimage.x]")
             .offerLinkSelector("DIV#content DIV.record.block DIV.linesmall > A[href*=label] + A")
             .artistSelector("DIV#content DIV.record.block DIV.textblock DIV.linebig > STRONG > A")
             .releaseSelector("DIV#content DIV.record.block DIV.textblock DIV.linebig")
@@ -83,8 +83,9 @@ public class HardWaxParser extends VinylParser {
     @Override
     public List<RawOffer> getRawOffersList() {
         Set<String> allGenres = getAllGenresLinks();
+        log.info("Got genres links totally: {'allGenresLinks':{}}", allGenres.size());
         Set<String> pageLinks = getAllPagesByGenres(allGenres);
-        log.info("got page links {'pageLinks':{}}", pageLinks.size());
+        log.info("Got page links {'pageLinks':{}}", pageLinks.size());
         Set<RawOffer> rawOffersSet = readOffersFromAllPages(pageLinks);
 
         log.info("Read {} rawOffers from all offer pages", rawOffersSet.size());
@@ -129,7 +130,6 @@ public class HardWaxParser extends VinylParser {
                 .map(link -> BASE_LINK + link.attr("href"))
                 .collect(toSet());
         log.debug("Got genres links {'allGenresLinks':{}}", allGenresLinks);
-        log.info("Got genres links totally: {'allGenresLinks':{}}", allGenresLinks.size());
         return allGenresLinks;
     }
 
@@ -192,6 +192,7 @@ public class HardWaxParser extends VinylParser {
                 .filter(this::isValid)
                 .collect(toSet());
         offerLinks.forEach(offer -> offer.setGenre(genre));
+        log.info("Resulting set of offers for {'pageLink':{}} has size {'offerLinks.size':{}}", pageLink, offerLinks.size());
         log.debug("Resulting set of offers for {'pageLink':{}} is {'offerLinks':{}}", pageLink, offerLinks);
         return offerLinks;
     }

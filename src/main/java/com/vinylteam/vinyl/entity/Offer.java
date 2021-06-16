@@ -107,12 +107,12 @@ public class Offer {
         if (this == o) return true;
         if (!(o instanceof Offer)) return false;
         Offer offer = (Offer) o;
-        return id == offer.id && uniqueVinylId == offer.uniqueVinylId && shopId == offer.shopId && Double.compare(offer.price, price) == 0 && inStock == offer.inStock && Objects.equals(currency, offer.currency) && Objects.equals(genre, offer.genre) && Objects.equals(catNumber, offer.catNumber) && Objects.equals(offerLink, offer.offerLink);
+        return id == offer.id && uniqueVinylId == offer.uniqueVinylId && shopId == offer.shopId && Double.compare(offer.price, price) == 0 && inStock == offer.inStock && Objects.equals(currency, offer.currency) && Objects.equals(catNumber, offer.catNumber) && Objects.equals(offerLink, offer.offerLink);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, uniqueVinylId, shopId, price, currency, genre, catNumber, inStock, offerLink);
+        return Objects.hash(id, uniqueVinylId, shopId, price, currency, catNumber, inStock, offerLink);
     }
 
 }
