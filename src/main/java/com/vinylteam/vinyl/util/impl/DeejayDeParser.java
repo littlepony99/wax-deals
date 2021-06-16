@@ -7,6 +7,8 @@ import com.vinylteam.vinyl.util.ParserConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -15,6 +17,7 @@ import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 @Service
+@Configuration
 public class DeejayDeParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://www.deejay.de";

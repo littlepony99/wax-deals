@@ -6,19 +6,27 @@ import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;
     private final MailSender mailSender;
     private final String applicationLink;
+
+    public DefaultConfirmationService(ConfirmationTokenDao confirmationTokenDao,
+                                      MailSender mailSender,
+                                      @Value("${application.link}") String applicationLink) {
+        this.confirmationTokenDao = confirmationTokenDao;
+        this.mailSender = mailSender;
+        this.applicationLink = applicationLink;
+    }
 
     private static final String SUBJECT = "Confirm your email on wax-deals.com";
     private static final String MAIL_BODY_BEGINNING = "To confirm click on the link below and log into your account.\n";

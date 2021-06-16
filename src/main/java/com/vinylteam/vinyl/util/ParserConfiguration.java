@@ -1,10 +1,13 @@
 package com.vinylteam.vinyl.util;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Value;
+import org.springframework.stereotype.Component;
 
 @Value
 @Builder
+@Component
 public class ParserConfiguration {
 
     String vinylGenresSelector;

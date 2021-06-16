@@ -1,6 +1,8 @@
 package com.vinylteam.vinyl.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -11,13 +13,18 @@ import javax.mail.internet.MimeMessage;
 import java.util.Properties;
 
 @Slf4j
+@Service
 public class MailSender {
 
     private static final String PRODUCTION_ENVIRONMENT = "PROD";
     private final String username;
     private final Session session;
 
-    public MailSender(String username, String password, String host, String port, String auth) {
+    public MailSender(@Value("${mail.smtp.username}") String username,
+                      @Value("${mail.smtp.password}") String password,
+                      @Value("${mail.smtp.host}") String host,
+                      @Value("${mail.smtp.port}") String port,
+                      @Value("${mail.smtp.auth}") String auth) {
         this.username = username;
 
         Properties properties = new Properties();

@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenRowMapper;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@RequiredArgsConstructor
 @Repository
 public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
@@ -24,11 +26,8 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id=? ";
     private static final String UPDATE_USER_STATUS = "UPDATE users set status = true WHERE id =?";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
-    private final DataSource dataSource;
 
-    public JdbcConfirmationTokenDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    private final DataSource dataSource;
 
     @Override
     public Optional<ConfirmationToken> findByToken(UUID token) {
