@@ -80,7 +80,7 @@ public class ConfirmationController {
             session.setAttribute("user", user);
             response.setStatus(HttpServletResponse.SC_OK);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-            return "index";
+            return "redirect:/";
         }
     }
 }

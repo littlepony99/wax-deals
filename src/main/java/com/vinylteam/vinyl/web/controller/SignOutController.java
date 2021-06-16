@@ -26,6 +26,6 @@ public class SignOutController {
         }
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        return "index";
+        return "redirect:/";
     }
 }

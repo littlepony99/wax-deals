@@ -15,6 +15,9 @@ public class Starter {
         //FIXME investigate MailSender in Spring
         //FIXME add tests
         //FIXME clean and tidy project
+        //FIXME fix MailSender
+        //FIXME fix if discogs userName is null then is problem in db
+        //FIXME if user was added and mail wasn't sent then user receive message that WaxDeals couldn't create profile
 
     /*    TimerTask updateTask = new TimerTask() {
             @Override

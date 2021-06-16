@@ -34,7 +34,7 @@ public class DeleteProfileController {
                     response.setStatus(HttpServletResponse.SC_OK);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
                     httpSession.invalidate();
-                    return "/signUp";
+                    return "redirect:/signUp";
                 } else {
                     response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
@@ -42,10 +42,10 @@ public class DeleteProfileController {
                     return "editProfile";
                 }
             } else {
-                return "/signIn";
+                return "redirect:/signIn";
             }
         } else {
-            return "/signIn";
+            return "redirect:/signIn";
         }
 
     }

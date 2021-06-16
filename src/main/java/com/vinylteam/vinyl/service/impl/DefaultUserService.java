@@ -31,6 +31,7 @@ public class DefaultUserService implements UserService {
             if (userId == -1) {
                 return false;
             }
+            //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
             log.debug("Added created user to db with id {'userId':{}}", userId);
             ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
             isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());

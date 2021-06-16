@@ -109,10 +109,10 @@ public class EditProfileController {
                 model.addAttribute("email", email);
                 return "editProfile";
             } else {
-                return "signIn";
+                return "redirect:/signIn";
             }
         } else {
-            return "signIn";
+            return "redirect:/signIn";
         }
     }
 }

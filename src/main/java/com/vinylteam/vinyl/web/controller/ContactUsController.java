@@ -61,7 +61,7 @@ public class ContactUsController {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 log.info("Post not added");
             }
-            return "index";
+            return "redirect:/";
         } else {
             WebUtils.setUserAttributes(request, model);
             model.addAttribute("captchaError", "Captcha is invalid!!!");

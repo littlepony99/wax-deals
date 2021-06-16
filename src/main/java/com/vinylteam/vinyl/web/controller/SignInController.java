@@ -67,7 +67,7 @@ public class SignInController {
                 session = request.getSession(true);
                 session.setMaxInactiveInterval(sessionMaxInactiveInterval);
                 session.setAttribute("user", user);
-                return "index";
+                return "redirect:/";
             } else {
                 log.debug("User's status is {'status':{}}", optionalUser.get().getStatus());
                 response.setStatus(HttpServletResponse.SC_SEE_OTHER);
