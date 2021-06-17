@@ -2,6 +2,10 @@
 
 .content-contact-us-page{
   height: 44.5em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .content-contact-us-page__column{

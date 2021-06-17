@@ -1,16 +1,18 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.web.dto.CaptchaRequestDto;
+import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.service.CaptchaService;
 import com.vinylteam.vinyl.service.UserPostService;
+import com.vinylteam.vinyl.service.ValidateCaptcha;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,41 +20,37 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 @RequestMapping("/contact")
 public class ContactUsController {
     private final UserPostService userPostService;
     private final CaptchaService defaultCaptchaService;
+    private final ValidateCaptcha service;
 
     @GetMapping
-    public String getContactUsPage(HttpServletRequest request,
-                                   HttpServletResponse response,
-                                   Model model) {
+    public ModelAndView getContactUsPage(HttpServletRequest request,
+                                         HttpServletResponse response,
+                                         Model model) {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
         WebUtils.setUserAttributes(request, model);
-        return "contactUs";
+        return new ModelAndView("contactUs");
     }
 
     @PostMapping
-    public String sendPost(HttpServletRequest request,
-                           HttpServletResponse response,
-                           Model model) {
+    public CaptchaResponseDto sendPost(HttpServletRequest request,
+                                       HttpServletResponse response,
+                                       Model model,
+                                       @RequestBody final CaptchaRequestDto dto) throws ForbiddenException {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
 
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
-        String subject = request.getParameter("subject");
-        String messageContactUs = request.getParameter("messageContactUs");
-        String captcha = request.getParameter("captcha");
-
-        boolean isCaptchaValid = defaultCaptchaService.validateCaptcha(request.getSession().getId(), captcha);
+        final boolean isCaptchaValid = service.validateCaptcha(dto.getCaptchaResponse());
 
         if (isCaptchaValid) {
-            UserPost post = new UserPost(name, email, subject, messageContactUs, LocalDateTime.now());
+            UserPost post = new UserPost(dto.getName(), dto.getEmail(), dto.getSubject(), dto.getMessage(), LocalDateTime.now());
             boolean isPostProcessed = userPostService.processAdd(post);
             if (isPostProcessed) {
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -61,11 +59,10 @@ public class ContactUsController {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 log.info("Post not added");
             }
-            return "redirect:/";
+            return new CaptchaResponseDto("Thank you. Your request was sent to us. We contact with you as soon as possible.");
         } else {
             WebUtils.setUserAttributes(request, model);
-            model.addAttribute("captchaError", "Captcha is invalid!!!");
-            return "contactUs";
+            throw new ForbiddenException("INVALID_CAPTCHA");
         }
     }
 }
