@@ -1,4 +1,6 @@
-package com.vinylteam.vinyl.service.impl;
+
+/*package com.vinylteam.vinyl.service.impl;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinylteam.vinyl.discogs4j.entity.DiscogsVinylInfo;
@@ -321,4 +323,4 @@ class DefaultDiscogsServiceITest {
         return vinyl;
     }
 
-}
+}*/

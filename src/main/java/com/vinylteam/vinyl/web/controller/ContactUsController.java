@@ -6,7 +6,7 @@ import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.service.CaptchaService;
 import com.vinylteam.vinyl.service.UserPostService;
-import com.vinylteam.vinyl.service.ValidateCaptcha;
+import com.vinylteam.vinyl.service.impl.DefaultCaptchaService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 public class ContactUsController {
     private final UserPostService userPostService;
     private final CaptchaService defaultCaptchaService;
-    private final ValidateCaptcha service;
+    private final DefaultCaptchaService service;
 
     @GetMapping
     public ModelAndView getContactUsPage(HttpServletRequest request,
