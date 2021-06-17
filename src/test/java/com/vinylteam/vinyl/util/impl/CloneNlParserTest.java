@@ -52,7 +52,7 @@ class CloneNlParserTest {
     @Test
     @DisplayName("Checks whether RawOffer is received from HTML Element that represents one vinyl Item from the listed on the page")
     void getRawOffersFromAllOfferLinksTest() {
-        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser.DefaultDetailedVinylParser());
+        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser().getListParser());
         assertNotNull(rawOffer);
         assertEquals("The Paul Breitner EP", rawOffer.getRelease());
         assertEquals("https://clone.nl/item36449.html", rawOffer.getOfferLink());
@@ -68,7 +68,7 @@ class CloneNlParserTest {
     void getRawOffersFromOneVinylPageLinkTest() throws IOException {
         File testHtml = new File(this.getClass().getClassLoader().getResource("HtmlPages/cloneNLItemOnePage.html").getPath());
         vinylElement = Jsoup.parse(testHtml, null).select("DIV").first();
-        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser.OnePageDetailedVinylParser());
+        var rawOffer = parser.getRawOfferFromElement(vinylElement, new CloneNlParser().getOnePageParser());
         assertNotNull(rawOffer);
         assertEquals("The Paul Breitner EP", rawOffer.getRelease());
         assertTrue(rawOffer.getOfferLink().isEmpty());

@@ -123,7 +123,6 @@ public class RawOffer {
                 Objects.equals(release, rawOffer.release) &&
                 Objects.equals(artist, rawOffer.artist) &&
                 Objects.equals(currency, rawOffer.currency) &&
-                Objects.equals(genre, rawOffer.genre) &&
                 Objects.equals(catNumber, rawOffer.catNumber) &&
                 Objects.equals(offerLink, rawOffer.offerLink) &&
                 Objects.equals(imageLink, rawOffer.imageLink);
@@ -131,7 +130,7 @@ public class RawOffer {
 
     @Override
     public int hashCode() {
-        return Objects.hash(shopId, release, artist, price, currency, genre, catNumber, inStock, offerLink, imageLink);
+        return Objects.hash(shopId, release, artist, price, currency, catNumber, inStock, offerLink, imageLink);
     }
 
 }

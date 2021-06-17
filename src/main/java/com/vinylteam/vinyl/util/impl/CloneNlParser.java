@@ -3,7 +3,8 @@ package com.vinylteam.vinyl.util.impl;
 import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.util.DetailedVinylParser;
-import com.vinylteam.vinyl.util.PriceUtils;
+import com.vinylteam.vinyl.util.ParserConfiguration;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -18,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 @Slf4j
 public class CloneNlParser extends VinylParser {
 
-    protected static final String BASE_LINK = "https://clone.nl";
+    static final String BASE_LINK = "https://clone.nl";
     private static final String CATALOG_ROOT_LINK = BASE_LINK + "/genres";
     private static final String START_PAGE_LINK = CATALOG_ROOT_LINK;
     private static final String GENRES_SELECTOR = "DIV > H1:contains(Genres) + P > A[href*=genre/]";
@@ -30,9 +31,40 @@ public class CloneNlParser extends VinylParser {
     private static final String ONE_VINYL_SELECTOR = "DIV.release";
     private static final String ONE_VINYL_FROM_ONE_PAGE_SELECTOR = "DIV.musicrelease";
     private static final int SHOP_ID = 4;
+    public static final String IN_STOCK = "in stock";
 
-    private final DetailedVinylParser batchParser = new DefaultDetailedVinylParser();
-    private final DetailedVinylParser onePageParser = new OnePageDetailedVinylParser();
+
+    private final ParserConfiguration listParserConfiguration = ParserConfiguration
+            .builder()
+            .highResolutionImageSelector("DIV.release IMG")
+            .offerLinkSelector("DIV.coverimage > A")
+            .artistSelector("DIV.description > H2 > A")
+            .releaseSelector("DIV.description > H2 + H3 > A")
+            .vinylGenresSelector("DIV.tagsbuttons > A.label")
+            .priceDetailsSelector("DIV.release TABLE.availability A.addtocart")
+            .catalogNumberSelector("span[itemprop=catalogNumber]")
+            .inStockMarker(IN_STOCK)
+            .inStockMarkerSelector(".col-xs-2.status")
+            .build();
+
+    private final ParserConfiguration onePageParserConfiguration = ParserConfiguration
+            .builder()
+            .highResolutionImageSelector("DIV.release IMG")
+            .offerLinkSelector("DIV#content DIV.record.block DIV.linesmall > A[href*=label] + A")
+            .artistSelector("H1[itemprop=author] > A")
+            .releaseSelector("H1[itemprop=author] + H2")
+            .vinylGenresSelector("DIV.tagsbuttons > A.label")
+            .priceDetailsSelector("DIV.release TABLE.availability A.addtocart")
+            .catalogNumberSelector("span[itemprop=catalogNumber]")
+            .inStockMarker(IN_STOCK)
+            .inStockMarkerSelector(".col-xs-2.status")
+            .build();
+
+    @Getter
+    private final DetailedVinylParser listParser = new DetailedVinylParserImpl(listParserConfiguration);
+
+    @Getter
+    private final DetailedVinylParser onePageParser = new DetailedVinylParserImpl(onePageParserConfiguration);
 
     @Override
     public List<RawOffer> getRawOffersList() {
@@ -87,7 +119,7 @@ public class CloneNlParser extends VinylParser {
                 .flatMap(link -> this.getDocument(link).stream())
                 .map(document -> document.select(OFFER_LIST_SELECTOR))
                 .flatMap(offersList -> offersList.select(ONE_VINYL_SELECTOR).stream())
-                .map((Element releaseElement) -> getRawOfferFromElement(releaseElement, batchParser))
+                .map((Element releaseElement) -> getRawOfferFromElement(releaseElement, listParser))
                 .filter(this::isValid)
                 .collect(toSet());
         log.debug("Resulting set of offer links is {'offerLinks':{}}", offerLinks);
@@ -133,6 +165,7 @@ public class CloneNlParser extends VinylParser {
     public RawOffer getRawOfferFromElement(Element releaseElement, DetailedVinylParser detailedParser) {
         String imageLink = detailedParser.getHighResImageLinkFromDocument(releaseElement);
         String offerLink = detailedParser.getOfferLinkFromDocument(releaseElement);
+        offerLink = !offerLink.isEmpty()? BASE_LINK + offerLink: offerLink;
         double price = detailedParser.getPriceFromDocument(releaseElement);
         Optional<Currency> priceCurrency = detailedParser.getOptionalCurrencyFromDocument(releaseElement);
         String artist = detailedParser.getArtistFromDocument(releaseElement);
@@ -159,157 +192,5 @@ public class CloneNlParser extends VinylParser {
     @Override
     public long getShopId() {
         return SHOP_ID;
-    }
-
-    public static class DefaultDetailedVinylParser implements DetailedVinylParser {
-
-        private static final String HIGH_RES_IMAGE_LINK_SELECTOR = "DIV.release IMG";
-        private static final String OFFER_LINK_SELECTOR = "DIV.coverimage > A";
-        private static final String ARTIST_SELECTOR = "DIV.description > H2 > A";
-        private static final String RELEASE_SELECTOR = "DIV.description > H2 + H3 > A";
-        private static final String VINYL_GENRES_SELECTOR = "DIV.tagsbuttons > A.label";
-        private static final String PRICE_DETAILS_SELECTOR = "DIV.release TABLE.availability A.addtocart";
-        public static final String CATALOG_NUMBER_SELECTOR = "span[itemprop=catalogNumber]";
-        public static final String OUT_OF_STOCK = "out of stock";
-
-        @Override
-        public String getGenreFromDocument(Element document) {
-            return document.select(VINYL_GENRES_SELECTOR).text();
-        }
-
-        public String getReleaseFromDocument(Element document) {
-            return document.select(RELEASE_SELECTOR).text();
-        }
-
-        public String getArtistFromDocument(Element document) {
-            return document.select(ARTIST_SELECTOR).text();
-        }
-
-        public String getCatNumberFromDocument(Element document) {
-            return document.select(CATALOG_NUMBER_SELECTOR).text();
-        }
-
-        public Boolean getInStockInfoFromDocument(Element document) {
-            boolean inStock = true;
-            String inStockText = document.getElementsByClass("col-xs-2 status").text();
-            if (OUT_OF_STOCK.contains(inStockText)) {
-                inStock = false;
-            }
-            return inStock;
-        }
-
-        public Optional<Currency> getOptionalCurrencyFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
-            if (pricesBlock.isEmpty()) {
-                return Optional.empty();
-            }
-            String fullPriceDetails = pricesBlock.get(0);
-            log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
-            return PriceUtils.getCurrencyFromString(fullPriceDetails);
-        }
-
-        public double getPriceFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
-            if (pricesBlock.isEmpty()) {
-                return 0d;
-            }
-            String fullPriceDetails = pricesBlock.get(0);
-            log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
-            return PriceUtils.getPriceFromString(fullPriceDetails);
-        }
-
-    public String getHighResImageLinkFromDocument(Element document) {
-        String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
-        if (imageLink != null && !Objects.equals(imageLink, "")){
-            if (!imageLink.contains("no-cover")){
-                log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
-            } else {
-                imageLink = "img/goods/no_image.jpg";
-            }
-        } else {
-            log.warn("Can't find image link, returning default");
-            imageLink = "img/goods/no_image.jpg";
-        }
-        return imageLink;
-    }
-
-        public String getOfferLinkFromDocument(Element document) {
-            return BASE_LINK + document.select(OFFER_LINK_SELECTOR).attr("href");
-        }
-    }
-
-    public static class OnePageDetailedVinylParser implements DetailedVinylParser {
-
-        private static final String HIGH_RES_IMAGE_LINK_SELECTOR = "DIV.release IMG";
-        private static final String ARTIST_SELECTOR = "H1[itemprop=author] > A";
-        private static final String RELEASE_SELECTOR = "H1[itemprop=author] + H2";
-        private static final String VINYL_GENRES_SELECTOR = "DIV.tagsbuttons > A.label";
-        private static final String PRICE_DETAILS_SELECTOR = "DIV.release TABLE.availability A.addtocart";
-        public static final String OUT_OF_STOCK = "out of stock";
-
-        @Override
-        public String getGenreFromDocument(Element document) {
-            return document.select(VINYL_GENRES_SELECTOR).text();
-        }
-
-        public String getReleaseFromDocument(Element document) {
-            return document.select(RELEASE_SELECTOR).text();
-        }
-
-        public String getArtistFromDocument(Element document) {
-            return document.select(ARTIST_SELECTOR).text();
-        }
-
-        public String getCatNumberFromDocument(Element document) {
-            return document.select("span[itemprop=catalogNumber]").text();
-        }
-
-        public Boolean getInStockInfoFromDocument(Element document) {
-            boolean inStock = true;
-            String inStockText = document.getElementsByClass("col-xs-2 status").text();
-            if (OUT_OF_STOCK.contains(inStockText)) {
-                inStock = false;
-            }
-            return inStock;
-        }
-
-        public Optional<Currency> getOptionalCurrencyFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
-            if (pricesBlock.isEmpty()) {
-                return Optional.empty();
-            }
-            String fullPriceDetails = pricesBlock.get(0);
-            log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
-            return PriceUtils.getCurrencyFromString(fullPriceDetails);
-        }
-
-        public double getPriceFromDocument(Element document) {
-            List<String> pricesBlock = document.select(PRICE_DETAILS_SELECTOR).eachText();
-            if (pricesBlock.isEmpty()) {
-                return 0d;
-            }
-            String fullPriceDetails = pricesBlock.get(0);
-            log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
-            return PriceUtils.getPriceFromString(fullPriceDetails);
-        }
-
-        public String getHighResImageLinkFromDocument(Element document) {
-            String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
-            if (imageLink != null && !Objects.equals(imageLink, "")){
-                if (!imageLink.contains("no-cover")){
-                    log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
-                } else {
-                    imageLink = "img/goods/no_image.jpg";
-                }
-            } else {
-                log.warn("Can't find image link, returning default");
-                imageLink = "img/goods/no_image.jpg";
-            }
-            return imageLink;
-        }
-
-        public String getOfferLinkFromDocument(Element document) {
-            return "";
-        }
     }
 }

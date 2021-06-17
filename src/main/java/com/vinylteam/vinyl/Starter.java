@@ -88,7 +88,7 @@ public class Starter {
 //UTIL, FILL IN DATABASE
         ShopsParser shopsParser = new ShopsParser();
         RawOffersSorter rawOffersSorter = new RawOffersSorter();
-        List<VinylParser> vinylParsers = List.of(new VinylUaParser(), new JunoVinylParser(), new DecksParser(), new CloneNlParser(), new DeejayDeParser());
+        List<VinylParser> vinylParsers = List.of(new VinylUaParser(), new JunoVinylParser(), new DecksParser(), new CloneNlParser(), new DeejayDeParser(), new HardWaxParser());
         ParserHolder parserHolder = new ParserHolder(vinylParsers);
         Updater updater = new Updater(uniqueVinylService, offerService, shopsParser, vinylParsers, rawOffersSorter);
         TimerTask updateTask = new TimerTask() {

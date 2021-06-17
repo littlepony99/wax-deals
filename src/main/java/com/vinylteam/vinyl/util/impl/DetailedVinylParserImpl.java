@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DetailedVinylParserImpl implements DetailedVinylParser {
 
-    private final ParserConfiguration config;
+    protected final ParserConfiguration config;
 
     @Override
     public String getGenreFromDocument(Element document) {
@@ -50,7 +50,7 @@ public class DetailedVinylParserImpl implements DetailedVinylParser {
 
     @Override
     public Optional<Currency> getOptionalCurrencyFromDocument(Element document) {
-        List<String> pricesBlock = document.select(config.getPriceDetailsSelector()).eachText();
+        List<String> pricesBlock = getPriceDetailsFromDocument(document);
         if (pricesBlock.isEmpty()) {
             return Optional.empty();
         }
@@ -61,13 +61,18 @@ public class DetailedVinylParserImpl implements DetailedVinylParser {
 
     @Override
     public double getPriceFromDocument(Element document) {
-        List<String> pricesBlock = document.select(config.getPriceDetailsSelector()).eachText();
+        List<String> pricesBlock = getPriceDetailsFromDocument(document);
         if (pricesBlock.isEmpty()) {
             return 0d;
         }
         String fullPriceDetails = pricesBlock.get(0);
         log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
         return PriceUtils.getPriceFromString(fullPriceDetails);
+    }
+
+    @Override
+    public List<String> getPriceDetailsFromDocument(Element document) {
+        return document.select(config.getPriceDetailsSelector()).eachText();
     }
 
     @Override
