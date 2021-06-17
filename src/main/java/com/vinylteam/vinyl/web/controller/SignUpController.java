@@ -52,15 +52,15 @@ public class SignUpController {
                 setBadRequest(response, model, "Sorry, the passwords don't match!");
                 return "registration";
             } else {
-                boolean isAdded = userService.add(email, password, discogsUserName);
-                log.debug("Got result of adding user with " +
-                        "passed email and password to db {'email':{}, 'isAdded':{}}", email, isAdded);
-                if (isAdded) {
+                try {
+                    userService.add(email, password, discogsUserName);
+                    log.debug("User was added with " +
+                            "passed email and password to db {'email':{}}", email);
                     response.setStatus(HttpServletResponse.SC_SEE_OTHER);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
                     model.addAttribute("message", "Please confirm your registration. To do this, follow the link that we sent to your email - " + email);
                     return "confirmation-directions";
-                } else {
+                } catch (RuntimeException e) {
                     setBadRequest(response, model, "Sorry, but the user couldn't be registered. Check email, password or discogs username!");
                     return "registration";
                 }

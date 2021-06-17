@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.util.MailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +20,7 @@ public class DefaultUserPostService implements UserPostService {
     private final MailSender mailSender;
 
     @Override
+    @Transactional
     public boolean processAdd(UserPost post) {
         boolean isAddedToDb = userPostDao.add(post);
         String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());

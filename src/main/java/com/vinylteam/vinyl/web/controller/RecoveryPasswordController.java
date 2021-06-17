@@ -46,7 +46,8 @@ public class RecoveryPasswordController {
             response.setStatus(HttpServletResponse.SC_OK);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
             model.addAttribute("message", "Follow the link that we sent you by email - " + email);
-        } catch (RecoveryPasswordException e) {
+//        } catch (RecoveryPasswordException e) {
+        } catch (RuntimeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
             log.error(e.getMessage());

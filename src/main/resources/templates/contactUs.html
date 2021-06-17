@@ -47,8 +47,11 @@
                     data: JSON.stringify(requestObj),
                     url: "/contact",
                     success: function (data) {
-                    $("#user_message").html(data.message);
-
+                        $("#user_message").html(data.message);
+                    },
+                    error: function (response, request) {
+                        data = JSON.parse(response.responseText);
+                        $("#user_message").html(data.message);
                     }
                 });
             } else {

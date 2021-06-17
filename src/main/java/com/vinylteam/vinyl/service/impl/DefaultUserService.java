@@ -9,6 +9,7 @@ import com.vinylteam.vinyl.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public class DefaultUserService implements UserService {
     private final ConfirmationService confirmationService;
 
     @Override
+    @Transactional
     public boolean add(String email, String password, String discogsUserName) {
         boolean isAdded = false;
         if (email != null && password != null) {
@@ -31,6 +33,7 @@ public class DefaultUserService implements UserService {
             if (userId == -1) {
                 return false;
             }
+            //TODO check how transaction annotation work after jdbc level repair
             //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
             log.debug("Added created user to db with id {'userId':{}}", userId);
             ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
@@ -106,7 +109,13 @@ public class DefaultUserService implements UserService {
                     optionalUser = optionalUserFromDataBase;
                     if (!optionalUser.get().getStatus()) {
                         Optional<ConfirmationToken> confirmationToken = confirmationService.findByUserId(optionalUser.get().getId());
-                        confirmationToken.ifPresent(token -> confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString()));
+                        confirmationToken.ifPresent(token -> {
+                            try {
+                                confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
                     }
                 }
             }

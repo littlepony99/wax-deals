@@ -10,6 +10,9 @@ import com.vinylteam.vinyl.service.impl.DefaultCaptchaService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,6 +45,7 @@ public class ContactUsController {
     public CaptchaResponseDto sendPost(HttpServletRequest request,
                                        HttpServletResponse response,
                                        Model model,
+                                       @Value("${project.mail}") String projectMail,
                                        @RequestBody final CaptchaRequestDto dto) throws ForbiddenException {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
@@ -51,15 +55,16 @@ public class ContactUsController {
 
         if (isCaptchaValid) {
             UserPost post = new UserPost(dto.getName(), dto.getEmail(), dto.getSubject(), dto.getMessage(), LocalDateTime.now());
-            boolean isPostProcessed = userPostService.processAdd(post);
-            if (isPostProcessed) {
+            try {
+                userPostService.processAdd(post);
                 response.setStatus(HttpServletResponse.SC_OK);
                 log.info("Post added");
-            } else {
+                return new CaptchaResponseDto("Thank you. Your request was sent to us. We contact with you as soon as possible.");
+            } catch (RuntimeException e){
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 log.info("Post not added");
+                return new CaptchaResponseDto("Sorry. but your request wasn't sent to us. Please, write to us - " + projectMail);
             }
-            return new CaptchaResponseDto("Thank you. Your request was sent to us. We contact with you as soon as possible.");
         } else {
             WebUtils.setUserAttributes(request, model);
             throw new ForbiddenException("INVALID_CAPTCHA");
