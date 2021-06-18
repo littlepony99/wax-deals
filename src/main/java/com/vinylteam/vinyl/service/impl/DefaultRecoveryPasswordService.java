@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -72,7 +73,9 @@ public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
     }
 
     @Override
+    @Transactional
     public void sendLink(String email) {
+        //TODO check how transaction annotation work after jdbc level repair
         checkForNotNull(email, ErrorRecoveryPassword.EMPTY_EMAIL);
         User user = userService.findByEmail(email)
                 .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.EMAIL_NOT_FOUND_IN_DB.getMessage()));

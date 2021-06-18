@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +12,7 @@ import javax.sql.DataSource;
 import java.sql.Timestamp;
 
 @Slf4j
+@RequiredArgsConstructor
 @Repository
 public class JdbcUserPostDao implements UserPostDao {
 
