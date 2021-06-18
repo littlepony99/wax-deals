@@ -5,6 +5,8 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -33,11 +35,9 @@ public class JdbcUserDao implements UserDao {
             " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
             " WHERE email ILIKE ?";
 
-    private final DataSource dataSource;
-
-    public JdbcUserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    @Autowired
+    private DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
     @Override
     public long add(User user) {
