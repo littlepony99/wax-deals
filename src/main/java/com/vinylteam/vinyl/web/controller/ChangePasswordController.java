@@ -37,7 +37,7 @@ public class ChangePasswordController {
         } catch (RecoveryPasswordException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             log.debug("Set response status to {'status':{}}, error - {}", HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            model.addAttribute("message", e.getMessage());
+            model.addAttribute("errorMessage", e.getMessage());
         }
         return "newPassword";
     }

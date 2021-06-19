@@ -2,8 +2,6 @@
 /*package com.vinylteam.vinyl.web.handler;
 
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

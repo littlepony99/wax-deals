@@ -1,18 +1,18 @@
 
-/*
 package com.vinylteam.vinyl.web.filter;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.stereotype.Component;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.EnumSet;
-import java.util.List;
 
+@Component
 public class SecurityFilter implements Filter {
 
     @Override
@@ -21,31 +21,22 @@ public class SecurityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 
-        List<String> allowedUrls = List.of("/", "/catalog", "/search", "/oneVinyl", "/signIn", "/signUp", "/emailConfirmation",
-                "/recoveryPassword", "/stores", "/contact", "/captcha", "/about", "/newPassword");
-
-        String uri = httpServletRequest.getRequestURI();
-
-        if (allowedUrls.contains(uri) || uri.startsWith("/css") || uri.startsWith("/img") || uri.startsWith("/fonts")) {
-            filterChain.doFilter(request, response);
-        } else {
-            HttpSession httpSession = httpServletRequest.getSession(false);
-            if (httpSession != null) {
-                User user = (User) httpSession.getAttribute("user");
-                if (user != null) {
-                    Role userRole = user.getRole();
-                    if (EnumSet.of(Role.USER, Role.ADMIN).contains(userRole)) {
-                        filterChain.doFilter(request, response);
-                    } else {
-                        httpServletResponse.sendRedirect("/signIn");
-                    }
+        HttpSession httpSession = httpServletRequest.getSession(false);
+        if (httpSession != null) {
+            User user = (User) httpSession.getAttribute("user");
+            if (user != null) {
+                Role userRole = user.getRole();
+                if (EnumSet.of(Role.USER, Role.ADMIN).contains(userRole)) {
+                    filterChain.doFilter(request, response);
                 } else {
                     httpServletResponse.sendRedirect("/signIn");
                 }
             } else {
                 httpServletResponse.sendRedirect("/signIn");
             }
+        } else {
+            httpServletResponse.sendRedirect("/signIn");
         }
     }
 
-}*/
+}
