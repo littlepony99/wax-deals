@@ -4,14 +4,15 @@ import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 
 @Slf4j
-public class UserRowMapper implements RowMapper<User> {
+public class UserRowMapper implements ResultSetExtractor<User> {
 
     @Override
-    public User mapRow(ResultSet resultSet) {
+    public User extractData(ResultSet resultSet) {
         User user = new User();
         try {
             user.setId(resultSet.getLong("id"));

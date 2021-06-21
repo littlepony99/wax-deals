@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryTokenRowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -26,7 +27,8 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
             " WHERE id = ?";
 
     private static final RecoveryTokenRowMapper RECOVERY_ROW_MAPPER = new RecoveryTokenRowMapper();
-    private final DataSource dataSource;
+    @Autowired
+private DataSource dataSource;
 
     public JdbcRecoveryPasswordDao(DataSource dataSource) {
         this.dataSource = dataSource;

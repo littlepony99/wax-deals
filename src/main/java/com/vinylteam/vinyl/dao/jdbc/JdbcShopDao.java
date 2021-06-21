@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ShopRowMapper;
 import com.vinylteam.vinyl.entity.Shop;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -24,7 +25,8 @@ public class JdbcShopDao implements ShopDao {
 
     private static final String SELECT_ALL_SHOPS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image FROM shops ORDER BY shop_order NULLS FIRST";
 
-    private final DataSource dataSource;
+    @Autowired
+private DataSource dataSource;
 
     public JdbcShopDao(DataSource dataSource) {
         this.dataSource = dataSource;

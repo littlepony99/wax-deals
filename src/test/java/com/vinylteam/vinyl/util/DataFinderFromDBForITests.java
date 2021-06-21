@@ -1,5 +1,6 @@
+/*
 
-/*package com.vinylteam.vinyl.util;
+package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenRowMapper;
@@ -120,4 +121,5 @@ public class DataFinderFromDBForITests {
         return Optional.ofNullable(recoveryToken);
     }
 
-}*/
+}
+*/

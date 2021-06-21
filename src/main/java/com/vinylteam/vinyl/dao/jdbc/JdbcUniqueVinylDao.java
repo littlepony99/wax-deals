@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UniqueVinylRowMapper;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -27,7 +28,8 @@ public class JdbcUniqueVinylDao implements UniqueVinylDao {
     private static final String SELECT_BY_ARTIST = SELECT_ALL + " WHERE artist ILIKE ? AND has_offers";
     private static final String UPDATE_UNIQUE_VINYL_SET_HAS_OFFERS_FALSE = "UPDATE unique_vinyls SET has_offers=FALSE WHERE has_offers=TRUE AND id = ?";
 
-    private final DataSource dataSource;
+    @Autowired
+private DataSource dataSource;
 
     public JdbcUniqueVinylDao(DataSource dataSource) {
         this.dataSource = dataSource;

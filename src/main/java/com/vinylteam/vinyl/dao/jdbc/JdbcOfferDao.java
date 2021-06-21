@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.dao.jdbc.mapper.OfferRowMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -30,7 +31,8 @@ public class JdbcOfferDao implements OfferDao {
     private static final String PREPARED_STATEMENT = "Prepared statement {'preparedStatement':{}}";
     private static final String EXECUTED_STATEMENT = "Executed statement {'statement':{}}";
 
-    private final DataSource dataSource;
+    @Autowired
+private DataSource dataSource;
 
     public JdbcOfferDao(DataSource dataSource) {
         this.dataSource = dataSource;
