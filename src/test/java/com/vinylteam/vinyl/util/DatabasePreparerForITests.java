@@ -1,11 +1,11 @@
 
-/*
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 
 import javax.sql.DataSource;
@@ -35,19 +35,9 @@ public class DatabasePreparerForITests {
             " (user_id, token, created_at, token_lifetime)" +
             " VALUES (?, ?, ?, ?)" +
             " ON CONFLICT (user_id) DO UPDATE SET token = ?, created_at = ?, token_lifetime = ?";
-    private final PropertiesReader propertiesReader = new PropertiesReader();
-    private final DataSource dataSource;
-    private final HikariConfig config = new HikariConfig();
 
-    public DatabasePreparerForITests() {
-        config.setJdbcUrl(propertiesReader.getProperty("jdbc.url"));
-        config.setUsername(propertiesReader.getProperty("jdbc.user"));
-        config.setPassword(propertiesReader.getProperty("jdbc.password"));
-        config.setDriverClassName(propertiesReader.getProperty("jdbc.driver"));
-        config.setMaximumPoolSize(Integer.parseInt(propertiesReader.getProperty("jdbc.maximum.pool.size")));
-        dataSource = new HikariDataSource(config);
-        log.info("Configured and created HikariDataSource object {'dataSource':{}}", dataSource);
-    }
+    @Autowired
+    DataSource dataSource;
 
     public DataSource getDataSource() {
         return dataSource;
@@ -229,9 +219,5 @@ public class DatabasePreparerForITests {
         }
     }
 
-    public void closeDataSource() {
-        dataSource.close();
-    }
 
 }
-*/

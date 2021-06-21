@@ -1,13 +1,21 @@
 
-/*
 package com.vinylteam.vinyl.dao.jdbc;
 
+import com.github.database.rider.core.api.configuration.DBUnit;
+import com.github.database.rider.core.api.configuration.Orthography;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.core.api.dataset.ExpectedDataSet;
+import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.dao.UserDao;
+import com.vinylteam.vinyl.data.TestData;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataFinderFromDBForITests;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.DatabasePreparerForITests;
+import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -15,21 +23,26 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@DBRider
+@DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcUserDaoITest {
-
-    private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();
-    private final UserDao userDao = new JdbcUserDao(databasePreparer.getDataSource());
-    private final DataFinderFromDBForITests dataFinder = new DataFinderFromDBForITests(databasePreparer.getDataSource());
-    private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final List<User> users = dataGenerator.getUsersList();
-
+/*
+    private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();*/
+    @Autowired
+    private UserDao userDao;
+    @Autowired
+    private Flyway flyway;/*
+    private final DataFinderFromDBForITests dataFinder = new DataFinderFromDBForITests(databasePreparer.getDataSource());*/
+    private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();/*
+    private final List<User> users = dataGenerator.getUsersList();*/
+/*
     @BeforeAll
     void beforeAll() throws SQLException {
         databasePreparer.truncateCascadeUsers();
-    }
-
-    @AfterAll
+    }*/
+/*    @AfterAll
     void afterAll() throws SQLException {
         databasePreparer.truncateCascadeUsers();
         databasePreparer.closeDataSource();
@@ -38,14 +51,15 @@ class JdbcUserDaoITest {
     @BeforeEach
     void beforeEach() throws SQLException {
         databasePreparer.insertUsers(users);
+    }*/
+
+    @AfterAll
+    void afterAll() {
+        //FIXME: Leaves empty flyway_migration_history withing test class running.
+       flyway.clean();
     }
 
-    @AfterEach
-    void afterEach() throws SQLException {
-        databasePreparer.truncateCascadeUsers();
-    }
-
-    @Test
+   /* @Test
     @DisplayName("Gets an existing user from db by email")
     void getByExistingEmailTest() {
         //prepare
@@ -90,19 +104,28 @@ class JdbcUserDaoITest {
         assertFalse(optionalUserGottenByNonexistentId.isPresent());
         assertEquals(2, dataFinder.findAllUsers().size());
     }
-
+*/
     @Test
+    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, tableOrdering = {"users"})
+    @ExpectedDataSet(provider = TestData.UsersResultProvider.class)
     @DisplayName("Adds user to db")
     void addNewTest() {
         //prepare
-        User expectedUser = dataGenerator.getUserWithNumber(3);
+        System.out.println("TEST");
+        User expectedUser = dataGenerator.getUserWithNumber(2);
         //when
         assertTrue(userDao.add(expectedUser) > 0);
         //then
-        assertEquals(3, dataFinder.findAllUsers().size());
-        Optional<User> optionalAddedUser = userDao.findByEmail(expectedUser.getEmail());
-        assertEquals(expectedUser, optionalAddedUser.get());
+        /*assertEquals(1, dataFinder.findAllUsers().size());*/
+        /*Optional<User> optionalAddedUser = userDao.findByEmail(expectedUser.getEmail());
+        assertEquals(expectedUser, optionalAddedUser.get());*/
     }
+
+    @Test
+    void fillTest() {
+        System.out.println("Test to fl");
+    }
+/*
 
     @Test
     @DisplayName("Adds existing user with the same password")
@@ -178,5 +201,6 @@ class JdbcUserDaoITest {
         assertNotEquals(changedUser, actualUser);
         assertNotEquals(changedUser.getDiscogsUserName(), actualUser.getDiscogsUserName());
     }
+*/
 
-}*/
+}

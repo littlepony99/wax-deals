@@ -1,5 +1,5 @@
 
-/*package com.vinylteam.vinyl.util;
+package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 
@@ -223,4 +223,4 @@ public class DataGeneratorForTests {
         return recoveryToken;
     }
 
-}*/
+}

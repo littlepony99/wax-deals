@@ -27,13 +27,9 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id=? ";
     private static final String UPDATE_USER_STATUS = "UPDATE users set status = true WHERE id =?";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
-<<<<<<< Updated upstream
-=======
-    @Autowired
+/*
+    @Autowired*/
 private DataSource dataSource;
->>>>>>> Stashed changes
-
-    private final DataSource dataSource;
 
     @Override
     public Optional<ConfirmationToken> findByToken(UUID token) {

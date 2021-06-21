@@ -20,9 +20,12 @@ public class JdbcUserPostDao implements UserPostDao {
             " (name, email, theme, message, created_at)" +
             " VALUES (?, ?, ?, ?, ?)";
 
+    private JdbcTemplate jdbcTemplate;
+
     @Autowired
-    private DataSource dataSource;
-    private final JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     @Override
     public boolean add(UserPost post) {
