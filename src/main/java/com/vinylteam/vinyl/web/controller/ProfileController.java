@@ -7,10 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -41,16 +38,29 @@ public class ProfileController {
                                     @RequestParam(value = "newPassword") String newPassword,
                                     @RequestParam(value = "confirmNewPassword") String confirmNewPassword,
                                     @RequestParam(value = "discogsUserName") String newDiscogsUserName,
-                                    HttpSession session) {
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                ModelAndView modelAndView = new ModelAndView("editProfile");
-                userService.editProfile(newEmail, oldPassword, newPassword, confirmNewPassword, newDiscogsUserName, user, modelAndView, session);
-                return modelAndView;
-            } else {
-                return new ModelAndView("redirect:/signIn");
+                                    HttpSession session, @SessionAttribute("user") User user) {
+        if (user != null) {
+            ModelAndView modelAndView = new ModelAndView("editProfile");
+
+            class UserChangeProfileInfo {
+                @RequestParam(value = "email")
+                String newEmail,
+                @RequestParam(value = "oldPassword")
+                String oldPassword,
+                @RequestParam(value = "newPassword")
+                String newPassword,
+                @RequestParam(value = "confirmNewPassword")
+                String confirmNewPassword,
+                @RequestParam(value = "discogsUserName")
+                String newDiscogsUserName
             }
+
+
+            SomeResult someResult = userService.editProfile(userChangeProfileInfo);
+            if (someResult) {
+                // create model and view
+            }
+            return modelAndView;
         } else {
             return new ModelAndView("redirect:/signIn");
         }

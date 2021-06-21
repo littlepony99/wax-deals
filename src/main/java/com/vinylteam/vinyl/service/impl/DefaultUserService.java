@@ -26,13 +26,21 @@ public class DefaultUserService implements UserService {
     private final SecurityService securityService;
     private final ConfirmationService confirmationService;
 
+    class UserInfo {
+        String email;
+        String password;
+        String discogsUserName;
+    }
+
     @Override
     @Transactional
-    public boolean add(String email, String password, String discogsUserName) {
+    public boolean add(UserInfo userInfo) {
         boolean isAdded = false;
-        if (email != null && password != null) {
+        if (email != null && password != null) { // validation on controller
             User userToAdd = securityService
-                    .createUserWithHashedPassword(email, password.toCharArray(), discogsUserName);
+                    .createUserWithHashedPassword(email, password.toCharArray());
+
+            userToAdd.setDiscogsUserName(userInfo.discogsUserName);
             long userId = userDao.add(userToAdd);
             if (userId == -1) {
                 return false;
@@ -164,7 +172,7 @@ public class DefaultUserService implements UserService {
                             String newDiscogsUserName,
                             User user,
                             ModelAndView modelAndView,
-                            HttpSession session){
+                            HttpSession session) {
         modelAndView.addObject("userRole", user.getRole().toString());
         String email = user.getEmail();
         String discogsUserName = user.getDiscogsUserName();
