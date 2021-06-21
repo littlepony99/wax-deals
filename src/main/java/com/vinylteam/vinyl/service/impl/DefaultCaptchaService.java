@@ -19,11 +19,11 @@ public class DefaultCaptchaService implements CaptchaService {
 
 	private final RestTemplate template;
 	@Value("${google.recaptcha.verification.endpoint}")
-	String recaptchaEndpoint;
+	private String recaptchaEndpoint;
 	@Value("${google.recaptcha.secret}")
-	String recaptchaSecret;
+	private String recaptchaSecret;
 
-	public DefaultCaptchaService(final RestTemplateBuilder templateBuilder) {
+	public DefaultCaptchaService(RestTemplateBuilder templateBuilder) {
 		this.template = templateBuilder.build();
 	}
 
@@ -31,7 +31,7 @@ public class DefaultCaptchaService implements CaptchaService {
 	// and return either true or false after the validation.
 	// reference url - https://developers.google.com/recaptcha/docs/verify
 	@Override
-	public boolean validateCaptcha(final String captchaResponse) {
+	public boolean validateCaptcha(String captchaResponse) {
 		log.info("Going to validate the captcha response = {}", captchaResponse);
 		final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 		// "secret" is a required param and it represents the shared key between your site 
