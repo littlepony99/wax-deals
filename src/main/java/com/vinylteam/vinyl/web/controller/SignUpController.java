@@ -9,9 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Slf4j
@@ -22,26 +24,26 @@ public class SignUpController {
     private final UserService userService;
 
     @GetMapping
-    public String getRegistrationPage(HttpServletRequest request,
+    public String getRegistrationPage(HttpSession session,
                                       HttpServletResponse response,
                                       Model model) throws IOException {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
         return "registration";
     }
 
     @PostMapping
-    public String signUpUser(HttpServletRequest request,
+    public String signUpUser(HttpSession session,
+                             @RequestParam(value = "email") String email,
+                             @RequestParam(value = "password") String password,
+                             @RequestParam(value = "confirmPassword") String confirmPassword,
+                             @RequestParam(value = "discogsUserName") String discogsUserName,
                              HttpServletResponse response,
                              Model model) {
         response.setContentType("text/html;charset=utf-8");
-        WebUtils.setUserAttributes(request, model);
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
-        String discogsUserName = request.getParameter("discogsUserName");
+        WebUtils.setUserAttributes(session, model);
         model.addAttribute("email", email);
         model.addAttribute("discogsUserName", discogsUserName);
         if (password.equals("")) {

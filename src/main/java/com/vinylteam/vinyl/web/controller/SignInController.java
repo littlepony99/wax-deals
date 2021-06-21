@@ -30,12 +30,12 @@ public class SignInController {
     }
 
     @GetMapping
-    public String getSignInPage(HttpServletRequest request,
+    public String getSignInPage(HttpSession session,
                                 HttpServletResponse response,
                                 Model model) {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
         return "signIn";
     }
 

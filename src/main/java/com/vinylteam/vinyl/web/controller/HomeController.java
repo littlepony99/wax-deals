@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
@@ -16,13 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 public class HomeController {
 
     @GetMapping
-    public String getHomePage(HttpServletRequest request,
+    public String getHomePage(HttpSession session,
                               HttpServletResponse response,
                               Model model) {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
         return "index";
     }
 }

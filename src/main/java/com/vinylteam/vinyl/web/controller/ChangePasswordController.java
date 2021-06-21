@@ -5,14 +5,17 @@ import com.vinylteam.vinyl.service.RecoveryPasswordService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,44 +26,39 @@ public class ChangePasswordController {
     private final RecoveryPasswordService recoveryPasswordService;
 
     @GetMapping
-    public String getChangePasswordPage(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        WebUtils.setUserAttributes(request, model);
-        String token = request.getParameter("token");
+    public ModelAndView getChangePasswordPage(HttpSession session,
+                                              @RequestParam(value = "token") String token,
+                                              Model model) {
+        WebUtils.setUserAttributes(session, model);
+        ModelAndView modelAndView = new ModelAndView("newPassword");
         try {
             recoveryPasswordService.checkToken(token);
-            response.setStatus(HttpServletResponse.SC_OK);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-            model.addAttribute("recoveryToken", token);
+            modelAndView.addObject("recoveryToken", token);
         } catch (RecoveryPasswordException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             log.debug("Set response status to {'status':{}}, error - {}", HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            model.addAttribute("errorMessage", e.getMessage());
+            modelAndView.addObject("errorMessage", e.getMessage());
+            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
         }
-        return "newPassword";
+        return modelAndView;
     }
 
     @PostMapping
-    public String changePassword(HttpServletRequest request,
-                                 HttpServletResponse response,
-                                 Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        WebUtils.setUserAttributes(request, model);
-        String newPassword = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
-        String token = request.getParameter("recoveryToken");
+    public ModelAndView changePassword(HttpSession session,
+                                       @RequestParam(value = "password") String newPassword,
+                                       @RequestParam(value = "confirmPassword") String confirmPassword,
+                                       @RequestParam(value = "recoveryToken") String token,
+                                       Model model) {
+        WebUtils.setUserAttributes(session, model);
+        ModelAndView modelAndView = new ModelAndView("signIn");
         try {
             recoveryPasswordService.changePassword(newPassword, confirmPassword, token);
-            response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-            model.addAttribute("message", "Your password was changed. Please, try to log in use new password.");
+            modelAndView.setStatus(HttpStatus.SEE_OTHER);
+            modelAndView.addObject("message", "Your password was changed. Please, try to log in use new password.");
         } catch (RecoveryPasswordException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}, error - {}", HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-            model.addAttribute("message", e.getMessage());
+            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
+            modelAndView.addObject("message", e.getMessage());
         }
-        return "signIn";
+        return modelAndView;
     }
 }

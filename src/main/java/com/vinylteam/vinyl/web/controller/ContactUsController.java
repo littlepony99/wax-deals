@@ -19,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -31,18 +32,18 @@ public class ContactUsController {
     private final DefaultCaptchaService service;
 
     @GetMapping
-    public ModelAndView getContactUsPage(HttpServletRequest request,
+    public ModelAndView getContactUsPage(HttpSession session,
                                          HttpServletResponse response,
                                          Model model) {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
         return new ModelAndView("contactUs");
     }
 
     @PostMapping
-    public CaptchaResponseDto sendPost(HttpServletRequest request,
+    public CaptchaResponseDto sendPost(HttpSession session,
                                        HttpServletResponse response,
                                        Model model,
                                        @Value("${project.mail}") String projectMail,
@@ -66,7 +67,7 @@ public class ContactUsController {
                 return new CaptchaResponseDto("Sorry. but your request wasn't sent to us. Please, write to us - " + projectMail);
             }
         } else {
-            WebUtils.setUserAttributes(request, model);
+            WebUtils.setUserAttributes(session, model);
             throw new ForbiddenException("INVALID_CAPTCHA");
         }
     }

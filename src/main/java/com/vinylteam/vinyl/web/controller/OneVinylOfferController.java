@@ -18,9 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,13 +39,14 @@ public class OneVinylOfferController {
     private final ParserHolder parserHolder;
 
     @GetMapping
-    public String getOneVinylOfferPage(HttpServletRequest request,
+    public String getOneVinylOfferPage(HttpSession session,
+                                       @RequestParam(value = "id") String stringId,
                                        HttpServletResponse response,
                                        Model model) {
         List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
 
-        long uniqueVinylId = Long.parseLong(request.getParameter("id"));
+        long uniqueVinylId = Long.parseLong(stringId);
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
 
         List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());

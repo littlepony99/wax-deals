@@ -12,9 +12,7 @@ public class FilterConfig {
         FilterRegistrationBean<SecurityFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(new SecurityFilter());
         registrationBean.addUrlPatterns("/signOut");
-        registrationBean.addUrlPatterns("/profile");
-        registrationBean.addUrlPatterns("/editProfile");
-        registrationBean.addUrlPatterns("/deleteProfile");
+        registrationBean.addUrlPatterns("/profile/*");
         return registrationBean;
     }
 }

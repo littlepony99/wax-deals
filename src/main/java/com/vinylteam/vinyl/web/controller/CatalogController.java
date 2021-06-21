@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,15 +27,12 @@ public class CatalogController {
 
     @GetMapping
     public String getCatalogPage(HttpServletRequest request,
-                                 HttpServletResponse response,
                                  Model model) {
         String discogsUserName;
         User user = null;
         List<UniqueVinyl> randomUniqueVinyls = uniqueVinylService.findManyRandom(50);
         List<UniqueVinyl> forShowing = new ArrayList<>();
         List<UniqueVinyl> allUniqueVinyl = uniqueVinylService.findAll();
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
         HttpSession session = request.getSession(false);
         String isWantListEmpty = request.getParameter("wantlist");
         if (session != null && isWantListEmpty == null) {

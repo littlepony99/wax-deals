@@ -9,9 +9,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +26,13 @@ public class SearchResultsController {
     private final UniqueVinylService vinylService;
 
     @GetMapping
-    public String getSearchResultPage(HttpServletRequest request,
+    public String getSearchResultPage(HttpSession session,
+                                      @RequestParam(value = "matcher") String matcher,
                                       HttpServletResponse response,
                                       Model model) {
-        String matcher = request.getParameter("matcher");
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findManyFiltered(matcher);
         model.addAttribute("matcher", matcher);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(session, model);
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         WebUtils.setModelContext(filteredUniqueVinyls, new ArrayList<>(), model);

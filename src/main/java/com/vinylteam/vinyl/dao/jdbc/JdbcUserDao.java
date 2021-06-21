@@ -4,7 +4,10 @@ import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -15,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 @Repository
 public class JdbcUserDao implements UserDao {
 
@@ -34,10 +38,7 @@ public class JdbcUserDao implements UserDao {
             " WHERE email ILIKE ?";
 
     private final DataSource dataSource;
-
-    public JdbcUserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public long add(User user) {
@@ -68,18 +69,15 @@ public class JdbcUserDao implements UserDao {
     @Override
     public boolean delete(User user) {
         boolean isDeleted = false;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement removeStatement = connection.prepareStatement(DELETE)) {
-            removeStatement.setString(1, user.getEmail());
-            log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
-            int result = removeStatement.executeUpdate();
+        try {
+            int result = jdbcTemplate.update(DELETE, user.getEmail());
             if (result > 0) {
                 isDeleted = true;
                 log.info("User was deleted from database {'user':{}}.", user);
             } else {
                 log.info("Failed delete user from database {'user':{}}.", user);
             }
-        } catch (SQLException e) {
+        } catch (DataAccessException e) {
             log.error("Error while delete user from users {'user':{}}", user, e);
             isDeleted = false;
         }
@@ -89,25 +87,23 @@ public class JdbcUserDao implements UserDao {
     @Override
     public boolean update(String email, User user) {
         boolean isUpdated = false;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement updateStatement = connection.prepareStatement(UPDATE)) {
-            updateStatement.setString(1, user.getEmail());
-            updateStatement.setString(2, user.getPassword());
-            updateStatement.setString(3, user.getSalt());
-            updateStatement.setInt(4, user.getIterations());
-            updateStatement.setString(5, user.getRole().toString());
-            updateStatement.setBoolean(6, user.getStatus());
-            updateStatement.setString(7, user.getDiscogsUserName());
-            updateStatement.setString(8, email);
-            log.debug("Prepared statement {'preparedStatement':{}}.", updateStatement);
-            int result = updateStatement.executeUpdate();
+        try {
+            int result = jdbcTemplate.update(UPDATE,
+                    user.getEmail(),
+                    user.getPassword(),
+                    user.getSalt(),
+                    user.getIterations(),
+                    user.getRole().toString(),
+                    user.getStatus(),
+                    user.getDiscogsUserName(),
+                    email);
             if (result > 0) {
                 isUpdated = true;
                 log.info("User was updated in the database {'user':{}}.", user);
             } else {
                 log.info("Failed to update user in the database {'user':{}}.", user);
             }
-        } catch (SQLException e) {
+        } catch (DataAccessException e) {
             log.error("Error while updating user in users by old email to {'email': {}, 'updatedUser':{}}", email, user, e);
             isUpdated = false;
         }

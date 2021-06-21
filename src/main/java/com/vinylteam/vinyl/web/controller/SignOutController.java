@@ -17,10 +17,9 @@ import javax.servlet.http.HttpSession;
 public class SignOutController {
 
     @GetMapping
-    public String getSignOutPage(HttpServletRequest request,
+    public String getSignOutPage(HttpSession session,
                                  HttpServletResponse response) {
         response.setContentType("text/html;charset=utf-8");
-        HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }

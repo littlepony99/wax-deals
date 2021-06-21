@@ -15,12 +15,13 @@ import java.util.Map;
 
 public class WebUtils {
 
-    public static void setUserAttributes(HttpServletRequest request, Model model) {
-        HttpSession session = request.getSession(false);
+    public static void setUserAttributes(HttpSession session, Model model) {
         if (session != null) {
             User user = (User) session.getAttribute("user");
             if (user != null) {
                 model.addAttribute("userRole", user.getRole().toString());
+                model.addAttribute("email", user.getEmail());
+                model.addAttribute("discogsUserName", user.getDiscogsUserName());
             }
         }
     }

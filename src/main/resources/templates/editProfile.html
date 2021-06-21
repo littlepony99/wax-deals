@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="css/common.css">
-  <link rel="stylesheet" href="css/user.css">
-  <link rel="stylesheet" href="css/editProfile.css">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" th:href="@{/css/common.css}">
+  <link rel="stylesheet" th:href="@{/css/user.css}">
+  <link rel="stylesheet" th:href="@{/css/editProfile.css}">
+  <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+  <link rel="shortcut icon" th:href="@{/favicon.ico}" type="image/x-icon">
   <title>Wax Deals</title>
 </head>
 <body>
@@ -37,7 +37,7 @@
             </li>
             <li>
               <a href="/" class="header__logo">
-                <img src="img/svg/wax_deals.svg" alt="wax deals logo">
+                <img src="/img/svg/wax_deals.svg" alt="wax deals logo">
               </a>
             </li>
             <li>
@@ -110,7 +110,7 @@
             <h2>Edit Profile</h2>
           </div>
 
-          <form action="/editProfile" id="edit-profile-form" method="POST" class="user edit-profile-user" name="form_edit" OnSubmit="return matchPassword();">
+          <form action="/profile/edit-profile" id="edit-profile-form" method="POST" class="user edit-profile-user" name="form_edit" OnSubmit="return matchPassword();">
             <div class="user__fields-wrapper">
               <div class="user__fields edit-profile-user__fields">
                 <label class="user__label">
@@ -184,7 +184,7 @@
               </label>
             </div>
           </form>
-          <form action="/deleteProfile" method="POST" class="delete-profile-button" OnSubmit="return matchPassword();">
+          <form action="/profile/delete-profile" method="POST" class="delete-profile-button" OnSubmit="return matchPassword();">
             <label class="user__submit-label">
               <input class="user__submit-input delete-user-button" type="submit" value="DELETE" onclick="deleteRequest(event)">
             </label>

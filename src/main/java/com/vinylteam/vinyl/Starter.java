@@ -13,13 +13,9 @@ public class Starter {
     public static void main(String[] args) throws Exception {
         SpringApplication.run(Starter.class, args);
 
-        //FIXME fixed application.properties
-        //FIXME fix if discogs userName is null then is problem in db
-        //FIXME add security filter
-        //FIXME look on exception into ConfirmationController
-        //FIXME if recovery token is not correct we must don't show password form ??? - HOW WORK MESSENGER
-
         //FIXME DefaultErrorHandler
+        //FIXME Del logic from controller and refactor services + All TESTS for that
+        //TODO watch video with my review and video with lesson from Tolya about Spring
 
         //FIXME add tests
         //FIXME add Updater

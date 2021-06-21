@@ -8,9 +8,13 @@ import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Slf4j
@@ -45,8 +49,19 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public boolean delete(User user) {
-        return userDao.delete(user);
+    public boolean delete(User user, ModelAndView modelAndView, HttpSession session) {
+        boolean isDeleted = userDao.delete(user);
+        if (isDeleted) {
+            modelAndView.setStatus(HttpStatus.OK);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
+            session.invalidate();
+        } else {
+            modelAndView = new ModelAndView("editProfile");
+            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+            modelAndView.addObject("message", "Delete is fail! Try again!");
+        }
+        return isDeleted;
     }
 
     @Override
@@ -139,6 +154,57 @@ public class DefaultUserService implements UserService {
             log.error("Email is not correct, token was sent to {}", userByLinkToken.getEmail());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void editProfile(String newEmail,
+                            String oldPassword,
+                            String newPassword,
+                            String confirmNewPassword,
+                            String newDiscogsUserName,
+                            User user,
+                            ModelAndView modelAndView,
+                            HttpSession session){
+        modelAndView.addObject("userRole", user.getRole().toString());
+        String email = user.getEmail();
+        String discogsUserName = user.getDiscogsUserName();
+        if (!newPassword.equals(confirmNewPassword)) {
+            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+            modelAndView.addObject("message", "Sorry, passwords don't match!");
+        } else {
+            boolean checkOldPassword = securityService.checkPasswordAgainstUserPassword(user, oldPassword.toCharArray());
+            if (checkOldPassword) {
+                boolean isUpdated;
+                if (!newPassword.isEmpty()) {
+                    isUpdated = update(email, newEmail, newPassword, newDiscogsUserName);
+                    log.debug("Trying update user with new email and new password in the database {'newEmail':{}}.", newEmail);
+                } else {
+                    isUpdated = update(email, newEmail, oldPassword, newDiscogsUserName);
+                    log.debug("Trying update user with new email and old password in the database {'newEmail':{}}.", newEmail);
+                }
+                if (isUpdated) {
+                    log.info("User was updated with new email or password in the database {'newEmail':{}}.", newEmail);
+                    modelAndView.setStatus(HttpStatus.SEE_OTHER);
+                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
+                    modelAndView.addObject("message", "Your profile is successfully changed.");
+                    email = newEmail;
+                    discogsUserName = newDiscogsUserName;
+                    session.setAttribute("user", findByEmail(email).orElse(user));
+                } else {
+                    log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
+                    modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+                    modelAndView.addObject("message", "Edit is fail! Try again!");
+                }
+            } else {
+                modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
+                modelAndView.addObject("message", "Sorry, old password isn't correct!");
+            }
+        }
+        modelAndView.addObject("discogsUserName", discogsUserName);
+        modelAndView.addObject("email", email);
     }
 
 }
