@@ -4,12 +4,12 @@ import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import javax.sql.DataSource;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,24 +18,27 @@ public class JdbcUserPostDao implements UserPostDao {
 
     private static final String INSERT_USER_POST = "INSERT INTO user_posts" +
             " (name, email, theme, message, created_at)" +
-            " VALUES (:name, :email, :theme, :message, :created_at)";
+            " VALUES (?, ?, ?, ?, ?)";
 
-    private final NamedParameterJdbcTemplate namedJdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     @Override
     public boolean add(UserPost post) {
-        //FIXME add normal return
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", post.getName());
-        params.put("email", post.getEmail());
-        params.put("theme", post.getTheme());
-        params.put("message", post.getMessage());
-        params.put("created_at", Timestamp.valueOf(post.getCreatedAt()));
-        namedJdbcTemplate.update(
-                INSERT_USER_POST,
-                params
-        );
-        return true;
+        if (jdbcTemplate.update(INSERT_USER_POST, post.getName(), post.getEmail(),
+                post.getTheme(), post.getMessage(), Timestamp.valueOf(post.getCreatedAt())) > 0) {
+            log.info("User post is added to the database {'userPost':{}}.", post);
+            return true;
+        } else {
+            log.info("Failed to add user post to the database {'userPost':{}}.", post);
+            return false;
+        }
     }
+//TODO: DataAccessException - add subset of that in catch.
+    //TODO: analog of RowMapper.
 
 }
