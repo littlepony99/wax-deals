@@ -17,17 +17,40 @@ public class TestData {
         }
     }
 
-    public static class UsersResultProvider implements DataSetProvider {
-    @Override
-    public IDataSet provide() {
-        System.out.println("ResultProvider");
-        return new DataSetBuilder()
-                .table("users")
-                .columns("id", "email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
-                .values("1", "user1@wax-deals.com", "salt1", "1", "hash1", "false", "USER", "discogsUserName1")
-                .values("2", "user2@wax-deals.com", "salt2", "2", "hash2", "false", "USER", "discogsUserName2")
-                .build();
+    public static class AddedUserResultProvider implements DataSetProvider {
+        @Override
+        public IDataSet provide() {
+            System.out.println("ResultProvider");
+            return new DataSetBuilder()
+                    .table("users")
+                    .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .values("user1@wax-deals.com", "salt1", "1", "hash1", "false", "USER", "discogsUserName1")
+                    .values("user2@wax-deals.com", "salt2", "2", "hash2", "false", "USER", "discogsUserName2")
+                    .build();
+        }
+
     }
-}
+
+    public static class UpdatedUserResultProvider implements DataSetProvider {
+        @Override
+        public IDataSet provide() {
+            return new DataSetBuilder()
+                    .table("users")
+                    .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .values("user3@wax-deals.com", "salt3", "3", "hash3", "false", "USER", "discogsUserName3")
+                    .build();
+        }
+    }
+
+    public static class DeletedUserResultProvider implements DataSetProvider {
+        @Override
+        public IDataSet provide() {
+            return new DataSetBuilder()
+                    .table("users")
+                    .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .build();
+        }
+    }
+
 
 }
