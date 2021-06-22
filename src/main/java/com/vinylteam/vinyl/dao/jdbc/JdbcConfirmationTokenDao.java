@@ -1,10 +1,12 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-/*import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
+import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
+import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenRowMapper;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
@@ -25,8 +27,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id=? ";
     private static final String UPDATE_USER_STATUS = "UPDATE users set status = true WHERE id =?";
     private static final RowMapper<ConfirmationToken> ROW_MAPPER = new ConfirmationTokenRowMapper();
-*//*
-    @Autowired*//*
+    @Autowired
 private DataSource dataSource;
 
     @Override
@@ -138,4 +139,4 @@ private DataSource dataSource;
         return isDeleted;
     }
 
-}*/
+}

@@ -2,11 +2,8 @@
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jca.cci.connection.ConnectionSpecConnectionFactoryAdapter;
 
 import javax.sql.DataSource;
 import java.sql.*;

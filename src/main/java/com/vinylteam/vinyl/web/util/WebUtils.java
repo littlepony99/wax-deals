@@ -1,17 +1,12 @@
 package com.vinylteam.vinyl.web.util;
 
 import com.vinylteam.vinyl.entity.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
 import org.springframework.ui.Model;
-import org.thymeleaf.context.Context;
 
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class WebUtils {
 

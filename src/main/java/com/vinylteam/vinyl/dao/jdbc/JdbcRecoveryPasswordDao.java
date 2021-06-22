@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-/*
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.RecoveryTokenRowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
@@ -102,4 +101,4 @@ private DataSource dataSource;
         return isRemoved;
     }
 
-}*/
+}

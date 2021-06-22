@@ -25,4 +25,5 @@ public class UserRowMapper implements RowMapper<User> {
         log.debug("Resulting User object {'user':{}}", user);
         return user;
     }
+
 }
