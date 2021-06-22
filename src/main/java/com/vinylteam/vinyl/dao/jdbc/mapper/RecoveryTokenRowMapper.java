@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.dao.jdbc.mapper;
-
-import com.vinylteam.vinyl.dao.RowMapper;
+/*
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,4 +25,4 @@ public class RecoveryTokenRowMapper implements RowMapper<RecoveryToken> {
         }
     }
 
-}
+}*/

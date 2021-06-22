@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
-import com.vinylteam.vinyl.dao.RowMapper;
-import com.vinylteam.vinyl.entity.Shop;
+/*import com.vinylteam.vinyl.entity.Shop;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
@@ -26,4 +25,4 @@ public class ShopRowMapper implements RowMapper<Shop> {
         }
     }
 
-}
+}*/

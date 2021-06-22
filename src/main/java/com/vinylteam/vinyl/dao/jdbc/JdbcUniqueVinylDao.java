@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.RowMapper;
-import com.vinylteam.vinyl.dao.UniqueVinylDao;
+/*import com.vinylteam.vinyl.dao.UniqueVinylDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UniqueVinylRowMapper;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
@@ -170,4 +169,4 @@ private DataSource dataSource;
         upsertUniqueVinyls.setLong(1, uniqueVinyl.getId());
     }
 
-}
+}*/

@@ -33,7 +33,8 @@ public class DefaultUserService implements UserService {
         boolean isAdded = false;
         if (email != null && password != null) {
             User userToAdd = securityService
-                    .createUserWithHashedPassword(email, password.toCharArray(), discogsUserName);
+                    .createUserWithHashedPassword(email, password.toCharArray());
+            userToAdd.setDiscogsUserName(discogsUserName);
             long userId = userDao.add(userToAdd);
             if (userId == -1) {
                 return false;
@@ -90,10 +91,11 @@ public class DefaultUserService implements UserService {
     public boolean update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
         boolean isUpdated = false;
         if (newEmail != null && newPassword != null && oldEmail != null) {
-            User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray(), newDiscogsUserName);
+            User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
             if (oldEmail.equalsIgnoreCase(newEmail)) {
                 changedUser.setStatus(true);
             }
+            changedUser.setDiscogsUserName(newDiscogsUserName);
             isUpdated = userDao.update(oldEmail, changedUser);
             log.debug("Attempt to update user with known email address in database with boolean result " +
                     "{'isUpdated':{}, 'oldEmail':{}}", isUpdated, oldEmail);

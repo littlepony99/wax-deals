@@ -54,7 +54,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(null, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()));
         verify(mockedUserDao, never()).add(any());
     }
 
@@ -68,7 +68,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(email, null, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(email), any(), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(email), any());
         verify(mockedUserDao, never()).add(any());
     }
 
@@ -80,13 +80,13 @@ class DefaultUserServiceTest {
         String existingEmail = "user1@wax-deals.com";
         String password = "password1";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()))).thenReturn(users.get(0));
         when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(0));
     }
 
@@ -98,13 +98,13 @@ class DefaultUserServiceTest {
         String existingEmail = "user123@wax-deals.com";
         String password = "password123";
         String newDiscogsUserName = "newDiscogsUserName1";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()))).thenReturn(users.get(0));
         when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(0));
     }
 
@@ -117,7 +117,7 @@ class DefaultUserServiceTest {
         String password = "password2";
         String newDiscogsUserName = "newDiscogsUserName";
         ConfirmationToken confirmationToken = new ConfirmationToken();
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(1));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()))).thenReturn(users.get(1));
         when(mockedUserDao.add(users.get(1))).thenReturn(1L);
         confirmationToken.setToken(UUID.randomUUID());
         when(mockedConfirmationService.addByUserId(1L)).thenReturn(confirmationToken);
@@ -126,7 +126,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(newEmail, password, newDiscogsUserName);
         //then
         assertTrue(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(1));
     }
 
@@ -352,7 +352,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(null, newEmail, password, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()));
         verify(mockedUserDao, never()).update(eq(null), any());
     }
 
@@ -368,7 +368,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(oldEmail, null, password, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()));
         verify(mockedUserDao, never()).update(eq(oldEmail), any());
     }
 
@@ -384,7 +384,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(oldEmail, newEmail, null, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(null), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(null));
         verify(mockedUserDao, never()).update(eq(oldEmail), any());
     }
 
@@ -397,13 +397,13 @@ class DefaultUserServiceTest {
         String newEmail = "newUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(notExistingOldEmail), eq(mockedUser))).thenReturn(false);
         //when
         boolean isEdit = userService.update(notExistingOldEmail, newEmail, newPassword, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         verify(mockedUser, never()).setStatus(true);
         verify(mockedUserDao).update(eq(notExistingOldEmail), eq(mockedUser));
     }
@@ -417,13 +417,13 @@ class DefaultUserServiceTest {
         String newUser = "newUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(existingOldEmail), eq(mockedUser))).thenReturn(true);
         //when
         boolean isEdit = userService.update(existingOldEmail, newUser, newPassword, newDiscogsUserName);
         //then
         assertTrue(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()));
         verify(mockedUser, never()).setStatus(true);
         verify(mockedUserDao).update(eq(existingOldEmail), eq(mockedUser));
     }
@@ -437,13 +437,13 @@ class DefaultUserServiceTest {
         String newUser = "existingUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(existingUser), eq(mockedUser))).thenReturn(true);
         //when
         boolean isEdit = userService.update(existingUser, newUser, newPassword, newDiscogsUserName);
         //then
         assertTrue(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()));
         verify(mockedUser).setStatus(true);
         verify(mockedUserDao).update(eq(existingUser), eq(mockedUser));
     }
@@ -545,7 +545,7 @@ class DefaultUserServiceTest {
         userAfterEdit.setDiscogsUserName(newDiscogsUserName);
 
         when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
-        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
         when(userService.update(userFromDB.getEmail(), newEmail, oldPassword, newDiscogsUserName)).thenReturn(true);
         when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
         when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
@@ -574,7 +574,7 @@ class DefaultUserServiceTest {
         userAfterEdit.setDiscogsUserName(newDiscogsUserName);
 
         when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
-        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
         when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(false);
         //when
         userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
@@ -601,7 +601,7 @@ class DefaultUserServiceTest {
         userAfterEdit.setDiscogsUserName(newDiscogsUserName);
 
         when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
-        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
         when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(true);
         when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
         when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));

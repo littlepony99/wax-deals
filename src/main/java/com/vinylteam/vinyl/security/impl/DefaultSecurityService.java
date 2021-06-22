@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -22,6 +23,7 @@ public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
+
     private final String algorithm = "PBKDF2WithHmacSHA512";
 
     public DefaultSecurityService() {
@@ -35,14 +37,13 @@ public class DefaultSecurityService implements SecurityService {
     }
 
     @Override
-    public User createUserWithHashedPassword(String email, char[] password, String discogsUserName) {
+    public User createUserWithHashedPassword(String email, char[] password) {
         byte[] salt = generateSalt();
         int iterations = 10000;
         String hashedPassword = hashPassword(password, salt, iterations);
         User user = new User();
         user.setEmail(email);
         user.setPassword(hashedPassword);
-        user.setDiscogsUserName(discogsUserName);
         user.setSalt(Base64.getEncoder().encodeToString(salt));
         user.setIterations(iterations);
         user.setRole(Role.USER);

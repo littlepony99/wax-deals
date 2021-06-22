@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.OfferDao;
-import com.vinylteam.vinyl.dao.RowMapper;
+/*import com.vinylteam.vinyl.dao.OfferDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.OfferRowMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
@@ -144,4 +143,4 @@ private DataSource dataSource;
         upsertUniqueVinyls.setBoolean(6, uniqueVinyl.getHasOffers());
     }
 
-}
+}*/

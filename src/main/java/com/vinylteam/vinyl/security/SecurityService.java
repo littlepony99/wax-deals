@@ -4,7 +4,7 @@ import com.vinylteam.vinyl.entity.User;
 
 public interface SecurityService {
 
-    User createUserWithHashedPassword(String email, char[] password, String discogsUserName);
+    User createUserWithHashedPassword(String email, char[] password);
 
     boolean checkPasswordAgainstUserPassword(User user, char[] password);
 
