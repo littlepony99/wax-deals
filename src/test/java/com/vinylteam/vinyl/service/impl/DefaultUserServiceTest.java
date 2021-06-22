@@ -9,6 +9,7 @@ import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,6 @@ class DefaultUserServiceTest {
     private final List<ConfirmationToken> tokens = dataGenerator.getConfirmationTokensList();
     private final User mockedUser = mock(User.class);
     private final ModelAndView mockedModelAndView = mock(ModelAndView.class);
-    private final HttpSession mockedHttpSession = mock(HttpSession.class);
 
     @BeforeEach
     void beforeEach() {
@@ -42,7 +42,6 @@ class DefaultUserServiceTest {
         reset(mockedSecurityService);
         reset(mockedConfirmationService);
         reset(mockedModelAndView);
-        reset(mockedHttpSession);
     }
 
     @Test
@@ -479,97 +478,186 @@ class DefaultUserServiceTest {
     @DisplayName("Check editProfile if newPassword and ConfirmNewPassword doesn't equals")
     void editProfileIfNewPasswordAndConfirmNewPasswordDoesNotEquals(){
         //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setConfirmNewPassword("differentPassword");
         Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
         //when
-        userService.editProfile("user1@wax-deals.com", "oldPassword", "newPassword", "confirmNewPassword", "newDiscogsName", optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
         //then
         verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(optionalUserFromDB.get(), userAfterEdit);
     }
 
     @Test
     @DisplayName("Checking editProfile if old password isn't correct")
     void editProfileIfOldPasswordIsNotCorrect(){
         //prepare
-        String incorrectPassword = "incorrectPassword";
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setOldPassword("incorrectPassword");
         Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
-        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), incorrectPassword.toCharArray())).thenReturn(false);
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), userProfileInfo.getOldPassword().toCharArray())).thenReturn(false);
         //when
-        userService.editProfile("user1@wax-deals.com", incorrectPassword, "newPassword", "newPassword", "newDiscogsName", optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
         //then
-        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), incorrectPassword.toCharArray());
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), userProfileInfo.getOldPassword().toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(optionalUserFromDB.get(), userAfterEdit);
     }
 
     @Test
     @DisplayName("Checking editProfile if user didn't change password and update in db failed")
     void editProfileIfUserDidNotChangePasswordAndUpdateInDbFailed(){
         //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setNewPassword("");
+        userProfileInfo.setConfirmNewPassword("");
         Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
         String oldPassword = optionalUserFromDB.get().getPassword();
-        String oldEmail = optionalUserFromDB.get().getEmail();
-        String newEmail = "new@wax-deals.com";
-        String newDiscogsUserName = "newDiscogsUserName";
+        userProfileInfo.setOldPassword(oldPassword);
         when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray())).thenReturn(true);
-        when(userService.update(oldEmail, newEmail, oldPassword, newDiscogsUserName)).thenReturn(false);
+        when(userService.update(optionalUserFromDB.get().getEmail(), userProfileInfo.getNewEmail(), oldPassword, userProfileInfo.getNewDiscogsUserName())).thenReturn(false);
         //when
-        userService.editProfile(newEmail, oldPassword, "", "", newDiscogsUserName, optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
         //then
         verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(optionalUserFromDB.get(), userAfterEdit);
     }
 
     @Test
     @DisplayName("Checking editProfile if user didn't change password and update in db successfully")
     void editProfileIfUserDidNotChangePasswordAndUpdateInDbSuccessfully(){
         //prepare
-        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
-        String oldPassword = optionalUserFromDB.get().getPassword();
-        String oldEmail = optionalUserFromDB.get().getEmail();
-        String newEmail = "new@wax-deals.com";
-        String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray())).thenReturn(true);
-        when(userService.update(oldEmail, newEmail, oldPassword, newDiscogsUserName)).thenReturn(true);
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setNewPassword("");
+        userProfileInfo.setConfirmNewPassword("");
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, oldPassword, newDiscogsUserName)).thenReturn(true);
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
         //when
-        userService.editProfile(newEmail, oldPassword, "", "", newDiscogsUserName, optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
         //then
-        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray());
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.SEE_OTHER);
+        assertNotNull(userAfterEdit.getEmail());
+        assertNotEquals(userFromDB, userAfterEdit);
     }
 
     @Test
     @DisplayName("Checking editProfile if user changed password and update in db failed")
     void editProfileIfUserChangedPasswordAndUpdateInDbFailed(){
         //prepare
-        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
-        String oldPassword = optionalUserFromDB.get().getPassword();
-        String oldEmail = optionalUserFromDB.get().getEmail();
-        String newEmail = "new@wax-deals.com";
-        String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray())).thenReturn(true);
-        when(userService.update(oldEmail, newEmail, oldPassword, newDiscogsUserName)).thenReturn(false);
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(false);
         //when
-        userService.editProfile(newEmail, oldPassword, "newPassword", "newPassword", newDiscogsUserName, optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
         //then
-        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray());
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(userFromDB, userAfterEdit);
     }
 
     @Test
     @DisplayName("Checking editProfile if user changed password and update in db successfully")
     void editProfileIfUserChangedPasswordAndUpdateInDbSuccessfully(){
         //prepare
-        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
-        String oldPassword = optionalUserFromDB.get().getPassword();
-        String oldEmail = optionalUserFromDB.get().getEmail();
-        String newEmail = "new@wax-deals.com";
-        String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray())).thenReturn(true);
-        when(userService.update(oldEmail, newEmail, oldPassword, newDiscogsUserName)).thenReturn(true);
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray(), newDiscogsUserName)).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(true);
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
         //when
-        userService.editProfile(newEmail, oldPassword, "", "", newDiscogsUserName, optionalUserFromDB.get(), mockedModelAndView, mockedHttpSession);
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
         //then
-        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray());
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.SEE_OTHER);
+        assertNotNull(userAfterEdit.getEmail());
+        assertNotEquals(userFromDB, userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if user is null")
+    void deleteIfUserIsNull(){
+        //when
+        boolean isDeleted = userService.delete(null, mockedModelAndView);
+        //then
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if ModelAndView is null")
+    void deleteIfModelAndViewIsNull(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        //when
+        boolean isDeleted = userService.delete(userFromDB, null);
+        //then
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if delete in db failed")
+    void deleteIfDeleteInDbFailed(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        when(mockedUserDao.delete(userFromDB)).thenReturn(false);
+        //when
+        boolean isDeleted = userService.delete(userFromDB, mockedModelAndView);
+        //then
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if delete in db successfully")
+    void deleteIfDeleteInDbSuccessfully(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        when(mockedUserDao.delete(userFromDB)).thenReturn(true);
+        //when
+        boolean isDeleted = userService.delete(userFromDB, mockedModelAndView);
+        //then
+        verify(mockedModelAndView).setStatus(HttpStatus.OK);
+        assertTrue(isDeleted);
     }
 
 }

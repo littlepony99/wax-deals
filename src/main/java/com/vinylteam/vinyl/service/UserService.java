@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
@@ -12,7 +13,7 @@ public interface UserService {
 
     boolean update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 
-    boolean delete(User user, ModelAndView modelAndView, HttpSession session);
+    boolean delete(User user, ModelAndView modelAndView);
 
     Optional<User> findById(long id);
 
@@ -22,13 +23,8 @@ public interface UserService {
 
     Optional<User> signInCheck(String email, String password, String token);
 
-    void editProfile(String newEmail,
-                     String oldPassword,
-                     String newPassword,
-                     String confirmNewPassword,
-                     String newDiscogsUserName,
+    Optional<User> editProfile(UserChangeProfileInfo userProfileInfo,
                      User user,
-                     ModelAndView modelAndView,
-                     HttpSession session);
+                     ModelAndView modelAndView);
 
 }

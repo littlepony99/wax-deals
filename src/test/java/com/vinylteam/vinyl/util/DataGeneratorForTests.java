@@ -2,6 +2,7 @@
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -221,6 +222,16 @@ public class DataGeneratorForTests {
         recoveryToken.setUserId(userId);
         recoveryToken.setToken(UUID.randomUUID());
         return recoveryToken;
+    }
+
+    public UserChangeProfileInfo getUserChangeProfileInfo(){
+        return UserChangeProfileInfo.builder()
+                .newEmail("new@wax-deals.com")
+                .oldPassword("oldPassword")
+                .newPassword("newPassword")
+                .confirmNewPassword("newPassword")
+                .newDiscogsUserName("newDiscogsUserName")
+                .build();
     }
 
 }

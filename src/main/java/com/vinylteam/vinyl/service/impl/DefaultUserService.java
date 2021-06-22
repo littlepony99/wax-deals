@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -49,17 +50,25 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public boolean delete(User user, ModelAndView modelAndView, HttpSession session) {
-        boolean isDeleted = userDao.delete(user);
-        if (isDeleted) {
-            modelAndView.setStatus(HttpStatus.OK);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-            session.invalidate();
+    public boolean delete(User user, ModelAndView modelAndView) {
+        boolean isDeleted = false;
+        if (user != null && modelAndView != null){
+            isDeleted = userDao.delete(user);
+            if (isDeleted) {
+                modelAndView.setStatus(HttpStatus.OK);
+                log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+            } else {
+                modelAndView.setViewName("editProfile");
+                modelAndView.addObject("discogsUserName", user.getDiscogsUserName());
+                modelAndView.addObject("email", user.getEmail());
+                modelAndView.addObject("userRole", user.getRole().toString());
+                modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+                log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
+                modelAndView.addObject("message", "Delete is fail! Try again!");
+            }
         } else {
-            modelAndView = new ModelAndView("editProfile");
-            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-            modelAndView.addObject("message", "Delete is fail! Try again!");
+            log.error("At least one of passed to DefaultUserService.delete(...) arguments is null {'user': {}, 'modelAndView': {}}",
+                    user == null ? "null" : user, modelAndView == null ? "null" : modelAndView);
         }
         return isDeleted;
     }
@@ -157,18 +166,17 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public void editProfile(String newEmail,
-                            String oldPassword,
-                            String newPassword,
-                            String confirmNewPassword,
-                            String newDiscogsUserName,
+    public Optional<User> editProfile(UserChangeProfileInfo userProfileInfo,
                             User user,
-                            ModelAndView modelAndView,
-                            HttpSession session){
+                            ModelAndView modelAndView){
+        String newPassword = userProfileInfo.getNewPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String oldPassword = userProfileInfo.getOldPassword();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
         modelAndView.addObject("userRole", user.getRole().toString());
         String email = user.getEmail();
         String discogsUserName = user.getDiscogsUserName();
-        if (!newPassword.equals(confirmNewPassword)) {
+        if (!newPassword.equals(userProfileInfo.getConfirmNewPassword())) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
             modelAndView.addObject("message", "Sorry, passwords don't match!");
@@ -190,7 +198,7 @@ public class DefaultUserService implements UserService {
                     modelAndView.addObject("message", "Your profile is successfully changed.");
                     email = newEmail;
                     discogsUserName = newDiscogsUserName;
-                    session.setAttribute("user", findByEmail(email).orElse(user));
+                    user = findByEmail(email).orElse(user);
                 } else {
                     log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
                     modelAndView.setStatus(HttpStatus.BAD_REQUEST);
@@ -205,6 +213,7 @@ public class DefaultUserService implements UserService {
         }
         modelAndView.addObject("discogsUserName", discogsUserName);
         modelAndView.addObject("email", email);
+        return Optional.of(user);
     }
 
 }
