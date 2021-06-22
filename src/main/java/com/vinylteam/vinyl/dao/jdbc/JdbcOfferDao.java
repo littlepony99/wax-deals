@@ -1,6 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-/*import com.vinylteam.vinyl.dao.OfferDao;
+import com.vinylteam.vinyl.dao.OfferDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.OfferRowMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
@@ -26,7 +26,7 @@ public class JdbcOfferDao implements OfferDao {
     private static final String SELECT_ALL = "SELECT id, unique_vinyl_id, shop_id, price, currency, genre, cat_number, in_stock, link_to_offer FROM offers";
     private static final String SELECT_MANY_BY_UNIQUE_VINYL_ID = SELECT_ALL + " WHERE unique_vinyl_id=?";
     private static final String TRUNCATE_RESTART_IDENTITY = "TRUNCATE offers RESTART IDENTITY";
-    private static final RowMapper<Offer> ROW_MAPPER = new OfferRowMapper();
+    private static final OfferRowMapper ROW_MAPPER = new OfferRowMapper();
     private static final String PREPARED_STATEMENT = "Prepared statement {'preparedStatement':{}}";
     private static final String EXECUTED_STATEMENT = "Executed statement {'statement':{}}";
 
@@ -143,4 +143,4 @@ private DataSource dataSource;
         upsertUniqueVinyls.setBoolean(6, uniqueVinyl.getHasOffers());
     }
 
-}*/
+}

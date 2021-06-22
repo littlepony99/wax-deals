@@ -2,9 +2,7 @@ package com.vinylteam.vinyl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 @SpringBootApplication
 @PropertySource({"classpath:application.properties", "classpath:dev.application.properties"})

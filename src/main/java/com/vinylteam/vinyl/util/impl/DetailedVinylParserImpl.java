@@ -7,7 +7,6 @@ import com.vinylteam.vinyl.util.PriceUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;

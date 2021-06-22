@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
-/*import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.dao.RowMapper;
+import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.ResultSet;
@@ -27,4 +28,4 @@ public class UniqueVinylRowMapper implements RowMapper<UniqueVinyl> {
         }
     }
 
-}*/
+}

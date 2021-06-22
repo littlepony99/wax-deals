@@ -1,3 +1,4 @@
+/*
 
 package com.vinylteam.vinyl.service.impl;
 
@@ -5,7 +6,6 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
-import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -670,3 +670,4 @@ class DefaultUserServiceTest {
     }
 
 }
+*/

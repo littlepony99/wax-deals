@@ -35,7 +35,8 @@ public class DefaultUserService implements UserService {
             User userToAdd = securityService
                     .createUserWithHashedPassword(email, password.toCharArray());
             userToAdd.setDiscogsUserName(discogsUserName);
-            long userId = userDao.add(userToAdd);
+            long userId = 1;
+            userDao.add(userToAdd);
             if (userId == -1) {
                 return false;
             }
@@ -54,7 +55,7 @@ public class DefaultUserService implements UserService {
     public boolean delete(User user, ModelAndView modelAndView) {
         boolean isDeleted = false;
         if (user != null && modelAndView != null){
-            isDeleted = userDao.delete(user);
+            userDao.delete(user);
             if (isDeleted) {
                 modelAndView.setStatus(HttpStatus.OK);
                 log.debug("Set response status to {'status':{}}", HttpStatus.OK);
@@ -96,7 +97,7 @@ public class DefaultUserService implements UserService {
                 changedUser.setStatus(true);
             }
             changedUser.setDiscogsUserName(newDiscogsUserName);
-            isUpdated = userDao.update(oldEmail, changedUser);
+            userDao.update(oldEmail, changedUser);
             log.debug("Attempt to update user with known email address in database with boolean result " +
                     "{'isUpdated':{}, 'oldEmail':{}}", isUpdated, oldEmail);
         } else {

@@ -1,6 +1,7 @@
 
-/*package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.mapper;
 
+import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,4 +26,4 @@ public class ConfirmationTokenRowMapper implements RowMapper<ConfirmationToken> 
         }
     }
 
-}*/
+}
