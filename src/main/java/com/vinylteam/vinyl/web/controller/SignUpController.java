@@ -1,15 +1,13 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,18 +22,14 @@ public class SignUpController {
     private final UserService userService;
 
     @GetMapping
-    public String getRegistrationPage(HttpSession session,
-                                      HttpServletResponse response,
-                                      Model model) throws IOException {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(session, model);
+    public String getRegistrationPage(@SessionAttribute(value = "user", required = false) User user,
+                                      Model model) {
+        WebUtils.setUserAttributes(user, model);
         return "registration";
     }
 
     @PostMapping
-    public String signUpUser(HttpSession session,
+    public String signUpUser(@SessionAttribute(value = "user", required = false) User user,
                              @RequestParam(value = "email") String email,
                              @RequestParam(value = "password") String password,
                              @RequestParam(value = "confirmPassword") String confirmPassword,
@@ -43,16 +37,17 @@ public class SignUpController {
                              HttpServletResponse response,
                              Model model) {
         response.setContentType("text/html;charset=utf-8");
-        WebUtils.setUserAttributes(session, model);
+        WebUtils.setUserAttributes(user, model);
         model.addAttribute("email", email);
         model.addAttribute("discogsUserName", discogsUserName);
+        String registrationPage = "registration";
         if (password.equals("")) {
             setBadRequest(response, model, "Sorry, the password is empty!");
-            return "registration";
+            return registrationPage;
         } else {
             if (!password.equals(confirmPassword)) {
                 setBadRequest(response, model, "Sorry, the passwords don't match!");
-                return "registration";
+                return registrationPage;
             } else {
                 try {
                     userService.add(email, password, discogsUserName);
@@ -64,7 +59,7 @@ public class SignUpController {
                     return "confirmation-directions";
                 } catch (RuntimeException e) {
                     setBadRequest(response, model, "Sorry, but the user couldn't be registered. Check email, password or discogs username!");
-                    return "registration";
+                    return registrationPage;
                 }
             }
         }

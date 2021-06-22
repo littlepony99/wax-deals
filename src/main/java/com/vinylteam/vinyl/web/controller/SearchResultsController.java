@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,15 +28,12 @@ public class SearchResultsController {
     private final UniqueVinylService vinylService;
 
     @GetMapping
-    public String getSearchResultPage(HttpSession session,
+    public String getSearchResultPage(@SessionAttribute(value = "user", required = false) User user,
                                       @RequestParam(value = "matcher") String matcher,
-                                      HttpServletResponse response,
                                       Model model) {
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findManyFiltered(matcher);
         model.addAttribute("matcher", matcher);
-        WebUtils.setUserAttributes(session, model);
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
+        WebUtils.setUserAttributes(user, model);
         WebUtils.setModelContext(filteredUniqueVinyls, new ArrayList<>(), model);
         return "search";
     }

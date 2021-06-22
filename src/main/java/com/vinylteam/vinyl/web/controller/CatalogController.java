@@ -10,6 +10,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttribute;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -26,28 +28,10 @@ public class CatalogController {
     private final UniqueVinylService uniqueVinylService;
 
     @GetMapping
-    public String getCatalogPage(HttpServletRequest request,
+    public String getCatalogPage(@SessionAttribute(value = "user", required = false) User user,
+                                 @RequestParam(value = "wantlist", required = false) String wantList,
                                  Model model) {
-        String discogsUserName;
-        User user = null;
-        List<UniqueVinyl> randomUniqueVinyls = uniqueVinylService.findManyRandom(50);
-        List<UniqueVinyl> forShowing = new ArrayList<>();
-        List<UniqueVinyl> allUniqueVinyl = uniqueVinylService.findAll();
-        HttpSession session = request.getSession(false);
-        String isWantListEmpty = request.getParameter("wantlist");
-        if (session != null && isWantListEmpty == null) {
-            user = (User) session.getAttribute("user");
-            if (user != null) {
-                model.addAttribute("userRole", user.getRole().toString());
-                discogsUserName = user.getDiscogsUserName();
-                forShowing = discogsService.getDiscogsMatchList(discogsUserName, allUniqueVinyl);
-            }
-        }
-        if (user != null) {
-            model.addAttribute("vinylList", forShowing);
-        } else {
-            model.addAttribute("vinylList", randomUniqueVinyls);
-        }
+        uniqueVinylService.prepareCatalog(user, model, wantList);
         return "catalog";
     }
 }
