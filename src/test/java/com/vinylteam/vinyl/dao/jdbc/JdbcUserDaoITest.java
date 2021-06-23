@@ -10,12 +10,16 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.data.TestData;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import org.flywaydb.core.Flyway;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
 
@@ -29,26 +33,34 @@ class JdbcUserDaoITest {
 
     @Autowired
     private UserDao userDao;
+
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-    @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @DisplayName("Finds user from db by existing email")
-    void getByExistingEmailTest() {
-        //when
-        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(1).getEmail());
-        //then
-        assertTrue(optionalUserGottenByExistingEmail.isPresent());
+    @AfterAll
+    void afterAll() {
+        //FIXME: Leaves empty flyway_migration_history withing test class running.
+       //flyway.clean();
     }
+
+   @Test
+   @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+   @DisplayName("Finds user from db by existing email")
+   void getByExistingEmailTest() {
+       //when
+       Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(1).getEmail());
+       //then
+       assertTrue(optionalUserGottenByExistingEmail.isPresent());
+   }
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by non existing email")
     void getByNotExistingEmailTest() {
         //when
-        Optional<User> optionalUserGottenByNonexistentEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());
+//        Optional<User> optionalUserGottenByNonexistentEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());
         //then
-        assertFalse(optionalUserGottenByNonexistentEmail.isPresent());
+        assertThrows(EmptyResultDataAccessException.class, () -> {userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());});
+//        assertFalse(optionalUserGottenByNonexistentEmail.isPresent());
     }
 
     @Test
@@ -105,6 +117,7 @@ class JdbcUserDaoITest {
         //when
         assertThrows(DataAccessException.class, () -> userDao.add(userExistingPassword));
     }
+//TODO: add unique constraint on salt in migrations.
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
