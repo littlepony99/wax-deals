@@ -1,7 +1,9 @@
 
-/*package com.vinylteam.vinyl.util;
+package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
+import com.vinylteam.vinyl.entity.Offer;
+import com.vinylteam.vinyl.entity.UniqueVinyl;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class DataGeneratorForTests {
             throw new RuntimeException("Don't generate template unique vinyl from number < 1! number: " + number);
         }
         UniqueVinyl uniqueVinyl = new UniqueVinyl();
-        uniqueVinyl.setId(number);
+        uniqueVinyl.setId(Integer.toString(number));
         uniqueVinyl.setRelease("release" + number);
         uniqueVinyl.setArtist("artist" + number);
         uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
@@ -59,7 +61,7 @@ public class DataGeneratorForTests {
                     "uniqueVinylId: " + uniqueVinylId + ", shopId: " + shopId);
         }
         Offer offer = new Offer();
-        offer.setUniqueVinylId(uniqueVinylId);
+        offer.setUniqueVinylId(Integer.toString(uniqueVinylId));
         offer.setShopId(shopId);
         offer.setPrice(uniqueVinylId * 10. + shopId);
         offer.setCurrency(Optional.of(Currency.UAH));
@@ -116,7 +118,7 @@ public class DataGeneratorForTests {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             UniqueVinyl uniqueVinyl = new UniqueVinyl();
-            uniqueVinyl.setId(i + 1);
+            uniqueVinyl.setId(Integer.toString(i + 1));
             uniqueVinyl.setRelease("release" + (i + 1));
             uniqueVinyl.setArtist("artist" + (i + 1));
             uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
@@ -131,10 +133,11 @@ public class DataGeneratorForTests {
     public List<Offer> getOffersList() {
         List<Offer> offers = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
+            String idUniqueVinyl = Integer.toString(i + 1);
             for (int j = 0; j < 2; j++) {
                 Offer offer = new Offer();
-                offer.setId(i * 2 + j + 1);
-                offer.setUniqueVinylId(i + 1);
+                offer.setId(Integer.toString(i * 2 + j + 1));
+                offer.setUniqueVinylId(idUniqueVinyl);
                 offer.setShopId(j + 1);
                 offer.setPrice((i + 1) * 10. + j + 1);
                 offer.setCurrency(Optional.of(Currency.UAH));
@@ -180,6 +183,7 @@ public class DataGeneratorForTests {
 
     public void fillListsForRawOffersSorterTest(List<RawOffer> rawOffers, List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
         for (int i = 0; i < 3; i++) {
+            String uniqueVinylId = Integer.toString(i + 1);
             for (int j = 0; j < 2; j++) {
                 RawOffer rawOffer = new RawOffer();
                 rawOffer.setShopId(j + 1);
@@ -195,7 +199,7 @@ public class DataGeneratorForTests {
                 rawOffers.add(rawOffer);
 
                 Offer offer = new Offer();
-                offer.setUniqueVinylId(i + 1);
+                offer.setUniqueVinylId(uniqueVinylId);
                 offer.setShopId(rawOffer.getShopId());
                 offer.setPrice(rawOffer.getPrice());
                 offer.setCurrency(rawOffer.getCurrency());
@@ -206,7 +210,7 @@ public class DataGeneratorForTests {
                 offers.add(offer);
             }
             UniqueVinyl uniqueVinyl = new UniqueVinyl();
-            uniqueVinyl.setId(i + 1);
+            uniqueVinyl.setId(uniqueVinylId);
             uniqueVinyl.setRelease(rawOffers.get(i * 2).getRelease());
             uniqueVinyl.setArtist(rawOffers.get(i * 2).getArtist());
             uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
@@ -223,4 +227,4 @@ public class DataGeneratorForTests {
         return recoveryToken;
     }
 
-}*/
+}

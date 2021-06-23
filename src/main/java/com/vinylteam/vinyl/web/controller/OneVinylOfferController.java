@@ -43,7 +43,7 @@ public class OneVinylOfferController {
         List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
         WebUtils.setUserAttributes(request, model);
 
-        long uniqueVinylId = Long.parseLong(request.getParameter("id"));
+        String uniqueVinylId = request.getParameter("id");
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
 
         List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());

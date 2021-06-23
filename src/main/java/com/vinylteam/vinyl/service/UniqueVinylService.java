@@ -8,7 +8,7 @@ public interface UniqueVinylService {
 
     List<UniqueVinyl> findAll();
 
-    UniqueVinyl findById(long id);
+    UniqueVinyl findById(String id);
 
     List<UniqueVinyl> findManyRandom(int amount);
 

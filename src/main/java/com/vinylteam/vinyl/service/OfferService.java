@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface OfferService {
 
-    List<Offer> findManyByUniqueVinylId(long uniqueVinylId);
+    List<Offer> findManyByUniqueVinylId(String uniqueVinylId);
 
     void updateUniqueVinylsRewriteAll(List<UniqueVinyl> uniqueVinyls, List<Offer> offers);
 

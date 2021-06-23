@@ -20,7 +20,7 @@ public class RawOffersSorter {
                 ListIterator<UniqueVinyl> vinylIterator = uniqueVinyls.listIterator();
                 while (!rawOffers.isEmpty()) {
                     if (!vinylIterator.hasNext()) {
-                        long lastVinylId = uniqueVinyls.isEmpty() ? 1 : (uniqueVinyls.get(uniqueVinyls.size() - 1).getId() + 1);
+                        String lastVinylId = uniqueVinyls.isEmpty() ? "1" : (uniqueVinyls.get(uniqueVinyls.size() - 1).getId() + "1");
                         UniqueVinyl uniqueVinyl = new UniqueVinyl();
                         uniqueVinyl.setId(lastVinylId);
                         uniqueVinyl.setRelease(rawOffers.get(0).getRelease());

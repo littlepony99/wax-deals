@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service.impl;
 
-import com.vinylteam.vinyl.dao.OfferDao;
+import com.vinylteam.vinyl.dao.elasticsearch.OfferRepository;
+import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
@@ -9,26 +10,28 @@ import com.vinylteam.vinyl.util.impl.VinylParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class DefaultOfferService implements OfferService {
 
-    private final OfferDao offerDao;
+    private final OfferRepository offerRepository;
+    private final UniqueVinylRepository uniqueVinylRepository;
 
     @Override
-    public List<Offer> findManyByUniqueVinylId(long uniqueVinylId) {
+    public List<Offer> findManyByUniqueVinylId(String uniqueVinylId) {
         List<Offer> offers;
-        if (uniqueVinylId > 0) {
-            offers = offerDao.findManyByUniqueVinylId(uniqueVinylId);
+        if (uniqueVinylId != null) {
+            offers = offerRepository.findByUniqueVinylId(uniqueVinylId);
         } else {
-            IllegalArgumentException e = new IllegalArgumentException();
-            log.error("uniqueVinylId is 0 or less {'uniqueVinylId':{}}", uniqueVinylId, e);
-            throw new RuntimeException(e);
+            log.error("uniqueVinylId is null");
+            throw new IllegalArgumentException("uniqueVinylId is null");
         }
         log.debug("Resulting list of vinyls is {'vinyls':{}}", offers);
         return offers;
@@ -37,49 +40,40 @@ public class DefaultOfferService implements OfferService {
     @Override
     public void updateUniqueVinylsRewriteAll(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
         if (uniqueVinyls == null) {
-            RuntimeException e = new NullPointerException("List of unique vinyls is null");
-            log.error("List of unique vinyls is null", e);
-            throw e;
+            log.error("List of unique vinyls is null");
+            throw new IllegalArgumentException("List of unique vinyls is null");
         }
         if (offers == null) {
-            RuntimeException e = new NullPointerException("List of offers is null");
-            log.error("List of offers is null", e);
-            throw e;
+            log.error("List of offers is null");
+            throw new IllegalArgumentException("List of offers is null");
         }
         if (uniqueVinyls.isEmpty()) {
-            RuntimeException e = new IllegalArgumentException("List of unique vinyls is empty");
-            log.error("List of unique vinyls is empty", e);
-            throw e;
+            log.error("List of unique vinyls is empty");
+            throw new IllegalArgumentException("List of unique vinyls is empty");
         }
         if (offers.isEmpty()) {
-            RuntimeException e = new IllegalArgumentException("List of offers is empty");
-            log.error("List of offers is empty", e);
-            throw e;
+            log.error("List of offers is empty");
+            throw new IllegalArgumentException("List of offers is empty");
         }
-        List<Offer> unaddedOffers = offerDao.updateUniqueVinylsRewriteAll(uniqueVinyls, offers);
-        if (unaddedOffers.isEmpty()) {
-            log.info("Successfully updated database with {} unique vinyls and {} offers", uniqueVinyls.size(), offers.size());
-        } else if (unaddedOffers.size() < offers.size()) {
-            log.error("Some offers weren't added to the database {'unaddedOffers':{}}", unaddedOffers);
-        } else {
-            RuntimeException e = new IllegalStateException("None of the offers were addad to the db");
-            log.error("None of the offers were added to the db {'unaddedOffers':{}}", unaddedOffers, e);
-            throw e;
-        }
+        save(uniqueVinyls, offers);
+        log.info("Successfully updated database with {} unique vinyls and {} offers", uniqueVinyls.size(), offers.size());
+    }
+
+    @Transactional
+    public void save(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
+        uniqueVinylRepository.saveAll(uniqueVinyls);
+        offerRepository.saveAll(offers);
     }
 
     @Override
     public List<Integer> getListOfShopIds(List<Offer> offers) {
-        List<Integer> shopsIds = new ArrayList<>();
-        if (offers != null) {
-            for (Offer offer : offers) {
-                if (!shopsIds.contains(offer.getShopId())) {
-                    shopsIds.add(offer.getShopId());
-                }
-            }
-        } else {
-            log.error("List of offers is null, returning empty list.");
+        if (offers == null) {
+            return new ArrayList<>();
         }
+        List<Integer> shopsIds = offers.stream()
+                .map(Offer::getShopId)
+                .distinct()
+                .collect(Collectors.toList());
         log.debug("Resulting list of shop id-s is {'shopIds':{}}", shopsIds);
         return shopsIds;
     }
