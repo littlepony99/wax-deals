@@ -9,13 +9,13 @@ import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Slf4j
@@ -35,16 +35,15 @@ public class DefaultUserService implements UserService {
             User userToAdd = securityService
                     .createUserWithHashedPassword(email, password.toCharArray());
             userToAdd.setDiscogsUserName(discogsUserName);
-            long userId = 1;
             userDao.add(userToAdd);
-            if (userId == -1) {
-                return false;
-            }
             //TODO check how transaction annotation work after jdbc level repair
             //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
-            log.debug("Added created user to db with id {'userId':{}}", userId);
-            ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
-            isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+            Optional<User> optionalUser = userDao.findByEmail(userToAdd.getEmail());
+            log.debug("Added created user to db {'user':{}}", userToAdd);
+            if (optionalUser.isPresent()) {
+                ConfirmationToken confirmationToken = confirmationService.addByUserId(optionalUser.get().getId());
+                isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+            }
         }
         log.debug("Result of attempting to add user, created from passed email and password" +
                 " if both are not null is {'isAdded': {}, 'email':{}}", isAdded, email);
@@ -54,7 +53,7 @@ public class DefaultUserService implements UserService {
     @Override
     public boolean delete(User user, ModelAndView modelAndView) {
         boolean isDeleted = false;
-        if (user != null && modelAndView != null){
+        if (user != null && modelAndView != null) {
             userDao.delete(user);
             if (isDeleted) {
                 modelAndView.setStatus(HttpStatus.OK);
@@ -170,8 +169,8 @@ public class DefaultUserService implements UserService {
 
     @Override
     public Optional<User> editProfile(UserChangeProfileInfo userProfileInfo,
-                            User user,
-                            ModelAndView modelAndView){
+                                      User user,
+                                      ModelAndView modelAndView) {
         String newPassword = userProfileInfo.getNewPassword();
         String newEmail = userProfileInfo.getNewEmail();
         String oldPassword = userProfileInfo.getOldPassword();
@@ -186,15 +185,14 @@ public class DefaultUserService implements UserService {
         } else {
             boolean checkOldPassword = securityService.checkPasswordAgainstUserPassword(user, oldPassword.toCharArray());
             if (checkOldPassword) {
-                boolean isUpdated;
-                if (!newPassword.isEmpty()) {
-                    isUpdated = update(email, newEmail, newPassword, newDiscogsUserName);
-                    log.debug("Trying update user with new email and new password in the database {'newEmail':{}}.", newEmail);
-                } else {
-                    isUpdated = update(email, newEmail, oldPassword, newDiscogsUserName);
-                    log.debug("Trying update user with new email and old password in the database {'newEmail':{}}.", newEmail);
-                }
-                if (isUpdated) {
+                try {
+                    if (!newPassword.isEmpty()) {
+                        update(email, newEmail, newPassword, newDiscogsUserName);
+                        log.debug("Trying update user with new email and new password in the database {'newEmail':{}}.", newEmail);
+                    } else {
+                        update(email, newEmail, oldPassword, newDiscogsUserName);
+                        log.debug("Trying update user with new email and old password in the database {'newEmail':{}}.", newEmail);
+                    }
                     log.info("User was updated with new email or password in the database {'newEmail':{}}.", newEmail);
                     modelAndView.setStatus(HttpStatus.SEE_OTHER);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
@@ -202,7 +200,7 @@ public class DefaultUserService implements UserService {
                     email = newEmail;
                     discogsUserName = newDiscogsUserName;
                     user = findByEmail(email).orElse(user);
-                } else {
+                } catch (DataAccessException e) {
                     log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
                     modelAndView.setStatus(HttpStatus.BAD_REQUEST);
                     log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);

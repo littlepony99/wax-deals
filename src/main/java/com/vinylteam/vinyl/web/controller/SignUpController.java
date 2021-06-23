@@ -41,7 +41,7 @@ public class SignUpController {
         model.addAttribute("email", email);
         model.addAttribute("discogsUserName", discogsUserName);
         String registrationPage = "registration";
-        if (password.equals("")) {
+        if (password.isEmpty()) {
             setBadRequest(response, model, "Sorry, the password is empty!");
             return registrationPage;
         } else {
