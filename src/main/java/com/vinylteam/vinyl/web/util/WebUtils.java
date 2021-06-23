@@ -10,15 +10,12 @@ import java.util.List;
 
 public class WebUtils {
 
-    public static void setUserAttributes(HttpSession session, Model model) {
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
+    public static void setUserAttributes(User user, Model model) {
             if (user != null) {
                 model.addAttribute("userRole", user.getRole().toString());
                 model.addAttribute("email", user.getEmail());
                 model.addAttribute("discogsUserName", user.getDiscogsUserName());
             }
-        }
     }
 
     public static OneVinylOffersServletResponse getOfferResponseFromOffer(Offer offer, Shop shop) {

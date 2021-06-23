@@ -22,14 +22,16 @@ public class ProfileController {
     private final UserService userService;
 
     @GetMapping
-    public String getProfilePage(HttpSession session, Model model) {
-        WebUtils.setUserAttributes(session, model);
+    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user,
+                                 Model model) {
+        WebUtils.setUserAttributes(user, model);
         return "profile";
     }
 
     @GetMapping(path = "/edit-profile")
-    public String getEditProfilePage(HttpSession session, Model model) {
-        WebUtils.setUserAttributes(session, model);
+    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,
+                                     Model model) {
+        WebUtils.setUserAttributes(user, model);
         return "editProfile";
     }
 

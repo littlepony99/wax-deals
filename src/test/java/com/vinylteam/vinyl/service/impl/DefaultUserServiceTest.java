@@ -1,11 +1,12 @@
-/*
 
+/*
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.SecurityService;
+import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -513,18 +514,27 @@ class DefaultUserServiceTest {
         UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
         userProfileInfo.setNewPassword("");
         userProfileInfo.setConfirmNewPassword("");
-        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
-        String oldPassword = optionalUserFromDB.get().getPassword();
+
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
         userProfileInfo.setOldPassword(oldPassword);
-        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray())).thenReturn(true);
-        when(userService.update(optionalUserFromDB.get().getEmail(), userProfileInfo.getNewEmail(), oldPassword, userProfileInfo.getNewDiscogsUserName())).thenReturn(false);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), userProfileInfo.getNewEmail(), oldPassword, userProfileInfo.getNewDiscogsUserName())).thenReturn(false);
         //when
-        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
         //then
-        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), oldPassword.toCharArray());
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
         verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
         assertNotNull(userAfterEdit.getEmail());
-        assertEquals(optionalUserFromDB.get(), userAfterEdit);
+        assertEquals(userFromDB, userAfterEdit);
     }
 
     @Test
@@ -574,7 +584,7 @@ class DefaultUserServiceTest {
         userAfterEdit.setDiscogsUserName(newDiscogsUserName);
 
         when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
-        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, userProfileInfo.getNewPassword().toCharArray())).thenReturn(userAfterEdit);
         when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(false);
         //when
         userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
@@ -601,7 +611,7 @@ class DefaultUserServiceTest {
         userAfterEdit.setDiscogsUserName(newDiscogsUserName);
 
         when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
-        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, userProfileInfo.getNewPassword().toCharArray())).thenReturn(userAfterEdit);
         when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(true);
         when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
         when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));

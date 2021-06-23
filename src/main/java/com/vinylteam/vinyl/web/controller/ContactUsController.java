@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.web.dto.CaptchaRequestDto;
 import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
@@ -32,18 +33,18 @@ public class ContactUsController {
     private final DefaultCaptchaService service;
 
     @GetMapping
-    public ModelAndView getContactUsPage(HttpSession session,
+    public ModelAndView getContactUsPage(@SessionAttribute(value = "user", required = false) User user,
                                          HttpServletResponse response,
                                          Model model) {
         response.setContentType("text/html;charset=utf-8");
         response.setStatus(HttpServletResponse.SC_OK);
         log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(session, model);
+        WebUtils.setUserAttributes(user, model);
         return new ModelAndView("contactUs");
     }
 
     @PostMapping
-    public CaptchaResponseDto sendPost(HttpSession session,
+    public CaptchaResponseDto sendPost(@SessionAttribute(value = "user", required = false) User user,
                                        HttpServletResponse response,
                                        Model model,
                                        @Value("${project.mail}") String projectMail,
@@ -67,7 +68,7 @@ public class ContactUsController {
                 return new CaptchaResponseDto("Sorry. but your request wasn't sent to us. Please, write to us - " + projectMail);
             }
         } else {
-            WebUtils.setUserAttributes(session, model);
+            WebUtils.setUserAttributes(user, model);
             throw new ForbiddenException("INVALID_CAPTCHA");
         }
     }
