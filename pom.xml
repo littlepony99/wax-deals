@@ -27,6 +27,7 @@
         <!--Test Dependencies-->
         <flyway.version>7.7.2</flyway.version>
         <system.lambda.version>1.2.0</system.lambda.version>
+        <testcontainers.version>1.15.3</testcontainers.version>
     </properties>
 
     <build>
@@ -174,6 +175,30 @@
             <version>2.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
 
         <!--FLYWAY CORE-->
         <dependency>
