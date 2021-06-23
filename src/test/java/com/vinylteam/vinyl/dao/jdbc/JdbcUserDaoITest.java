@@ -64,14 +64,14 @@ class JdbcUserDaoITest {
     }
 
     @Test
-   @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-   @DisplayName("Finds user from db by existing id")
-   void getByExistingIdTest() {
-       //when
-       Optional<User> optionalUserGottenByExistingId = userDao.findById(1);
-       //then
-       assertTrue(optionalUserGottenByExistingId.isPresent());
-   }
+    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true,  executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Finds user from db by existing id")
+    void getByExistingIdTest() {
+        //when
+        Optional<User> optionalUserGottenByExistingId = userDao.findById(1);
+        //then
+        assertTrue(optionalUserGottenByExistingId.isPresent());
+    }
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})

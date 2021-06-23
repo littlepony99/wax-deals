@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -72,14 +73,22 @@ public class JdbcUserDao implements UserDao {
     public Optional<User> findByEmail(String email) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("email", email);
-        return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_EMAIL, sqlParameterSource, USER_ROW_MAPPER));
+        try {
+            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_EMAIL, sqlParameterSource, USER_ROW_MAPPER));
+        } catch (DataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<User> findById(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
-        return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_ID, sqlParameterSource, USER_ROW_MAPPER));
+        try {
+            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_ID, sqlParameterSource, USER_ROW_MAPPER));
+        } catch (DataAccessException e) {
+            return Optional.empty();
+        }
     }
 
 }

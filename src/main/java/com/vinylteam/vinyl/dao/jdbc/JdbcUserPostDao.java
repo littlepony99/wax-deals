@@ -38,7 +38,5 @@ public class JdbcUserPostDao implements UserPostDao {
             return false;
         }
     }
-//TODO: DataAccessException - add subset of that in catch.
-    //TODO: analog of RowMapper.
 
 }
