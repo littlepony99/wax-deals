@@ -45,7 +45,7 @@ public class JdbcUserDao implements UserDao {
         sqlParameterSource.addValue("password", user.getPassword());
         sqlParameterSource.addValue("salt", user.getSalt());
         sqlParameterSource.addValue("iterations", user.getIterations());
-        sqlParameterSource.addValue("role", user.getRole().toString());
+        sqlParameterSource.addValue("role", user.getRole().getName());
         sqlParameterSource.addValue("status", user.getStatus());
         sqlParameterSource.addValue("discogs_user_name", user.getDiscogsUserName());
         namedParameterJdbcTemplate.update(INSERT, sqlParameterSource);
@@ -66,7 +66,7 @@ public class JdbcUserDao implements UserDao {
         sqlParameterSource.addValue("password", user.getPassword());
         sqlParameterSource.addValue("salt", user.getSalt());
         sqlParameterSource.addValue("iterations", user.getIterations());
-        sqlParameterSource.addValue("role", user.getRole().toString());
+        sqlParameterSource.addValue("role", user.getRole().getName());
         sqlParameterSource.addValue("status", user.getStatus());
         sqlParameterSource.addValue("discogs_user_name", user.getDiscogsUserName());
         sqlParameterSource.addValue("old_email", email);

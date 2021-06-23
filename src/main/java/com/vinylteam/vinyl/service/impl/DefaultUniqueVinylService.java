@@ -91,7 +91,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
         List<UniqueVinyl> forShowing = new ArrayList<>();
         List<UniqueVinyl> allUniqueVinyl = findAll();
         if (wantList == null && user != null) {
-            model.addAttribute("userRole", user.getRole().toString());
+            model.addAttribute("userRole", user.getRole().getName());
             forShowing = discogsService.getDiscogsMatchList(user.getDiscogsUserName(), allUniqueVinyl);
         }
         if (user != null) {

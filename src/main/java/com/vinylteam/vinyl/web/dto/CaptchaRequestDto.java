@@ -12,13 +12,13 @@ import org.springframework.lang.NonNull;
 public class CaptchaRequestDto {
 
     @NonNull
-    String name;
+    private String name;
     @NonNull
-    String email;
+    private String email;
     @NonNull
-    String subject;
+    private String subject;
     @NonNull
-    String message;
+    private String message;
     @NonNull
-    String captchaResponse;
+    private String captchaResponse;
 }

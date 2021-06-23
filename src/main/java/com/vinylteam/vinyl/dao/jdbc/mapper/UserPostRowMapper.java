@@ -12,13 +12,14 @@ public class UserPostRowMapper implements RowMapper<UserPost> {
 
     @Override
     public UserPost mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-        UserPost userPost = new UserPost();
-        userPost.setId(resultSet.getLong("id"));
-        userPost.setName(resultSet.getString("name"));
-        userPost.setEmail(resultSet.getString("email"));
-        userPost.setTheme(resultSet.getString("theme"));
-        userPost.setMessage(resultSet.getString("message"));
-        userPost.setCreatedAt(resultSet.getTimestamp("created_at").toLocalDateTime());
+        UserPost userPost = UserPost.builder()
+                .id(resultSet.getLong("id"))
+                .name(resultSet.getString("name"))
+                .email(resultSet.getString("email"))
+                .theme(resultSet.getString("theme"))
+                .message(resultSet.getString("message"))
+                .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
+                .build();
         log.debug("Resulting user post object {'userPost':{}}", userPost);
         return userPost;
     }

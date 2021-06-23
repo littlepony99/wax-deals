@@ -168,7 +168,7 @@ public class DatabasePreparerForITests {
                 insertUsers.setString(3, user.getSalt());
                 insertUsers.setInt(4, user.getIterations());
                 insertUsers.setBoolean(5, user.getStatus());
-                insertUsers.setString(6, user.getRole().toString());
+                insertUsers.setString(6, user.getRole().getName());
                 insertUsers.setString(7, user.getDiscogsUserName());
                 insertUsers.addBatch();
             }
