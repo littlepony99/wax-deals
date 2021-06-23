@@ -17,7 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
 
@@ -31,8 +33,7 @@ class JdbcUserDaoITest {
 
     @Autowired
     private UserDao userDao;
-    @Autowired
-    private Flyway flyway;
+
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @AfterAll
@@ -56,9 +57,10 @@ class JdbcUserDaoITest {
     @DisplayName("Finds user from db by non existing email")
     void getByNotExistingEmailTest() {
         //when
-        Optional<User> optionalUserGottenByNonexistentEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());
+//        Optional<User> optionalUserGottenByNonexistentEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());
         //then
-        assertFalse(optionalUserGottenByNonexistentEmail.isPresent());
+        assertThrows(EmptyResultDataAccessException.class, () -> {userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());});
+//        assertFalse(optionalUserGottenByNonexistentEmail.isPresent());
     }
 
     @Test
