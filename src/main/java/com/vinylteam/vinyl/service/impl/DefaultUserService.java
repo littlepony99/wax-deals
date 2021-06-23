@@ -109,15 +109,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        Optional<User> optionalUser = Optional.empty();
-        if (email != null) {
-            optionalUser = userDao.findByEmail(email);
-            log.debug("Attempted to get optional with user found by email from db {'email':{}, 'optional':{}}", email, optionalUser);
-        } else {
-            log.error("Passed email is null, returning empty optional");
-        }
-        log.debug("Resulting optional is {'optional':{}}", optionalUser);
-        return optionalUser;
+        return userDao.findByEmail(email);
     }
 
     @Override

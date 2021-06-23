@@ -13,17 +13,16 @@ public class UserRowMapper implements RowMapper<User> {
 
     @Override
     public User mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-        User user = new User();
-        user.setId(resultSet.getLong("id"));
-        user.setEmail(resultSet.getString("email"));
-        user.setPassword(resultSet.getString("password"));
-        user.setDiscogsUserName(resultSet.getString("discogs_user_name"));
-        user.setSalt(resultSet.getString("salt"));
-        user.setIterations(resultSet.getInt("iterations"));
-        user.setRole(Role.valueOf(resultSet.getString("role")));
-        user.setStatus(resultSet.getBoolean("status"));
-        log.debug("Resulting User object {'user':{}}", user);
-        return user;
+        return User.builder()
+                .id(resultSet.getLong("id"))
+                .email(resultSet.getString("email"))
+                .password(resultSet.getString("password"))
+                .discogsUserName(resultSet.getString("discogs_user_name"))
+                .salt(resultSet.getString("salt"))
+                .iterations(resultSet.getInt("iterations"))
+                .role(Role.valueOf(resultSet.getString("role")))
+                .status(resultSet.getBoolean("status")).build();
+
     }
 
 }

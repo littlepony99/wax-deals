@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserDao;
+import com.vinylteam.vinyl.dao.jdbc.mapper.UserResultSetExtractor;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +33,13 @@ public class JdbcUserDao implements UserDao {
             " WHERE email ILIKE :old_email";
 
     private static final UserRowMapper USER_ROW_MAPPER = new UserRowMapper();
+    private static final UserResultSetExtractor USER_RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public void add(User user) {
+        log.info("add log");
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("email", user.getEmail());
         sqlParameterSource.addValue("password", user.getPassword());
@@ -50,6 +53,7 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void delete(User user) {
+        log.info("add log");
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("email", user.getEmail());
         namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
@@ -73,11 +77,10 @@ public class JdbcUserDao implements UserDao {
     public Optional<User> findByEmail(String email) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("email", email);
-        try {
-            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_EMAIL, sqlParameterSource, USER_ROW_MAPPER));
-        } catch (DataAccessException e) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+                FIND_BY_EMAIL,
+                sqlParameterSource,
+                USER_RESULT_SET_EXTRACTOR));
     }
 
     @Override
@@ -85,7 +88,10 @@ public class JdbcUserDao implements UserDao {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
         try {
-            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(FIND_BY_ID, sqlParameterSource, USER_ROW_MAPPER));
+            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(
+                    FIND_BY_ID,
+                    sqlParameterSource,
+                    USER_ROW_MAPPER));
         } catch (DataAccessException e) {
             return Optional.empty();
         }
