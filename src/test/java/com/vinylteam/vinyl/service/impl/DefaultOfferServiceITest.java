@@ -16,6 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +44,8 @@ public class DefaultOfferServiceITest extends AbstractElasticsearchContainerBase
     void beforeEach() {
         uniqueVinylRepository.deleteAll();
         offerRepository.deleteAll();
+
+        offers.get(0).setCurrency(Optional.empty());
 
         uniqueVinylRepository.saveAll(uniqueVinyls);
         offerRepository.saveAll(offers);
