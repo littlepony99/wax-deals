@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.data.domain.Page;
@@ -63,30 +64,33 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
         log.info("Search with query {}", matcher);
 
-        // 1. Create query on multiple fields enabling fuzzy search
         QueryBuilder queryBuilder =
-                QueryBuilders
-                        .matchQuery("fullName", matcher)
-                        .fuzziness(Fuzziness.AUTO);
+                QueryBuilders.boolQuery()
+                        .must(QueryBuilders
+                                .matchQuery("fullName", matcher)
+                                .fuzziness(Fuzziness.AUTO)
+                        )
+                        .must(QueryBuilders
+                                .termQuery("hasOffers", true));
 
-        QueryBuilder queryBuilderHasOffer =
-                QueryBuilders
-                        .matchQuery("hasOffer", true);
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.must(queryBuilder);
 
         Query searchQuery = new NativeSearchQueryBuilder()
-                .withFilter(queryBuilder)
-                // .withFilter(queryBuilderHasOffer)
+                .withQuery(boolQueryBuilder)
                 .build();
 
-        // 2. Execute search
         SearchHits<UniqueVinyl> productHits =
                 elasticsearchOperations
                         .search(searchQuery, UniqueVinyl.class,
                                 IndexCoordinates.of(INDEX));
 
-        // 3. Map searchHits to product list
         List<UniqueVinyl> vinylMatches = new ArrayList<>();
         productHits.forEach(searchHit -> vinylMatches.add(searchHit.getContent()));
+
+        if (vinylMatches.isEmpty()) {
+            return uniqueVinylRepository.findByFullNameIgnoreCaseContainingAndHasOffers(matcher, true);
+        }
 
         return vinylMatches;
     }

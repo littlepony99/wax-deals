@@ -37,8 +37,9 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     @BeforeEach
     void beforeEach() {
         uniqueVinylRepository.deleteAll();
-        uniqueVinyls.get(2).setFullName("release3 Access All Worlds - artist3");
-        uniqueVinyls.get(3).setFullName("release4 Songs & Instrumentals - artist4");
+        uniqueVinyls.get(1).setFullName("release2 Access All Worlds - artist2");
+        uniqueVinyls.get(2).setFullName("release3 SONGS & Instrumentals - artist3");
+        uniqueVinyls.get(3).setFullName("release4 SONGS");
         uniqueVinylRepository.saveAll(uniqueVinyls);
     }
 
@@ -108,10 +109,12 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     @Test
     @DisplayName("Returns filled list by full name substring matcher that has matches with offers in table")
     void findManyFilteredTest() {
+        List<UniqueVinyl> expectedUniqueVinyls = new ArrayList<>();
+        expectedUniqueVinyls.add(uniqueVinyls.get(0));
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyFiltered("artist");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyFiltered("1");
         //then
-        assertEquals(uniqueVinyls, actualUniqueVinyls);
+        assertEquals(expectedUniqueVinyls, actualUniqueVinyls);
     }
 
     @Test
@@ -128,7 +131,7 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     void findManyFilteredNotWholeWord() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("ongs");
         assertEquals(1, vinylList.size());
-        System.out.println(vinylList);
+        assertEquals(uniqueVinyls.get(2), vinylList.get(0));
     }
 
     @Test
@@ -136,15 +139,15 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     void findManyFilteredOneLetterIsDifferent() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("bongs");
         assertEquals(1, vinylList.size());
-        System.out.println(vinylList);
+        assertEquals(uniqueVinyls.get(2), vinylList.get(0));
     }
 
     @Test
     @DisplayName("Return some results when one letter is different")
     void findManyFilteredOneLetterIsDifferentSomeResults() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("gelease");
-        assertEquals(4, vinylList.size());
-        System.out.println(vinylList);
+        assertEquals(3, vinylList.size());
+        assertFalse(vinylList.contains(uniqueVinyls.get(3)));
     }
 
     @Test
@@ -152,7 +155,7 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     void findManyFilteredSomeWordsWithMistakes() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("acess word");
         assertEquals(1, vinylList.size());
-        System.out.println(vinylList);
+        assertEquals(uniqueVinyls.get(1), vinylList.get(0));
     }
 
     @Test
@@ -160,7 +163,7 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     void findManyFilteredSomeWordsWithMistakesDifferentOrder() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("word acess");
         assertEquals(1, vinylList.size());
-        System.out.println(vinylList);
+        assertEquals(uniqueVinyls.get(1), vinylList.get(0));
     }
 
     @Test

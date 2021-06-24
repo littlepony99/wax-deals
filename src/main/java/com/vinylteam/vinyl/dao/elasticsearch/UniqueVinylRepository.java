@@ -16,4 +16,5 @@ public interface UniqueVinylRepository
 
     List<UniqueVinyl> findByArtistIgnoreCaseAndHasOffers(String artist, boolean hasOffer);
 
+    List<UniqueVinyl> findByFullNameIgnoreCaseContainingAndHasOffers(String fullName, boolean hasOffer);
 }
