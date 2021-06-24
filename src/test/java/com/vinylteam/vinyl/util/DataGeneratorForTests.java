@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;

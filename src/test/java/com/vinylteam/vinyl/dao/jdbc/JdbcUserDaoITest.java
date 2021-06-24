@@ -38,19 +38,19 @@ class JdbcUserDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-    @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
-            .withDatabaseName("testDB")
-            .withUsername("user")
-            .withPassword("password");
-
-    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        container.start();
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }
+//    @Container
+//    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
+//            .withDatabaseName("testDB")
+//            .withUsername("user")
+//            .withPassword("password");
+//
+//    @DynamicPropertySource
+//    static void properties(DynamicPropertyRegistry registry) {
+//        container.start();
+//        registry.add("spring.datasource.url", container::getJdbcUrl);
+//        registry.add("spring.datasource.username", container::getUsername);
+//        registry.add("spring.datasource.password", container::getPassword);
+//    }
 
     @Test
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
@@ -182,6 +182,24 @@ class JdbcUserDaoITest {
         User userNonExistentEmail = dataGenerator.getUserWithNumber(2);
         //when
         userDao.delete(userNonExistentEmail);
+    }
+
+    @Test
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.SetUserStatusProvider.class)
+    @DisplayName("Update user status")
+    void setUserStatusTrue(){
+        //when
+        userDao.setUserStatusTrue(1);
+    }
+
+    @Test
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
+    @DisplayName("Update user status")
+    void setUserStatusTrueIfInvalidUserId(){
+        //when
+        userDao.setUserStatusTrue(1000);
     }
 
 }

@@ -16,4 +16,6 @@ public interface UserDao {
 
     Optional<User> findById(long id);
 
+    void setUserStatusTrue(long userId);
+
 }

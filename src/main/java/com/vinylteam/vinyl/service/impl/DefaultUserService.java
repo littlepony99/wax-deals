@@ -10,7 +10,6 @@ import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -39,15 +38,13 @@ public class DefaultUserService implements UserService {
             User userToAdd = securityService
                     .createUserWithHashedPassword(email, password.toCharArray());
             userToAdd.setDiscogsUserName(userProfileInfo.getNewDiscogsUserName());
-            userDao.add(userToAdd);
+            long userId = userDao.add(userToAdd);
             //TODO check how transaction annotation work after jdbc level repair
             //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
-            Optional<User> optionalUser = userDao.findByEmail(userToAdd.getEmail());
             log.debug("Added created user to db {'user':{}}", userToAdd);
-            if (optionalUser.isPresent()) {
-                ConfirmationToken confirmationToken = confirmationService.addByUserId(optionalUser.get().getId());
-                isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
-            }
+            ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
+            isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+
         }
         log.debug("Result of attempting to add user, created from passed email and password" +
                 " if both are not null is {'isAdded': {}, 'email':{}}", isAdded, email);

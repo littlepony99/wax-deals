@@ -52,5 +52,15 @@ public class TestUserProvider {
         }
     }
 
+    public static class SetUserStatusProvider implements DataSetProvider {
+        @Override
+        public IDataSet provide() {
+            return new DataSetBuilder()
+                    .table("users")
+                    .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .values("user1@wax-deals.com", "salt1", "1", "hash1", "true", "USER", "discogsUserName1")
+                    .build();
+        }
+    }
 
 }

@@ -29,6 +29,7 @@ public class JdbcUserDao implements UserDao {
     private static final String UPDATE = "UPDATE users" +
             " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
             " WHERE email ILIKE :old_email";
+    private static final String UPDATE_USER_STATUS = "UPDATE users SET status = true WHERE id = :id";
 
     private static final UserResultSetExtractor USER_RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
@@ -87,6 +88,13 @@ public class JdbcUserDao implements UserDao {
                 FIND_BY_ID,
                 sqlParameterSource,
                 USER_RESULT_SET_EXTRACTOR));
+    }
+
+    @Override
+    public void setUserStatusTrue(long id){
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("id", id);
+        namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
 }
