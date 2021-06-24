@@ -1,12 +1,14 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
+import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,13 +18,16 @@ import java.util.UUID;
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;
+    private final UserDao userDao;
     private final MailSender mailSender;
     private final String applicationLink;
 
     public DefaultConfirmationService(ConfirmationTokenDao confirmationTokenDao,
+                                      UserDao userDao,
                                       MailSender mailSender,
                                       @Value("${application.link}") String applicationLink) {
         this.confirmationTokenDao = confirmationTokenDao;
+        this.userDao = userDao;
         this.mailSender = mailSender;
         this.applicationLink = applicationLink;
     }
@@ -91,13 +96,14 @@ public class DefaultConfirmationService implements ConfirmationService {
     }
 
     @Override
+    @Transactional
     public boolean deleteByUserId(long userId) {
         if (userId <= 0) {
             log.error("Id is 0 or less {'userId':{}}", userId);
             throw new IllegalArgumentException("Not correct user id=" + userId);
         }
-        //FIXME normal return
         confirmationTokenDao.deleteByUserId(userId);
+        userDao.setUserStatusTrue(userId);
         return false;
     }
 
