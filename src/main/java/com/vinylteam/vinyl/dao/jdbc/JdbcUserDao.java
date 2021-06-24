@@ -2,18 +2,16 @@ package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.mapper.UserResultSetExtractor;
-import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
 import com.vinylteam.vinyl.entity.User;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class JdbcUserDao implements UserDao {
@@ -32,28 +30,26 @@ public class JdbcUserDao implements UserDao {
             " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
             " WHERE email ILIKE :old_email";
 
-    private static final UserRowMapper USER_ROW_MAPPER = new UserRowMapper();
     private static final UserResultSetExtractor USER_RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public void add(User user) {
-        log.info("add log");
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("email", user.getEmail());
-        sqlParameterSource.addValue("password", user.getPassword());
-        sqlParameterSource.addValue("salt", user.getSalt());
-        sqlParameterSource.addValue("iterations", user.getIterations());
-        sqlParameterSource.addValue("role", user.getRole().getName());
-        sqlParameterSource.addValue("status", user.getStatus());
-        sqlParameterSource.addValue("discogs_user_name", user.getDiscogsUserName());
-        namedParameterJdbcTemplate.update(INSERT, sqlParameterSource);
+    public long add(User user) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword())
+                .addValue("salt", user.getSalt())
+                .addValue("iterations", user.getIterations())
+                .addValue("role", user.getRole().getName())
+                .addValue("status", user.getStatus())
+                .addValue("discogs_user_name", user.getDiscogsUserName());
+        return namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
     }
 
     @Override
     public void delete(User user) {
-        log.info("add log");
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("email", user.getEmail());
         namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
@@ -87,14 +83,10 @@ public class JdbcUserDao implements UserDao {
     public Optional<User> findById(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
-        try {
-            return Optional.ofNullable(namedParameterJdbcTemplate.queryForObject(
-                    FIND_BY_ID,
-                    sqlParameterSource,
-                    USER_ROW_MAPPER));
-        } catch (DataAccessException e) {
-            return Optional.empty();
-        }
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+                FIND_BY_ID,
+                sqlParameterSource,
+                USER_RESULT_SET_EXTRACTOR));
     }
 
 }
