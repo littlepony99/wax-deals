@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Component
 public class DataGeneratorForTests {
 
     public Shop getShopWithNumber(int number) {

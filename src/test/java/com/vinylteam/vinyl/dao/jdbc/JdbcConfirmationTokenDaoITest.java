@@ -5,24 +5,35 @@ import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.data.TestConfirmationTokenProvider;
+import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Optional;
+
+@RequiredArgsConstructor
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
-
 class JdbcConfirmationTokenDaoITest {
 
-    @Autowired
-    private JdbcConfirmationTokenDao jdbcConfirmationTokenDao;
+    private final JdbcConfirmationTokenDao jdbcConfirmationTokenDao;
+    private final DataGeneratorForTests dataGenerator;
 
     @Test
     @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns optional with confirmation token when there is token with that user_id")
     void findByUserIdTest() {
+        //prepare
+
+        //when
+        Optional<ConfirmationToken> optionalConfirmationToken = jdbcConfirmationTokenDao
+                .findByUserId(dataGenerator.getConfirmationTokenWithUserId(1).getUserId());
+        //then
 
     }
 }
