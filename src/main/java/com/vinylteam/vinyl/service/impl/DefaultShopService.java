@@ -20,7 +20,7 @@ public class DefaultShopService implements ShopService {
     public List<Shop> getManyByListOfIds(List<Integer> ids) {
         List<Shop> shops;
         if (ids != null) {
-            shops = shopDao.getManyByListOfIds(ids);
+            shops = shopDao.findByListOfIds(ids);
         } else {
             log.error("List of ids is null, returning empty list.");
             shops = new ArrayList<>();

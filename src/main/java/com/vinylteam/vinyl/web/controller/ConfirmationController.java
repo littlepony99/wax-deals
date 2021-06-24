@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,9 +53,14 @@ public class ConfirmationController {
                                       @RequestParam(value = "password") String password,
                                       @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval,
                                       HttpSession session) {
+        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+                .token(tokenAsString)
+                .email(email)
+                .oldPassword(password)
+                .build();
         ModelAndView modelAndView = new ModelAndView();
         log.info("Sign in user with email {} and token {}", email, tokenAsString);
-        Optional<User> optionalUser = userService.signInCheck(email, password, tokenAsString);
+        Optional<User> optionalUser = userService.signInCheck(userProfileInfo);
         log.debug("Received an optional with User with password verification by the passed " +
                 "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
         if (optionalUser.isEmpty()) {

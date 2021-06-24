@@ -61,9 +61,10 @@ public class DefaultConfirmationService implements ConfirmationService {
             log.error("Id is 0 or less {'userId':{}}", userId);
             throw new IllegalArgumentException();
         }
-        ConfirmationToken newConfirmationToken = new ConfirmationToken();
-        newConfirmationToken.setUserId(userId);
-        newConfirmationToken.setToken(UUID.randomUUID());
+        ConfirmationToken newConfirmationToken = ConfirmationToken.builder()
+                .userId(userId)
+                .token(UUID.randomUUID())
+                .build();
         confirmationTokenDao.add(newConfirmationToken);
         return newConfirmationToken;
     }
@@ -74,7 +75,10 @@ public class DefaultConfirmationService implements ConfirmationService {
             log.error("Passed confirmation token is null");
             throw new RuntimeException("Passed confirmation token is null");
         }
-        return confirmationTokenDao.update(confirmationToken);
+        //FIXME normal return
+        confirmationTokenDao.update(confirmationToken);
+//        return confirmationTokenDao.update(confirmationToken);
+        return false;
     }
 
     @Override
@@ -92,7 +96,9 @@ public class DefaultConfirmationService implements ConfirmationService {
             log.error("Id is 0 or less {'userId':{}}", userId);
             throw new IllegalArgumentException("Not correct user id=" + userId);
         }
-        return confirmationTokenDao.deleteByUserId(userId);
+        //FIXME normal return
+        confirmationTokenDao.deleteByUserId(userId);
+        return false;
     }
 
     private String composeEmail(String token) {

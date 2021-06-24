@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +43,8 @@ public class ProfileController {
                                     @RequestParam(value = "discogsUserName") String newDiscogsUserName,
                                     HttpSession session,
                                     @SessionAttribute("user") User user) {
-        UserChangeProfileInfo userProfileInfo = UserChangeProfileInfo.builder()
-                .newEmail(newEmail)
+        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+                .email(newEmail)
                 .oldPassword(oldPassword)
                 .newPassword(newPassword)
                 .confirmNewPassword(confirmNewPassword)

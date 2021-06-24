@@ -12,7 +12,7 @@ public class WebUtils {
 
     public static void setUserAttributes(User user, Model model) {
             if (user != null) {
-                model.addAttribute("userRole", user.getRole().toString());
+                model.addAttribute("userRole", user.getRole().getName());
                 model.addAttribute("email", user.getEmail());
                 model.addAttribute("discogsUserName", user.getDiscogsUserName());
             }

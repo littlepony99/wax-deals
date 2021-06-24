@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.RecoveryPasswordService;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +48,14 @@ public class ChangePasswordController {
                                        @RequestParam(value = "recoveryToken") String token,
                                        Model model) {
         WebUtils.setUserAttributes(user, model);
+        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+                .newPassword(newPassword)
+                .confirmNewPassword(confirmPassword)
+                .token(token)
+                .build();
         ModelAndView modelAndView = new ModelAndView("signIn");
         try {
-            recoveryPasswordService.changePassword(newPassword, confirmPassword, token);
+            recoveryPasswordService.changePassword(userProfileInfo);
             modelAndView.setStatus(HttpStatus.SEE_OTHER);
             modelAndView.addObject("message", "Your password was changed. Please, try to log in use new password.");
         } catch (RecoveryPasswordException e) {

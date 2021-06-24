@@ -2,7 +2,7 @@
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -91,12 +91,12 @@ public class DataGeneratorForTests {
     }
 
     public ConfirmationToken getConfirmationTokenWithUserId(long userId) {
-        ConfirmationToken confirmationToken = new ConfirmationToken();
-        confirmationToken.setId(userId);
-        confirmationToken.setUserId(userId);
-        confirmationToken.setToken(UUID.randomUUID());
-        confirmationToken.setTimestamp(new Timestamp(userId));
-        return confirmationToken;
+        return ConfirmationToken.builder()
+                .id(userId)
+                .userId(userId)
+                .token(UUID.randomUUID())
+                .timestamp(new Timestamp(userId))
+                .build();
     }
 
     public List<Shop> getShopsList() {
@@ -169,11 +169,12 @@ public class DataGeneratorForTests {
     public List<ConfirmationToken> getConfirmationTokensList() {
         List<ConfirmationToken> confirmationTokens = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
-            ConfirmationToken confirmationToken = new ConfirmationToken();
-            confirmationToken.setId(i + 1L);
-            confirmationToken.setUserId(i + 1L);
-            confirmationToken.setToken(UUID.randomUUID());
-            confirmationToken.setTimestamp(new Timestamp(i + 1L));
+            ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                    .id(i + 1L)
+                    .userId(i + 1L)
+                    .token(UUID.randomUUID())
+                    .timestamp(new Timestamp(i + 1L))
+                    .build();
             confirmationTokens.add(confirmationToken);
         }
         return confirmationTokens;
@@ -224,9 +225,9 @@ public class DataGeneratorForTests {
         return recoveryToken;
     }
 
-    public UserChangeProfileInfo getUserChangeProfileInfo(){
-        return UserChangeProfileInfo.builder()
-                .newEmail("new@wax-deals.com")
+    public UserChangeProfileInfoRequest getUserChangeProfileInfo(){
+        return UserChangeProfileInfoRequest.builder()
+                .email("new@wax-deals.com")
                 .oldPassword("oldPassword")
                 .newPassword("newPassword")
                 .confirmNewPassword("newPassword")

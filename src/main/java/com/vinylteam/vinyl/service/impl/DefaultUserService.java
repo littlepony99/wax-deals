@@ -3,13 +3,15 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.UserServiceException;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +31,14 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public boolean add(String email, String password, String discogsUserName) {
+    public boolean add(UserChangeProfileInfoRequest userProfileInfo) {
         boolean isAdded = false;
+        String email = userProfileInfo.getEmail();
+        String password = userProfileInfo.getNewPassword();
         if (email != null && password != null) {
             User userToAdd = securityService
                     .createUserWithHashedPassword(email, password.toCharArray());
-            userToAdd.setDiscogsUserName(discogsUserName);
+            userToAdd.setDiscogsUserName(userProfileInfo.getNewDiscogsUserName());
             userDao.add(userToAdd);
             //TODO check how transaction annotation work after jdbc level repair
             //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
@@ -62,7 +66,7 @@ public class DefaultUserService implements UserService {
                 modelAndView.setViewName("editProfile");
                 modelAndView.addObject("discogsUserName", user.getDiscogsUserName());
                 modelAndView.addObject("email", user.getEmail());
-                modelAndView.addObject("userRole", user.getRole().toString());
+                modelAndView.addObject("userRole", user.getRole().getName());
                 modelAndView.setStatus(HttpStatus.BAD_REQUEST);
                 log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
                 modelAndView.addObject("message", "Delete is fail! Try again!");
@@ -109,15 +113,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        Optional<User> optionalUser = Optional.empty();
-        if (email != null) {
-            optionalUser = userDao.findByEmail(email);
-            log.debug("Attempted to get optional with user found by email from db {'email':{}, 'optional':{}}", email, optionalUser);
-        } else {
-            log.error("Passed email is null, returning empty optional");
-        }
-        log.debug("Resulting optional is {'optional':{}}", optionalUser);
-        return optionalUser;
+        return userDao.findByEmail(email);
     }
 
     @Override
@@ -150,14 +146,14 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> signInCheck(String email, String password, String token) {
-        Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(token);
+    public Optional<User> signInCheck(UserChangeProfileInfoRequest userProfileInfo) {
+        Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(userProfileInfo.getToken());
         ConfirmationToken confirmationToken = optionalConfirmationTokenByLinkToken.orElseThrow(
                 () -> new IllegalArgumentException("Sorry, something went wrong on our side, we're looking into it. Please, try to login again, or contact us."));
         User userByLinkToken = userDao.findById(confirmationToken.getUserId()).get();
-        if (userByLinkToken.getEmail().equalsIgnoreCase(email)) {
+        if (userByLinkToken.getEmail().equalsIgnoreCase(userByLinkToken.getEmail())) {
             if (securityService.checkPasswordAgainstUserPassword(
-                    userByLinkToken, password.toCharArray())) {
+                    userByLinkToken, userProfileInfo.getOldPassword().toCharArray())) {
                 confirmationService.deleteByUserId(userByLinkToken.getId());
                 return Optional.of(userByLinkToken);
             }
@@ -168,14 +164,14 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> editProfile(UserChangeProfileInfo userProfileInfo,
+    public Optional<User> editProfile(UserChangeProfileInfoRequest userProfileInfo,
                                       User user,
                                       ModelAndView modelAndView) {
         String newPassword = userProfileInfo.getNewPassword();
-        String newEmail = userProfileInfo.getNewEmail();
+        String newEmail = userProfileInfo.getEmail();
         String oldPassword = userProfileInfo.getOldPassword();
         String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
-        modelAndView.addObject("userRole", user.getRole().toString());
+        modelAndView.addObject("userRole", user.getRole().getName());
         String email = user.getEmail();
         String discogsUserName = user.getDiscogsUserName();
         if (!newPassword.equals(userProfileInfo.getConfirmNewPassword())) {
@@ -200,11 +196,9 @@ public class DefaultUserService implements UserService {
                     email = newEmail;
                     discogsUserName = newDiscogsUserName;
                     user = findByEmail(email).orElse(user);
-                } catch (DataAccessException e) {
-                    log.info("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
-                    modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                    modelAndView.addObject("message", "Edit is fail! Try again!");
+                } catch (EmptyResultDataAccessException e) {
+                    log.error("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
+                    throw new UserServiceException("Edit is fail! Try again!");
                 }
             } else {
                 modelAndView.setStatus(HttpStatus.BAD_REQUEST);
