@@ -7,7 +7,7 @@ import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.dao.UserDao;
-import com.vinylteam.vinyl.data.TestData;
+import com.vinylteam.vinyl.data.TestUserProvider;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -35,7 +35,7 @@ class JdbcUserDaoITest {
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by existing email")
     void getByExistingEmailTest() {
         //when
@@ -46,7 +46,7 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by non existing email")
     void getByNotExistingEmailTest() {
         //when
@@ -56,7 +56,7 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by existing id")
     void getByExistingIdTest() {
         //when
@@ -66,7 +66,7 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by non existing id")
     void getByNotExistingIdTest() {
         //when
@@ -76,8 +76,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.AddedUserResultProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.AddedUserResultProvider.class)
     @DisplayName("Adds user to db")
     void addNewUser() {
         //prepare
@@ -87,7 +87,7 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Adds empty user to db")
     void addNewEmptyUser() {
         //prepare
@@ -97,8 +97,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.UsersProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
     @DisplayName("Adds existing user with the same email")
     void addExistingWithSameEmailTest() {
         //prepare
@@ -109,8 +109,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.UsersProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
     @DisplayName("Adds existing user with the same email")
     void addExistingWithSameEmailToUpperCaseTest() {
         //prepare
@@ -121,8 +121,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.UsersProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
     @DisplayName("Update non-existent user in db")
     void updateNonExistentUserInDbTest() {
         //prepare
@@ -134,8 +134,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.UpdatedUserResultProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UpdatedUserResultProvider.class)
     @DisplayName("Edit existing user in db with valid new values")
     void editWithAnExistingUserInDbTest() {
         //prepare
@@ -146,8 +146,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.DeletedUserResultProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.DeletedUserResultProvider.class)
     @DisplayName("Delete by user with non-existent email")
     void deleteExistingUserTest() {
         //prepare
@@ -157,8 +157,8 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @ExpectedDataSet(provider = TestData.UsersProvider.class)
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
     @DisplayName("Delete by user with non-existent email")
     void deleteNonExistentUserTest() {
         //prepare

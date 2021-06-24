@@ -4,7 +4,7 @@ import com.github.database.rider.core.api.dataset.DataSetProvider;
 import com.github.database.rider.core.dataset.builder.DataSetBuilder;
 import org.dbunit.dataset.IDataSet;
 
-public class TestData {
+public class TestUserProvider {
 
     public static class UsersProvider implements DataSetProvider {
         @Override
