@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UniqueVinylDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.UniqueVinylRowMapper;
+import com.vinylteam.vinyl.dao.jdbc.extractor.UniqueVinylRowMapper;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

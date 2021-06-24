@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.ConfirmationTokenResultSetExtractor;
+import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

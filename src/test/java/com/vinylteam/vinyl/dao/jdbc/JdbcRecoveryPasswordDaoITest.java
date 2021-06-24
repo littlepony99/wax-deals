@@ -1,63 +1,63 @@
-
-/*
 package com.vinylteam.vinyl.dao.jdbc;
 
+import com.github.database.rider.core.api.configuration.DBUnit;
+import com.github.database.rider.core.api.configuration.Orthography;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.core.api.dataset.ExpectedDataSet;
+import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
+import com.vinylteam.vinyl.data.TestRecoveryTokenProvider;
 import com.vinylteam.vinyl.entity.RecoveryToken;
-import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.util.DataFinderFromDBForITests;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.util.DatabasePreparerForITests;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataAccessException;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+@DBRider
+@DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcRecoveryPasswordDaoITest {
 
-    private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();
-    private final RecoveryPasswordDao recoveryPasswordDao = new JdbcRecoveryPasswordDao(databasePreparer.getDataSource());
-    private final DataFinderFromDBForITests dataFinder = new DataFinderFromDBForITests(databasePreparer.getDataSource());
+    @Autowired
+    private RecoveryPasswordDao recoveryPasswordDao;
+
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final List<User> users = dataGenerator.getUsersList();
-    private RecoveryToken recoveryToken = new RecoveryToken();
 
-    @BeforeAll
-    void beforeAll() throws SQLException {
-        databasePreparer.truncateCascadeRecoveryPassword();
-        databasePreparer.truncateCascadeUsers();
-    }
+    @Container
+    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
+            .withDatabaseName("testDB")
+            .withUsername("user")
+            .withPassword("password");
 
-    @AfterAll
-    void afterAll() throws SQLException {
-        databasePreparer.truncateCascadeRecoveryPassword();
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.closeDataSource();
-    }
-
-    @BeforeEach
-    void beforeEach() throws SQLException {
-        databasePreparer.insertRecoveryToken(recoveryToken);
-        databasePreparer.insertUsers(users);
-    }
-
-    @AfterEach
-    void afterEach() throws SQLException {
-        databasePreparer.truncateCascadeRecoveryPassword();
-        databasePreparer.truncateCascadeUsers();
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        container.start();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.AddRecoveryPasswordTokenProvider.class)
     @DisplayName("Add new recovery token into recovery_password table in db")
     void addRecoveryToken() {
         //prepare
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
+        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2L);
+        recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
         //when
         boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
@@ -65,23 +65,24 @@ class JdbcRecoveryPasswordDaoITest {
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class)
     @DisplayName("Add new recovery token if user doesn't exist into recovery_password table in db")
     void addRecoveryTokenIfUserDoesNotExist() {
         //prepare
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(3L);
+        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(3L);
         //when
-        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
-        //then
-        assertFalse(isAdded);
+        assertThrows(DataAccessException.class, () -> recoveryPasswordDao.add(recoveryToken));
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.UpdateRecoveryPasswordTokenProvider.class)
     @DisplayName("Add new recovery token if token with this user already exist into recovery_password table in db")
     void addRecoveryTokenIfTokenWithThisUserAlreadyExist() {
         //prepare
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
+        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
+        recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
         //when
         boolean isAdded = recoveryPasswordDao.add(recoveryToken);
         //then
@@ -89,35 +90,31 @@ class JdbcRecoveryPasswordDaoITest {
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class)
     @DisplayName("Add new recovery token if this token already exist into recovery_password table in db")
     void addRecoveryTokenIfTokenAlreadyExist() {
         //prepare
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
-        recoveryToken.setUserId(2L);
+        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2);
+        recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
         //when
-        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
-        //then
-        assertFalse(isAdded);
+        assertThrows(DataAccessException.class, () -> recoveryPasswordDao.add(recoveryToken));
     }
 
     @Test
-    @DisplayName("Get optional recovery token by token frpm Recovery_token in db")
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Get optional recovery token by token from Recovery_token in db")
     void getRecoveryTokenByToken() {
-        //prepare
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(recoveryToken.getToken());
+        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
         //then
         assertTrue(optionalRecoveryToken.isPresent());
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Try get token if it doesn't exist into recovery_password in db")
     void getRecoveryTokenByTokenIfTokenDoesNotExist() {
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
         //when
         Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(UUID.randomUUID());
         //then
@@ -125,10 +122,10 @@ class JdbcRecoveryPasswordDaoITest {
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.DeleteRecoveryPasswordTokenProvider.class)
     @DisplayName("Remove token from recovery_password table in db")
-    void removeRecoveryToken() {
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
+    void deleteByExistingId() {
         //when
         boolean isDeleted = recoveryPasswordDao.deleteById(1);
         //then
@@ -136,14 +133,14 @@ class JdbcRecoveryPasswordDaoITest {
     }
 
     @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class)
     @DisplayName("Remove token if it doesn't exist from recovery_password table in db")
-    void removeRecoveryTokenIfTokenDoesNotExist() {
-        recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
-        recoveryPasswordDao.add(recoveryToken);
+    void DeleteByNonExistentId() {
         //when
-        boolean isDeleted = recoveryPasswordDao.deleteById(1000);
+        boolean isDeleted = recoveryPasswordDao.deleteById(0);
         //then
         assertFalse(isDeleted);
     }
 
-}*/
+}
