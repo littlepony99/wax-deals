@@ -38,19 +38,19 @@ class JdbcUserDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-//    @Container
-//    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
-//            .withDatabaseName("testDB")
-//            .withUsername("user")
-//            .withPassword("password");
-//
-//    @DynamicPropertySource
-//    static void properties(DynamicPropertyRegistry registry) {
-//        container.start();
-//        registry.add("spring.datasource.url", container::getJdbcUrl);
-//        registry.add("spring.datasource.username", container::getUsername);
-//        registry.add("spring.datasource.password", container::getPassword);
-//    }
+    @Container
+    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
+            .withDatabaseName("testDB")
+            .withUsername("user")
+            .withPassword("password");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        container.start();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
+    }
 
     @Test
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
