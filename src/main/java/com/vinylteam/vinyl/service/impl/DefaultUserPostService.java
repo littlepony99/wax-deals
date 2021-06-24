@@ -21,16 +21,15 @@ public class DefaultUserPostService implements UserPostService {
 
     @Override
     @Transactional
-    public boolean processAdd(UserPost post) {
-        boolean isAddedToDb = userPostDao.add(post);
+    public void processAdd(UserPost post) {
+        userPostDao.add(post);
         String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());
         boolean isMailSent = mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
-        return isAddedToDb && isMailSent;
     }
 
     @Override
-    public boolean add(UserPost post) {
-        return userPostDao.add(post);
+    public void add(UserPost post) {
+        userPostDao.add(post);
     }
 
     protected String createContactUsMessage(String recipient, String subject, String mailBody) {

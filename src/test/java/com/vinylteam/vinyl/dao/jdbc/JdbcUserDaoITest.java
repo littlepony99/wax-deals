@@ -8,6 +8,7 @@ import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.data.TestData;
+import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.DisplayName;
@@ -15,7 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Optional;
 
@@ -32,27 +34,29 @@ class JdbcUserDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-   @Test
-   @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-   @DisplayName("Finds user from db by existing email")
-   void getByExistingEmailTest() {
-       //when
-       Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(
-               dataGenerator.getUserWithNumber(1).getEmail());
-       //then
-       assertTrue(optionalUserGottenByExistingEmail.isPresent());
-   }
+    @Test
+    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Finds user from db by existing email")
+    void getByExistingEmailTest() {
+        //when
+        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(
+                dataGenerator.getUserWithNumber(1).getEmail());
+        //then
+        assertTrue(optionalUserGottenByExistingEmail.isPresent());
+    }
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by non existing email")
     void getByNotExistingEmailTest() {
-//        assertThrows(ValidationException.class, () -> {userDao.findByEmail(
-//                dataGenerator.getUserWithNumber(3).getEmail());});
+        //when
+        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail("sdfsdfsdfsd");
+        //then
+        assertFalse(optionalUserGottenByExistingEmail.isPresent());
     }
 
     @Test
-    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true,  executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by existing id")
     void getByExistingIdTest() {
         //when
@@ -75,11 +79,21 @@ class JdbcUserDaoITest {
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestData.AddedUserResultProvider.class)
     @DisplayName("Adds user to db")
-    void addNewTest() {
+    void addNewUser() {
         //prepare
         User expectedUser = dataGenerator.getUserWithNumber(2);
         //when
-        userDao.add(expectedUser);
+        assertEquals(1, userDao.add(expectedUser));
+    }
+
+    @Test
+    @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Adds empty user to db")
+    void addNewEmptyUser() {
+        //prepare
+        User expectedUser = User.builder().email("uniq").role(Role.USER).build();
+        //when
+        assertThrows(DataIntegrityViolationException.class, () -> userDao.add(expectedUser));
     }
 
     @Test
@@ -91,21 +105,20 @@ class JdbcUserDaoITest {
         User userExistingEmail = dataGenerator.getUserWithNumber(2);
         userExistingEmail.setEmail(dataGenerator.getUserWithNumber(1).getEmail());
         //when
-        assertThrows(DataAccessException.class, () -> userDao.add(userExistingEmail));
+        assertThrows(DuplicateKeyException.class, () -> userDao.add(userExistingEmail));
     }
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestData.UsersProvider.class)
-    @DisplayName("Adds existing user with the same password")
-    void addExistingWithSamePasswordTest() {
+    @DisplayName("Adds existing user with the same email")
+    void addExistingWithSameEmailToUpperCaseTest() {
         //prepare
-        User userExistingPassword = dataGenerator.getUserWithNumber(2);
-        userExistingPassword.setPassword(dataGenerator.getUserWithNumber(1).getPassword());
+        User userExistingEmail = dataGenerator.getUserWithNumber(2);
+        userExistingEmail.setEmail(dataGenerator.getUserWithNumber(1).getEmail().toUpperCase());
         //when
-        assertThrows(DataAccessException.class, () -> userDao.add(userExistingPassword));
+        assertThrows(DuplicateKeyException.class, () -> userDao.add(userExistingEmail));
     }
-//TODO: add unique constraint on salt in migrations.
 
     @Test
     @DataSet(provider = TestData.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})

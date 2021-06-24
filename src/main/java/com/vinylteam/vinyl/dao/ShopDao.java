@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ShopDao {
 
-    List<Shop> getManyByListOfIds(List<Integer> ids);
+    List<Shop> findByListOfIds(List<Integer> ids);
 
     List<Shop> findAll();
 

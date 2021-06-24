@@ -4,12 +4,9 @@ import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import javax.sql.DataSource;
-import java.sql.Timestamp;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,25 +15,20 @@ public class JdbcUserPostDao implements UserPostDao {
 
     private static final String INSERT_USER_POST = "INSERT INTO user_posts" +
             " (name, email, theme, message, created_at)" +
-            " VALUES (?, ?, ?, ?, ?)";
+            " VALUES (:name , :email, :theme, :message, :create_at)";
 
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean add(UserPost post) {
-        if (jdbcTemplate.update(INSERT_USER_POST, post.getName(), post.getEmail(),
-                post.getTheme(), post.getMessage(), Timestamp.valueOf(post.getCreatedAt())) > 0) {
-            log.info("User post is added to the database {'userPost':{}}.", post);
-            return true;
-        } else {
-            log.info("Failed to add user post to the database {'userPost':{}}.", post);
-            return false;
-        }
+    public void add(UserPost post) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource
+                .addValue("name", post.getName())
+                .addValue("email", post.getEmail())
+                .addValue("theme", post.getTheme())
+                .addValue("message", post.getMessage())
+                .addValue("create_at", post.getCreatedAt());
+        jdbcTemplate.update(INSERT_USER_POST, sqlParameterSource);
     }
 
 }
