@@ -18,6 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.util.Optional;
 
@@ -34,13 +38,26 @@ class JdbcUserDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
+    @Container
+    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
+            .withDatabaseName("testDB")
+            .withUsername("user")
+            .withPassword("password");
+
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        container.start();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
+    }
+
     @Test
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by existing email")
     void getByExistingEmailTest() {
         //when
-        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(
-                dataGenerator.getUserWithNumber(1).getEmail());
+        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(1).getEmail());
         //then
         assertTrue(optionalUserGottenByExistingEmail.isPresent());
     }
@@ -50,9 +67,9 @@ class JdbcUserDaoITest {
     @DisplayName("Finds user from db by non existing email")
     void getByNotExistingEmailTest() {
         //when
-        Optional<User> optionalUserGottenByExistingEmail = userDao.findByEmail("sdfsdfsdfsd");
+        Optional<User> optionalUserGottenByNonexistentEmail = userDao.findByEmail(dataGenerator.getUserWithNumber(3).getEmail());
         //then
-        assertFalse(optionalUserGottenByExistingEmail.isPresent());
+        assertFalse(optionalUserGottenByNonexistentEmail.isPresent());
     }
 
     @Test
@@ -79,7 +96,7 @@ class JdbcUserDaoITest {
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestUserProvider.AddedUserResultProvider.class)
     @DisplayName("Adds user to db")
-    void addNewUser() {
+    void addNewTest() {
         //prepare
         User expectedUser = dataGenerator.getUserWithNumber(2);
         //when
