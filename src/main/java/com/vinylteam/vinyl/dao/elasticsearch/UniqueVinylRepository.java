@@ -12,8 +12,6 @@ public interface UniqueVinylRepository
 
     List<UniqueVinyl> findAll();
 
-    Page<UniqueVinyl> findByHasOffers(boolean hasOffers, PageRequest pageRequest);
-
     List<UniqueVinyl> findByArtistIgnoreCaseAndHasOffers(String artist, boolean hasOffer);
 
     List<UniqueVinyl> findByFullNameIgnoreCaseContainingAndHasOffers(String fullName, boolean hasOffer);

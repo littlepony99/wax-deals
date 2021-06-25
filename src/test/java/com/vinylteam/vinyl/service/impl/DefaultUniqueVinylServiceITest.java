@@ -5,11 +5,13 @@ import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.AbstractElasticsearchContainerBaseTest;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContainerBaseTest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
+    private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList(9);
 
     @Autowired
     private UniqueVinylService uniqueVinylService;
@@ -49,7 +51,6 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
         //when
         List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findAll();
         //then
-        System.out.println(actualUniqueVinyls);
         assertEquals(uniqueVinyls, actualUniqueVinyls);
     }
 
@@ -65,34 +66,72 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     }
 
     @Test
-    @DisplayName("Checks that when amount>0 UniqueVinylDao.findManyRandom(amount) is called, it's result is returned")
+    @DisplayName("findManyRandom - returns expected data")
     void findManyRandomValidAmountTest() {
         //prepare
         int amount = 2;
         //when
         List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
 
-        System.out.println(actualUniqueVinyls);
         //then
         assertEquals(2, actualUniqueVinyls.size());
+
+        UniqueVinyl vinylWithHasOffersFalse = uniqueVinyls.get(3);
+        assertFalse(actualUniqueVinyls.contains(vinylWithHasOffersFalse));
+    }
+
+    @Test
+    @DisplayName("findManyRandom produces different results")
+    void findManyRandomNotRepeatResultsAmountTest() {
+        //prepare
+        UniqueVinyl vinylWithHasOffersFalse = uniqueVinyls.get(3);
+        int amount = 2;
+
+        //uniqueVinylRepository.deleteAll();
+        //uniqueVinylRepository.saveAll(dataGenerator.getUniqueVinylsList(9));
+
+        //when
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
+
+        //then
+        assertEquals(2, actualUniqueVinyls.size());
+        assertFalse(actualUniqueVinyls.contains(vinylWithHasOffersFalse));
+
+        String resultAttempt1 = actualUniqueVinyls.stream()
+                .map(UniqueVinyl::getId)
+                .reduce("", String::concat);
+
+        List<UniqueVinyl> invocation2UniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        assertEquals(2, invocation2UniqueVinyls.size());
+        assertFalse(invocation2UniqueVinyls.contains(vinylWithHasOffersFalse));
+
+        String resultAttempt2 = invocation2UniqueVinyls.stream()
+                .map(UniqueVinyl::getId)
+                .reduce("", String::concat);
+
+        assertNotEquals(resultAttempt1, resultAttempt2);
     }
 
     @Test
     @DisplayName("Returns filled list with all unique vinyls selected randomly from table when requested amount is equal or bigger than amount of rows in table")
     void findManyRandomAmountBiggerThanTableSizeTest() {
         //prepare
+        int amount = 20;
         List<UniqueVinyl> expectedUniqueVinyls = new ArrayList<>(uniqueVinyls);
         expectedUniqueVinyls.remove(3);
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(5);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
 
-        System.out.println(actualUniqueVinyls);
         //then
-        assertEquals(3, actualUniqueVinyls.size());
+        assertEquals(8, actualUniqueVinyls.size());
         assertTrue(expectedUniqueVinyls.containsAll(actualUniqueVinyls));
-        assertNotEquals(actualUniqueVinyls.get(0), actualUniqueVinyls.get(1));
-        assertNotEquals(actualUniqueVinyls.get(1), actualUniqueVinyls.get(2));
-        assertNotEquals(actualUniqueVinyls.get(2), actualUniqueVinyls.get(0));
+
+        long distinctValues = actualUniqueVinyls.stream()
+                .map(UniqueVinyl::getId)
+                .distinct()
+                .count();
+
+        assertEquals(8, distinctValues);
     }
 
     @Test
@@ -146,7 +185,7 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
     @DisplayName("Return some results when one letter is different")
     void findManyFilteredOneLetterIsDifferentSomeResults() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("gelease");
-        assertEquals(3, vinylList.size());
+        assertEquals(8, vinylList.size());
         assertFalse(vinylList.contains(uniqueVinyls.get(3)));
     }
 
@@ -215,6 +254,5 @@ public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContain
         //when
         assertThrows(RuntimeException.class, () -> uniqueVinylService.findById("100"));
     }
-
 
 }

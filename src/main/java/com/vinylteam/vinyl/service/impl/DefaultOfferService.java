@@ -25,13 +25,11 @@ public class DefaultOfferService implements OfferService {
 
     @Override
     public List<Offer> findManyByUniqueVinylId(String uniqueVinylId) {
-        List<Offer> offers;
-        if (uniqueVinylId != null) {
-            offers = offerRepository.findByUniqueVinylId(uniqueVinylId);
-        } else {
+        if (uniqueVinylId == null) {
             log.error("uniqueVinylId is null");
             throw new IllegalArgumentException("uniqueVinylId is null");
         }
+        List<Offer> offers = offerRepository.findByUniqueVinylId(uniqueVinylId);
         log.debug("Resulting list of vinyls is {'vinyls':{}}", offers);
         return offers;
     }

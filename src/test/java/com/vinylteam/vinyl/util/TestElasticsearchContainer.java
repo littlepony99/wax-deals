@@ -4,7 +4,7 @@ import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public class TestElasticsearchContainer extends ElasticsearchContainer {
-    private static final String ELASTIC_SEARCH_DOCKER = "elasticsearch:7.9.0";
+    private static final String ELASTIC_SEARCH_DOCKER = "elasticsearch:7.12.1";
 
     private static final String CLUSTER_NAME = "cluster.name";
 

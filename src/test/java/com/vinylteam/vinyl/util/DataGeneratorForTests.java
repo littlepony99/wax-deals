@@ -130,6 +130,22 @@ public class DataGeneratorForTests {
         return uniqueVinyls;
     }
 
+    public List<UniqueVinyl> getUniqueVinylsList(int size) {
+        List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            UniqueVinyl uniqueVinyl = new UniqueVinyl();
+            uniqueVinyl.setId(Integer.toString(i + 1));
+            uniqueVinyl.setRelease("release" + (i + 1));
+            uniqueVinyl.setArtist("artist" + (i + 1));
+            uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
+            uniqueVinyl.setImageLink("/image" + (i + 1));
+            uniqueVinyl.setHasOffers(true);
+            uniqueVinyls.add(uniqueVinyl);
+        }
+        uniqueVinyls.get(3).setHasOffers(false);
+        return uniqueVinyls;
+    }
+
     public List<Offer> getOffersList() {
         List<Offer> offers = new ArrayList<>();
         for (int i = 0; i < 3; i++) {

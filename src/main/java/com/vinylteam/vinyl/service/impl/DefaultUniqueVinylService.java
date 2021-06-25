@@ -9,8 +9,8 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -50,9 +50,16 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
         if (amount <= 0) {
             return new ArrayList<>();
         }
-        Page<UniqueVinyl> page = uniqueVinylRepository.findByHasOffers(true,
-                PageRequest.of(0, amount));
-        return page.getContent();
+        FunctionScoreQueryBuilder functionScore = QueryBuilders.functionScoreQuery(
+                QueryBuilders.termQuery("hasOffers", true),
+                ScoreFunctionBuilders.randomFunction());
+
+        Query searchQuery = new NativeSearchQueryBuilder()
+                .withQuery(functionScore)
+                .withMaxResults(amount)
+                .build();
+
+        return getUniqueVinyls(searchQuery);
     }
 
     @Override
@@ -73,20 +80,11 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
                         .must(QueryBuilders
                                 .termQuery("hasOffers", true));
 
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.must(queryBuilder);
-
         Query searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(boolQueryBuilder)
+                .withQuery(queryBuilder)
                 .build();
 
-        SearchHits<UniqueVinyl> productHits =
-                elasticsearchOperations
-                        .search(searchQuery, UniqueVinyl.class,
-                                IndexCoordinates.of(INDEX));
-
-        List<UniqueVinyl> vinylMatches = new ArrayList<>();
-        productHits.forEach(searchHit -> vinylMatches.add(searchHit.getContent()));
+        List<UniqueVinyl> vinylMatches = getUniqueVinyls(searchQuery);
 
         if (vinylMatches.isEmpty()) {
             return uniqueVinylRepository.findByFullNameIgnoreCaseContainingAndHasOffers(matcher, true);
@@ -115,6 +113,17 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
                 .orElseThrow(() -> new RuntimeException("No uniqueVinyl with that id in table {'id':{" + id + "}}"));
         log.debug("Resulting uniqueVinyl is {'uniqueVinyl':{}}", uniqueVinyl);
         return uniqueVinyl;
+    }
+
+    List<UniqueVinyl> getUniqueVinyls(Query searchQuery) {
+        SearchHits<UniqueVinyl> productHits =
+                elasticsearchOperations
+                        .search(searchQuery, UniqueVinyl.class,
+                                IndexCoordinates.of(INDEX));
+
+        List<UniqueVinyl> vinylMatches = new ArrayList<>();
+        productHits.forEach(searchHit -> vinylMatches.add(searchHit.getContent()));
+        return vinylMatches;
     }
 
 }
