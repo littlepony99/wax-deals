@@ -9,4 +9,6 @@ public interface OfferRepository extends ElasticsearchRepository<Offer, String> 
 
     List<Offer> findByUniqueVinylId(String uniqueVinylId);
 
+    List<Offer> findAll();
+
 }

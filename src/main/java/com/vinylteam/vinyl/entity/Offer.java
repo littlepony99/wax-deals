@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import java.util.Optional;
 
 @Data
-@Document(indexName = "offer_index", createIndex = true)
+@Document(indexName = "offer_index")
 public class Offer {
 
     @Id

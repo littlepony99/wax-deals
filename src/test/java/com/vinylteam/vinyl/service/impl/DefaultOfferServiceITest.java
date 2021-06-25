@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.elasticsearch.OfferRepository;
 import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
+import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.elasticsearch.NoSuchIndexException;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -74,34 +76,43 @@ public class DefaultOfferServiceITest extends AbstractElasticsearchContainerBase
         //then
         assertTrue(actualOffers.isEmpty());
     }
-/*
+
     @Test
-    @DisplayName("Checks that when uniqueVinyls and offers are not empty and not null and unaddedOffers empty, " +
-            "offerDao.updateUniqueVinylsRewriteAll() is called, exception isn't thrown")
-    void updateUniqueVinylsRewriteAllUnaddedZeroOffers() {
+    @DisplayName("Rewrite all - check uniqueVinyl changes")
+    void updateUniqueVinylsRewriteAll() {
         //prepare
-        when(mockedOfferDao.updateUniqueVinylsRewriteAll(uniqueVinyls, offers)).thenReturn(new ArrayList<>());
+        List<UniqueVinyl> vinylsToUpdate = new ArrayList<>(uniqueVinyls);
+        List<Offer> offersToUpdate = new ArrayList<>(offers);
+
+        UniqueVinyl newUniqueVinyl = new UniqueVinyl();
+        newUniqueVinyl.setId("10");
+        newUniqueVinyl.setHasOffers(false);
+        newUniqueVinyl.setFullName("Test fullname");
+        newUniqueVinyl.setArtist("Artist new");
+
+        vinylsToUpdate.add(newUniqueVinyl);
+        vinylsToUpdate.get(3).setHasOffers(true);
+        vinylsToUpdate.remove(0);
+
+        Offer newOffer = new Offer();
+        newOffer.setId("25");
+        newOffer.setUniqueVinylId("10");
+        newOffer.setPrice(25.5);
+        newOffer.setCurrency(Optional.of(Currency.UAH));
+        newOffer.setCatNumber("Test category");
+        offersToUpdate.add(newOffer);
+        offersToUpdate.remove(0);
+        offersToUpdate.get(0).setPrice(0.1);
         //when
-        offerService.updateUniqueVinylsRewriteAll(uniqueVinyls, offers);
+        offerService.updateUniqueVinylsRewriteAll(vinylsToUpdate, offersToUpdate);
         //then
-        verify(mockedOfferDao).updateUniqueVinylsRewriteAll(uniqueVinyls, offers);
+        List<UniqueVinyl> vinylsAfterUpdate = uniqueVinylRepository.findAll();
+        assertTrue(vinylsAfterUpdate.containsAll(vinylsToUpdate));
+        assertTrue(vinylsAfterUpdate.contains(uniqueVinyls.get(0)));
+
+        List<Offer> offersAfterUpdate = offerRepository.findAll();
+        assertTrue(offersAfterUpdate.containsAll(offersToUpdate));
+        assertFalse(offersAfterUpdate.contains(offers.get(0)));
     }
-
-    @Test
-    @DisplayName("Checks that when uniqueVinyls and offers are not empty and not null and unaddedOffers same size as offers, " +
-            "offerDao.updateUniqueVinylsRewriteAll() is called, RuntimeException is thrown")
-    void updateUniqueVinylsRewriteAllUnaddedAllOffers() {
-        //prepare
-        when(mockedOfferDao.updateUniqueVinylsRewriteAll(uniqueVinyls, offers)).thenReturn(new ArrayList<>(offers));
-        //when
-        assertThrows(RuntimeException.class, () -> offerService.updateUniqueVinylsRewriteAll(uniqueVinyls, offers));
-        //then
-        verify(mockedOfferDao).updateUniqueVinylsRewriteAll(uniqueVinyls, offers);
-    }*/
-
-   /* private void recreateIndexes() {
-        //elasticsearchOperations.indexOps(UniqueVinyl.class).refresh();
-        elasticsearchOperations.indexOps(Offer.class).refresh();
-    }*/
 
 }

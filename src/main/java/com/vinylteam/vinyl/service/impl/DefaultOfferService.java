@@ -10,7 +10,6 @@ import com.vinylteam.vinyl.util.impl.VinylParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +58,9 @@ public class DefaultOfferService implements OfferService {
         log.info("Successfully updated database with {} unique vinyls and {} offers", uniqueVinyls.size(), offers.size());
     }
 
-    @Transactional
     public void save(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
         uniqueVinylRepository.saveAll(uniqueVinyls);
+        offerRepository.deleteAll();
         offerRepository.saveAll(offers);
     }
 

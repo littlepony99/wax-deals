@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
-@Document(indexName = "unique_vinyl_index", createIndex = true)
+@Document(indexName = "unique_vinyl_index")
 public class UniqueVinyl {
 
     @Id
