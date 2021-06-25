@@ -24,7 +24,7 @@ import java.util.UUID;
 @Configuration
 @PropertySource("classpath:application.properties")
 public class DefaultRecoveryPasswordService implements RecoveryPasswordService {
-    private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/newPassword?token=";
+    private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/recoveryPassword/newPassword?token=";
 
     private final RecoveryPasswordDao recoveryPasswordDao;
     private final UserService userService;

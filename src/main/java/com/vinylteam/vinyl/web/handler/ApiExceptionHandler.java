@@ -13,9 +13,9 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {RuntimeException.class})
     public ResponseEntity<Object> handleApiExceptionHandler(RuntimeException exception){
-        ApiException apiException = new ApiException(
+        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
                 exception.getMessage());
-        return ResponseEntity.status(BAD_REQUEST).body(apiException);
+        return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);
     }
 
     @ExceptionHandler(UserServiceException.class)

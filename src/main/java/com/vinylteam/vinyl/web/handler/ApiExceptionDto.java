@@ -6,6 +6,6 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 @Getter
-public class ApiException {
+public class ApiExceptionDto {
     private final String message;
 }
