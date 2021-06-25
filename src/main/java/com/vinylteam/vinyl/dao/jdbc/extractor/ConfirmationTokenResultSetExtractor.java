@@ -1,5 +1,5 @@
 
-package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +22,8 @@ public class ConfirmationTokenResultSetExtractor implements ResultSetExtractor<C
                     .token(resultSet.getObject("token", java.util.UUID.class))
                     .timestamp(resultSet.getTimestamp("created_at"))
                     .build();
+            log.debug("Resulting ConfirmationToken object {'user':{}}", confirmationToken);
         }
-        log.debug("Resulting ConfirmationToken object {'user':{}}", confirmationToken);
         return confirmationToken;
     }
 

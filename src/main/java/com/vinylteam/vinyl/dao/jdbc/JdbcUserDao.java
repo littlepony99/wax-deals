@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.UserResultSetExtractor;
+import com.vinylteam.vinyl.dao.jdbc.extractor.UserResultSetExtractor;
 import com.vinylteam.vinyl.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

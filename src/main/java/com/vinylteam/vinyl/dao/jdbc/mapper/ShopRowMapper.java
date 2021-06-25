@@ -1,6 +1,6 @@
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
-import com.vinylteam.vinyl.dao.RowMapper;
+import org.springframework.jdbc.core.RowMapper;
 import com.vinylteam.vinyl.entity.Shop;
 import lombok.extern.slf4j.Slf4j;
 
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 public class ShopRowMapper implements RowMapper<Shop> {
 
     @Override
-    public Shop mapRow(ResultSet resultSet) {
+    public Shop mapRow(ResultSet resultSet, int rowNumber) {
         Shop shop = new Shop();
         try {
             shop.setId(resultSet.getInt("id"));

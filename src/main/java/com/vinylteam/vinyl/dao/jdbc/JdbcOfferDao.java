@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.OfferDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.OfferRowMapper;
+import com.vinylteam.vinyl.dao.jdbc.extractor.OfferRowMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
 import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
