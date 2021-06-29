@@ -23,7 +23,6 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Configuration
 @PropertySource("classpath:application.properties")
 public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
     private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/recoveryPassword/newPassword?token=";

@@ -220,6 +220,11 @@ public class CloneNlParser extends VinylParser {
             return PriceUtils.getPriceFromString(fullPriceDetails);
         }
 
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return null;
+        }
+
         public String getHighResImageLinkFromDocument(Element document) {
             String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
             if (imageLink != null && !Objects.equals(imageLink, "")) {
@@ -293,6 +298,11 @@ public class CloneNlParser extends VinylParser {
             String fullPriceDetails = pricesBlock.get(0);
             log.debug("Got price details from page by offer link {'priceDetails':{}, 'offerLink':{}}", fullPriceDetails, document.ownerDocument().location());
             return PriceUtils.getPriceFromString(fullPriceDetails);
+        }
+
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return null;
         }
 
         public String getHighResImageLinkFromDocument(Element document) {
