@@ -1,4 +1,6 @@
-package com.vinylteam.vinyl.service.impl;
+
+/*package com.vinylteam.vinyl.service.impl;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinylteam.vinyl.discogs4j.entity.DiscogsVinylInfo;
@@ -29,7 +31,7 @@ class DefaultDiscogsServiceITest {
         this.propertiesReader = new PropertiesReader();
         this.defaultDiscogsService = new DefaultDiscogsService(propertiesReader.getProperty("consumer.key"),
                 propertiesReader.getProperty("consumer.secret"), propertiesReader.getProperty("user.agent"),
-                propertiesReader.getProperty("callback.url"), new ObjectMapper());
+                propertiesReader.getProperty("callback.url"));
         this.vinylListWithOneMatch = new ArrayList<>();
         this.vinylListWithNoMatch = new ArrayList<>();
     }
@@ -321,4 +323,4 @@ class DefaultDiscogsServiceITest {
         return vinyl;
     }
 
-}
+}*/

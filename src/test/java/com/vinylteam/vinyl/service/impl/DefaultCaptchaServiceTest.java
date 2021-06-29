@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.service.CaptchaService;
@@ -30,4 +32,4 @@ class DefaultCaptchaServiceTest {
         Assertions.assertNotNull(captcha);
     }
 
-}
+}*/

@@ -1,4 +1,5 @@
-package com.vinylteam.vinyl.web.servlets;
+
+/*package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
@@ -216,4 +217,4 @@ class SignUpServletTest {
         assertEquals("Error message", attributes.get("message"));
     }
 
-}
+}*/

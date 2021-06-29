@@ -13,8 +13,8 @@ public interface ConfirmationTokenDao {
 
     void add(ConfirmationToken token);
 
-    boolean update(ConfirmationToken token);
+    void update(ConfirmationToken token);
 
-    boolean deleteByUserId(long userId);
+    void deleteByUserId(long userId);
 
 }

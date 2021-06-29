@@ -1,3 +1,4 @@
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import jakarta.servlet.ServletOutputStream;
@@ -46,4 +47,4 @@ class ImageCaptchaServletTest {
         inOrderRequest.verify(mockedRequest).getSession();
     }
 
-}
+}*/

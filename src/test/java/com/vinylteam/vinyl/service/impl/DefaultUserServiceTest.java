@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.UserDao;
@@ -8,10 +10,14 @@ import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,12 +35,14 @@ class DefaultUserServiceTest {
     private final List<User> users = dataGenerator.getUsersList();
     private final List<ConfirmationToken> tokens = dataGenerator.getConfirmationTokensList();
     private final User mockedUser = mock(User.class);
+    private final ModelAndView mockedModelAndView = mock(ModelAndView.class);
 
     @BeforeEach
     void beforeEach() {
         reset(mockedUserDao);
         reset(mockedSecurityService);
         reset(mockedConfirmationService);
+        reset(mockedModelAndView);
     }
 
     @Test
@@ -47,7 +55,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(null, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()));
         verify(mockedUserDao, never()).add(any());
     }
 
@@ -61,7 +69,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(email, null, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(email), any(), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(email), any());
         verify(mockedUserDao, never()).add(any());
     }
 
@@ -73,13 +81,13 @@ class DefaultUserServiceTest {
         String existingEmail = "user1@wax-deals.com";
         String password = "password1";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()))).thenReturn(users.get(0));
         when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(0));
     }
 
@@ -91,13 +99,13 @@ class DefaultUserServiceTest {
         String existingEmail = "user123@wax-deals.com";
         String password = "password123";
         String newDiscogsUserName = "newDiscogsUserName1";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(0));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()))).thenReturn(users.get(0));
         when(mockedUserDao.add(users.get(0))).thenReturn(-1L);
         //when
         boolean actualIsAdded = userService.add(existingEmail, password, newDiscogsUserName);
         //then
         assertFalse(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(existingEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(0));
     }
 
@@ -110,7 +118,7 @@ class DefaultUserServiceTest {
         String password = "password2";
         String newDiscogsUserName = "newDiscogsUserName";
         ConfirmationToken confirmationToken = new ConfirmationToken();
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName))).thenReturn(users.get(1));
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()))).thenReturn(users.get(1));
         when(mockedUserDao.add(users.get(1))).thenReturn(1L);
         confirmationToken.setToken(UUID.randomUUID());
         when(mockedConfirmationService.addByUserId(1L)).thenReturn(confirmationToken);
@@ -119,7 +127,7 @@ class DefaultUserServiceTest {
         boolean actualIsAdded = userService.add(newEmail, password, newDiscogsUserName);
         //then
         assertTrue(actualIsAdded);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()));
         verify(mockedUserDao).add(users.get(1));
     }
 
@@ -345,7 +353,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(null, newEmail, password, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(password.toCharArray()));
         verify(mockedUserDao, never()).update(eq(null), any());
     }
 
@@ -361,7 +369,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(oldEmail, null, password, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(null), eq(password.toCharArray()));
         verify(mockedUserDao, never()).update(eq(oldEmail), any());
     }
 
@@ -377,7 +385,7 @@ class DefaultUserServiceTest {
         boolean isEdit = userService.update(oldEmail, newEmail, null, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(null), eq(newDiscogsUserName));
+        verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(null));
         verify(mockedUserDao, never()).update(eq(oldEmail), any());
     }
 
@@ -390,13 +398,13 @@ class DefaultUserServiceTest {
         String newEmail = "newUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(notExistingOldEmail), eq(mockedUser))).thenReturn(false);
         //when
         boolean isEdit = userService.update(notExistingOldEmail, newEmail, newPassword, newDiscogsUserName);
         //then
         assertFalse(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         verify(mockedUser, never()).setStatus(true);
         verify(mockedUserDao).update(eq(notExistingOldEmail), eq(mockedUser));
     }
@@ -410,13 +418,13 @@ class DefaultUserServiceTest {
         String newUser = "newUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(existingOldEmail), eq(mockedUser))).thenReturn(true);
         //when
         boolean isEdit = userService.update(existingOldEmail, newUser, newPassword, newDiscogsUserName);
         //then
         assertTrue(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()));
         verify(mockedUser, never()).setStatus(true);
         verify(mockedUserDao).update(eq(existingOldEmail), eq(mockedUser));
     }
@@ -430,13 +438,13 @@ class DefaultUserServiceTest {
         String newUser = "existingUser@wax-deals.com";
         String newPassword = "newPassword";
         String newDiscogsUserName = "newDiscogsUserName";
-        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName))).thenReturn(mockedUser);
+        when(mockedSecurityService.createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()))).thenReturn(mockedUser);
         when(mockedUserDao.update(eq(existingUser), eq(mockedUser))).thenReturn(true);
         //when
         boolean isEdit = userService.update(existingUser, newUser, newPassword, newDiscogsUserName);
         //then
         assertTrue(isEdit);
-        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()), eq(newDiscogsUserName));
+        verify(mockedSecurityService).createUserWithHashedPassword(eq(newUser), eq(newPassword.toCharArray()));
         verify(mockedUser).setStatus(true);
         verify(mockedUserDao).update(eq(existingUser), eq(mockedUser));
     }
@@ -467,4 +475,200 @@ class DefaultUserServiceTest {
         verify(mockedUserDao, never()).findById(id);
     }
 
+    @Test
+    @DisplayName("Check editProfile if newPassword and ConfirmNewPassword doesn't equals")
+    void editProfileIfNewPasswordAndConfirmNewPasswordDoesNotEquals(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setConfirmNewPassword("differentPassword");
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        //when
+        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(optionalUserFromDB.get(), userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking editProfile if old password isn't correct")
+    void editProfileIfOldPasswordIsNotCorrect(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setOldPassword("incorrectPassword");
+        Optional<User> optionalUserFromDB = Optional.of(dataGenerator.getUserWithNumber(1));
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(optionalUserFromDB.get(), userProfileInfo.getOldPassword().toCharArray())).thenReturn(false);
+        //when
+        User userAfterEdit = userService.editProfile(userProfileInfo, optionalUserFromDB.get(), mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(optionalUserFromDB.get(), userProfileInfo.getOldPassword().toCharArray());
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(optionalUserFromDB.get(), userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking editProfile if user didn't change password and update in db failed")
+    void editProfileIfUserDidNotChangePasswordAndUpdateInDbFailed(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setNewPassword("");
+        userProfileInfo.setConfirmNewPassword("");
+
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), userProfileInfo.getNewEmail(), oldPassword, userProfileInfo.getNewDiscogsUserName())).thenReturn(false);
+        //when
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(userFromDB, userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking editProfile if user didn't change password and update in db successfully")
+    void editProfileIfUserDidNotChangePasswordAndUpdateInDbSuccessfully(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        userProfileInfo.setNewPassword("");
+        userProfileInfo.setConfirmNewPassword("");
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, oldPassword.toCharArray())).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, oldPassword, newDiscogsUserName)).thenReturn(true);
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        //when
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
+        verify(mockedModelAndView).setStatus(HttpStatus.SEE_OTHER);
+        assertNotNull(userAfterEdit.getEmail());
+        assertNotEquals(userFromDB, userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking editProfile if user changed password and update in db failed")
+    void editProfileIfUserChangedPasswordAndUpdateInDbFailed(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, userProfileInfo.getNewPassword().toCharArray())).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(false);
+        //when
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertNotNull(userAfterEdit.getEmail());
+        assertEquals(userFromDB, userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking editProfile if user changed password and update in db successfully")
+    void editProfileIfUserChangedPasswordAndUpdateInDbSuccessfully(){
+        //prepare
+        UserChangeProfileInfo userProfileInfo = dataGenerator.getUserChangeProfileInfo();
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        String oldPassword = userFromDB.getPassword();
+        String newEmail = userProfileInfo.getNewEmail();
+        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
+        userProfileInfo.setOldPassword(oldPassword);
+
+        User userAfterEdit = dataGenerator.getUserWithNumber(1);
+        userAfterEdit.setEmail(newEmail);
+        userAfterEdit.setDiscogsUserName(newDiscogsUserName);
+
+        when(mockedSecurityService.checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray())).thenReturn(true);
+        when(mockedSecurityService.createUserWithHashedPassword(newEmail, userProfileInfo.getNewPassword().toCharArray())).thenReturn(userAfterEdit);
+        when(userService.update(userFromDB.getEmail(), newEmail, userProfileInfo.getNewPassword(), newDiscogsUserName)).thenReturn(true);
+        when(mockedUserDao.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        when(userService.findByEmail(newEmail)).thenReturn(Optional.of(userAfterEdit));
+        //when
+        userAfterEdit = userService.editProfile(userProfileInfo, userFromDB, mockedModelAndView).orElse(new User());
+        //then
+        verify(mockedSecurityService).checkPasswordAgainstUserPassword(userFromDB, oldPassword.toCharArray());
+        verify(mockedModelAndView).setStatus(HttpStatus.SEE_OTHER);
+        assertNotNull(userAfterEdit.getEmail());
+        assertNotEquals(userFromDB, userAfterEdit);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if user is null")
+    void deleteIfUserIsNull(){
+        //when
+        boolean isDeleted = userService.delete(null, mockedModelAndView);
+        //then
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if ModelAndView is null")
+    void deleteIfModelAndViewIsNull(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        //when
+        boolean isDeleted = userService.delete(userFromDB, null);
+        //then
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if delete in db failed")
+    void deleteIfDeleteInDbFailed(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        when(mockedUserDao.delete(userFromDB)).thenReturn(false);
+        //when
+        boolean isDeleted = userService.delete(userFromDB, mockedModelAndView);
+        //then
+        verify(mockedModelAndView).setStatus(HttpStatus.BAD_REQUEST);
+        assertFalse(isDeleted);
+    }
+
+    @Test
+    @DisplayName("Checking delete method if delete in db successfully")
+    void deleteIfDeleteInDbSuccessfully(){
+        //prepare
+        User userFromDB = Optional.of(dataGenerator.getUserWithNumber(1)).get();
+        when(mockedUserDao.delete(userFromDB)).thenReturn(true);
+        //when
+        boolean isDeleted = userService.delete(userFromDB, mockedModelAndView);
+        //then
+        verify(mockedModelAndView).setStatus(HttpStatus.OK);
+        assertTrue(isDeleted);
+    }
+
 }
+*/

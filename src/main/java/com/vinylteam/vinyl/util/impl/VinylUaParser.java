@@ -8,11 +8,13 @@ import org.jsoup.nodes.DataNode;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
 @Slf4j
+@Service
 public class VinylUaParser extends VinylParser {
 
     private static final String START_LINK = "http://vinyl.ua";
@@ -193,7 +195,7 @@ public class VinylUaParser extends VinylParser {
         if (beginIndexOfImageLink != -1) {
             int endIndexOfImageLink = scriptWithHighResImageLink.indexOf('\'', beginIndexOfImageLink);
             highResImageLink = scriptWithHighResImageLink.substring(beginIndexOfImageLink, endIndexOfImageLink);
-            if (highResImageLink.contains("release-original")){
+            if (highResImageLink.contains("release-original")) {
                 highResImageLink = "img/goods/no_image.jpg";
             }
             log.debug("Got high resolution image link from page by offer link {'highResImageLink':{}, 'offerLink':{}}", highResImageLink, document.location());
@@ -234,4 +236,5 @@ public class VinylUaParser extends VinylParser {
     public long getShopId() {
         return SHOP_ID;
     }
+
 }

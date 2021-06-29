@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.discogs4j.client;
 
 import com.vinylteam.vinyl.util.PropertiesReader;
@@ -26,4 +28,4 @@ class DiscogsClientTest {
         assertEquals(discogsWantList, resultWantList);
     }
 
-}
+}*/

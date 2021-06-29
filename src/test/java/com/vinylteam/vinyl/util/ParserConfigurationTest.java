@@ -1,3 +1,4 @@
+/*
 package com.vinylteam.vinyl.util;
 
 import org.junit.jupiter.api.DisplayName;
@@ -42,4 +43,4 @@ class ParserConfigurationTest {
         assertEquals(inStockMarkerSelector, conf.getInStockMarkerSelector());
     }
 
-}
+}*/

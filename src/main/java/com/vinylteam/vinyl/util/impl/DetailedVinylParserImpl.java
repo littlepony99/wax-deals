@@ -100,4 +100,5 @@ public class DetailedVinylParserImpl implements DetailedVinylParser {
     public String getOfferLinkFromDocument(Element document) {
         return document.select(config.getOfferLinkSelector()).attr("href");
     }
+
 }

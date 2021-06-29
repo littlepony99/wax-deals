@@ -7,9 +7,13 @@ import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.impl.ShopsParser;
 import com.vinylteam.vinyl.util.impl.VinylParser;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
+@Service
 public class Updater {
 
     private final UniqueVinylService uniqueVinylService;
@@ -17,14 +21,6 @@ public class Updater {
     private final ShopsParser shopsParser;
     private final List<VinylParser> vinylParsers;
     private final RawOffersSorter sorter;
-
-    public Updater(UniqueVinylService uniqueVinylService, OfferService offerService, ShopsParser shopsParser, List<VinylParser> vinylParsers, RawOffersSorter sorter) {
-        this.uniqueVinylService = uniqueVinylService;
-        this.offerService = offerService;
-        this.shopsParser = shopsParser;
-        this.vinylParsers = vinylParsers;
-        this.sorter = sorter;
-    }
 
     public void updateUniqueVinylsRewriteOffers() {
         List<UniqueVinyl> uniqueVinyls = uniqueVinylService.findAll();

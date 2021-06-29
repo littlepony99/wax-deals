@@ -1,13 +1,6 @@
 package com.vinylteam.vinyl.web.util;
 
-import com.vinylteam.vinyl.entity.Role;
-import com.vinylteam.vinyl.entity.User;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
+/*
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,4 +67,4 @@ class WebUtilsTest {
         //then
         assertEquals(Role.ADMIN.toString(), attributes.get("userRole"));
     }
-}
+}*/

@@ -1,242 +1,218 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
+import com.github.database.rider.core.api.configuration.DBUnit;
+import com.github.database.rider.core.api.configuration.Orthography;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.core.api.dataset.ExpectedDataSet;
+import com.github.database.rider.spring.api.DBRider;
+import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
+import com.vinylteam.vinyl.data.TestConfirmationTokenProvider;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.util.DataFinderFromDBForITests;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.util.DatabasePreparerForITests;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
-import java.sql.SQLException;
-import java.util.List;
+import java.sql.Timestamp;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DBRider
+@DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
+@SpringBootTest
 class JdbcConfirmationTokenDaoITest {
 
-    private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();
-    private final DataFinderFromDBForITests dataFinder = new DataFinderFromDBForITests(databasePreparer.getDataSource());
+    @Autowired
+    private JdbcConfirmationTokenDao jdbcConfirmationTokenDao;
+
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final ConfirmationTokenDao confirmationTokenDao = new JdbcConfirmationTokenDao(databasePreparer.getDataSource());
-    private final List<User> users = dataGenerator.getUsersList();
-    private final List<ConfirmationToken> confirmationTokens = dataGenerator.getConfirmationTokensList();
 
-    @BeforeAll
-    void beforeAll() throws SQLException {
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
-    }
+    @Container
+    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
 
-    @AfterAll
-    void afterAll() throws SQLException {
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
-        databasePreparer.closeDataSource();
-    }
-
-    @BeforeEach
-    void beforeEach() throws SQLException {
-        databasePreparer.insertUsers(users);
-        databasePreparer.insertConfirmationTokens(confirmationTokens);
-    }
-
-    @AfterEach
-    void afterEach() throws SQLException {
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        container.start();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
     }
 
     @Test
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns optional with confirmation token when there is token with that user_id")
     void findByUserIdTest() {
         //prepare
-        ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        expectedConfirmationToken.setToken(confirmationTokens.get(0).getToken());
+        ConfirmationToken expectedConfirmationToken = ConfirmationToken.builder()
+                .id(1)
+                .userId(1)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))
+                .timestamp(Timestamp.valueOf("2021-06-23 10:10:10"))
+                .build();
         //when
-        Optional<ConfirmationToken> actualConfirmationTokenOptional = confirmationTokenDao.findByUserId(1);
+        Optional<ConfirmationToken> optionalConfirmationToken = jdbcConfirmationTokenDao.findByUserId(1);
         //then
-        assertTrue(actualConfirmationTokenOptional.isPresent());
-        assertEquals(expectedConfirmationToken, actualConfirmationTokenOptional.get());
+        assertTrue(optionalConfirmationToken.isPresent());
+        assertEquals(expectedConfirmationToken, optionalConfirmationToken.get());
     }
 
     @Test
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns empty optional when there is no token with that user_id")
     void findByNotExistingUserIdTest() {
         //when
-        Optional<ConfirmationToken> actualConfirmationTokenOptional = confirmationTokenDao.findByUserId(3);
+        Optional<ConfirmationToken> optionalConfirmationToken = jdbcConfirmationTokenDao.findByUserId(3);
         //then
-        assertTrue(actualConfirmationTokenOptional.isEmpty());
+        assertTrue(optionalConfirmationToken.isEmpty());
     }
 
     @Test
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns optional with confirmation token when there is one with that token")
     void findByTokenTest() {
         //prepare
-        ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        expectedConfirmationToken.setToken(confirmationTokens.get(0).getToken());
+        ConfirmationToken expectedConfirmationToken = ConfirmationToken.builder()
+                .id(1)
+                .userId(1)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))
+                .timestamp(Timestamp.valueOf("2021-06-23 10:10:10"))
+                .build();
         UUID token = expectedConfirmationToken.getToken();
         //when
-        Optional<ConfirmationToken> actualConfirmationTokenOptional = confirmationTokenDao.findByToken(token);
+        Optional<ConfirmationToken> optionalConfirmationToken = jdbcConfirmationTokenDao.findByToken(token);
         //then
-        assertTrue(actualConfirmationTokenOptional.isPresent());
-        assertEquals(expectedConfirmationToken, actualConfirmationTokenOptional.get());
+        assertTrue(optionalConfirmationToken.isPresent());
+        assertEquals(expectedConfirmationToken, optionalConfirmationToken.get());
     }
 
     @Test
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns empty optional when there is no row with that token")
     void findByNotExistingTokenTest() {
         //when
-        Optional<ConfirmationToken> actualConfirmationTokenOptional = confirmationTokenDao.findByToken(UUID.randomUUID());
+        Optional<ConfirmationToken> optionalConfirmationToken = jdbcConfirmationTokenDao.findByToken(UUID.randomUUID());
         //then
-        assertTrue(actualConfirmationTokenOptional.isEmpty());
+        assertTrue(optionalConfirmationToken.isEmpty());
     }
 
     @Test
-    @DisplayName("Returns true when there is user with status false with this user_id and all fields have valid values")
-    void add() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestConfirmationTokenProvider.AddConfirmationTokenProvider.class)
+    @DisplayName("Add when there is user with status false with this user_id")
+    void add() {
         //prepare
-        long userId = 3;
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
-        List<User> listWithUserWithoutConfirmationToken = dataGenerator.getUsersList();
-        listWithUserWithoutConfirmationToken.add(dataGenerator.getUserWithNumber((int) userId));
-        databasePreparer.insertUsers(listWithUserWithoutConfirmationToken);
-        databasePreparer.insertConfirmationTokens(confirmationTokens);
-        ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(userId);
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(3)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))
+                .build();
         //when
-        assertDoesNotThrow(() -> confirmationTokenDao.add(expectedConfirmationToken));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(3, actualConfirmationTokens.size());
-        assertEquals(expectedConfirmationToken.getUserId(), actualConfirmationTokens.get(2).getUserId());
-        assertEquals(expectedConfirmationToken.getToken(), actualConfirmationTokens.get(2).getToken());
-        assertNotEquals(expectedConfirmationToken.getTimestamp(), actualConfirmationTokens.get(2).getTimestamp());
+        jdbcConfirmationTokenDao.add(confirmationToken);
     }
 
     @Test
-    @DisplayName("Throws Runtime exception when there is user with status false with this user_id and token with same userId exists")
-    void addDuplicateUserId() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Throws DataIntegrityViolationException when there is user with status false with this user_id and token with same userId exists")
+    void addDuplicateUserId() {
         //prepare
-        ConfirmationToken confirmationTokenDuplicateUserId = dataGenerator.getConfirmationTokenWithUserId(2);
-        confirmationTokenDuplicateUserId.setId(3);
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(1)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))
+                .build();
         //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.add(confirmationTokenDuplicateUserId));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        assertFalse(actualConfirmationTokens.contains(confirmationTokenDuplicateUserId));
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
     }
 
     @Test
-    @DisplayName("Throws Runtime exception when there is no user with given userId")
-    void addNotExistingUserId() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Throws DataIntegrityViolationException when there is no user with given userId")
+    void addNotExistingUserId() {
         //prepare
-        ConfirmationToken confirmationTokenDuplicateUserId = dataGenerator.getConfirmationTokenWithUserId(3);
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(4)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))
+                .build();
         //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.add(confirmationTokenDuplicateUserId));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        assertFalse(actualConfirmationTokens.contains(confirmationTokenDuplicateUserId));
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
     }
 
     @Test
-    @DisplayName("Throws runtime exception when confirmation token with same token exists")
-    void addExistingTokenValidUserId() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Throws DuplicateKeyException when confirmation token with same token exists")
+    void addExistingTokenValidUserId() {
         //prepare
-        long userId = 3;
-        databasePreparer.truncateCascadeUsers();
-        databasePreparer.truncateConfirmationTokens();
-        List<User> listWithNewUser = dataGenerator.getUsersList();
-        listWithNewUser.add(dataGenerator.getUserWithNumber((int) userId));
-        databasePreparer.insertUsers(listWithNewUser);
-        databasePreparer.insertConfirmationTokens(confirmationTokens);
-        ConfirmationToken confirmationTokenExistingToken = dataGenerator.getConfirmationTokenWithUserId(userId);
-        confirmationTokenExistingToken.setToken(confirmationTokens.get(1).getToken());
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(2)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))
+                .build();
         //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.add(confirmationTokenExistingToken));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        assertFalse(actualConfirmationTokens.contains(confirmationTokenExistingToken));
+        assertThrows(DuplicateKeyException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
     }
 
     @Test
-    @DisplayName("Returns true when there exists confirmation token with same id and it gets updated with valid unique uuid token and timestamp")
-    void update() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestConfirmationTokenProvider.UpdateConfirmationTokenProvider.class)
+    @DisplayName("Update when there exists confirmation token with same user_id and it gets updated with valid unique uuid token and timestamp")
+    void update() {
         //prepare
-        ConfirmationToken expectedConfirmationToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        expectedConfirmationToken.setToken(UUID.randomUUID());
+        ConfirmationToken expectedConfirmationToken = ConfirmationToken.builder()
+                .userId(2)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440020"))
+                .build();
         //when
-        boolean actualIsUpdated = confirmationTokenDao.update(expectedConfirmationToken);
-        //then
-        assertTrue(actualIsUpdated);
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
-        ConfirmationToken actualConfirmationToken = actualConfirmationTokens.get(0);
-        assertEquals(expectedConfirmationToken.getId(), actualConfirmationToken.getId());
-        assertEquals(expectedConfirmationToken.getUserId(), actualConfirmationToken.getUserId());
-        assertEquals(expectedConfirmationToken.getToken(), actualConfirmationToken.getToken());
-        assertTrue(actualConfirmationToken.getTimestamp().compareTo(confirmationTokens.get(0).getTimestamp()) > 0);
+        jdbcConfirmationTokenDao.update(expectedConfirmationToken);
     }
 
     @Test
-    @DisplayName("Throws Runtime Exception when updating confirmation token with uuid token that already exists in the table in another confirmation token")
-    void updateWithTokenWithDuplicateUUIDToken() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Throws DuplicateKeyException when updating confirmation token with uuid token that already exists in the table in another confirmation token")
+    void updateWithTokenWithDuplicateUUIDToken() {
         //prepare
-        ConfirmationToken confirmationTokenDuplicateToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        confirmationTokenDuplicateToken.setToken(confirmationTokens.get(1).getToken());
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(1)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440001"))
+                .build();
         //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenDuplicateToken));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(confirmationTokens, actualConfirmationTokens);
+        assertThrows(DuplicateKeyException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
     }
 
     @Test
-    @DisplayName("Throws Runtime Exception when updating confirmation token with null token")
-    void updateWithTokenWithNullUUIDToken() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Throws DataIntegrityViolationException when updating confirmation token with null token")
+    void updateWithTokenWithNullUUIDToken() {
         //prepare
-        ConfirmationToken confirmationTokenDuplicateToken = dataGenerator.getConfirmationTokenWithUserId(1);
-        confirmationTokenDuplicateToken.setToken(null);
+        ConfirmationToken confirmationToken = ConfirmationToken.builder()
+                .userId(2)
+                .token(null)
+                .build();
         //when
-        assertThrows(RuntimeException.class, () -> confirmationTokenDao.update(confirmationTokenDuplicateToken));
-        //then
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(confirmationTokens, actualConfirmationTokens);
+        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
     }
 
     @Test
-    @DisplayName("Returns true and change status when there is user with given user_id and status false and a token for it's user_id that gets deleted")
-    void deleteTokenByUserId() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestConfirmationTokenProvider.DeleteConfirmationTokenProvider.class)
+    @DisplayName("Delete when there is user with given user_id")
+    void deleteTokenByUserId() {
         //when
-        boolean actualIsDeleted = confirmationTokenDao.deleteByUserId(2);
-        //then
-        assertTrue(actualIsDeleted);
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(1, actualConfirmationTokens.size());
-        assertFalse(actualConfirmationTokens.contains(confirmationTokens.get(1)));
-        List<User> allUsers = dataFinder.findAllUsers();
-        for (User user : allUsers) {
-            if (user.getId() == 2L) {
-                assertTrue(user.getStatus());
-            }
-        }
+        jdbcConfirmationTokenDao.deleteByUserId(2);
     }
 
     @Test
-    @DisplayName("Returns false when there is no confirmation token with that user_id")
-    void deleteNotExistingTokenByUserId() throws SQLException {
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class)
+    @DisplayName("Delete when user id isn't exist")
+    void deleteNotExistingUserId() {
         //when
-        boolean actualIsDeleted = confirmationTokenDao.deleteByUserId(3);
-        //then
-        assertFalse(actualIsDeleted);
-        List<ConfirmationToken> actualConfirmationTokens = dataFinder.findAllConfirmationTokens();
-        assertEquals(2, actualConfirmationTokens.size());
+        jdbcConfirmationTokenDao.deleteByUserId(100);
     }
 
 }

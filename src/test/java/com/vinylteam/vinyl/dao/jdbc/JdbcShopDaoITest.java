@@ -1,9 +1,22 @@
+
 package com.vinylteam.vinyl.dao.jdbc;
 
+import com.github.database.rider.core.api.configuration.DBUnit;
+import com.github.database.rider.core.api.configuration.Orthography;
+import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.database.rider.spring.api.DBRider;
+import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
+import com.vinylteam.vinyl.dao.ShopDao;
+import com.vinylteam.vinyl.data.TestShopProvider;
 import com.vinylteam.vinyl.entity.Shop;
-import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.util.DatabasePreparerForITests;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,133 +25,91 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@DBRider
+@DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
+@SpringBootTest
 class JdbcShopDaoITest {
 
-    private final DatabasePreparerForITests databasePreparer = new DatabasePreparerForITests();
-    private final JdbcShopDao jdbcShopDao = new JdbcShopDao(databasePreparer.getDataSource());
-    private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final List<Shop> shops = dataGenerator.getShopsList();
+    @Autowired
+    private ShopDao shopDao;
 
-    @BeforeAll
-    void beforeAll() throws SQLException {
-        databasePreparer.truncateCascadeShops();
-    }
+    @Container
+    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
 
-    @AfterAll
-    void afterAll() throws SQLException {
-        databasePreparer.truncateCascadeShops();
-        databasePreparer.closeDataSource();
-    }
-
-    @BeforeEach
-    void beforeEach() throws SQLException {
-        databasePreparer.insertShops(shops);
-    }
-
-    @AfterEach
-    void afterEach() throws SQLException {
-        databasePreparer.truncateCascadeShops();
+    @DynamicPropertySource
+    static void properties(DynamicPropertyRegistry registry) {
+        container.start();
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
     }
 
     @Test
+    @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets list of shops with id-s with list of id-s from db")
     void getManyByListOfIds() {
         //prepare
         List<Integer> ids = List.of(1, 2);
-        List<Shop> expectedShops = dataGenerator.getShopsList();
-        expectedShops.remove(2);
         //when
-        List<Shop> actualShops = jdbcShopDao.getManyByListOfIds(ids);
+        List<Shop> actualShops = shopDao.findByListOfIds(ids);
         //then
         assertEquals(2, actualShops.size());
-        assertEquals(expectedShops, actualShops);
     }
 
     @Test
+    @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets list of all shops from db`s non-empty table")
     void findAllShops() {
-        //prepare
-        List<Shop> expectedShops = dataGenerator.getShopsList();
         //when
-        List<Shop> actualShops = jdbcShopDao.findAll();
+        List<Shop> actualShops = shopDao.findAll();
         //then
         assertEquals(3, actualShops.size());
-        assertEquals(expectedShops, actualShops);
     }
 
     @Test
+    @DataSet(cleanBefore = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets empty list of all shops from empty table")
     void findAllShopsFromEmptyTable() throws SQLException {
-        //prepare
-        databasePreparer.truncateCascadeShops();
         //when
-        List<Shop> actualShops = jdbcShopDao.findAll();
+        List<Shop> actualShops = shopDao.findAll();
         //then
         assertTrue(actualShops.isEmpty());
     }
 
     @Test
+    @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets list of shops with id-s with list of id-s where some ids do not exist in db")
     void getManyByListOfIdsWithSomeNonExistentIds() {
         //prepare
         List<Integer> ids = List.of(1, 2, 4);
-        List<Shop> expectedShops = dataGenerator.getShopsList();
-        expectedShops.remove(2);
         //when
-        List<Shop> actualShops = jdbcShopDao.getManyByListOfIds(ids);
+        List<Shop> actualShops = shopDao.findByListOfIds(ids);
         //then
         assertEquals(2, actualShops.size());
-        assertEquals(expectedShops, actualShops);
     }
 
     @Test
+    @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets empty list of shops with empty list of id-s from db")
     void getManyByListOfIdsEmptyList() {
         //prepare
         List<Integer> ids = new ArrayList<>();
         //when
-        List<Shop> actualShops = jdbcShopDao.getManyByListOfIds(ids);
+        List<Shop> actualShops = shopDao.findByListOfIds(ids);
         //then
         assertTrue(actualShops.isEmpty());
     }
 
     @Test
+    @DataSet(cleanBefore = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets empty list of shops with list id-s from empty table")
     void getManyByListOfIdsFromEmptyTable() throws SQLException {
         //prepare
-        databasePreparer.truncateCascadeShops();
         List<Integer> ids = List.of(1, 2);
         //when
-        List<Shop> actualShops = jdbcShopDao.getManyByListOfIds(ids);
+        List<Shop> actualShops = shopDao.findByListOfIds(ids);
         //then
         assertTrue(actualShops.isEmpty());
-    }
-
-    @Test
-    @DisplayName("Gets String filled with ids from filled list of ids")
-    void fillSelectManyByIdsStatementWithFilledIdListTest() {
-        //prepare
-        List<Integer> ids = List.of(1, 2);
-        String expectedStatement = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image " +
-                "FROM shops WHERE id IN (1, 2)  ORDER BY shop_order NULLS FIRST";
-        //when
-        String actualStatement = jdbcShopDao.fillSelectManyByIdsStatement(ids);
-        //then
-        assertEquals(expectedStatement, actualStatement);
-    }
-
-    @Test
-    @DisplayName("Gets String not filled with ids from empty list of ids")
-    void fillSelectManyByIdsStatementWithEmptyIdListTest() {
-        //prepare
-        List<Integer> ids = new ArrayList<>();
-        String expectedStatement = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image " +
-                "FROM shops WHERE id IN ()  ORDER BY shop_order NULLS FIRST";
-        //when
-        String actualStatement = jdbcShopDao.fillSelectManyByIdsStatement(ids);
-        //then
-        assertEquals(expectedStatement, actualStatement);
     }
 
 }

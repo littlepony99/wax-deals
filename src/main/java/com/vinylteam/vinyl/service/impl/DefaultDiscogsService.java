@@ -13,6 +13,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Slf4j
+@Service
 public class DefaultDiscogsService implements DiscogsService {
 
     public static final String REGEX_FOR_SPLIT = "[- ()!@#$%^&*_+={}:;\"']";
@@ -32,14 +35,16 @@ public class DefaultDiscogsService implements DiscogsService {
     private final String USER_AGENT;
     private final String CALLBACK_URL;
 
-    public DefaultDiscogsService(String consumerKey, String consumerSecret, String userAgent, String callbackUrl,
-                                 ObjectMapper objectMapper) {
+    public DefaultDiscogsService(@Value("${consumer.key}") String consumerKey,
+                                 @Value("${consumer.secret}") String consumerSecret,
+                                 @Value("${user.agent}") String userAgent,
+                                 @Value("${callback.url}") String callbackUrl) {
         this.CONSUMER_KEY = consumerKey;
         this.CONSUMER_SECRET = consumerSecret;
         this.USER_AGENT = userAgent;
         this.CALLBACK_URL = callbackUrl;
         this.discogsClient = new DiscogsClient(CONSUMER_KEY, CONSUMER_SECRET, USER_AGENT, CALLBACK_URL);
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
         try {
             discogsClient.getRequestToken();
         } catch (ArrayIndexOutOfBoundsException e) {

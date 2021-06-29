@@ -2,56 +2,33 @@ package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
-import com.zaxxer.hikari.HikariDataSource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.postgresql.util.PSQLException;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 @Slf4j
+@RequiredArgsConstructor
+@Repository
 public class JdbcUserPostDao implements UserPostDao {
 
     private static final String INSERT_USER_POST = "INSERT INTO user_posts" +
             " (name, email, theme, message, created_at)" +
-            " VALUES (?, ?, ?, ?, ?)";
+            " VALUES (:name , :email, :theme, :message, :create_at)";
 
-    private final HikariDataSource dataSource;
-
-    public JdbcUserPostDao(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
-    public boolean add(UserPost post) {
-        boolean isAdded = false;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement insertStatement = connection.prepareStatement(INSERT_USER_POST)) {
-            insertStatement.setString(1, post.getName());
-            insertStatement.setString(2, post.getEmail());
-            insertStatement.setString(3, post.getTheme());
-            insertStatement.setString(4, post.getMessage());
-            insertStatement.setTimestamp(5, Timestamp.valueOf(post.getCreatedAt()));
-            log.debug("Prepared statement {'preparedStatement':{}}.", insertStatement);
-            int result = insertStatement.executeUpdate();
-            if (result > 0) {
-                isAdded = true;
-            }
-        } catch (PSQLException e) {
-            log.error("Database error while adding user post to user_posts", e);
-            isAdded = false;
-        } catch (SQLException e) {
-            log.error("Error while adding user post to user_posts", e);
-            throw new RuntimeException(e);
-        }
-        if (isAdded) {
-            log.info("User post is added to the database {'userPost':{}}.", post);
-        } else {
-            log.info("Failed to add user post to the database {'userPost':{}}.", post);
-        }
-        return isAdded;
+    public void add(UserPost post) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource
+                .addValue("name", post.getName())
+                .addValue("email", post.getEmail())
+                .addValue("theme", post.getTheme())
+                .addValue("message", post.getMessage())
+                .addValue("create_at", post.getCreatedAt());
+        jdbcTemplate.update(INSERT_USER_POST, sqlParameterSource);
     }
 
 }

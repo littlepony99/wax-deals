@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.filter;
 
 import com.vinylteam.vinyl.entity.Role;
@@ -259,4 +261,4 @@ class SecurityFilterTest {
         inOrderResponse.verify(mockedHttpServletResponse, times(0)).sendRedirect("/signIn");
     }
 
-}
+}*/

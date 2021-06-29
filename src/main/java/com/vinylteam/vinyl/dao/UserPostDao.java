@@ -4,6 +4,6 @@ import com.vinylteam.vinyl.entity.UserPost;
 
 public interface UserPostDao {
 
-    boolean add(UserPost post);
+    void add(UserPost post);
 
 }

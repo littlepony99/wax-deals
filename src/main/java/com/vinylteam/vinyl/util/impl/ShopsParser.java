@@ -1,13 +1,14 @@
 package com.vinylteam.vinyl.util.impl;
 
 import com.vinylteam.vinyl.entity.RawOffer;
-import com.vinylteam.vinyl.util.impl.VinylParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ShopsParser {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());

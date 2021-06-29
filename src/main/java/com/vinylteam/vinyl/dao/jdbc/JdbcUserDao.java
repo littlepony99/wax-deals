@@ -1,162 +1,101 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.dao.UserDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.UserRowMapper;
+import com.vinylteam.vinyl.dao.jdbc.extractor.UserResultSetExtractor;
 import com.vinylteam.vinyl.entity.User;
-import com.zaxxer.hikari.HikariDataSource;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Optional;
 
-@Slf4j
+@Repository
+@RequiredArgsConstructor
 public class JdbcUserDao implements UserDao {
 
-    private static final RowMapper<User> ROW_MAPPER = new UserRowMapper();
     private static final String FIND_BY_EMAIL = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
             " FROM users" +
-            " WHERE email ILIKE ?";
+            " WHERE email ILIKE :email";
     private static final String FIND_BY_ID = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
             " FROM users" +
-            " WHERE id=?";
+            " WHERE id = :id";
     private static final String INSERT = "INSERT INTO users" +
             " (email, password, salt, iterations, role, status, discogs_user_name)" +
-            " VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-    private static final String DELETE = "DELETE FROM users WHERE email ILIKE ?";
+            " VALUES (:email, :password, :salt, :iterations, :role, :status, :discogs_user_name)";
+    private static final String DELETE = "DELETE FROM users WHERE email ILIKE :email";
     private static final String UPDATE = "UPDATE users" +
-            " SET email = ?, password = ?, salt = ?, iterations = ?, role = ?, status = ?, discogs_user_name = ?" +
-            " WHERE email ILIKE ?";
+            " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
+            " WHERE email ILIKE :old_email";
+    private static final String UPDATE_USER_STATUS = "UPDATE users SET status = true WHERE id = :id";
 
-    private final HikariDataSource dataSource;
+    private static final ResultSetExtractor<User> RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
-    public JdbcUserDao(HikariDataSource dataSource) {
-        this.dataSource = dataSource;
-    }
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public long add(User user) {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement insertStatement = connection.prepareStatement(INSERT)) {
-            insertStatement.setString(1, user.getEmail());
-            insertStatement.setString(2, user.getPassword());
-            insertStatement.setString(3, user.getSalt());
-            insertStatement.setInt(4, user.getIterations());
-            insertStatement.setString(5, user.getRole().toString());
-            insertStatement.setBoolean(6, user.getStatus());
-            insertStatement.setString(7, user.getDiscogsUserName());
-            log.debug("Prepared statement {'preparedStatement':{}}.", insertStatement);
-            ResultSet resultSet = insertStatement.executeQuery();
-            if (resultSet.next()) {
-                long userId = resultSet.getLong(1);
-                log.info("User is added to the database {'user':{} 'id':{}}.", user, userId);
-                return userId;
-            }
-            log.info("Failed to add user to the database {'user':{}}.", user);
-            return -1;
-        } catch (SQLException e) {
-            log.error("Error while add user {'user':{}}.", user, e);
-            return -1;
-        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword())
+                .addValue("salt", user.getSalt())
+                .addValue("iterations", user.getIterations())
+                .addValue("role", user.getRole().getName())
+                .addValue("status", user.getStatus())
+                .addValue("discogs_user_name", user.getDiscogsUserName());
+        return namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
     }
 
     @Override
-    public boolean delete(User user) {
-        boolean isDeleted = false;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement removeStatement = connection.prepareStatement(DELETE)) {
-            removeStatement.setString(1, user.getEmail());
-            log.debug("Prepared statement {'preparedStatement':{}}.", removeStatement);
-            int result = removeStatement.executeUpdate();
-            if (result > 0) {
-                isDeleted = true;
-                log.info("User was deleted from database {'user':{}}.", user);
-            } else {
-                log.info("Failed delete user from database {'user':{}}.", user);
-            }
-        } catch (SQLException e) {
-            log.error("Error while delete user from users {'user':{}}", user, e);
-            isDeleted = false;
-        }
-        return isDeleted;
+    public void delete(User user) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("email", user.getEmail());
+        namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
     }
 
     @Override
-    public boolean update(String email, User user) {
-        boolean isUpdated = false;
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement updateStatement = connection.prepareStatement(UPDATE)) {
-            updateStatement.setString(1, user.getEmail());
-            updateStatement.setString(2, user.getPassword());
-            updateStatement.setString(3, user.getSalt());
-            updateStatement.setInt(4, user.getIterations());
-            updateStatement.setString(5, user.getRole().toString());
-            updateStatement.setBoolean(6, user.getStatus());
-            updateStatement.setString(7, user.getDiscogsUserName());
-            updateStatement.setString(8, email);
-            log.debug("Prepared statement {'preparedStatement':{}}.", updateStatement);
-            int result = updateStatement.executeUpdate();
-            if (result > 0) {
-                isUpdated = true;
-                log.info("User was updated in the database {'user':{}}.", user);
-            } else {
-                log.info("Failed to update user in the database {'user':{}}.", user);
-            }
-        } catch (SQLException e) {
-            log.error("Error while updating user in users by old email to {'email': {}, 'updatedUser':{}}", email, user, e);
-            isUpdated = false;
-        }
-        return isUpdated;
+    public void update(String email, User user) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("email", user.getEmail());
+        sqlParameterSource.addValue("password", user.getPassword());
+        sqlParameterSource.addValue("salt", user.getSalt());
+        sqlParameterSource.addValue("iterations", user.getIterations());
+        sqlParameterSource.addValue("role", user.getRole().getName());
+        sqlParameterSource.addValue("status", user.getStatus());
+        sqlParameterSource.addValue("discogs_user_name", user.getDiscogsUserName());
+        sqlParameterSource.addValue("old_email", email);
+        namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement findByEmailStatement = connection.prepareStatement(FIND_BY_EMAIL)) {
-            User user = null;
-            findByEmailStatement.setString(1, email);
-            log.debug("Prepared statement {'preparedStatement':{}}.", findByEmailStatement);
-            try (ResultSet resultSet = findByEmailStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    user = ROW_MAPPER.mapRow(resultSet);
-                    if (resultSet.next()) {
-                        log.error("More than one user was found for email: {}", email);
-                        throw new RuntimeException("More than one user was found for email " + email);
-                    }
-                }
-            }
-            log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
-            return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            log.error("SQLException retrieving user by email from users", e);
-            throw new RuntimeException(e);
-        }
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("email", email);
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+                FIND_BY_EMAIL,
+                sqlParameterSource,
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override
     public Optional<User> findById(long id) {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement findByIdStatement = connection.prepareStatement(FIND_BY_ID)) {
-            User user = null;
-            findByIdStatement.setLong(1, id);
-            log.debug("Prepared statement {'preparedStatement':{}}.", findByIdStatement);
-            try (ResultSet resultSet = findByIdStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    user = ROW_MAPPER.mapRow(resultSet);
-                    if (resultSet.next()) {
-                        throw new RuntimeException("More than one user was found for id");
-                    }
-                }
-            }
-            log.debug("Resulting optional with user is {'Optional.ofNullable(user)':{}}", Optional.ofNullable(user));
-            return Optional.ofNullable(user);
-        } catch (SQLException e) {
-            log.error("SQLException retrieving user by id from users", e);
-            throw new RuntimeException(e);
-        }
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("id", id);
+        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+                FIND_BY_ID,
+                sqlParameterSource,
+                RESULT_SET_EXTRACTOR));
+    }
+
+    @Override
+    public void setUserStatusTrue(long id) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("id", id);
+        namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
 }

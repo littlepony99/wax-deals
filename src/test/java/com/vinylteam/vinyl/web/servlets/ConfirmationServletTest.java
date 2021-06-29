@@ -1,3 +1,5 @@
+
+/*
 package com.vinylteam.vinyl.web.servlets;
 
 import com.vinylteam.vinyl.entity.ConfirmationToken;
@@ -176,4 +178,4 @@ class ConfirmationServletTest {
         inOrderUserService.verify(mockedUserService).signInCheck(eq("user2@wax-deals.com"), eq("rightPassword"), eq(wrongTokenString));
     }
 
-}
+}*/

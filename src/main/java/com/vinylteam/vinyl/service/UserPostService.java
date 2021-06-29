@@ -4,8 +4,8 @@ import com.vinylteam.vinyl.entity.UserPost;
 
 public interface UserPostService {
 
-    boolean processAdd(UserPost post);
+    void processAdd(UserPost post);
 
-    boolean add(UserPost post);
+    void add(UserPost post);
 
 }
