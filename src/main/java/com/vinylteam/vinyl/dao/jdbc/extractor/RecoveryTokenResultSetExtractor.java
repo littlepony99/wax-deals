@@ -13,16 +13,16 @@ public class RecoveryTokenResultSetExtractor implements ResultSetExtractor<Recov
     @Override
     public RecoveryToken extractData(ResultSet resultSet) throws SQLException {
         RecoveryToken recoveryToken = null;
-            if (resultSet.next()) {
-                recoveryToken = RecoveryToken.builder()
-                        .id(resultSet.getLong("id"))
-                        .userId(resultSet.getLong("user_id"))
-                        .token(resultSet.getObject("token", java.util.UUID.class))
-                        .createdAt(resultSet.getTimestamp("created_at"))
-                        .build();
-                log.debug("Resulting RecoveryToken object {'user':{}}", recoveryToken);
-            }
-            return recoveryToken;
+        if (resultSet.next()) {
+            recoveryToken = RecoveryToken.builder()
+                    .id(resultSet.getLong("id"))
+                    .userId(resultSet.getLong("user_id"))
+                    .token(resultSet.getObject("token", java.util.UUID.class))
+                    .createdAt(resultSet.getTimestamp("created_at"))
+                    .build();
+            log.debug("Resulting RecoveryToken object {'user':{}}", recoveryToken);
+        }
+        return recoveryToken;
     }
 
 }

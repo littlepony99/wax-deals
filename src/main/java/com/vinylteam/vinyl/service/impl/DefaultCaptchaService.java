@@ -17,36 +17,36 @@ import java.util.Objects;
 @Service
 public class DefaultCaptchaService implements CaptchaService {
 
-	private final RestTemplate template;
-	@Value("${google.recaptcha.verification.endpoint}")
-	private String recaptchaEndpoint;
-	@Value("${google.recaptcha.secret}")
-	private String recaptchaSecret;
+    private final RestTemplate template;
+    @Value("${google.recaptcha.verification.endpoint}")
+    private String recaptchaEndpoint;
+    @Value("${google.recaptcha.secret}")
+    private String recaptchaSecret;
 
-	public DefaultCaptchaService(RestTemplateBuilder templateBuilder) {
-		this.template = templateBuilder.build();
-	}
-	
-	@Override
-	public boolean validateCaptcha(String captchaResponse) {
-		log.info("Going to validate the captcha response = {}", captchaResponse);
-		final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-		params.add("secret", recaptchaSecret);
-		params.add("response", captchaResponse);
+    public DefaultCaptchaService(RestTemplateBuilder templateBuilder) {
+        this.template = templateBuilder.build();
+    }
 
-		CaptchaResponse apiResponse = null;
-		try {
-			apiResponse = template.postForObject(recaptchaEndpoint, params, CaptchaResponse.class);
-		} catch (final RestClientException e) {
-			log.error("Some exception occurred while binding to the recaptcha endpoint.", e);
-		}
+    @Override
+    public boolean validateCaptcha(String captchaResponse) {
+        log.info("Going to validate the captcha response = {}", captchaResponse);
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("secret", recaptchaSecret);
+        params.add("response", captchaResponse);
 
-		if (Objects.nonNull(apiResponse) && apiResponse.isSuccess()) {
-			log.info("Captcha API response = {}", apiResponse.toString());
-			return true;
-		} else {
-			return false;
-		}
-	}
+        CaptchaResponse apiResponse = null;
+        try {
+            apiResponse = template.postForObject(recaptchaEndpoint, params, CaptchaResponse.class);
+        } catch (final RestClientException e) {
+            log.error("Some exception occurred while binding to the recaptcha endpoint.", e);
+        }
+
+        if (Objects.nonNull(apiResponse) && apiResponse.isSuccess()) {
+            log.info("Captcha API response = {}", apiResponse.toString());
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }

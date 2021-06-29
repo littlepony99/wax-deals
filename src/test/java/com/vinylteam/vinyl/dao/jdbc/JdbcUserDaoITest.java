@@ -6,6 +6,7 @@ import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
+import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.data.TestUserProvider;
 import com.vinylteam.vinyl.entity.Role;
@@ -14,7 +15,6 @@ import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcUserDaoITest {
 
     @Autowired
@@ -41,16 +40,14 @@ class JdbcUserDaoITest {
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer("postgres:11.1");
+    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         container.start();
-        Integer firstMappedPort = container.getFirstMappedPort();
         registry.add("spring.datasource.url", container::getJdbcUrl);
         registry.add("spring.datasource.username", container::getUsername);
         registry.add("spring.datasource.password", container::getPassword);
-        log.info("Container: {}, {}, {}, {}", container.getJdbcUrl(), container.getPassword(), container.getUsername(), container.getFirstMappedPort());
     }
 
     @Test
@@ -189,7 +186,7 @@ class JdbcUserDaoITest {
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestUserProvider.SetUserStatusProvider.class)
     @DisplayName("Update user status")
-    void setUserStatusTrue(){
+    void setUserStatusTrue() {
         //when
         userDao.setUserStatusTrue(1);
     }
@@ -198,7 +195,7 @@ class JdbcUserDaoITest {
     @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestUserProvider.UsersProvider.class)
     @DisplayName("Update user status")
-    void setUserStatusTrueIfInvalidUserId(){
+    void setUserStatusTrueIfInvalidUserId() {
         //when
         userDao.setUserStatusTrue(1000);
     }

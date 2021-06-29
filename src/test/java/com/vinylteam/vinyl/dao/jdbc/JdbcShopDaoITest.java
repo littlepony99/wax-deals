@@ -5,12 +5,12 @@ import com.github.database.rider.core.api.configuration.DBUnit;
 import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.spring.api.DBRider;
+import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.data.TestShopProvider;
 import com.vinylteam.vinyl.entity.Shop;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -28,17 +28,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcShopDaoITest {
 
     @Autowired
     private ShopDao shopDao;
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
-            .withDatabaseName("testDB")
-            .withUsername("user")
-            .withPassword("password");
+    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

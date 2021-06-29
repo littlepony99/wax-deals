@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -226,7 +225,7 @@ public class DataGeneratorForTests {
         return recoveryToken;
     }
 
-    public UserChangeProfileInfoRequest getUserChangeProfileInfo(){
+    public UserChangeProfileInfoRequest getUserChangeProfileInfo() {
         return UserChangeProfileInfoRequest.builder()
                 .email("new@wax-deals.com")
                 .oldPassword("oldPassword")

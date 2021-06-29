@@ -92,7 +92,7 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public void setUserStatusTrue(long id){
+    public void setUserStatusTrue(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("id", id);
         namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);

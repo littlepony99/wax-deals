@@ -4,18 +4,17 @@ import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
 import org.springframework.ui.Model;
 
-import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
 public class WebUtils {
 
     public static void setUserAttributes(User user, Model model) {
-            if (user != null) {
-                model.addAttribute("userRole", user.getRole().getName());
-                model.addAttribute("email", user.getEmail());
-                model.addAttribute("discogsUserName", user.getDiscogsUserName());
-            }
+        if (user != null) {
+            model.addAttribute("userRole", user.getRole().getName());
+            model.addAttribute("email", user.getEmail());
+            model.addAttribute("discogsUserName", user.getDiscogsUserName());
+        }
     }
 
     public static OneVinylOffersServletResponse getOfferResponseFromOffer(Offer offer, Shop shop) {

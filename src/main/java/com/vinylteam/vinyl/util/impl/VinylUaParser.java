@@ -195,7 +195,7 @@ public class VinylUaParser extends VinylParser {
         if (beginIndexOfImageLink != -1) {
             int endIndexOfImageLink = scriptWithHighResImageLink.indexOf('\'', beginIndexOfImageLink);
             highResImageLink = scriptWithHighResImageLink.substring(beginIndexOfImageLink, endIndexOfImageLink);
-            if (highResImageLink.contains("release-original")){
+            if (highResImageLink.contains("release-original")) {
                 highResImageLink = "img/goods/no_image.jpg";
             }
             log.debug("Got high resolution image link from page by offer link {'highResImageLink':{}, 'offerLink':{}}", highResImageLink, document.location());

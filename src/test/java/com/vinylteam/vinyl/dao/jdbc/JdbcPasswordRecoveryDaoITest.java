@@ -5,13 +5,13 @@ import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
+import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.data.TestRecoveryTokenProvider;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataAccessException;
@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JdbcPasswordRecoveryDaoITest {
 
     @Autowired
@@ -37,10 +36,7 @@ class JdbcPasswordRecoveryDaoITest {
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
-            .withDatabaseName("testDB")
-            .withUsername("user")
-            .withPassword("password");
+    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {

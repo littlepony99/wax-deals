@@ -48,8 +48,8 @@ public class DefaultUserService implements UserService {
     public void delete(User user, ModelAndView modelAndView) {
         if (user != null && modelAndView != null) {
             userDao.delete(user);
-                modelAndView.setStatus(HttpStatus.OK);
-                log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+            modelAndView.setStatus(HttpStatus.OK);
+            log.debug("Set response status to {'status':{}}", HttpStatus.OK);
         } else {
             log.error("At least one of passed to DefaultUserService.delete(...) arguments is null {'user': {}, 'modelAndView': {}}",
                     user == null ? "null" : user, modelAndView == null ? "null" : modelAndView);

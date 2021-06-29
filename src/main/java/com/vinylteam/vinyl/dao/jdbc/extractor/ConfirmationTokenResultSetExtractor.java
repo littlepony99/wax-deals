@@ -14,7 +14,7 @@ public class ConfirmationTokenResultSetExtractor implements ResultSetExtractor<C
     @Override
     public ConfirmationToken extractData(ResultSet resultSet) throws SQLException, DataAccessException {
         ConfirmationToken confirmationToken = null;
-        if (resultSet.next()){
+        if (resultSet.next()) {
             confirmationToken = ConfirmationToken.builder()
                     .id(resultSet.getLong("id"))
                     .userId(resultSet.getLong("user_id"))
