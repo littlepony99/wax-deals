@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
-// Lombok annotations
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +20,5 @@ public class CaptchaRequestDto {
     private String message;
     @NonNull
     private String captchaResponse;
+
 }

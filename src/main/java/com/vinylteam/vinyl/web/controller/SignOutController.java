@@ -19,4 +19,5 @@ public class SignOutController {
         session.invalidate();
         return "redirect:/";
     }
+
 }

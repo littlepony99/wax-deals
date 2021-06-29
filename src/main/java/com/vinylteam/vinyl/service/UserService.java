@@ -8,11 +8,11 @@ import java.util.Optional;
 
 public interface UserService {
 
-    boolean add(UserChangeProfileInfoRequest userProfileInfo);
+    void add(UserChangeProfileInfoRequest userProfileInfo);
 
-    boolean update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
+    void update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 
-    boolean delete(User user, ModelAndView modelAndView);
+    void delete(User user, ModelAndView modelAndView);
 
     Optional<User> findById(long id);
 

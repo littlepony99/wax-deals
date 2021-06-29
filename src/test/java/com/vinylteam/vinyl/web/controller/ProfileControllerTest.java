@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.SharedHttpSessionConfigurer.sharedHttpSession;
 
-//@RunWith(SpringRunner.class)
 @WebMvcTest(ProfileController.class)
 class ProfileControllerTest {
 
@@ -64,4 +63,5 @@ class ProfileControllerTest {
                 .andExpect(content().string(containsString("<h2>Edit Profile</h2>")))
                 .andReturn();
     }
+
 }

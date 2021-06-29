@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,23 +15,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;
     private final UserDao userDao;
     private final MailSender mailSender;
-    private final String applicationLink;
-
-    public DefaultConfirmationService(ConfirmationTokenDao confirmationTokenDao,
-                                      UserDao userDao,
-                                      MailSender mailSender,
-                                      @Value("${application.link}") String applicationLink) {
-        this.confirmationTokenDao = confirmationTokenDao;
-        this.userDao = userDao;
-        this.mailSender = mailSender;
-        this.applicationLink = applicationLink;
-    }
+    @Value("${application.link}")
+    private String applicationLink;
 
     private static final String SUBJECT = "Confirm your email on wax-deals.com";
     private static final String MAIL_BODY_BEGINNING = "To confirm click on the link below and log into your account.\n";
@@ -75,36 +68,32 @@ public class DefaultConfirmationService implements ConfirmationService {
     }
 
     @Override
-    public boolean update(ConfirmationToken confirmationToken) {
+    public void update(ConfirmationToken confirmationToken) {
         if (confirmationToken == null) {
             log.error("Passed confirmation token is null");
             throw new RuntimeException("Passed confirmation token is null");
         }
-        //FIXME normal return
         confirmationTokenDao.update(confirmationToken);
-//        return confirmationTokenDao.update(confirmationToken);
-        return false;
     }
 
     @Override
-    public boolean sendMessageWithLinkToUserEmail(String email, String token) {
+    public void sendMessageWithLinkToUserEmail(String email, String token) {
         if (email == null) {
             log.error("User's email is null, not adding token and sending email with confirmation link.");
             throw new RuntimeException("User's email is null");
         }
-        return mailSender.sendMail(email, SUBJECT, composeEmail(token));
+        mailSender.sendMail(email, SUBJECT, composeEmail(token));
     }
 
     @Override
     @Transactional
-    public boolean deleteByUserId(long userId) {
+    public void deleteByUserId(long userId) {
         if (userId <= 0) {
             log.error("Id is 0 or less {'userId':{}}", userId);
             throw new IllegalArgumentException("Not correct user id=" + userId);
         }
         confirmationTokenDao.deleteByUserId(userId);
         userDao.setUserStatusTrue(userId);
-        return false;
     }
 
     private String composeEmail(String token) {

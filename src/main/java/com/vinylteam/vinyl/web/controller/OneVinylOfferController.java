@@ -109,4 +109,5 @@ public class OneVinylOfferController {
         WebUtils.setModelContext(preparedListById, offersResponseList, model);
         return "vinyl";
     }
+
 }

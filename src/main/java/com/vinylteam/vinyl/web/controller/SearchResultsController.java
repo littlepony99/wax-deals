@@ -37,4 +37,5 @@ public class SearchResultsController {
         WebUtils.setModelContext(filteredUniqueVinyls, new ArrayList<>(), model);
         return "search";
     }
+
 }

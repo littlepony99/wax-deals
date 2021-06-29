@@ -64,9 +64,8 @@ public class ProfileController {
     public ModelAndView deleteProfile(HttpSession session, @SessionAttribute("user") User user) {
         if (user != null) {
             ModelAndView modelAndView = new ModelAndView("redirect:/signUp");
-            if (userService.delete(user, modelAndView)) {
-                session.invalidate();
-            }
+            userService.delete(user, modelAndView);
+            session.invalidate();
             return modelAndView;
         } else {
             return new ModelAndView("redirect:/signIn");

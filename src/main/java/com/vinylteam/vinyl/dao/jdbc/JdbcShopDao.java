@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
 import com.vinylteam.vinyl.dao.ShopDao;
-import com.vinylteam.vinyl.dao.jdbc.mapper.ShopRowMapper;
+import com.vinylteam.vinyl.dao.jdbc.extractor.ShopRowMapper;
 import com.vinylteam.vinyl.entity.Shop;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class JdbcShopDao implements ShopDao {
     private static final String SELECT_ALL_SHOPS = "SELECT id, link_to_main_page, link_to_image, name, link_to_small_image FROM shops ORDER BY shop_order NULLS FIRST";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final RowMapper<Shop> rowMapper = new ShopRowMapper();
+    private static final RowMapper<Shop> ROW_MAPPER = new ShopRowMapper();
 
     @Override
     public List<Shop> findByListOfIds(List<Integer> ids) {
@@ -33,12 +33,12 @@ public class JdbcShopDao implements ShopDao {
             return new ArrayList<>();
         }
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource("ids", ids);
-        return jdbcTemplate.query(SELECT_SHOPS_BY_IDS, sqlParameterSource, rowMapper);
+        return jdbcTemplate.query(SELECT_SHOPS_BY_IDS, sqlParameterSource, ROW_MAPPER);
     }
 
     @Override
     public List<Shop> findAll() {
-        return jdbcTemplate.query(SELECT_ALL_SHOPS, rowMapper);
+        return jdbcTemplate.query(SELECT_ALL_SHOPS, ROW_MAPPER);
     }
 
 }

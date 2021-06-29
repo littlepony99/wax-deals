@@ -5,7 +5,7 @@ import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.core.api.dataset.ExpectedDataSet;
 import com.github.database.rider.spring.api.DBRider;
-import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
+import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.data.TestRecoveryTokenProvider;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -29,10 +29,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JdbcRecoveryPasswordDaoITest {
+class JdbcPasswordRecoveryDaoITest {
 
     @Autowired
-    private RecoveryPasswordDao recoveryPasswordDao;
+    private PasswordRecoveryDao passwordRecoveryDao;
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
@@ -59,9 +59,7 @@ class JdbcRecoveryPasswordDaoITest {
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2L);
         recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
         //when
-        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
-        //then
-        assertTrue(isAdded);
+        passwordRecoveryDao.add(recoveryToken);
     }
 
     @Test
@@ -72,7 +70,7 @@ class JdbcRecoveryPasswordDaoITest {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(3L);
         //when
-        assertThrows(DataAccessException.class, () -> recoveryPasswordDao.add(recoveryToken));
+        assertThrows(DataAccessException.class, () -> passwordRecoveryDao.add(recoveryToken));
     }
 
     @Test
@@ -84,9 +82,7 @@ class JdbcRecoveryPasswordDaoITest {
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1L);
         recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174001"));
         //when
-        boolean isAdded = recoveryPasswordDao.add(recoveryToken);
-        //then
-        assertTrue(isAdded);
+        passwordRecoveryDao.add(recoveryToken);
     }
 
     @Test
@@ -98,7 +94,7 @@ class JdbcRecoveryPasswordDaoITest {
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2);
         recoveryToken.setToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
         //when
-        assertThrows(DataAccessException.class, () -> recoveryPasswordDao.add(recoveryToken));
+        assertThrows(DataAccessException.class, () -> passwordRecoveryDao.add(recoveryToken));
     }
 
     @Test
@@ -106,7 +102,7 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Get optional recovery token by token from Recovery_token in db")
     void getRecoveryTokenByToken() {
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+        Optional<RecoveryToken> optionalRecoveryToken = passwordRecoveryDao.findByToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
         //then
         assertTrue(optionalRecoveryToken.isPresent());
     }
@@ -116,7 +112,7 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Try get token if it doesn't exist into recovery_password in db")
     void getRecoveryTokenByTokenIfTokenDoesNotExist() {
         //when
-        Optional<RecoveryToken> optionalRecoveryToken = recoveryPasswordDao.findByToken(UUID.randomUUID());
+        Optional<RecoveryToken> optionalRecoveryToken = passwordRecoveryDao.findByToken(UUID.randomUUID());
         //then
         assertFalse(optionalRecoveryToken.isPresent());
     }
@@ -127,9 +123,7 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Remove token from recovery_password table in db")
     void deleteByExistingId() {
         //when
-        boolean isDeleted = recoveryPasswordDao.deleteById(1);
-        //then
-        assertTrue(isDeleted);
+        passwordRecoveryDao.deleteById(1);
     }
 
     @Test
@@ -138,9 +132,7 @@ class JdbcRecoveryPasswordDaoITest {
     @DisplayName("Remove token if it doesn't exist from recovery_password table in db")
     void DeleteByNonExistentId() {
         //when
-        boolean isDeleted = recoveryPasswordDao.deleteById(0);
-        //then
-        assertFalse(isDeleted);
+        passwordRecoveryDao.deleteById(0);
     }
 
 }

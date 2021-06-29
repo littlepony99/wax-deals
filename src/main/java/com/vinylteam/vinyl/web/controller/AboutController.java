@@ -20,4 +20,5 @@ public class AboutController {
         WebUtils.setUserAttributes(user, model);
         return "about";
     }
+
 }

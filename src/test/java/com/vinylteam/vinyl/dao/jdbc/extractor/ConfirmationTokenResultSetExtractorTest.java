@@ -1,9 +1,9 @@
-/*
 package com.vinylteam.vinyl.dao.jdbc.mapper;
 
-import com.vinylteam.vinyl.dao.RowMapper;
+import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,22 +15,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class ConfirmationTokenRowMapperTest {
-
-    private final RowMapper<ConfirmationToken> rowMapper = new ConfirmationTokenRowMapper();
+class ConfirmationTokenResultSetExtractorTest {
 
     @Test
-    void mapRow() throws SQLException {
+    void extractData() throws SQLException {
         //prepare
+        ResultSetExtractor<ConfirmationToken> resultSetExtractor = new ConfirmationTokenResultSetExtractor();
         ResultSet mockedResultSet = mock(ResultSet.class);
         UUID expectedToken = UUID.randomUUID();
         Timestamp expectedTimestamp = Timestamp.from(Instant.now());
+        when(mockedResultSet.next()).thenReturn(true);
         when(mockedResultSet.getLong("id")).thenReturn(1L);
         when(mockedResultSet.getLong("user_id")).thenReturn(1L);
         when(mockedResultSet.getObject("token", java.util.UUID.class)).thenReturn(expectedToken);
         when(mockedResultSet.getTimestamp("created_at")).thenReturn(expectedTimestamp);
         //when
-        ConfirmationToken confirmationToken = rowMapper.mapRow(mockedResultSet);
+        ConfirmationToken confirmationToken = resultSetExtractor.extractData(mockedResultSet);
         //then
         assertEquals(1L, confirmationToken.getId());
         assertEquals(1L, confirmationToken.getUserId());
@@ -38,4 +38,4 @@ class ConfirmationTokenRowMapperTest {
         assertEquals(expectedTimestamp, confirmationToken.getTimestamp());
     }
 
-}*/
+}

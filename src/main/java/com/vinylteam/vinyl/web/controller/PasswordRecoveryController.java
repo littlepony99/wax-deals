@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.RecoveryPasswordException;
-import com.vinylteam.vinyl.service.RecoveryPasswordService;
+import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,12 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("/recoveryPassword")
 @RequiredArgsConstructor
-public class RecoveryPasswordController {
+public class PasswordRecoveryController {
 
-    private final RecoveryPasswordService recoveryPasswordService;
+    private final PasswordRecoveryService passwordRecoveryService;
 
     @GetMapping
-    public String getRecoveryPasswordPage(@SessionAttribute(value = "user", required = false) User user,
+    public String getPasswordRecoveryPage(@SessionAttribute(value = "user", required = false) User user,
                                           Model model) {
         WebUtils.setUserAttributes(user, model);
         return "recoveryPassword";
@@ -36,7 +36,7 @@ public class RecoveryPasswordController {
         model.addAttribute("email", email);
         WebUtils.setUserAttributes(user, model);
         try {
-            recoveryPasswordService.sendLink(email);
+            passwordRecoveryService.sendLink(email);
             log.debug("Successfully send mail for recovery password to email - {'email':{}}", email);
             modelAndView.setStatus(HttpStatus.OK);
             log.debug("Set response status to {'status':{}}", HttpStatus.OK);
@@ -57,7 +57,7 @@ public class RecoveryPasswordController {
         WebUtils.setUserAttributes(user, model);
         ModelAndView modelAndView = new ModelAndView("newPassword");
         try {
-            recoveryPasswordService.checkToken(token);
+            passwordRecoveryService.checkToken(token);
             modelAndView.addObject("recoveryToken", token);
         } catch (RecoveryPasswordException e) {
             log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
@@ -81,7 +81,7 @@ public class RecoveryPasswordController {
                 .build();
         ModelAndView modelAndView = new ModelAndView("signIn");
         try {
-            recoveryPasswordService.changePassword(userProfileInfo);
+            passwordRecoveryService.changePassword(userProfileInfo);
             modelAndView.setStatus(HttpStatus.SEE_OTHER);
             modelAndView.addObject("message", "Your password was changed. Please, try to log in use new password.");
         } catch (RecoveryPasswordException e) {

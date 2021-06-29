@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtracto
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -25,7 +26,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
     private static final String UPDATE = "UPDATE confirmation_tokens SET token = :token, created_at = :created_at WHERE user_id = :user_id";
     private static final String DELETE = "DELETE FROM confirmation_tokens WHERE user_id = :user_id ";
 
-    private static final ConfirmationTokenResultSetExtractor CONFIRMATION_TOKEN_RESULT_SET_EXTRACTOR = new ConfirmationTokenResultSetExtractor();
+    private static final ResultSetExtractor<ConfirmationToken> RESULT_SET_EXTRACTOR = new ConfirmationTokenResultSetExtractor();
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -36,7 +37,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 SELECT_BY_TOKEN,
                 sqlParameterSource,
-                CONFIRMATION_TOKEN_RESULT_SET_EXTRACTOR));
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override
@@ -46,7 +47,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 SELECT_BY_USER_ID,
                 sqlParameterSource,
-                CONFIRMATION_TOKEN_RESULT_SET_EXTRACTOR));
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override

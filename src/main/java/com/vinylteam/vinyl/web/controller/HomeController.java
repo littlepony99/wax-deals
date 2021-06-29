@@ -24,4 +24,5 @@ public class HomeController {
         WebUtils.setUserAttributes(user, model);
         return "index";
     }
+
 }

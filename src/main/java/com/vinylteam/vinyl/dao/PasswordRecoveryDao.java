@@ -5,12 +5,12 @@ import com.vinylteam.vinyl.entity.RecoveryToken;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface RecoveryPasswordDao {
+public interface PasswordRecoveryDao {
 
-    boolean add(RecoveryToken recoveryToken);
+    void add(RecoveryToken recoveryToken);
 
     Optional<RecoveryToken> findByToken(UUID token);
 
-    boolean deleteById(long id);
+    void deleteById(long id);
 
 }

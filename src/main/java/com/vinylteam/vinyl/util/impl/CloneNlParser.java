@@ -314,4 +314,5 @@ public class CloneNlParser extends VinylParser {
             return "";
         }
     }
+
 }

@@ -198,4 +198,5 @@ public class DecksParser extends VinylParser {
     public long getShopId() {
         return SHOP_ID;
     }
+
 }

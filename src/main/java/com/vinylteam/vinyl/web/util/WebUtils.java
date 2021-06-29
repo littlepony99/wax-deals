@@ -80,4 +80,5 @@ public class WebUtils {
 
         model.addAttribute("vinylOffersList", vinylOffersList);
     }
+
 }

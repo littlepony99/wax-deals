@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserResultSetExtractor;
 import com.vinylteam.vinyl.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -31,7 +32,7 @@ public class JdbcUserDao implements UserDao {
             " WHERE email ILIKE :old_email";
     private static final String UPDATE_USER_STATUS = "UPDATE users SET status = true WHERE id = :id";
 
-    private static final UserResultSetExtractor USER_RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
+    private static final ResultSetExtractor<User> RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -77,7 +78,7 @@ public class JdbcUserDao implements UserDao {
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 FIND_BY_EMAIL,
                 sqlParameterSource,
-                USER_RESULT_SET_EXTRACTOR));
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override
@@ -87,7 +88,7 @@ public class JdbcUserDao implements UserDao {
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 FIND_BY_ID,
                 sqlParameterSource,
-                USER_RESULT_SET_EXTRACTOR));
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override

@@ -11,6 +11,7 @@ import com.vinylteam.vinyl.data.TestUserProvider;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
@@ -39,17 +41,16 @@ class JdbcUserDaoITest {
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @Container
-    public static PostgreSQLContainer container = new PostgreSQLContainer(PostgreSQLContainer.IMAGE)
-            .withDatabaseName("testDB")
-            .withUsername("user")
-            .withPassword("password");
+    public static PostgreSQLContainer container = new PostgreSQLContainer("postgres:11.1");
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         container.start();
+        Integer firstMappedPort = container.getFirstMappedPort();
         registry.add("spring.datasource.url", container::getJdbcUrl);
         registry.add("spring.datasource.username", container::getUsername);
         registry.add("spring.datasource.password", container::getPassword);
+        log.info("Container: {}, {}, {}, {}", container.getJdbcUrl(), container.getPassword(), container.getUsername(), container.getFirstMappedPort());
     }
 
     @Test
@@ -73,11 +74,11 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 3, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Finds user from db by existing id")
     void getByExistingIdTest() {
         //when
-        Optional<User> optionalUserGottenByExistingId = userDao.findById(1);
+        Optional<User> optionalUserGottenByExistingId = userDao.findById(3);
         //then
         assertTrue(optionalUserGottenByExistingId.isPresent());
     }

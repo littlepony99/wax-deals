@@ -1,5 +1,6 @@
-package com.vinylteam.vinyl.web.filter;
+package com.vinylteam.vinyl.config;
 
+import com.vinylteam.vinyl.web.filter.SecurityFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,4 +16,5 @@ public class FilterConfig {
         registrationBean.addUrlPatterns("/profile/*");
         return registrationBean;
     }
+
 }

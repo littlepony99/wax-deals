@@ -1,4 +1,4 @@
-package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
 import org.springframework.jdbc.core.RowMapper;
 import com.vinylteam.vinyl.entity.Shop;

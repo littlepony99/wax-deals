@@ -1,10 +1,11 @@
 package com.vinylteam.vinyl.dao.jdbc;
 
-import com.vinylteam.vinyl.dao.RecoveryPasswordDao;
+import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.dao.jdbc.extractor.RecoveryTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 @Repository
-public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
+public class JdbcPasswordRecoveryDao implements PasswordRecoveryDao {
 
     private static final String INSERT_TOKEN = "INSERT INTO recovery_password_tokens" +
             " (user_id, token, created_at)" +
@@ -28,18 +29,18 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
     private static final String REMOVE_TOKEN = "DELETE FROM recovery_password_tokens" +
             " WHERE id = :id";
 
-    private static final RecoveryTokenResultSetExtractor RECOVERY_ROW_MAPPER = new RecoveryTokenResultSetExtractor();
+    private static final ResultSetExtractor<RecoveryToken> RESULT_SET_EXTRACTOR = new RecoveryTokenResultSetExtractor();
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public boolean add(RecoveryToken token) {
+    public void add(RecoveryToken token) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource
                 .addValue("user_id", token.getUserId())
                 .addValue("token", token.getToken())
                 .addValue("created_at", Timestamp.from(Instant.now()));
-        return namedParameterJdbcTemplate.update(INSERT_TOKEN, sqlParameterSource) > 0;
+        namedParameterJdbcTemplate.update(INSERT_TOKEN, sqlParameterSource);
     }
 
     @Override
@@ -49,14 +50,14 @@ public class JdbcRecoveryPasswordDao implements RecoveryPasswordDao {
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 FIND_BY_TOKEN,
                 sqlParameterSource,
-                RECOVERY_ROW_MAPPER));
+                RESULT_SET_EXTRACTOR));
     }
 
     @Override
-    public boolean deleteById(long id) {
+    public void deleteById(long id) {
         MapSqlParameterSource deleteSqlParameterSource = new MapSqlParameterSource();
         deleteSqlParameterSource.addValue("id", id);
-        return namedParameterJdbcTemplate.update(REMOVE_TOKEN, deleteSqlParameterSource) > 0;
+        namedParameterJdbcTemplate.update(REMOVE_TOKEN, deleteSqlParameterSource);
     }
 
 }

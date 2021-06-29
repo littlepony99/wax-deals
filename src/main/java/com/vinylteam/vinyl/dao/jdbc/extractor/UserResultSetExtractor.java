@@ -31,4 +31,5 @@ public class UserResultSetExtractor implements ResultSetExtractor<User> {
         log.debug("Resulting User object {'user':{}}", user);
         return user;
     }
+
 }

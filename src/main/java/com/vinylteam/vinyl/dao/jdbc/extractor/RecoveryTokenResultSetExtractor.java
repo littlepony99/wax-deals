@@ -1,9 +1,7 @@
 package com.vinylteam.vinyl.dao.jdbc.extractor;
 
-import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;

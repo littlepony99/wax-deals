@@ -12,10 +12,10 @@ public interface ConfirmationService {
 
     ConfirmationToken addByUserId(long userId);
 
-    boolean update(ConfirmationToken confirmationToken);
+    void update(ConfirmationToken confirmationToken);
 
-    boolean sendMessageWithLinkToUserEmail(String email, String token);
+    void sendMessageWithLinkToUserEmail(String email, String token);
 
-    boolean deleteByUserId(long userId);
+    void deleteByUserId(long userId);
 
 }

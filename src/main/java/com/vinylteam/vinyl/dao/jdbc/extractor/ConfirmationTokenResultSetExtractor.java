@@ -1,4 +1,3 @@
-
 package com.vinylteam.vinyl.dao.jdbc.extractor;
 
 import com.vinylteam.vinyl.entity.ConfirmationToken;

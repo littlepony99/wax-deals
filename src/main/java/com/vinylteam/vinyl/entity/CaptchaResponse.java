@@ -9,7 +9,6 @@ import lombok.ToString;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// Lombok annotations
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

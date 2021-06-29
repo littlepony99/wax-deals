@@ -34,4 +34,5 @@ public class CatalogController {
         uniqueVinylService.prepareCatalog(user, model, wantList);
         return "catalog";
     }
+
 }

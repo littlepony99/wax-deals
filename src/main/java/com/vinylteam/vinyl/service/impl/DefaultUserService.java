@@ -30,8 +30,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public boolean add(UserChangeProfileInfoRequest userProfileInfo) {
-        boolean isAdded = false;
+    public void add(UserChangeProfileInfoRequest userProfileInfo) {
         String email = userProfileInfo.getEmail();
         String password = userProfileInfo.getNewPassword();
         if (email != null && password != null) {
@@ -39,40 +38,22 @@ public class DefaultUserService implements UserService {
                     .createUserWithHashedPassword(email, password.toCharArray());
             userToAdd.setDiscogsUserName(userProfileInfo.getNewDiscogsUserName());
             long userId = userDao.add(userToAdd);
-            //TODO check how transaction annotation work after jdbc level repair
-            //FIXME the user can be added to the database, but the letter has not been sent. Then the user will see a message that he cannot be added, but he will already be in the database. The mail just didn't send
             log.debug("Added created user to db {'user':{}}", userToAdd);
             ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
-            isAdded = confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
-
+            confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
         }
-        log.debug("Result of attempting to add user, created from passed email and password" +
-                " if both are not null is {'isAdded': {}, 'email':{}}", isAdded, email);
-        return isAdded;
     }
 
     @Override
-    public boolean delete(User user, ModelAndView modelAndView) {
-        boolean isDeleted = false;
+    public void delete(User user, ModelAndView modelAndView) {
         if (user != null && modelAndView != null) {
             userDao.delete(user);
-            if (isDeleted) {
                 modelAndView.setStatus(HttpStatus.OK);
                 log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-            } else {
-                modelAndView.setViewName("editProfile");
-                modelAndView.addObject("discogsUserName", user.getDiscogsUserName());
-                modelAndView.addObject("email", user.getEmail());
-                modelAndView.addObject("userRole", user.getRole().getName());
-                modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-                log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
-                modelAndView.addObject("message", "Delete is fail! Try again!");
-            }
         } else {
             log.error("At least one of passed to DefaultUserService.delete(...) arguments is null {'user': {}, 'modelAndView': {}}",
                     user == null ? "null" : user, modelAndView == null ? "null" : modelAndView);
         }
-        return isDeleted;
     }
 
     @Override
@@ -89,8 +70,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public boolean update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
-        boolean isUpdated = false;
+    public void update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
         if (newEmail != null && newPassword != null && oldEmail != null) {
             User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
             if (oldEmail.equalsIgnoreCase(newEmail)) {
@@ -98,14 +78,11 @@ public class DefaultUserService implements UserService {
             }
             changedUser.setDiscogsUserName(newDiscogsUserName);
             userDao.update(oldEmail, changedUser);
-            log.debug("Attempt to update user with known email address in database with boolean result " +
-                    "{'isUpdated':{}, 'oldEmail':{}}", isUpdated, oldEmail);
         } else {
             log.error("At least one of passed to DefaultUserService.update(...) arguments is null {'oldEmail': {}, 'newEmail': {}, {}'newDiscogsUserName': {}}",
                     oldEmail == null ? "null" : oldEmail, newEmail == null ? "null" : newEmail,
                     newPassword == null ? "'newPassword': null, " : "", newDiscogsUserName == null ? "null" : newDiscogsUserName);
         }
-        return isUpdated;
     }
 
     @Override
@@ -129,11 +106,7 @@ public class DefaultUserService implements UserService {
                     if (!optionalUser.get().getStatus()) {
                         Optional<ConfirmationToken> confirmationToken = confirmationService.findByUserId(optionalUser.get().getId());
                         confirmationToken.ifPresent(token -> {
-                            try {
-                                confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                            confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString());
                         });
                     }
                 }

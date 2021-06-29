@@ -1,12 +1,9 @@
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
-/*
-
-package com.vinylteam.vinyl.dao.jdbc.mapper;
-
-import com.vinylteam.vinyl.dao.RowMapper;
 import com.vinylteam.vinyl.entity.Shop;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,12 +14,11 @@ import static org.mockito.Mockito.when;
 
 class ShopRowMapperTest {
 
-    private final RowMapper<Shop> rowMapper = new ShopRowMapper();
-
     @Test
     @DisplayName("Checks if shop created from resultSet has all fields right.")
-    void mapFilledRowTest() throws SQLException {
+    void mapRow() throws SQLException {
         //prepare
+        RowMapper<Shop> rowMapper = new ShopRowMapper();
         ResultSet mockedFilledResultSet = mock(ResultSet.class);
         when(mockedFilledResultSet.getInt("id")).thenReturn(1);
         when(mockedFilledResultSet.getString("link_to_main_page")).thenReturn("shop1/main");
@@ -30,7 +26,7 @@ class ShopRowMapperTest {
         when(mockedFilledResultSet.getString("name")).thenReturn("shop1");
         when(mockedFilledResultSet.getString("link_to_small_image")).thenReturn("shop1/small_image.png");
         //when
-        Shop actualShop = rowMapper.mapRow(mockedFilledResultSet);
+        Shop actualShop = rowMapper.mapRow(mockedFilledResultSet, 0);
         //then
         assertEquals(1, actualShop.getId());
         assertEquals("shop1/main", actualShop.getMainPageLink());
@@ -39,4 +35,4 @@ class ShopRowMapperTest {
         assertEquals("shop1/small_image.png", actualShop.getSmallImageLink());
     }
 
-}*/
+}

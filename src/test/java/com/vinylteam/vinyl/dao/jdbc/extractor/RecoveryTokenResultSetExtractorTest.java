@@ -1,10 +1,10 @@
-/*
 
-package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.ResultSetExtractor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,27 +16,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RecoveryRowMapperTest {
+class RecoveryTokenResultSetExtractorTest {
 
     @Test
     @DisplayName("Check if RecoveryToken entity created and all necessary info has been received from ResultSet")
-    void mapRowTest() throws SQLException {
+    void extractData() throws SQLException {
         //prepare
-        RecoveryTokenRowMapper recoveryRowMapper = new RecoveryTokenRowMapper();
+        ResultSetExtractor<RecoveryToken> resultSetExtractor = new RecoveryTokenResultSetExtractor();
         ResultSet mockedResultSet = mock(ResultSet.class);
         LocalDateTime createdAt = LocalDateTime.now();
         UUID token = UUID.randomUUID();
-        when(mockedResultSet.getInt("id")).thenReturn(1);
+        when(mockedResultSet.next()).thenReturn(true);
+        when(mockedResultSet.getLong("id")).thenReturn(1L);
         when(mockedResultSet.getLong("user_id")).thenReturn(1L);
         when(mockedResultSet.getObject("token", java.util.UUID.class)).thenReturn(token);
         when(mockedResultSet.getTimestamp("created_at")).thenReturn(Timestamp.valueOf(createdAt));
         //when
-        RecoveryToken recoveryToken = recoveryRowMapper.mapRow(mockedResultSet);
+        RecoveryToken recoveryToken = resultSetExtractor.extractData(mockedResultSet);
         //then
-        assertEquals(1, recoveryToken.getId());
+        assertEquals(1L, recoveryToken.getId());
         assertEquals(1L, recoveryToken.getUserId());
         assertEquals(token, recoveryToken.getToken());
         assertEquals(Timestamp.valueOf(createdAt), recoveryToken.getCreatedAt());
     }
 
-}*/
+}

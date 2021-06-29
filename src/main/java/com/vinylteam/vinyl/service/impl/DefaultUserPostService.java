@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultUserPostService implements UserPostService {
 
     @Value("${project.mail}")
-    String projectMail;
+    private String projectMail;
     private final static String CONTACT_US_DEFAULT_THEME = "Mail from customer";
     private final UserPostDao userPostDao;
     private final MailSender mailSender;
@@ -24,7 +24,7 @@ public class DefaultUserPostService implements UserPostService {
     public void processAdd(UserPost post) {
         userPostDao.add(post);
         String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());
-        boolean isMailSent = mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
+        mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
     }
 
     @Override

@@ -77,4 +77,5 @@ public class SignUpController {
         log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
         modelAndView.addObject("message", message);
     }
+
 }

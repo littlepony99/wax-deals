@@ -236,4 +236,5 @@ public class VinylUaParser extends VinylParser {
     public long getShopId() {
         return SHOP_ID;
     }
+
 }
