@@ -25,8 +25,6 @@ public abstract class VinylParser {
 
     public abstract RawOffer getRawOfferFromOfferLink(String offerLink);
 
-    ;
-
     protected abstract long getShopId();
 
     protected abstract List<RawOffer> getRawOffersList();

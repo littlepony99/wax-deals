@@ -14,7 +14,6 @@ public class UserResultSetExtractor implements ResultSetExtractor<User> {
 
     @Override
     public User extractData(ResultSet resultSet) throws SQLException, DataAccessException {
-
         User user = null;
         if (resultSet.next()) {
             user = User.builder()
@@ -25,8 +24,8 @@ public class UserResultSetExtractor implements ResultSetExtractor<User> {
                     .salt(resultSet.getString("salt"))
                     .iterations(resultSet.getInt("iterations"))
                     .role(Role.valueOf(resultSet.getString("role")))
-                    .status(resultSet.getBoolean("status")).build();
-
+                    .status(resultSet.getBoolean("status"))
+                    .build();
         }
         log.debug("Resulting User object {'user':{}}", user);
         return user;
