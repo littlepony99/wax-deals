@@ -1,5 +1,3 @@
-
-/*
 package com.vinylteam.vinyl.entity;
 
 import org.junit.jupiter.api.DisplayName;
@@ -47,4 +45,4 @@ class CurrencyTest {
         assertTrue(Currency.getCurrency(null).isEmpty());
     }
 
-}*/
+}

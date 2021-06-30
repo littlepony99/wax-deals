@@ -14,23 +14,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultUserPostService implements UserPostService {
 
     @Value("${project.mail}")
-    String projectMail;
+    private String projectMail;
     private final static String CONTACT_US_DEFAULT_THEME = "Mail from customer";
     private final UserPostDao userPostDao;
     private final MailSender mailSender;
 
     @Override
     @Transactional
-    public boolean processAdd(UserPost post) {
-        boolean isAddedToDb = userPostDao.add(post);
+    public void processAdd(UserPost post) {
+        userPostDao.add(post);
         String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());
-        boolean isMailSent = mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
-        return isAddedToDb && isMailSent;
+        mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
     }
 
     @Override
-    public boolean add(UserPost post) {
-        return userPostDao.add(post);
+    public void add(UserPost post) {
+        userPostDao.add(post);
     }
 
     protected String createContactUsMessage(String recipient, String subject, String mailBody) {

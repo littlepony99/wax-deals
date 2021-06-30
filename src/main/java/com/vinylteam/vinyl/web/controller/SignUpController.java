@@ -1,18 +1,16 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,56 +20,57 @@ public class SignUpController {
     private final UserService userService;
 
     @GetMapping
-    public String getRegistrationPage(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      Model model) throws IOException {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+    public String getRegistrationPage(@SessionAttribute(value = "user", required = false) User user,
+                                      Model model) {
+        WebUtils.setUserAttributes(user, model);
         return "registration";
     }
 
     @PostMapping
-    public String signUpUser(HttpServletRequest request,
-                             HttpServletResponse response,
-                             Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        WebUtils.setUserAttributes(request, model);
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        String confirmPassword = request.getParameter("confirmPassword");
-        String discogsUserName = request.getParameter("discogsUserName");
-        model.addAttribute("email", email);
-        model.addAttribute("discogsUserName", discogsUserName);
-        if (password.equals("")) {
-            setBadRequest(response, model, "Sorry, the password is empty!");
-            return "registration";
+    public ModelAndView signUpUser(@SessionAttribute(value = "user", required = false) User user,
+                                   @RequestParam(value = "email") String email,
+                                   @RequestParam(value = "password") String password,
+                                   @RequestParam(value = "confirmPassword") String confirmPassword,
+                                   @RequestParam(value = "discogsUserName") String discogsUserName,
+                                   Model model) {
+        WebUtils.setUserAttributes(user, model);
+        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+                .email(email)
+                .newPassword(password)
+                .newDiscogsUserName(discogsUserName)
+                .build();
+        ModelAndView modelAndView = new ModelAndView("registration");
+        modelAndView.addObject("email", email);
+        modelAndView.addObject("discogsUserName", discogsUserName);
+        if (password.isEmpty()) {
+            setBadRequest(modelAndView, "Sorry, the password is empty!");
+            return modelAndView;
         } else {
             if (!password.equals(confirmPassword)) {
-                setBadRequest(response, model, "Sorry, the passwords don't match!");
-                return "registration";
+                setBadRequest(modelAndView, "Sorry, the passwords don't match!");
+                return modelAndView;
             } else {
                 try {
-                    userService.add(email, password, discogsUserName);
+                    userService.add(userProfileInfo);
                     log.debug("User was added with " +
                             "passed email and password to db {'email':{}}", email);
-                    response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                    model.addAttribute("message", "Please confirm your registration. To do this, follow the link that we sent to your email - " + email);
-                    return "confirmation-directions";
+                    modelAndView.setStatus(HttpStatus.SEE_OTHER);
+                    log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
+                    modelAndView.addObject("message", "Please confirm your registration. To do this, follow the link that we sent to your email - " + email);
+                    return modelAndView;
                 } catch (RuntimeException e) {
-                    setBadRequest(response, model, "Sorry, but the user couldn't be registered. Check email, password or discogs username!");
-                    return "registration";
+                    setBadRequest(modelAndView, "Sorry, but the user couldn't be registered. Check email, password or discogs username!");
+                    return modelAndView;
                 }
             }
         }
 
     }
 
-    void setBadRequest(HttpServletResponse response, Model model, String message) {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-        model.addAttribute("message", message);
+    void setBadRequest(ModelAndView modelAndView, String message) {
+        modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+        log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
+        modelAndView.addObject("message", message);
     }
+
 }

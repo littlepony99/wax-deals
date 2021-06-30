@@ -253,8 +253,8 @@ class RawOffersSorterTest {
                 Arguments.of(3, new String[]{"hello", "variOus", "artist"}, "Hello Vinyl Artist Various"),
                 Arguments.of(0, new String[]{"hello12", "variOus12", "artist12"}, "Hello Vinyl Artist Various"),
                 Arguments.of(1, new String[]{"variOus"}, "Hello Vinyl Artist Various "),
-                Arguments.of(1, new String[]{"variOus", "Various"}, "Hello Vinyl Artist Various "),
-                Arguments.of(1, new String[]{"  variOus ", "  Various    "}, "Hello Vinyl Artist Various ")
+                Arguments.of(2, new String[]{"variOus", "Various"}, "Hello Vinyl Artist Various "),
+                Arguments.of(2, new String[]{"  variOus ", "  Various    "}, "Hello Vinyl Artist Various ")
         );
     }
 

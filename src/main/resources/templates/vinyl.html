@@ -173,7 +173,8 @@
                                     </div>
                                     <div class="item-body shop-list__catalog-width shop-list__item-direction"
                                          th:text="${vinylOffer.catNumber}"></div>
-                                    <div class="item-body shop-list__stock-width shop-list__item-direction" th:classappend="${vinylOffer.inStock} ? in-stock : out-of-stock"></div>
+                                    <div class="item-body shop-list__stock-width shop-list__item-direction"
+                                         th:classappend="${vinylOffer.inStock} ? in-stock : out-of-stock"></div>
                                     <div class="item-body shop-list__item-price shop-list__price-width shop-list__item-direction"
                                          th:text="${vinylOffer.price + ' ' + vinylOffer.currency}">No price
                                     </div>

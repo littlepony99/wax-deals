@@ -110,11 +110,13 @@
                         <h2>Registration</h2>
                     </div>
 
-                    <form action="/signUp" method="POST" class="user registration-page-user" name="form_reg" OnSubmit="return matchPassword();">
+                    <form action="/signUp" method="POST" class="user registration-page-user" name="form_reg"
+                          OnSubmit="return matchPassword();">
                         <div class="user__fields-wrapper">
                             <div class="user__fields registration-page-user__fields">
                                 <label class="user__label">
-                                    <input class="user__input" type="email" name="email" id="email" placeholder="Email" onblur="checkEmail(this)" th:value="${email}" required>
+                                    <input class="user__input" type="email" name="email" id="email" placeholder="Email"
+                                           onblur="checkEmail(this)" th:value="${email}" required>
                                 </label>
                                 <script language='javascript'>
                                     function checkEmail(emailInput) {
@@ -131,6 +133,7 @@
                                             return false;
                                         }
                                     }
+
                                 </script>
                                 <label class="user__label">
                                     <input class="user__input" type="password" name="password" placeholder="Password"
@@ -151,9 +154,11 @@
                                             return false;
                                         }
                                     }
+
                                 </script>
                                 <label class="user__label">
-                                    <input class="user__input" type="password" name="confirmPassword" id="confirmPassword"
+                                    <input class="user__input" type="password" name="confirmPassword"
+                                           id="confirmPassword"
                                            placeholder="Confirm password" required>
                                 </label>
                                 <script language='javascript'>
@@ -165,9 +170,11 @@
                                         }
                                         document.form_reg.submit();
                                     }
+
                                 </script>
                                 <label class="user__label">
-                                    <input class="user__input" type="text" name="discogsUserName" th:value="${discogsUserName}"
+                                    <input class="user__input" type="text" name="discogsUserName"
+                                           th:value="${discogsUserName}"
                                            placeholder="Discogs Username">
                                 </label>
                                 <img class="discogs-logo"

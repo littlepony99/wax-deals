@@ -1,15 +1,11 @@
 package com.vinylteam.vinyl.web.util;
 
 import com.vinylteam.vinyl.entity.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import com.vinylteam.vinyl.entity.Offer;
-import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
 import org.springframework.ui.Model;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,4 +83,5 @@ public class WebUtils {
 
         model.addAttribute("vinylOffersList", vinylOffersList);
     }
+
 }

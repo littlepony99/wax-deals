@@ -21,12 +21,14 @@
         <!--Dependencies-->
         <postgresql.version>42.2.17</postgresql.version>
         <jsoup.version>1.13.1</jsoup.version>
-        <!--        <javax.mail.version>1.4.7</javax.mail.version>-->
         <jcaptcha.version>1.0-RC6</jcaptcha.version>
+        <json.simple.version>1.1</json.simple.version>
 
         <!--Test Dependencies-->
+        <dbrider.version>1.23.0</dbrider.version>
+        <persistence.version>2.2</persistence.version>
+        <testcontainers.version>1.15.3</testcontainers.version>
         <flyway.version>7.7.2</flyway.version>
-        <system.lambda.version>1.2.0</system.lambda.version>
     </properties>
 
     <build>
@@ -112,18 +114,17 @@
             <optional>true</optional>
         </dependency>
 
-        <!--Spring boot TEST-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!--Lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- Mail sender -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!--POSTGRES-->
@@ -144,62 +145,61 @@
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
-            <version>1.1</version>
+            <version>${json.simple.version}</version>
         </dependency>
-
-        <!-- Mail sender -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-            <version>2.5.1</version>
-        </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>javax.mail</groupId>-->
-        <!--            <artifactId>mail</artifactId>-->
-        <!--            <version>${javax.mail.version}</version>-->
-        <!--        </dependency>-->
-
-        <!--        <dependency>-->
-        <!--            <groupId>com.octo.captcha</groupId>-->
-        <!--            <artifactId>jcaptcha-all</artifactId>-->
-        <!--            <version>${jcaptcha.version}</version>-->
-        <!--        </dependency>-->
 
         <!--TESTS-->
+
+        <!--DBRider-->
+        <dependency>
+            <groupId>com.github.database-rider</groupId>
+            <artifactId>rider-spring</artifactId>
+            <version>${dbrider.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--Persistence-->
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>javax.persistence-api</artifactId>
+            <version>${persistence.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--TestContainers-->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--Spring boot TEST-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!--FLYWAY CORE-->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <version>${flyway.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!--SYSTEM-LAMBDA-->
-        <dependency>
-            <groupId>com.github.stefanbirkner</groupId>
-            <artifactId>system-lambda</artifactId>
-            <version>${system.lambda.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>1.15.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>1.15.3</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>elasticsearch</artifactId>
-            <version>1.15.3</version>
             <scope>test</scope>
         </dependency>
 

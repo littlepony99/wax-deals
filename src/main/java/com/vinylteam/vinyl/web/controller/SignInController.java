@@ -5,14 +5,12 @@ import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
 
@@ -30,56 +28,47 @@ public class SignInController {
     }
 
     @GetMapping
-    public String getSignInPage(HttpServletRequest request,
-                                HttpServletResponse response,
+    public String getSignInPage(@SessionAttribute(value = "user", required = false) User user,
                                 Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(user, model);
         return "signIn";
     }
 
     @PostMapping
-    public String signIn(HttpServletRequest request,
-                         HttpServletResponse response,
-                         Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-        model.addAttribute("email", email);
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                model.addAttribute("userRole", user.getRole().toString());
-            }
-        }
+    public ModelAndView signIn(@SessionAttribute(value = "user", required = false) User user,
+                               Model model,
+                               HttpSession session,
+                               @RequestParam(value = "email") String email,
+                               @RequestParam(value = "password") String password) {
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.addObject("email", email);
+        WebUtils.setUserAttributes(user, model);
         Optional<User> optionalUser = userService.signInCheck(email, password);
         log.debug("Received a optional with User with password verification by the passed " +
                 "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
         if (optionalUser.isPresent()) {
             if (optionalUser.get().getStatus()) {
                 log.debug("User's status is {'status':{}}", optionalUser.get().getStatus());
-                response.setStatus(HttpServletResponse.SC_OK);
-                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-                User user = optionalUser.get();
-
-                session = request.getSession(true);
+                modelAndView.setStatus(HttpStatus.OK);
+                log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+                User checkedUser = optionalUser.get();
                 session.setMaxInactiveInterval(sessionMaxInactiveInterval);
-                session.setAttribute("user", user);
-                return "redirect:/";
+                session.setAttribute("user", checkedUser);
+                modelAndView.setViewName("redirect:/");
             } else {
                 log.debug("User's status is {'status':{}}", optionalUser.get().getStatus());
-                response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                model.addAttribute("message", "Sorry, your email has not been verified. Please go to your mailbox and follow the link to confirm your registration.");
-                return "confirmation-directions";
+                modelAndView.setStatus(HttpStatus.SEE_OTHER);
+                log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
+                modelAndView.addObject("message", "Sorry, your email has not been verified. Please go to your mailbox and follow the link to confirm your registration.");
+                modelAndView.setViewName("confirmation-directions");
             }
         } else {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-            model.addAttribute("message", "Sorry, login or password is not correct, please, check your credentials and try again.");
-            return "signIn";
+            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
+            modelAndView.addObject("message", "Sorry, login or password is not correct, please, check your credentials and try again.");
+            modelAndView.setViewName("signIn");
         }
+        return modelAndView;
     }
+
 }

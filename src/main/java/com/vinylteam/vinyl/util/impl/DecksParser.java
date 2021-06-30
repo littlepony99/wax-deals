@@ -75,7 +75,7 @@ public class DecksParser extends VinylParser {
         boolean inStock = true;
         Element iframeElement = offerDocument.select("iframe").first();
         String inStockText = iframeElement.parents().get(0).getElementsByClass("stockBlockaround").text();
-        if (inStockText.contains("out of stock")){
+        if (inStockText.contains("out of stock")) {
             inStock = false;
         }
         return inStock;
@@ -85,7 +85,7 @@ public class DecksParser extends VinylParser {
         Element iframeElement = offerDocument.select("iframe").first();
         String imageLink = iframeElement.parents().get(0).getElementsByClass("bigCoverDetail").select("img")
                 .attr("src");
-        if (imageLink != null && !Objects.equals(imageLink, "")){
+        if (imageLink != null && !Objects.equals(imageLink, "")) {
             log.debug("Got high resolution image link from page by offer link {'highResImageLink':{}, 'offerLink':{}}", imageLink, offerDocument.location());
         } else {
             log.warn("Can't find image link from page by offer link, returning default {'offerLink':{}}", offerDocument.location());
@@ -198,4 +198,5 @@ public class DecksParser extends VinylParser {
     public long getShopId() {
         return SHOP_ID;
     }
+
 }

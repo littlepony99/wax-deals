@@ -1,39 +1,75 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/profile")
+@RequestMapping(path = "/profile", produces = "text/html;charset=UTF-8")
 public class ProfileController {
 
+    private final UserService userService;
+
     @GetMapping
-    public String getProfilePage(HttpServletRequest request,
-                                 HttpServletResponse response,
+    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user,
                                  Model model) {
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-        log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_OK);
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                model.addAttribute("userRole", user.getRole().toString());
-                model.addAttribute("email", user.getEmail());
-                model.addAttribute("discogsUserName", user.getDiscogsUserName());
-            }
-        }
+        WebUtils.setUserAttributes(user, model);
         return "profile";
     }
+
+    @GetMapping(path = "/edit-profile")
+    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,
+                                     Model model) {
+        WebUtils.setUserAttributes(user, model);
+        return "editProfile";
+    }
+
+    @PostMapping(path = "/edit-profile")
+    public ModelAndView editProfile(@RequestParam(value = "email") String newEmail,
+                                    @RequestParam(value = "oldPassword") String oldPassword,
+                                    @RequestParam(value = "newPassword") String newPassword,
+                                    @RequestParam(value = "confirmNewPassword") String confirmNewPassword,
+                                    @RequestParam(value = "discogsUserName") String newDiscogsUserName,
+                                    HttpSession session,
+                                    @SessionAttribute("user") User user) {
+        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+                .email(newEmail)
+                .oldPassword(oldPassword)
+                .newPassword(newPassword)
+                .confirmNewPassword(confirmNewPassword)
+                .newDiscogsUserName(newDiscogsUserName)
+                .build();
+        if (user != null) {
+            ModelAndView modelAndView = new ModelAndView("editProfile");
+            User userAfterEdit = userService.editProfile(userProfileInfo, user, modelAndView).orElse(user);
+            session.setAttribute("user", userAfterEdit);
+            return modelAndView;
+        } else {
+            return new ModelAndView("redirect:/signIn");
+        }
+    }
+
+    @PostMapping(path = "/delete-profile")
+    public ModelAndView deleteProfile(HttpSession session, @SessionAttribute("user") User user) {
+        if (user != null) {
+            ModelAndView modelAndView = new ModelAndView("redirect:/signUp");
+            userService.delete(user, modelAndView);
+            session.invalidate();
+            return modelAndView;
+        } else {
+            return new ModelAndView("redirect:/signIn");
+        }
+    }
+
 }

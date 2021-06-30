@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,11 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
             return vinyl;
         }
         return uniqueVinylRepository.save(vinyl);
+    }
+
+    @Override
+    public void prepareCatalog(User user, Model model, String wantList) {
+
     }
 
     @Override

@@ -23,7 +23,7 @@ public abstract class VinylParser {
         return isValid;
     }
 
-    public abstract RawOffer getRawOfferFromOfferLink(String offerLink);;
+    public abstract RawOffer getRawOfferFromOfferLink(String offerLink);
 
     protected abstract long getShopId();
 

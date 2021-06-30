@@ -7,7 +7,6 @@ import com.vinylteam.vinyl.util.PriceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -221,20 +220,25 @@ public class CloneNlParser extends VinylParser {
             return PriceUtils.getPriceFromString(fullPriceDetails);
         }
 
-    public String getHighResImageLinkFromDocument(Element document) {
-        String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
-        if (imageLink != null && !Objects.equals(imageLink, "")){
-            if (!imageLink.contains("no-cover")){
-                log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return null;
+        }
+
+        public String getHighResImageLinkFromDocument(Element document) {
+            String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
+            if (imageLink != null && !Objects.equals(imageLink, "")) {
+                if (!imageLink.contains("no-cover")) {
+                    log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
+                } else {
+                    imageLink = "img/goods/no_image.jpg";
+                }
             } else {
+                log.warn("Can't find image link, returning default");
                 imageLink = "img/goods/no_image.jpg";
             }
-        } else {
-            log.warn("Can't find image link, returning default");
-            imageLink = "img/goods/no_image.jpg";
+            return imageLink;
         }
-        return imageLink;
-    }
 
         public String getOfferLinkFromDocument(Element document) {
             return BASE_LINK + document.select(OFFER_LINK_SELECTOR).attr("href");
@@ -296,10 +300,15 @@ public class CloneNlParser extends VinylParser {
             return PriceUtils.getPriceFromString(fullPriceDetails);
         }
 
+        @Override
+        public List<String> getPriceDetailsFromDocument(Element document) {
+            return null;
+        }
+
         public String getHighResImageLinkFromDocument(Element document) {
             String imageLink = document.select(HIGH_RES_IMAGE_LINK_SELECTOR).attr("src");
-            if (imageLink != null && !Objects.equals(imageLink, "")){
-                if (!imageLink.contains("no-cover")){
+            if (imageLink != null && !Objects.equals(imageLink, "")) {
+                if (!imageLink.contains("no-cover")) {
                     log.debug("Got high resolution image link {'highResImageLink':{}}", imageLink);
                 } else {
                     imageLink = "img/goods/no_image.jpg";
@@ -315,4 +324,5 @@ public class CloneNlParser extends VinylParser {
             return "";
         }
     }
+
 }

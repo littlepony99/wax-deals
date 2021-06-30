@@ -1,8 +1,15 @@
 package com.vinylteam.vinyl.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum Role {
 
-    USER,
-    ADMIN
+    USER("USER"),
+    ADMIN("ADMIN");
+
+    private String name;
 
 }
