@@ -11,13 +11,11 @@ import java.util.List;
 
 public class WebUtils {
 
-    public static void setUserAttributes(HttpServletRequest request, Model model) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            User user = (User) session.getAttribute("user");
-            if (user != null) {
-                model.addAttribute("userRole", user.getRole().toString());
-            }
+    public static void setUserAttributes(User user, Model model) {
+        if (user != null) {
+            model.addAttribute("userRole", user.getRole().getName());
+            model.addAttribute("email", user.getEmail());
+            model.addAttribute("discogsUserName", user.getDiscogsUserName());
         }
     }
 
