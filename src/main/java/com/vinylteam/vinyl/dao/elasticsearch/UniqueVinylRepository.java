@@ -1,8 +1,6 @@
 package com.vinylteam.vinyl.dao.elasticsearch;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;

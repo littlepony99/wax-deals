@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,14 +38,13 @@ public class OneVinylOfferController {
     private final ParserHolder parserHolder;
 
     @GetMapping
-    public String getOneVinylOfferPage(HttpServletRequest request,
-                                       HttpServletResponse response,
+    public String getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
+                                       @RequestParam(value = "id") String stringId,
                                        Model model) {
         List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
-        WebUtils.setUserAttributes(request, model);
+        WebUtils.setUserAttributes(user, model);
 
-        String uniqueVinylId = request.getParameter("id");
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
+        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(stringId);
 
         List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());
         List<Integer> shopIds = offerService.getListOfShopIds(offers);
@@ -84,9 +81,6 @@ public class OneVinylOfferController {
         List<UniqueVinyl> preparedListById = new ArrayList<>();
         preparedListById.add(0, uniqueVinyl);
 
-        response.setContentType("text/html;charset=utf-8");
-        response.setStatus(HttpServletResponse.SC_OK);
-
         String artist = uniqueVinyl.getArtist();
         List<UniqueVinyl> uniqueVinylsByArtist = uniqueVinylService.findManyByArtist(artist);
 
@@ -111,4 +105,5 @@ public class OneVinylOfferController {
         WebUtils.setModelContext(preparedListById, offersResponseList, model);
         return "vinyl";
     }
+
 }

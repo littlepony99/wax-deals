@@ -3,15 +3,12 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.UniqueVinylService;
-import com.vinylteam.vinyl.util.AbstractElasticsearchContainerBaseTest;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -22,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DefaultUniqueVinylServiceITest extends AbstractElasticsearchContainerBaseTest {
+public class DefaultUniqueVinylServiceITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
-    private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList(9);
+    private final List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
 
     @Autowired
     private UniqueVinylService uniqueVinylService;

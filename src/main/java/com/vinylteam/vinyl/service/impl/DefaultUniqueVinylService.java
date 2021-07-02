@@ -7,7 +7,6 @@ import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.common.unit.Fuzziness;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
@@ -47,7 +46,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public List<UniqueVinyl> findAll() {
-        List<UniqueVinyl> gottenUniqueVinyls = uniqueVinylRepository.findAll();
+        List<UniqueVinyl> gottenUniqueVinyls = new ArrayList<>(uniqueVinylRepository.findAll());
         log.debug("Resulting list with that amount of unique vinyls from db is {'uniqueVinyls':{}}", gottenUniqueVinyls);
         return gottenUniqueVinyls;
     }
