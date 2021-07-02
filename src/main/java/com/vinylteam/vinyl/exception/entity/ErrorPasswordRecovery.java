@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum ErrorRecoveryPassword {
+public enum ErrorPasswordRecovery {
 
     EMPTY_PASSWORD("Sorry, the password is empty!"),
     PASSWORDS_NOT_EQUAL("Sorry, the passwords don't match!"),
@@ -15,6 +15,7 @@ public enum ErrorRecoveryPassword {
 
     TOKEN_NOT_CORRECT_UUID("Your link is incorrect! Please check the link in the your email"),
     TOKEN_NOT_FOUND_IN_DB("Your link is incorrect! Please check the link in the your email or contact support."),
+    DELETE_TOKEN_ERROR("Sorry, problem with processing this link. Please, request new one or contact support."),
     TOKEN_IS_EXPIRED("The link you are trying to follow is no longer valid. You need to" +
             " repeat the recovery password process."),
 

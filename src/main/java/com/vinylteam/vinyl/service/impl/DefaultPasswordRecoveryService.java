@@ -3,8 +3,8 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.RecoveryPasswordException;
-import com.vinylteam.vinyl.exception.entity.ErrorRecoveryPassword;
+import com.vinylteam.vinyl.exception.PasswordRecoveryException;
+import com.vinylteam.vinyl.exception.entity.ErrorPasswordRecovery;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.MailSender;
@@ -12,8 +12,8 @@ import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,76 +35,93 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
     @Value("${recoveryToken.live.hours}")
     private int liveTokenHours;
 
+    @Transactional
     @Override
     public void changePassword(UserChangeProfileInfoRequest userProfileInfo) {
         String newPassword = userProfileInfo.getNewPassword();
         checkPassword(newPassword, userProfileInfo.getConfirmNewPassword());
-        UUID tokenUUID = stringToUUD(userProfileInfo.getToken());
+        UUID tokenUUID = stringToUUID(userProfileInfo.getToken());
         RecoveryToken recoveryToken = passwordRecoveryDao.findByToken(tokenUUID)
-                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
+                .orElseThrow(() -> new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         User user = userService.findById(recoveryToken.getUserId())
-                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
+                .orElseThrow(() -> new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         String email = user.getEmail();
-        userService.update(email, email, newPassword, user.getDiscogsUserName());
-        passwordRecoveryDao.deleteById(recoveryToken.getId());
+        try {
+            userService.update(email, email, newPassword, user.getDiscogsUserName());
+            passwordRecoveryDao.deleteById(recoveryToken.getId());
+        } catch (DataAccessException e) {
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.UPDATE_PASSWORD_ERROR.getMessage());
+        }
     }
 
     @Override
     public void checkToken(String token) {
-        UUID tokenUUID = stringToUUD(token);
+        UUID tokenUUID = stringToUUID(token);
         RecoveryToken recoveryToken = passwordRecoveryDao.findByToken(tokenUUID)
-                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_FOUND_IN_DB.getMessage()));
+                .orElseThrow(() -> new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage()));
         LocalDateTime tokenLifetime = recoveryToken.getCreatedAt().toLocalDateTime().plusHours(liveTokenHours);
         if (tokenLifetime.compareTo(LocalDateTime.now()) < 0) {
             log.debug("Token lifetime has come to an end.");
-            passwordRecoveryDao.deleteById(recoveryToken.getId());
-            throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_IS_EXPIRED.getMessage());
+            try {
+                passwordRecoveryDao.deleteById(recoveryToken.getId());
+            } catch (DataAccessException e) {
+                throw new PasswordRecoveryException(ErrorPasswordRecovery.DELETE_TOKEN_ERROR.getMessage());
+            }
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_IS_EXPIRED.getMessage());
         }
     }
 
     @Override
     @Transactional
     public void sendLink(String email) {
-        checkForNotNull(email, ErrorRecoveryPassword.EMPTY_EMAIL);
+        checkForIsNotEmptyNotNull(email, ErrorPasswordRecovery.EMPTY_EMAIL);
         User user = userService.findByEmail(email)
-                .orElseThrow(() -> new RecoveryPasswordException(ErrorRecoveryPassword.EMAIL_NOT_FOUND_IN_DB.getMessage()));
-        RecoveryToken recoveryToken = addRecoveryUserToken(user.getId());
+                .orElseThrow(() -> new PasswordRecoveryException(ErrorPasswordRecovery.EMAIL_NOT_FOUND_IN_DB.getMessage()));
+        RecoveryToken recoveryToken = addRecoveryTokenWithUserId(user.getId());
         sendEmailWithLink(email, recoveryToken.getToken().toString());
     }
 
-    UUID stringToUUD(String token) {
+    UUID stringToUUID(String token) {
         try {
             return UUID.fromString(token);
         } catch (IllegalArgumentException e) {
-            throw new RecoveryPasswordException(ErrorRecoveryPassword.TOKEN_NOT_CORRECT_UUID.getMessage());
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_NOT_CORRECT_UUID.getMessage());
         }
     }
 
     void sendEmailWithLink(String email, String recoveryToken) {
         String recoveryLink = RECOVERY_MESSAGE.replace("{applicationLink}", applicationLink) + recoveryToken;
-        String recoveryTopic = "Recovery Password - WaxDeals";
-        mailSender.sendMail(email, recoveryTopic, recoveryLink);
+        String recoveryTopic = "Password Recovery - WaxDeals";
+        try {
+            mailSender.sendMail(email, recoveryTopic, recoveryLink);
+        } catch (RuntimeException e) {
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.EMAIL_SEND_ERROR.getMessage());
+        }
     }
 
     void checkPassword(String newPassword, String confirmPassword) {
-        checkForNotNull(newPassword, ErrorRecoveryPassword.EMPTY_PASSWORD);
+        checkForIsNotEmptyNotNull(newPassword, ErrorPasswordRecovery.EMPTY_PASSWORD);
         if (!newPassword.equals(confirmPassword)) {
-            throw new RecoveryPasswordException(ErrorRecoveryPassword.PASSWORDS_NOT_EQUAL.getMessage());
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.PASSWORDS_NOT_EQUAL.getMessage());
         }
     }
 
-    void checkForNotNull(String value, ErrorRecoveryPassword emptyValue) {
+    void checkForIsNotEmptyNotNull(String value, ErrorPasswordRecovery emptyValue) {
         if (value == null || value.isEmpty()) {
-            throw new RecoveryPasswordException(emptyValue.getMessage());
+            throw new PasswordRecoveryException(emptyValue.getMessage());
         }
     }
 
-    RecoveryToken addRecoveryUserToken(long userId) {
+    RecoveryToken addRecoveryTokenWithUserId(long userId) {
         UUID token = UUID.randomUUID();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);
         recoveryToken.setToken(token);
-        passwordRecoveryDao.add(recoveryToken);
+        try {
+            passwordRecoveryDao.add(recoveryToken);
+        } catch (DataAccessException e) {
+            throw new PasswordRecoveryException(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage());
+        }
         return recoveryToken;
     }
 

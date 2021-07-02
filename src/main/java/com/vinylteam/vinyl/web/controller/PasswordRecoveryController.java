@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.RecoveryPasswordException;
+import com.vinylteam.vinyl.exception.PasswordRecoveryException;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
@@ -41,7 +41,7 @@ public class PasswordRecoveryController {
             modelAndView.setStatus(HttpStatus.OK);
             log.debug("Set response status to {'status':{}}", HttpStatus.OK);
             model.addAttribute("message", "Follow the link that we sent you by email - " + email);
-        } catch (RecoveryPasswordException e) {
+        } catch (PasswordRecoveryException e) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
             log.error(e.getMessage());
@@ -59,7 +59,7 @@ public class PasswordRecoveryController {
         try {
             passwordRecoveryService.checkToken(token);
             modelAndView.addObject("recoveryToken", token);
-        } catch (RecoveryPasswordException e) {
+        } catch (PasswordRecoveryException e) {
             log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
             modelAndView.addObject("errorMessage", e.getMessage());
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
@@ -84,7 +84,7 @@ public class PasswordRecoveryController {
             passwordRecoveryService.changePassword(userProfileInfo);
             modelAndView.setStatus(HttpStatus.SEE_OTHER);
             modelAndView.addObject("message", "Your password was changed. Please, try to log in use new password.");
-        } catch (RecoveryPasswordException e) {
+        } catch (PasswordRecoveryException e) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
             modelAndView.addObject("message", e.getMessage());
