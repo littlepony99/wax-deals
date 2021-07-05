@@ -12,8 +12,9 @@ import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,17 +24,16 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@PropertySource("classpath:application.properties")
 public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
     private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/recoveryPassword/newPassword?token=";
-
-    private final PasswordRecoveryDao passwordRecoveryDao;
-    private final UserService userService;
-    private final MailSender mailSender;
     @Value("${application.link}")
     private String applicationLink;
     @Value("${recoveryToken.live.hours}")
     private int liveTokenHours;
+    private final PasswordRecoveryDao passwordRecoveryDao;
+    private final UserService userService;
+    private final MailSender mailSender;
+
 
     @Transactional
     @Override
@@ -119,7 +119,9 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         recoveryToken.setToken(token);
         try {
             passwordRecoveryDao.add(recoveryToken);
-        } catch (DataAccessException e) {
+        } catch (DuplicateKeyException e) {
+            throw new PasswordRecoveryException((ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage()));
+        } catch (DataIntegrityViolationException e) {
             throw new PasswordRecoveryException(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage());
         }
         return recoveryToken;

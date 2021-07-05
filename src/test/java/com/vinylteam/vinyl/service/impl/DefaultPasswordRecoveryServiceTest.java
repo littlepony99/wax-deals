@@ -12,8 +12,10 @@ import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataAccessException;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -27,11 +29,14 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class DefaultPasswordRecoveryServiceTest {
 
-    private final PasswordRecoveryDao mockedPasswordRecoveryDao = mock(PasswordRecoveryDao.class);
-    private final UserService mockedUserService = mock(UserService.class);
-    private final MailSender mockedMailSender = mock(MailSender.class);
-    private final DefaultPasswordRecoveryService passwordRecoveryService = new DefaultPasswordRecoveryService(mockedPasswordRecoveryDao,
-            mockedUserService, mockedMailSender);
+    @MockBean
+    private PasswordRecoveryDao mockedPasswordRecoveryDao;
+    @MockBean
+    private UserService mockedUserService;
+    @MockBean
+    private MailSender mockedMailSender;
+    @Autowired
+    private DefaultPasswordRecoveryService passwordRecoveryService;
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
     @BeforeEach
@@ -49,7 +54,7 @@ class DefaultPasswordRecoveryServiceTest {
         //when
         RecoveryToken token = passwordRecoveryService.addRecoveryTokenWithUserId(userId);
         //then
-        verify(passwordRecoveryService.addRecoveryTokenWithUserId(any()));
+        verify(mockedPasswordRecoveryDao).add(any());
         assertNotNull(token);
     }
 
@@ -58,7 +63,7 @@ class DefaultPasswordRecoveryServiceTest {
     void addRecoveryUserTokenNonExistentUserId() {
         //prepare
         long userId = 2L;
-        doThrow(DataAccessException.class)
+        doThrow(DataIntegrityViolationException.class)
                 .when(mockedPasswordRecoveryDao)
                 .add(any());
         //when
@@ -160,9 +165,9 @@ class DefaultPasswordRecoveryServiceTest {
         //then
         assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
-        verify(mockedUserService, never()).findById(any());
+        verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao, never()).deleteById(any());
+        verify(mockedPasswordRecoveryDao, never()).deleteById(anyLong());
     }
 
     @Test
@@ -180,9 +185,9 @@ class DefaultPasswordRecoveryServiceTest {
         //then
         assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
-        verify(mockedUserService, never()).findById(any());
+        verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao, never()).deleteById(any());
+        verify(mockedPasswordRecoveryDao, never()).deleteById(anyLong());
     }
 
     @Test
@@ -202,9 +207,9 @@ class DefaultPasswordRecoveryServiceTest {
         //then
         assertEquals(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
-        verify(mockedUserService, never()).findById(any());
+        verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao, never()).deleteById(any());
+        verify(mockedPasswordRecoveryDao, never()).deleteById(anyLong());
     }
 
     @Test
@@ -221,42 +226,16 @@ class DefaultPasswordRecoveryServiceTest {
         User user = dataGenerator.getUserWithNumber(1);
         when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         when(mockedUserService.findById(user.getId())).thenReturn(Optional.of(user));
-        doThrow(DataAccessException.class).when(mockedUserService).update(any(), any(), any(), any());
+        doThrow(DataIntegrityViolationException.class).when(mockedUserService).update(any(), any(), any(), any());
         //when
         Exception exception = assertThrows(PasswordRecoveryException.class,
                 () -> passwordRecoveryService.changePassword(userProfileInfo));
         //then
         assertEquals(ErrorPasswordRecovery.UPDATE_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
-        verify(mockedUserService).findById(any());
+        verify(mockedPasswordRecoveryDao).findByToken(eq(token));
+        verify(mockedUserService).findById(anyLong());
         verify(mockedUserService).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao, never()).deleteById(any());
-    }
-
-    @Test
-    @DisplayName("Change password - error while deleting token")
-    void changePasswordTokenDeleteError() {
-        //prepare
-        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
-        UUID token = recoveryToken.getToken();
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
-                .newPassword("new_password")
-                .confirmNewPassword("new_password")
-                .token(token.toString())
-                .build();
-        User user = dataGenerator.getUserWithNumber(1);
-        when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
-        when(mockedUserService.findById(user.getId())).thenReturn(Optional.of(user));
-        doThrow(DataAccessException.class).when(mockedPasswordRecoveryDao).deleteById(1);
-        //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
-                () -> passwordRecoveryService.changePassword(userProfileInfo));
-        //then
-        assertEquals(ErrorPasswordRecovery.UPDATE_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
-        verify(mockedUserService).findById(any());
-        verify(mockedUserService).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao).deleteById(any());
+        verify(mockedPasswordRecoveryDao, never()).deleteById(anyLong());
     }
 
     @Test
@@ -277,10 +256,10 @@ class DefaultPasswordRecoveryServiceTest {
         assertDoesNotThrow(
                 () -> passwordRecoveryService.changePassword(userProfileInfo));
         //then
-        verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
-        verify(mockedUserService).findById(any());
+        verify(mockedPasswordRecoveryDao).findByToken(eq(token));
+        verify(mockedUserService).findById(anyLong());
         verify(mockedUserService).update(any(), any(), any(), any());
-        verify(mockedPasswordRecoveryDao).deleteById(any());
+        verify(mockedPasswordRecoveryDao).deleteById(anyLong());
     }
 
     @Test
@@ -326,7 +305,7 @@ class DefaultPasswordRecoveryServiceTest {
         recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusHours(30)));
         recoveryToken.setId(1);
         when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
-        doThrow(DataAccessException.class).when(mockedPasswordRecoveryDao).deleteById(1);
+        doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).deleteById(1);
         //when
         Exception exception = assertThrows(PasswordRecoveryException.class,
                 () -> passwordRecoveryService.checkToken(token.toString()));
@@ -344,7 +323,7 @@ class DefaultPasswordRecoveryServiceTest {
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setToken(token);
         recoveryToken.setCreatedAt(Timestamp.valueOf(LocalDateTime.now().minusHours(3)));
-        when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
+        when(mockedPasswordRecoveryDao.findByToken(eq(token))).thenReturn(Optional.of(recoveryToken));
         //when
         assertDoesNotThrow(() -> passwordRecoveryService.checkToken(token.toString()));
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
@@ -417,7 +396,7 @@ class DefaultPasswordRecoveryServiceTest {
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();
         when(mockedUserService.findByEmail(email)).thenReturn(Optional.of(user));
-        doThrow(DataAccessException.class).when(mockedPasswordRecoveryDao).add(any());
+        doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).add(any());
         //when
         Exception exception = assertThrows(PasswordRecoveryException.class,
                 () -> passwordRecoveryService.sendLink(email));
@@ -482,6 +461,27 @@ class DefaultPasswordRecoveryServiceTest {
                 () -> passwordRecoveryService.stringToUUID(invalidUUID));
         //then
         assertEquals(ErrorPasswordRecovery.TOKEN_NOT_CORRECT_UUID.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Add recovery token with user id - existing user id, new token, success")
+    void addRecoveryTokenWithUserId() {
+        //prepare
+        long userId = 1;
+        //when
+        assertDoesNotThrow(() -> passwordRecoveryService.addRecoveryTokenWithUserId(userId));
+    }
+
+    @Test
+    @DisplayName("Add recovery token with user id - new user id, new token, DataIntegrityViolationException -> PasswordRecoveryException(ErrorPasswordRecovery.ADD_TOKEN_ERROR)")
+    void addRecoveryTokenWithUserIdNonExistentUserId() {
+        //prepare
+        long nonExistentUserId = 2;
+        doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).add(any());
+        //when
+        Exception exception = assertThrows(PasswordRecoveryException.class, () -> passwordRecoveryService.addRecoveryTokenWithUserId(nonExistentUserId));
+        //then
+        assertEquals(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
     }
 
 }
