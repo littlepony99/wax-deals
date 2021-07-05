@@ -120,7 +120,7 @@ public class DefaultUniqueVinylServiceITest {
         List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
 
         //then
-        assertEquals(8, actualUniqueVinyls.size());
+        assertEquals(3, actualUniqueVinyls.size());
         assertTrue(expectedUniqueVinyls.containsAll(actualUniqueVinyls));
 
         long distinctValues = actualUniqueVinyls.stream()
@@ -128,7 +128,7 @@ public class DefaultUniqueVinylServiceITest {
                 .distinct()
                 .count();
 
-        assertEquals(8, distinctValues);
+        assertEquals(3, distinctValues);
     }
 
     @Test
@@ -182,7 +182,7 @@ public class DefaultUniqueVinylServiceITest {
     @DisplayName("Return some results when one letter is different")
     void findManyFilteredOneLetterIsDifferentSomeResults() {
         List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("gelease");
-        assertEquals(8, vinylList.size());
+        assertEquals(3, vinylList.size());
         assertFalse(vinylList.contains(uniqueVinyls.get(3)));
     }
 
