@@ -2,6 +2,8 @@ package com.vinylteam.vinyl.security.impl;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.UserServiceException;
+import com.vinylteam.vinyl.exception.entity.ErrorUser;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -61,6 +64,27 @@ public class DefaultSecurityService implements SecurityService {
         }
         log.debug("Result of comparing password against user's password is {'isSame': {}, 'user':{}}", isSame, user);
         return isSame;
+    }
+
+    @Override
+    public void validatePassword(String password, String confirmationPassword) {
+        if (!Objects.equals(password, confirmationPassword)) {
+            throw new UserServiceException(ErrorUser.PASSWORDS_NOT_EQUAL.getMessage());
+        }
+        passwordFormatCheck(password);
+    }
+
+    @Override
+    public void emailFormatCheck(String email) {
+        if (!email.matches("")) {
+            throw new UserServiceException(ErrorUser.INVALID_EMAIL.getMessage());
+        }
+    }
+
+    void passwordFormatCheck(String password) {
+        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
+            throw new UserServiceException(ErrorUser.INVALID_PASSWORD.getMessage());
+        }
     }
 
     String hashPassword(char[] password, byte[] salt, int iterations) {

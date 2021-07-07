@@ -1,10 +1,10 @@
 package com.vinylteam.vinyl.service;
 
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 public interface PasswordRecoveryService {
 
-    void changePassword(UserChangeProfileInfoRequest userProfileInfo);
+    void changePassword(UserInfoRequest userProfileInfo);
 
     void sendLink(String email);
 

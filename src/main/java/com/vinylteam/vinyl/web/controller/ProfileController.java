@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,16 +43,17 @@ public class ProfileController {
                                     @RequestParam(value = "discogsUserName") String newDiscogsUserName,
                                     HttpSession session,
                                     @SessionAttribute("user") User user) {
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .email(newEmail)
-                .oldPassword(oldPassword)
+                .password(oldPassword)
                 .newPassword(newPassword)
-                .confirmNewPassword(confirmNewPassword)
-                .newDiscogsUserName(newDiscogsUserName)
+                .newPasswordConfirmation(confirmNewPassword)
+                .discogsUserName(newDiscogsUserName)
                 .build();
         if (user != null) {
             ModelAndView modelAndView = new ModelAndView("editProfile");
-            User userAfterEdit = userService.editProfile(userProfileInfo, user, modelAndView).orElse(user);
+            User userAfterEdit = userService.editProfile(userProfileInfo, user).orElse(user);
+            modelAndView.addObject("userRole", user.getRole().getName());
             session.setAttribute("user", userAfterEdit);
             return modelAndView;
         } else {
@@ -64,7 +65,7 @@ public class ProfileController {
     public ModelAndView deleteProfile(HttpSession session, @SessionAttribute("user") User user) {
         if (user != null) {
             ModelAndView modelAndView = new ModelAndView("redirect:/signUp");
-            userService.delete(user, modelAndView);
+            userService.delete(user);
             session.invalidate();
             return modelAndView;
         } else {

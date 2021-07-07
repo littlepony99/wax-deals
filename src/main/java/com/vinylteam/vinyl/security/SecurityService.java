@@ -8,4 +8,8 @@ public interface SecurityService {
 
     boolean checkPasswordAgainstUserPassword(User user, char[] password);
 
+    void validatePassword(String password, String confirmationPassword);
+
+    void emailFormatCheck(String email);
+
 }

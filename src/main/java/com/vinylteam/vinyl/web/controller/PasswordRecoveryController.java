@@ -3,7 +3,7 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.PasswordRecoveryException;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,9 +74,9 @@ public class PasswordRecoveryController {
                                        @RequestParam(value = "recoveryToken") String token,
                                        Model model) {
         WebUtils.setUserAttributes(user, model);
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .newPassword(newPassword)
-                .confirmNewPassword(confirmPassword)
+                .newPasswordConfirmation(confirmPassword)
                 .token(token)
                 .build();
         ModelAndView modelAndView = new ModelAndView("signIn");

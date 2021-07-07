@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,31 +44,11 @@ public class SignInController {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("email", email);
         WebUtils.setUserAttributes(user, model);
-        Optional<User> optionalUser = userService.signInCheck(email, password);
-        log.debug("Received a optional with User with password verification by the passed " +
-                "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
-        if (optionalUser.isPresent()) {
-            if (optionalUser.get().getStatus()) {
-                log.debug("User's status is {'status':{}}", optionalUser.get().getStatus());
-                modelAndView.setStatus(HttpStatus.OK);
-                log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-                User checkedUser = optionalUser.get();
-                session.setMaxInactiveInterval(sessionMaxInactiveInterval);
-                session.setAttribute("user", checkedUser);
-                modelAndView.setViewName("redirect:/");
-            } else {
-                log.debug("User's status is {'status':{}}", optionalUser.get().getStatus());
-                modelAndView.setStatus(HttpStatus.SEE_OTHER);
-                log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
-                modelAndView.addObject("message", "Sorry, your email has not been verified. Please go to your mailbox and follow the link to confirm your registration.");
-                modelAndView.setViewName("confirmation-directions");
-            }
-        } else {
-            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
-            modelAndView.addObject("message", "Sorry, login or password is not correct, please, check your credentials and try again.");
-            modelAndView.setViewName("signIn");
-        }
+        UserInfoRequest userInfo = UserInfoRequest.builder()
+                .email(email)
+                .password(password)
+                .build();
+        userService.signInCheck(userInfo);
         return modelAndView;
     }
 

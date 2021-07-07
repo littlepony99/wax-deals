@@ -1,29 +1,28 @@
 package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Optional;
 
 public interface UserService {
 
-    void add(UserChangeProfileInfoRequest userProfileInfo);
+    void register(UserInfoRequest userProfileInfo);
 
     void update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 
-    void delete(User user, ModelAndView modelAndView);
+    void delete(User user);
 
     Optional<User> findById(long id);
 
     Optional<User> findByEmail(String email);
 
-    Optional<User> signInCheck(String email, String password);
+    void signInCheck(UserInfoRequest userProfileInfo);
 
-    Optional<User> signInCheck(UserChangeProfileInfoRequest userProfileInfo);
+    Optional<User> signInCheckConfirmation(UserInfoRequest userProfileInfo);
 
-    Optional<User> editProfile(UserChangeProfileInfoRequest userProfileInfo,
-                               User user,
-                               ModelAndView modelAndView);
+    Optional<User> editProfile(UserInfoRequest userProfileInfo,
+                               User user);
 
 }
