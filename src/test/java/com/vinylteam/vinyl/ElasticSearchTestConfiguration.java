@@ -3,6 +3,7 @@ package com.vinylteam.vinyl;
 import com.github.dockerjava.api.model.PortBinding;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -22,7 +23,7 @@ public class ElasticSearchTestConfiguration {
 
     private static ElasticsearchContainer ES_CONTAINER;
 
-    @Bean(/*initMethod = "start", destroyMethod = "stop", */name = "elasticSearchContainer")
+    @Bean(name = "elasticSearchContainer")
     public ElasticsearchContainer createESTestContainer(){
         if (ES_CONTAINER == null) {
             ES_CONTAINER = new ElasticsearchContainer(DockerImageName
