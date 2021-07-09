@@ -4,12 +4,15 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.UserServiceException;
+import com.vinylteam.vinyl.exception.entity.ErrorUser;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,43 +33,37 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public void add(UserChangeProfileInfoRequest userProfileInfo) {
+    public void register(UserInfoRequest userProfileInfo) {
         String email = userProfileInfo.getEmail();
-        String password = userProfileInfo.getNewPassword();
-        if (email != null && password != null) {
-            User userToAdd = securityService
-                    .createUserWithHashedPassword(email, password.toCharArray());
-            userToAdd.setDiscogsUserName(userProfileInfo.getNewDiscogsUserName());
-            long userId = userDao.add(userToAdd);
-            log.debug("Added created user to db {'user':{}}", userToAdd);
-            ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
-            confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+        String password = userProfileInfo.getPassword();
+        securityService.emailFormatCheck(email);
+        securityService.validatePassword(password, userProfileInfo.getPasswordConfirmation());
+        User userToAdd = securityService
+                .createUserWithHashedPassword(email, password.toCharArray());
+        userToAdd.setDiscogsUserName(userProfileInfo.getDiscogsUserName());
+        long userId;
+        try {
+            userId = userDao.add(userToAdd);
+        } catch (DuplicateKeyException e) {
+            throw new UserServiceException(ErrorUser.ADD_USER_EXISTING_EMAIL.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new UserServiceException(ErrorUser.ADD_USER_INVALID_VALUES.getMessage());
         }
+        log.debug("Added created user to db {'user':{}}", userToAdd);
+        ConfirmationToken confirmationToken = confirmationService.addByUserId(userId);
+        confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
     }
 
     @Override
-    public void delete(User user, ModelAndView modelAndView) {
-        if (user != null && modelAndView != null) {
-            userDao.delete(user);
-            modelAndView.setStatus(HttpStatus.OK);
-            log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-        } else {
-            log.error("At least one of passed to DefaultUserService.delete(...) arguments is null {'user': {}, 'modelAndView': {}}",
-                    user == null ? "null" : user, modelAndView == null ? "null" : modelAndView);
-        }
+    public void delete(User user) {
+        userDao.delete(user);
     }
 
     @Override
     public Optional<User> findById(long id) {
-        Optional<User> optionalUser = Optional.empty();
-        if (id > 0) {
-            optionalUser = userDao.findById(id);
-            log.debug("Attempted to get optional with user found by id from db {'id':{}, 'optional':{}}", id, optionalUser);
-        } else {
-            log.error("Passed id is invalid, returning empty optional {'id':{}}", id);
-        }
-        log.debug("Resulting optional is {'optional':{}}", optionalUser);
-        return optionalUser;
+        User user = userDao.findById(id)
+                .orElseThrow(() -> new UserServiceException(ErrorUser.EMAIL_NOT_FOUND_IN_DB.getMessage()));
+        return Optional.of(user);
     }
 
     @Override
@@ -87,43 +84,33 @@ public class DefaultUserService implements UserService {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return userDao.findByEmail(email);
+        User user = userDao.findByEmail(email)
+                .orElseThrow(() -> new UserServiceException(ErrorUser.EMAIL_NOT_FOUND_IN_DB.getMessage()));
+        return Optional.of(user);
     }
 
     @Override
-    public Optional<User> signInCheck(String email, String password) {
-        Optional<User> optionalUser = Optional.empty();
-        if (email != null && password != null) {
-            Optional<User> optionalUserFromDataBase = userDao.findByEmail(email);
-            log.debug("Got optional with user from db by email {'email':{}, 'optionalUser':{}}",
-                    email, optionalUserFromDataBase);
-            if (optionalUserFromDataBase.isPresent()) {
-                if (securityService.checkPasswordAgainstUserPassword(
-                        optionalUserFromDataBase.get(), password.toCharArray())) {
-                    log.debug("Hashed password passed as argument matches hashed password " +
-                            "of user by passed email {'email':{}}", email);
-                    optionalUser = optionalUserFromDataBase;
-                    if (!optionalUser.get().getStatus()) {
-                        Optional<ConfirmationToken> confirmationToken = confirmationService.findByUserId(optionalUser.get().getId());
-                        confirmationToken.ifPresent(token -> {
-                            confirmationService.sendMessageWithLinkToUserEmail(email, token.getToken().toString());
-                        });
-                    }
-                }
-            }
+    public void signInCheck(UserInfoRequest userProfileInfo) {
+        User userToCheckAgainst = findByEmail(userProfileInfo.getEmail()).orElseThrow(
+                () -> new UserServiceException(ErrorUser.WRONG_CREDENTIALS.getMessage())
+        );
+        if (!securityService.checkPasswordAgainstUserPassword(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
+            throw new UserServiceException(ErrorUser.WRONG_CREDENTIALS.getMessage());
         }
-        return optionalUser;
+        if (!userToCheckAgainst.getStatus()) {
+            throw new UserServiceException(ErrorUser.EMAIL_NOT_VERIFIED.getMessage());
+        }
     }
 
     @Override
-    public Optional<User> signInCheck(UserChangeProfileInfoRequest userProfileInfo) {
+    public Optional<User> signInCheckConfirmation(UserInfoRequest userProfileInfo) {
         Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(userProfileInfo.getToken());
         ConfirmationToken confirmationToken = optionalConfirmationTokenByLinkToken.orElseThrow(
                 () -> new IllegalArgumentException("Sorry, something went wrong on our side, we're looking into it. Please, try to login again, or contact us."));
         User userByLinkToken = userDao.findById(confirmationToken.getUserId()).get();
         if (userByLinkToken.getEmail().equalsIgnoreCase(userByLinkToken.getEmail())) {
             if (securityService.checkPasswordAgainstUserPassword(
-                    userByLinkToken, userProfileInfo.getOldPassword().toCharArray())) {
+                    userByLinkToken, userProfileInfo.getPassword().toCharArray())) {
                 confirmationService.deleteByUserId(userByLinkToken.getId());
                 return Optional.of(userByLinkToken);
             }
@@ -134,51 +121,48 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> editProfile(UserChangeProfileInfoRequest userProfileInfo,
-                                      User user,
-                                      ModelAndView modelAndView) {
+    public Optional<User> editProfile(UserInfoRequest userProfileInfo,
+                                      User user) {
+        String oldPassword = userProfileInfo.getPassword();
+        boolean checkOldPassword = securityService.checkPasswordAgainstUserPassword(user, oldPassword.toCharArray());
+        if (!checkOldPassword) {
+            throw new UserServiceException(ErrorUser.WRONG_PASSWORD.getMessage());
+        }
         String newPassword = userProfileInfo.getNewPassword();
-        String newEmail = userProfileInfo.getEmail();
-        String oldPassword = userProfileInfo.getOldPassword();
-        String newDiscogsUserName = userProfileInfo.getNewDiscogsUserName();
-        modelAndView.addObject("userRole", user.getRole().getName());
-        String email = user.getEmail();
-        String discogsUserName = user.getDiscogsUserName();
-        if (!newPassword.equals(userProfileInfo.getConfirmNewPassword())) {
-            modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-            log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-            modelAndView.addObject("message", "Sorry, passwords don't match!");
+        if (isNotEmptyNotNull(newPassword)) {
+            String newPasswordConfirmation = userProfileInfo.getNewPasswordConfirmation();
+            securityService.validatePassword(newPassword, newPasswordConfirmation);
         } else {
-            boolean checkOldPassword = securityService.checkPasswordAgainstUserPassword(user, oldPassword.toCharArray());
-            if (checkOldPassword) {
-                try {
-                    if (!newPassword.isEmpty()) {
-                        update(email, newEmail, newPassword, newDiscogsUserName);
-                        log.debug("Trying update user with new email and new password in the database {'newEmail':{}}.", newEmail);
-                    } else {
-                        update(email, newEmail, oldPassword, newDiscogsUserName);
-                        log.debug("Trying update user with new email and old password in the database {'newEmail':{}}.", newEmail);
-                    }
-                    log.info("User was updated with new email or password in the database {'newEmail':{}}.", newEmail);
-                    modelAndView.setStatus(HttpStatus.SEE_OTHER);
-                    log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_SEE_OTHER);
-                    modelAndView.addObject("message", "Your profile is successfully changed.");
-                    email = newEmail;
-                    discogsUserName = newDiscogsUserName;
-                    user = findByEmail(email).orElse(user);
-                } catch (EmptyResultDataAccessException e) {
-                    log.error("Failed to update with new email or password user in the database {'newEmail':{}}.", newEmail);
-                    throw new UserServiceException("Edit is fail! Try again!");
-                }
-            } else {
-                modelAndView.setStatus(HttpStatus.BAD_REQUEST);
-                log.debug("Set response status to {'status':{}}", HttpServletResponse.SC_BAD_REQUEST);
-                modelAndView.addObject("message", "Sorry, old password isn't correct!");
+            newPassword = oldPassword;
+        }
+        String newEmail = userProfileInfo.getEmail();
+        if (isNotEmptyNotNull(userProfileInfo.getEmail())) {
+            securityService.emailFormatCheck(userProfileInfo.getEmail());
+        } else {
+            newEmail = user.getEmail();
+        }
+        User updatedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
+        String newDiscogsUserName = userProfileInfo.getDiscogsUserName();
+        if (!isNotEmptyNotNull(newDiscogsUserName)) {
+            newDiscogsUserName = user.getDiscogsUserName();
+        }
+        updatedUser.setDiscogsUserName(newDiscogsUserName);
+        try {
+            userDao.update(user.getEmail(), updatedUser);
+        } catch (EmptyResultDataAccessException e) {
+            log.error("Failed to update user with new email, password, or discogs username in the database {'newEmail':{}, 'newDiscogsUserName':{}}.", newEmail, newDiscogsUserName);
+            throw new UserServiceException(ErrorUser.UPDATE_USER_ERROR.getMessage());
+        }
+        return Optional.of(updatedUser);
+    }
+
+    boolean isNotEmptyNotNull(String string) {
+        if (string != null) {
+            if (!string.isEmpty()) {
+                return true;
             }
         }
-        modelAndView.addObject("discogsUserName", discogsUserName);
-        modelAndView.addObject("email", email);
-        return Optional.of(user);
+        return false;
     }
 
 }

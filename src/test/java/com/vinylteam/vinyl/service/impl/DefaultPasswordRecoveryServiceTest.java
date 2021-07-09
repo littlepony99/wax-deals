@@ -8,7 +8,7 @@ import com.vinylteam.vinyl.exception.entity.ErrorPasswordRecovery;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.MailSender;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -156,7 +156,7 @@ class DefaultPasswordRecoveryServiceTest {
     void changePasswordNullNewPassword() {
         //prepare
         UUID token = UUID.randomUUID();
-        UserChangeProfileInfoRequest userProfileInfoNullPassword = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfoNullPassword = UserInfoRequest.builder()
                 .token(token.toString())
                 .build();
         //when
@@ -175,7 +175,7 @@ class DefaultPasswordRecoveryServiceTest {
     void changePasswordEmptyNewPassword() {
         //prepare
         UUID token = UUID.randomUUID();
-        UserChangeProfileInfoRequest userProfileInfoEmptyPassword = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfoEmptyPassword = UserInfoRequest.builder()
                 .newPassword("")
                 .token(token.toString())
                 .build();
@@ -196,9 +196,9 @@ class DefaultPasswordRecoveryServiceTest {
         //prepare
         UUID token = UUID.randomUUID();
         when(mockedPasswordRecoveryDao.findByToken(eq(token))).thenReturn(Optional.empty());
-        UserChangeProfileInfoRequest userProfileInfoNonExistentToken = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfoNonExistentToken = UserInfoRequest.builder()
                 .newPassword("new_password")
-                .confirmNewPassword("new_password")
+                .newPasswordConfirmation("new_password")
                 .token(token.toString())
                 .build();
         //when
@@ -218,9 +218,9 @@ class DefaultPasswordRecoveryServiceTest {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
         UUID token = recoveryToken.getToken();
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .newPassword("new_password")
-                .confirmNewPassword("new_password")
+                .newPasswordConfirmation("new_password")
                 .token(token.toString())
                 .build();
         User user = dataGenerator.getUserWithNumber(1);
@@ -244,9 +244,9 @@ class DefaultPasswordRecoveryServiceTest {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
         UUID token = recoveryToken.getToken();
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .newPassword("new_password")
-                .confirmNewPassword("new_password")
+                .newPasswordConfirmation("new_password")
                 .token(token.toString())
                 .build();
         User user = dataGenerator.getUserWithNumber(1);

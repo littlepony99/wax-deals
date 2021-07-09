@@ -7,12 +7,14 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class UserChangeProfileInfoRequest {
+public class UserInfoRequest {
 
     private String email;
-    private String oldPassword;
+    private String password;
+    private String passwordConfirmation;
     private String newPassword;
-    private String confirmNewPassword;
+    private String newPasswordConfirmation;
+    private String discogsUserName;
     private String newDiscogsUserName;
     private String token;
 

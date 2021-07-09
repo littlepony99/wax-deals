@@ -4,7 +4,7 @@ import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.service.UserService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,16 +53,16 @@ public class ConfirmationController {
                                       @RequestParam(value = "password") String password,
                                       @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval,
                                       HttpSession session) {
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .token(tokenAsString)
                 .email(email)
-                .oldPassword(password)
+                .password(password)
                 .build();
         ModelAndView modelAndView = new ModelAndView();
         log.info("Sign in user with email {} and token {}", email, tokenAsString);
-        Optional<User> optionalUser = userService.signInCheck(userProfileInfo);
-        log.debug("Received an optional with User with password verification by the passed " +
-                "email address and password {'email':{}, 'optionalUser':{}}", email, optionalUser);
+        userService.signInCheck(userProfileInfo);
+        //FIXME: temporary variable, refactor code to not use it.
+        Optional<User> optionalUser = Optional.of(new User());
         if (optionalUser.isEmpty()) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);

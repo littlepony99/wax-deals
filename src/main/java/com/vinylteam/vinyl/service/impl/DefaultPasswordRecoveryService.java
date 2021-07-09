@@ -8,7 +8,7 @@ import com.vinylteam.vinyl.exception.entity.ErrorPasswordRecovery;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.MailSender;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,9 +37,9 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
 
     @Transactional
     @Override
-    public void changePassword(UserChangeProfileInfoRequest userProfileInfo) {
+    public void changePassword(UserInfoRequest userProfileInfo) {
         String newPassword = userProfileInfo.getNewPassword();
-        checkPassword(newPassword, userProfileInfo.getConfirmNewPassword());
+        checkPassword(newPassword, userProfileInfo.getNewPasswordConfirmation());
         UUID tokenUUID = stringToUUID(userProfileInfo.getToken());
         RecoveryToken recoveryToken = passwordRecoveryDao.findByToken(tokenUUID)
                 .orElseThrow(() -> new PasswordRecoveryException(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage()));

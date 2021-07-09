@@ -2,7 +2,7 @@
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -38,6 +38,23 @@ public class DataGeneratorForTests {
         user.setStatus(false);
         user.setDiscogsUserName("discogsUserName" + number);
         return user;
+    }
+
+    public UserInfoRequest getUserInfoRequestWithNumber(int number) {
+        if (number < 1) {
+            throw new RuntimeException("Don't generate template user from number < 1! number: " + number);
+        }
+        UserInfoRequest userInfoRequest = UserInfoRequest.builder()
+                .email("user" + number + "@wax-deals.com")
+                .password("Password123" + number)
+                .passwordConfirmation("Password123" + number)
+                .newPassword("NewPassword1234" + number)
+                .newPassword("NewPassword1234" + number)
+                .discogsUserName("discogsUserName" + number)
+                .newDiscogsUserName("newDiscogsUserName" + number)
+                .token(UUID.randomUUID().toString())
+                .build();
+        return userInfoRequest;
     }
 
     public UniqueVinyl getUniqueVinylWithNumber(int number) {
@@ -225,13 +242,13 @@ public class DataGeneratorForTests {
         return recoveryToken;
     }
 
-    public UserChangeProfileInfoRequest getUserChangeProfileInfo() {
-        return UserChangeProfileInfoRequest.builder()
+    public UserInfoRequest getUserChangeProfileInfo() {
+        return UserInfoRequest.builder()
                 .email("new@wax-deals.com")
-                .oldPassword("oldPassword")
+                .password("oldPassword")
                 .newPassword("newPassword")
-                .confirmNewPassword("newPassword")
-                .newDiscogsUserName("newDiscogsUserName")
+                .newPasswordConfirmation("newPassword")
+                .discogsUserName("newDiscogsUserName")
                 .build();
     }
 
