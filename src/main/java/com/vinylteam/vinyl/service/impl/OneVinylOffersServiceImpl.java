@@ -83,7 +83,7 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         return offersResponseList;
     }
 
-    private Offer getActualOffer(Offer dbOffer) {
+    Offer getActualOffer(Offer dbOffer) {
         var shopParser = parserHolder
                 .getShopParserByShopId(dbOffer.getShopId());
         var actualOffer = shopParser
