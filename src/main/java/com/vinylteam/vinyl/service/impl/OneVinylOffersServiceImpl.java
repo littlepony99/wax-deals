@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.entity.Offer;
+import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
@@ -40,52 +41,66 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
 
         List<OneVinylOffersServletResponse> offersResponseList = prepareOffersSection(offers, shopsFromOffers);
 
-        List<UniqueVinyl> preparedVinylsList = prepareVinylsSection(uniqueVinyl);
+        checkIsVinylInStock(uniqueVinyl, offersResponseList);
 
-        if (offersResponseList.isEmpty()) {
-            uniqueVinyl.setHasOffers(false);
-            uniqueVinylService.updateOneUniqueVinylAsHavingNoOffer(uniqueVinyl);
-        }
+        List<UniqueVinyl> preparedVinylsList = prepareVinylsSection(uniqueVinyl);
 
         String discogsLink = getDiscogsLink(uniqueVinyl);
 
         return new OneVinylPageFullResponse(offersResponseList, preparedVinylsList, discogsLink);
     }
 
+    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOffersServletResponse> offersResponseList) {
+        if (offersResponseList.isEmpty()) {
+            uniqueVinyl.setHasOffers(false);
+            uniqueVinylService.updateOneUniqueVinylAsHavingNoOffer(uniqueVinyl);
+        }
+    }
+
     String getDiscogsLink(UniqueVinyl uniqueVinyl) {
-        String discogsLink = "";
         try {
-            discogsLink = discogsService.getDiscogsLink(uniqueVinyl.getArtist(),
+            return discogsService.getDiscogsLink(uniqueVinyl.getArtist(),
                     uniqueVinyl.getRelease(), uniqueVinyl.getFullName());
         } catch (ParseException e) {
             log.error("Error while getting discogs link for unique vinyl, ParseException thrown {'uniqueVinyl':{}}", uniqueVinyl, e);
+            return "";
         }
-        return discogsLink;
     }
 
-    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> offers, List<Shop> shopsFromOffers) {
+    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsFromOffers) {
         List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
-        for (Offer offer : offers) {
-            var offerShopParser = parserHolder.getShopParserByShopId(offer.getShopId());
-            var shop = shopsFromOffers
-                    .stream()
-                    .filter(store -> Objects.equals(store.getId(), offer.getShopId()))
-                    .findFirst()
-                    .get();
-            if (offerShopParser.isPresent()) {
-                VinylParser shopParser = offerShopParser.get();
 
-                var dynamicOffer = shopParser.getRawOfferFromOfferLink(offer.getOfferLink());
-                offerService.mergeOfferChanges(offer, shopParser, dynamicOffer);
+        for (Offer dbOffer : dbOffers) {
+            var actualOffer = getActualOffer(dbOffer);
 
-                if (offer.isInStock()) {
-                    OneVinylOffersServletResponse offersResponse = WebUtils.getOfferResponseFromOffer(offer, shop);
-                    offersResponseList.add(offersResponse);
-                }
+            if (actualOffer.isInStock()) {
+                var shop = findShop(shopsFromOffers, actualOffer);
+                OneVinylOffersServletResponse offersResponse = WebUtils.getOfferResponseFromOffer(dbOffer, shop);
+                offersResponseList.add(offersResponse);
             }
         }
         offersResponseList.sort((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()));
         return offersResponseList;
+    }
+
+    private Offer getActualOffer(Offer dbOffer) {
+        var shopParser = parserHolder
+                .getShopParserByShopId(dbOffer.getShopId());
+        var actualOffer = shopParser
+                .stream()
+                .map(parser -> parser.getRawOfferFromOfferLink(dbOffer.getOfferLink()))
+                .findFirst()
+                .orElse(new RawOffer());
+        offerService.mergeOfferChanges(dbOffer, shopParser.get(), actualOffer);
+        return dbOffer;
+    }
+
+    Shop findShop(List<Shop> shopsFromOffers, Offer offer) {
+        return shopsFromOffers
+                .stream()
+                .filter(store -> Objects.equals(store.getId(), offer.getShopId()))
+                .findFirst()
+                .get();
     }
 
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
@@ -99,4 +114,5 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
 
         return preparedListById;
     }
+
 }
