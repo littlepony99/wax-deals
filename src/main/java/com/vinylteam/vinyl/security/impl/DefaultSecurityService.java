@@ -76,12 +76,13 @@ public class DefaultSecurityService implements SecurityService {
 
     @Override
     public void emailFormatCheck(String email) {
-        if (!email.matches("")) {
+        if (!email.matches("/^[^\\s@]+@[^\\s@]+$/")) {
             throw new UserServiceException(ErrorUser.INVALID_EMAIL.getMessage());
         }
     }
 
-    void passwordFormatCheck(String password) {
+    @Override
+    public void passwordFormatCheck(String password) {
         if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
             throw new UserServiceException(ErrorUser.INVALID_PASSWORD.getMessage());
         }

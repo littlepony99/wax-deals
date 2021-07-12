@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HardWaxParserTest {
 
@@ -54,14 +53,14 @@ class HardWaxParserTest {
 
     @Test
     @DisplayName("Checks whether getAllPageLinksSet returns whole link set in respect of max number page")
-    void test(){
+    void test() {
         Set<String> links = parser.getAllPageLinksSet(Set.of("https://hardwax.com/electronica/?filter=vinyl&page=6"));
         assertEquals(6, links.size());
     }
 
     @BeforeEach
     void init() throws IOException {
-        parser  = new HardWaxParser();
+        parser = new HardWaxParser();
         setVinylElement("HtmlPages/hardwaxItem.html");
     }
 
@@ -80,7 +79,7 @@ class HardWaxParserTest {
 
     @Test
     @DisplayName("Checks whether genre is taken from the specified URL correctly")
-    void getGenreFromLinkTest(){
+    void getGenreFromLinkTest() {
         String genre = parser.getGenreFromLink("https://hardwax.com/digital/?page=10");
         assertEquals("digital", genre);
     }

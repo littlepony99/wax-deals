@@ -13,13 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
 
 @Slf4j
@@ -36,6 +32,12 @@ public class DefaultUserService implements UserService {
     public void register(UserInfoRequest userProfileInfo) {
         String email = userProfileInfo.getEmail();
         String password = userProfileInfo.getPassword();
+        if (!isNotEmptyNotNull(email)) {
+            throw new UserServiceException(ErrorUser.EMPTY_EMAIL.getMessage());
+        }
+        if (!isNotEmptyNotNull(password)) {
+            throw new UserServiceException(ErrorUser.EMPTY_PASSWORD.getMessage());
+        }
         securityService.emailFormatCheck(email);
         securityService.validatePassword(password, userProfileInfo.getPasswordConfirmation());
         User userToAdd = securityService
@@ -54,6 +56,15 @@ public class DefaultUserService implements UserService {
         confirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
     }
 
+    @Transactional
+    @Override
+    public void confirmEmail(UserInfoRequest userInfo) {
+        signInCheck(userInfo);
+        User user = findByEmail(userInfo.getEmail()).get();
+        confirmationService.deleteByUserId(user.getId());
+        userDao.setUserStatusTrue(user.getId());
+    }
+
     @Override
     public void delete(User user) {
         userDao.delete(user);
@@ -68,22 +79,38 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
-        if (newEmail != null && newPassword != null && oldEmail != null) {
-            User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
-            if (oldEmail.equalsIgnoreCase(newEmail)) {
-                changedUser.setStatus(true);
-            }
-            changedUser.setDiscogsUserName(newDiscogsUserName);
+        if (!isNotEmptyNotNull(oldEmail) || !isNotEmptyNotNull(newEmail)) {
+            throw new UserServiceException(ErrorUser.EMPTY_EMAIL.getMessage());
+        }
+        securityService.emailFormatCheck(newEmail);
+        if (!isNotEmptyNotNull(newPassword)) {
+            throw new UserServiceException(ErrorUser.EMPTY_PASSWORD.getMessage());
+        }
+        securityService.passwordFormatCheck(newPassword);
+        User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
+        if (oldEmail.equalsIgnoreCase(newEmail)) {
+            changedUser.setStatus(true);
+        }
+        changedUser.setDiscogsUserName(newDiscogsUserName);
+        try {
             userDao.update(oldEmail, changedUser);
-        } else {
-            log.error("At least one of passed to DefaultUserService.update(...) arguments is null {'oldEmail': {}, 'newEmail': {}, {}'newDiscogsUserName': {}}",
-                    oldEmail == null ? "null" : oldEmail, newEmail == null ? "null" : newEmail,
-                    newPassword == null ? "'newPassword': null, " : "", newDiscogsUserName == null ? "null" : newDiscogsUserName);
+        } catch (DuplicateKeyException e) {
+            throw new UserServiceException(ErrorUser.UPDATE_USER_EXISTING_EMAIL.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new UserServiceException(ErrorUser.UPDATE_USER_ERROR.getMessage());
+        }
+        if (!changedUser.getStatus()) {
+            User user = findByEmail(newEmail).get();
+            ConfirmationToken token = confirmationService.addByUserId(user.getId());
+            confirmationService.sendMessageWithLinkToUserEmail(newEmail, token.getToken().toString());
         }
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
+        if (!isNotEmptyNotNull(email)) {
+            throw new UserServiceException(ErrorUser.EMPTY_EMAIL.getMessage());
+        }
         User user = userDao.findByEmail(email)
                 .orElseThrow(() -> new UserServiceException(ErrorUser.EMAIL_NOT_FOUND_IN_DB.getMessage()));
         return Optional.of(user);
@@ -91,9 +118,18 @@ public class DefaultUserService implements UserService {
 
     @Override
     public void signInCheck(UserInfoRequest userProfileInfo) {
-        User userToCheckAgainst = findByEmail(userProfileInfo.getEmail()).orElseThrow(
-                () -> new UserServiceException(ErrorUser.WRONG_CREDENTIALS.getMessage())
-        );
+        if (!isNotEmptyNotNull(userProfileInfo.getEmail())) {
+            throw new UserServiceException(ErrorUser.EMPTY_EMAIL.getMessage());
+        }
+        if (!isNotEmptyNotNull(userProfileInfo.getPassword())) {
+            throw new UserServiceException(ErrorUser.EMPTY_PASSWORD.getMessage());
+        }
+        User userToCheckAgainst;
+        try {
+            userToCheckAgainst = findByEmail(userProfileInfo.getEmail()).get();
+        } catch (UserServiceException e) {
+            throw new UserServiceException(ErrorUser.WRONG_CREDENTIALS.getMessage());
+        }
         if (!securityService.checkPasswordAgainstUserPassword(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
             throw new UserServiceException(ErrorUser.WRONG_CREDENTIALS.getMessage());
         }
@@ -103,30 +139,19 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public Optional<User> signInCheckConfirmation(UserInfoRequest userProfileInfo) {
-        Optional<ConfirmationToken> optionalConfirmationTokenByLinkToken = confirmationService.findByToken(userProfileInfo.getToken());
-        ConfirmationToken confirmationToken = optionalConfirmationTokenByLinkToken.orElseThrow(
-                () -> new IllegalArgumentException("Sorry, something went wrong on our side, we're looking into it. Please, try to login again, or contact us."));
-        User userByLinkToken = userDao.findById(confirmationToken.getUserId()).get();
-        if (userByLinkToken.getEmail().equalsIgnoreCase(userByLinkToken.getEmail())) {
-            if (securityService.checkPasswordAgainstUserPassword(
-                    userByLinkToken, userProfileInfo.getPassword().toCharArray())) {
-                confirmationService.deleteByUserId(userByLinkToken.getId());
-                return Optional.of(userByLinkToken);
-            }
-        } else {
-            log.error("Email is not correct, token was sent to {}", userByLinkToken.getEmail());
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public Optional<User> editProfile(UserInfoRequest userProfileInfo,
                                       User user) {
+        String oldEmail = user.getEmail();
         String oldPassword = userProfileInfo.getPassword();
+        if (!isNotEmptyNotNull(oldPassword)) {
+            throw new UserServiceException(ErrorUser.EMPTY_PASSWORD.getMessage());
+        }
         boolean checkOldPassword = securityService.checkPasswordAgainstUserPassword(user, oldPassword.toCharArray());
         if (!checkOldPassword) {
             throw new UserServiceException(ErrorUser.WRONG_PASSWORD.getMessage());
+        }
+        if (!isNotEmptyNotNull(oldEmail)) {
+            throw new UserServiceException(ErrorUser.EMPTY_EMAIL.getMessage());
         }
         String newPassword = userProfileInfo.getNewPassword();
         if (isNotEmptyNotNull(newPassword)) {
@@ -136,24 +161,17 @@ public class DefaultUserService implements UserService {
             newPassword = oldPassword;
         }
         String newEmail = userProfileInfo.getEmail();
-        if (isNotEmptyNotNull(userProfileInfo.getEmail())) {
-            securityService.emailFormatCheck(userProfileInfo.getEmail());
+        if (isNotEmptyNotNull(newEmail)) {
+            securityService.emailFormatCheck(newEmail);
         } else {
-            newEmail = user.getEmail();
+            newEmail = oldEmail;
         }
-        User updatedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
         String newDiscogsUserName = userProfileInfo.getDiscogsUserName();
         if (!isNotEmptyNotNull(newDiscogsUserName)) {
             newDiscogsUserName = user.getDiscogsUserName();
         }
-        updatedUser.setDiscogsUserName(newDiscogsUserName);
-        try {
-            userDao.update(user.getEmail(), updatedUser);
-        } catch (EmptyResultDataAccessException e) {
-            log.error("Failed to update user with new email, password, or discogs username in the database {'newEmail':{}, 'newDiscogsUserName':{}}.", newEmail, newDiscogsUserName);
-            throw new UserServiceException(ErrorUser.UPDATE_USER_ERROR.getMessage());
-        }
-        return Optional.of(updatedUser);
+        update(oldEmail, newEmail, newPassword, newDiscogsUserName);
+        return findByEmail(newEmail);
     }
 
     boolean isNotEmptyNotNull(String string) {

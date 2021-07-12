@@ -47,6 +47,7 @@ public class ConfirmationController {
         return modelAndView;
     }
 
+    //TODO: Move to future user controller.
     @PostMapping
     public ModelAndView confirmSignIn(@RequestParam(value = "token") String tokenAsString,
                                       @RequestParam(value = "email") String email,
