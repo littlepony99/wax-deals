@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
-import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.service.ConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
@@ -20,7 +19,6 @@ import java.util.UUID;
 public class DefaultConfirmationService implements ConfirmationService {
 
     private final ConfirmationTokenDao confirmationTokenDao;
-    private final UserDao userDao;
     private final MailSender mailSender;
     @Value("${application.link}")
     private String applicationLink;
@@ -93,7 +91,6 @@ public class DefaultConfirmationService implements ConfirmationService {
             throw new IllegalArgumentException("Not correct user id=" + userId);
         }
         confirmationTokenDao.deleteByUserId(userId);
-        userDao.setUserStatusTrue(userId);
     }
 
     private String composeEmail(String token) {

@@ -81,7 +81,8 @@ public class DefaultSecurityService implements SecurityService {
         }
     }
 
-    void passwordFormatCheck(String password) {
+    @Override
+    public void passwordFormatCheck(String password) {
         if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
             throw new UserServiceException(ErrorUser.INVALID_PASSWORD.getMessage());
         }

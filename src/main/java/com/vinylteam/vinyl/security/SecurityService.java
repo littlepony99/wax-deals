@@ -10,6 +10,8 @@ public interface SecurityService {
 
     void validatePassword(String password, String confirmationPassword);
 
+    void passwordFormatCheck(String password);
+
     void emailFormatCheck(String email);
 
 }

@@ -9,7 +9,6 @@ import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.data.TestUserProvider;
-import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import lombok.extern.slf4j.Slf4j;

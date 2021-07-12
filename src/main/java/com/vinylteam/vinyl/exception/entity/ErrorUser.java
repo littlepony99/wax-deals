@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ErrorUser {
 
     INVALID_PASSWORD("Sorry, the password doesn't meet these requirements: minimum 8 symbols, uppercase, lowercase, number"),
+    EMPTY_PASSWORD("Error. Password is empty. Please enter password correctly."),
     WRONG_PASSWORD("Password is not correct."),
     PASSWORDS_NOT_EQUAL("Passwords don't match!"),
 
