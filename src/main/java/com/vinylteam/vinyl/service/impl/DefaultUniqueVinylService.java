@@ -1,13 +1,16 @@
 package com.vinylteam.vinyl.service.impl;
 
+import com.vinylteam.vinyl.dao.jdbc.JdbcUniqueVinylDao;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -15,15 +18,18 @@ import java.util.List;
 @Service
 public class DefaultUniqueVinylService implements UniqueVinylService {
 
+    @Autowired
+    private JdbcUniqueVinylDao uniqueVinylDao;
+
 
     @Override
     public List<UniqueVinyl> findAll() {
-        return null;
+        return uniqueVinylDao.findAll();
     }
 
     @Override
     public UniqueVinyl findById(long id) {
-        return null;
+        return uniqueVinylDao.findById(id);
     }
 
     @Override
@@ -33,12 +39,20 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public List<UniqueVinyl> findManyFiltered(String matcher) {
-        return null;
+        return uniqueVinylDao.findManyFiltered(matcher);
     }
 
     @Override
     public List<UniqueVinyl> findManyByArtist(String artist) {
-        return null;
+        List<UniqueVinyl> gottenUniqueVinyls;
+        if (artist != null) {
+            gottenUniqueVinyls = uniqueVinylDao.findManyByArtist(artist);
+        } else {
+            log.error("Artist is null, returning empty list.");
+            gottenUniqueVinyls = new ArrayList<>();
+        }
+        log.debug("Resulting list of random unique vinyls is {'uniqueVinyls':{}}", gottenUniqueVinyls);
+        return gottenUniqueVinyls;
     }
 
     @Override

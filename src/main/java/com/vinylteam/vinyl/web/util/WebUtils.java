@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.util;
 
 import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
+import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
 import org.springframework.ui.Model;
 
 import java.util.ArrayList;
@@ -30,6 +31,11 @@ public class WebUtils {
         offersResponse.setOfferLink(offer.getOfferLink());
         offersResponse.setShopImageLink(shop.getSmallImageLink());
         return offersResponse;
+    }
+
+    public static void setModelContext(OneVinylPageFullResponse fullResponse, Model model) {
+
+        setModelContext(fullResponse.getPreparedVinylsList(), fullResponse.getOffersResponseList(), model);
     }
 
     public static void setModelContext(List<UniqueVinyl> vinylList, List<OneVinylOffersServletResponse> vinylOffersList, Model model) {
