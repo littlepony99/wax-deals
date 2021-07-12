@@ -1,12 +1,10 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.entity.Offer;
-import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.util.impl.ParserHolder;
-import com.vinylteam.vinyl.util.impl.VinylParser;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
 import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
 import com.vinylteam.vinyl.web.util.WebUtils;
@@ -18,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,36 +66,17 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         }
     }
 
-    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsFromOffers) {
-        List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
-
-        for (Offer dbOffer : dbOffers) {
-            var actualOffer = getActualOffer(dbOffer);
-
-            if (actualOffer.isInStock()) {
-                var shop = findShop(shopsFromOffers, actualOffer);
-                OneVinylOffersServletResponse offersResponse = WebUtils.getOfferResponseFromOffer(dbOffer, shop);
-                offersResponseList.add(offersResponse);
-            }
-        }
-        offersResponseList.sort((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()));
-        return offersResponseList;
+    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
+        return dbOffers.stream()
+                        .map(offerService::getActualizedOffer)
+                        .filter(Offer::isInStock)
+                        .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
+                        .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
+                        .collect(Collectors.toList());
     }
 
-    Offer getActualOffer(Offer dbOffer) {
-        var shopParser = parserHolder
-                .getShopParserByShopId(dbOffer.getShopId());
-        var actualOffer = shopParser
-                .stream()
-                .map(parser -> parser.getRawOfferFromOfferLink(dbOffer.getOfferLink()))
-                .findFirst()
-                .orElse(new RawOffer());
-        offerService.mergeOfferChanges(dbOffer, shopParser.get(), actualOffer);
-        return dbOffer;
-    }
-
-    Shop findShop(List<Shop> shopsFromOffers, Offer offer) {
-        return shopsFromOffers
+    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+        return shopsList
                 .stream()
                 .filter(store -> Objects.equals(store.getId(), offer.getShopId()))
                 .findFirst()
@@ -106,11 +86,10 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
         List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
 
-        String artist = uniqueVinyl.getArtist();
-        uniqueVinylService.findManyByArtist(artist)
+        uniqueVinylService.findManyByArtist(uniqueVinyl.getArtist())
                 .stream()
                 .filter(v -> v.getId() != uniqueVinyl.getId())
-                .forEach(v -> preparedListById.add(v));
+                .forEach(preparedListById::add);
 
         return preparedListById;
     }

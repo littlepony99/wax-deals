@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
+import com.vinylteam.vinyl.util.impl.ParserHolder;
 import com.vinylteam.vinyl.util.impl.VinylParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,8 @@ import java.util.List;
 public class DefaultOfferService implements OfferService {
 
     private final OfferDao offerDao;
+
+    private final ParserHolder parserHolder;
 
     @Override
     public List<Offer> findManyByUniqueVinylId(long uniqueVinylId) {
@@ -39,6 +42,13 @@ public class DefaultOfferService implements OfferService {
 
     }
 
+    public Offer getActualizedOffer(Offer dbOffer) {
+        return parserHolder
+                .getShopParserByShopId(dbOffer.getShopId())
+                .map(parser -> mergeOfferChanges(dbOffer, parser, parser.getRawOfferFromOfferLink(dbOffer.getOfferLink())))
+                .orElse(dbOffer);
+    }
+
     @Override
     public List<Integer> getListOfShopIds(List<Offer> offers) {
         List<Integer> shopsIds = new ArrayList<>();
@@ -55,7 +65,8 @@ public class DefaultOfferService implements OfferService {
         return shopsIds;
     }
 
-    public void mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer) {
+    @Override
+    public Offer mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer) {
         if (shopParser.isValid(dynamicOffer)) {
             var actualPrice = dynamicOffer.getPrice();
             var actualCurrency = dynamicOffer.getCurrency();
@@ -65,6 +76,7 @@ public class DefaultOfferService implements OfferService {
         } else {
             offer.setInStock(false);
         }
+        return offer;
     }
 
 }

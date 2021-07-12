@@ -15,6 +15,8 @@ public interface OfferService {
 
     List<Integer> getListOfShopIds(List<Offer> offers);
 
-    void mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer);
+    Offer mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer);
+
+    Offer getActualizedOffer(Offer dbOffer);
 
 }
