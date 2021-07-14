@@ -3,8 +3,11 @@ package com.vinylteam.vinyl.dao.jdbc;
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationError;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -52,22 +55,30 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
 
     @Override
     public void add(ConfirmationToken token) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource
-                .addValue("user_id", token.getUserId())
-                .addValue("token", token.getToken())
-                .addValue("created_at", Timestamp.from(Instant.now()));
-        namedParameterJdbcTemplate.update(INSERT, sqlParameterSource);
+        try {
+            MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+            sqlParameterSource
+                    .addValue("user_id", token.getUserId())
+                    .addValue("token", token.getToken())
+                    .addValue("created_at", Timestamp.from(Instant.now()));
+            namedParameterJdbcTemplate.update(INSERT, sqlParameterSource);
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException(EmailConfirmationError.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage());
+        }
     }
 
     @Override
     public void update(ConfirmationToken token) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource
-                .addValue("token", token.getToken())
-                .addValue("created_at", Timestamp.from(Instant.now()))
-                .addValue("user_id", token.getUserId());
-        namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
+        try {
+            MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+            sqlParameterSource
+                    .addValue("token", token.getToken())
+                    .addValue("created_at", Timestamp.from(Instant.now()))
+                    .addValue("user_id", token.getUserId());
+            namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException(EmailConfirmationError.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage());
+        }
     }
 
     @Override

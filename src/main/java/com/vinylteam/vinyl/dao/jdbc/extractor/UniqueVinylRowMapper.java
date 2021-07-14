@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.dao.jdbc.extractor;
 
-import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.RowMapper;

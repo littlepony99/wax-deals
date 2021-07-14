@@ -9,7 +9,7 @@ public interface UserService {
 
     void register(UserInfoRequest userProfileInfo);
 
-    void confirmEmail(UserInfoRequest userInfo);
+    Optional<User> confirmEmail(UserInfoRequest userInfo);
 
     void update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 

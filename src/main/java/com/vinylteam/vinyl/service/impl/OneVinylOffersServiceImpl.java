@@ -68,11 +68,11 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
 
     List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
         return dbOffers.stream()
-                        .map(offerService::getActualizedOffer)
-                        .filter(Offer::isInStock)
-                        .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
-                        .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
-                        .collect(Collectors.toList());
+                .map(offerService::getActualizedOffer)
+                .filter(Offer::isInStock)
+                .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
+                .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
+                .collect(Collectors.toList());
     }
 
     Shop findOfferShop(List<Shop> shopsList, Offer offer) {

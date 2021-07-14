@@ -2,8 +2,7 @@ package com.vinylteam.vinyl.security.impl;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.UserServiceException;
-import com.vinylteam.vinyl.exception.entity.ErrorUser;
+import com.vinylteam.vinyl.exception.entity.UserError;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,7 @@ public class DefaultSecurityService implements SecurityService {
             secretKeyFactory = SecretKeyFactory.getInstance(algorithm);
         } catch (NoSuchAlgorithmException e) {
             log.error("Error during initialisation of secretKeyFactory", e);
-            throw new RuntimeException(e);
+            throw new java.lang.RuntimeException(e);
         }
     }
 
@@ -69,7 +68,7 @@ public class DefaultSecurityService implements SecurityService {
     @Override
     public void validatePassword(String password, String confirmationPassword) {
         if (!Objects.equals(password, confirmationPassword)) {
-            throw new UserServiceException(ErrorUser.PASSWORDS_NOT_EQUAL.getMessage());
+            throw new RuntimeException(UserError.PASSWORDS_NOT_EQUAL.getMessage());
         }
         passwordFormatCheck(password);
     }
@@ -77,14 +76,14 @@ public class DefaultSecurityService implements SecurityService {
     @Override
     public void emailFormatCheck(String email) {
         if (!email.matches("/^[^\\s@]+@[^\\s@]+$/")) {
-            throw new UserServiceException(ErrorUser.INVALID_EMAIL.getMessage());
+            throw new RuntimeException(UserError.INVALID_EMAIL.getMessage());
         }
     }
 
     @Override
     public void passwordFormatCheck(String password) {
         if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
-            throw new UserServiceException(ErrorUser.INVALID_PASSWORD.getMessage());
+            throw new RuntimeException(UserError.INVALID_PASSWORD.getMessage());
         }
     }
 
@@ -99,7 +98,7 @@ public class DefaultSecurityService implements SecurityService {
             return Base64.getEncoder().encodeToString(result);
         } catch (InvalidKeySpecException e) {
             log.error("Error during hashing password", e);
-            throw new RuntimeException(e);
+            throw new java.lang.RuntimeException(e);
         }
     }
 

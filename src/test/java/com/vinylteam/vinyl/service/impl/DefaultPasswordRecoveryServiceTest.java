@@ -3,8 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.PasswordRecoveryException;
-import com.vinylteam.vinyl.exception.entity.ErrorPasswordRecovery;
+import com.vinylteam.vinyl.exception.entity.PasswordRecoveryError;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.MailSender;
@@ -67,30 +66,30 @@ class DefaultPasswordRecoveryServiceTest {
                 .when(mockedPasswordRecoveryDao)
                 .add(any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.addRecoveryTokenWithUserId(userId));
         //then
-        assertEquals(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Check for not null: null")
     void checkForIsNotEmptyNotNullNullString() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
-                () -> passwordRecoveryService.checkForIsNotEmptyNotNull(null, ErrorPasswordRecovery.EMPTY_EMAIL));
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> passwordRecoveryService.checkForIsNotEmptyNotNull(null, PasswordRecoveryError.EMPTY_EMAIL));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Check for not null: empty string")
     void checkForIsNotEmptyNotNullEmptyString() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
-                () -> passwordRecoveryService.checkForIsNotEmptyNotNull("", ErrorPasswordRecovery.EMPTY_EMAIL));
+        Exception exception = assertThrows(RuntimeException.class,
+                () -> passwordRecoveryService.checkForIsNotEmptyNotNull("", PasswordRecoveryError.EMPTY_EMAIL));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -98,7 +97,7 @@ class DefaultPasswordRecoveryServiceTest {
     void checkForIsNotEmptyNotNull() {
         //when
         assertDoesNotThrow(
-                () -> passwordRecoveryService.checkForIsNotEmptyNotNull("correct value", ErrorPasswordRecovery.EMPTY_EMAIL)
+                () -> passwordRecoveryService.checkForIsNotEmptyNotNull("correct value", PasswordRecoveryError.EMPTY_EMAIL)
         );
     }
 
@@ -106,40 +105,40 @@ class DefaultPasswordRecoveryServiceTest {
     @DisplayName("Check password: not null")
     void checkPasswordNotNull() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkPassword(null, "confirm password"));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_PASSWORD.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Check password: new password empty, confirm password does not match")
     void checkPasswordNewPasswordEmptyNotEqual() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkPassword("", "confirm password"));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_PASSWORD.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Check password: new password and confirm password are empty")
     void checkPasswordBothEmpty() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkPassword("", ""));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_PASSWORD.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Check password: new password is not empty but not equal to confirm password")
     void checkPasswordNotEmptyNotEqual() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkPassword("password", ""));
         //then
-        assertEquals(ErrorPasswordRecovery.PASSWORDS_NOT_EQUAL.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.PASSWORDS_NOT_EQUAL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -160,10 +159,10 @@ class DefaultPasswordRecoveryServiceTest {
                 .token(token.toString())
                 .build();
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.changePassword(userProfileInfoNullPassword));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_PASSWORD.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
         verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
@@ -180,10 +179,10 @@ class DefaultPasswordRecoveryServiceTest {
                 .token(token.toString())
                 .build();
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.changePassword(userProfileInfoEmptyPassword));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_PASSWORD.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao, never()).findByToken(eq(token));
         verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
@@ -202,10 +201,10 @@ class DefaultPasswordRecoveryServiceTest {
                 .token(token.toString())
                 .build();
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.changePassword(userProfileInfoNonExistentToken));
         //then
-        assertEquals(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
         verify(mockedUserService, never()).findById(anyLong());
         verify(mockedUserService, never()).update(any(), any(), any(), any());
@@ -228,10 +227,10 @@ class DefaultPasswordRecoveryServiceTest {
         when(mockedUserService.findById(user.getId())).thenReturn(Optional.of(user));
         doThrow(DataIntegrityViolationException.class).when(mockedUserService).update(any(), any(), any(), any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.changePassword(userProfileInfo));
         //then
-        assertEquals(ErrorPasswordRecovery.UPDATE_PASSWORD_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.UPDATE_PASSWORD_ERROR.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
         verify(mockedUserService).findById(anyLong());
         verify(mockedUserService).update(any(), any(), any(), any());
@@ -269,10 +268,10 @@ class DefaultPasswordRecoveryServiceTest {
         UUID token = UUID.randomUUID();
         when(mockedPasswordRecoveryDao.findByToken(eq(token))).thenReturn(Optional.empty());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkToken(token.toString()));
         //then
-        assertEquals(ErrorPasswordRecovery.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.TOKEN_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
     }
 
@@ -287,10 +286,10 @@ class DefaultPasswordRecoveryServiceTest {
         recoveryToken.setId(1);
         when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkToken(token.toString()));
         //then
-        assertEquals(ErrorPasswordRecovery.TOKEN_IS_EXPIRED.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.TOKEN_IS_EXPIRED.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
         verify(mockedPasswordRecoveryDao).deleteById(1);
     }
@@ -307,10 +306,10 @@ class DefaultPasswordRecoveryServiceTest {
         when(mockedPasswordRecoveryDao.findByToken(token)).thenReturn(Optional.of(recoveryToken));
         doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).deleteById(1);
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.checkToken(token.toString()));
         //then
-        assertEquals(ErrorPasswordRecovery.DELETE_TOKEN_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.DELETE_TOKEN_ERROR.getMessage(), exception.getMessage());
         verify(mockedPasswordRecoveryDao).findByToken(eq(token));
         verify(mockedPasswordRecoveryDao).deleteById(1);
     }
@@ -333,12 +332,12 @@ class DefaultPasswordRecoveryServiceTest {
     @DisplayName("Send email - error")
     void sendEmailWithLinkHasNotBeenSent() {
         //prepare
-        doThrow(RuntimeException.class).when(mockedMailSender).sendMail(any(), any(), any());
+        doThrow(java.lang.RuntimeException.class).when(mockedMailSender).sendMail(any(), any(), any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendEmailWithLink("email", "token"));
         //then
-        assertEquals(ErrorPasswordRecovery.EMAIL_SEND_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMAIL_SEND_ERROR.getMessage(), exception.getMessage());
         verify(mockedMailSender).sendMail(any(), any(), any());
     }
 
@@ -357,10 +356,10 @@ class DefaultPasswordRecoveryServiceTest {
     @DisplayName("Send link - email is null")
     void sendLinkEmailNull() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendLink(null));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_EMAIL.getMessage(), exception.getMessage());
         verify(mockedUserService, never()).findByEmail(null);
     }
 
@@ -368,10 +367,10 @@ class DefaultPasswordRecoveryServiceTest {
     @DisplayName("Send link - email is empty string")
     void sendLinkEmailEmpty() {
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendLink(""));
         //then
-        assertEquals(ErrorPasswordRecovery.EMPTY_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMPTY_EMAIL.getMessage(), exception.getMessage());
         verify(mockedUserService, never()).findByEmail(eq(""));
     }
 
@@ -382,10 +381,10 @@ class DefaultPasswordRecoveryServiceTest {
         String email = "not_existing@email";
         when(mockedUserService.findByEmail(email)).thenReturn(Optional.empty());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendLink(email));
         //then
-        assertEquals(ErrorPasswordRecovery.EMAIL_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMAIL_NOT_FOUND_IN_DB.getMessage(), exception.getMessage());
         verify(mockedUserService).findByEmail(eq(email));
     }
 
@@ -398,10 +397,10 @@ class DefaultPasswordRecoveryServiceTest {
         when(mockedUserService.findByEmail(email)).thenReturn(Optional.of(user));
         doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).add(any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendLink(email));
         //then
-        assertEquals(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
         verify(mockedUserService).findByEmail(eq(email));
         verify(mockedPasswordRecoveryDao).add(any());
     }
@@ -413,12 +412,12 @@ class DefaultPasswordRecoveryServiceTest {
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();
         when(mockedUserService.findByEmail(email)).thenReturn(Optional.of(user));
-        doThrow(RuntimeException.class).when(mockedMailSender).sendMail(any(), any(), any());
+        doThrow(java.lang.RuntimeException.class).when(mockedMailSender).sendMail(any(), any(), any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.sendLink(email));
         //then
-        assertEquals(ErrorPasswordRecovery.EMAIL_SEND_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.EMAIL_SEND_ERROR.getMessage(), exception.getMessage());
         verify(mockedUserService).findByEmail(eq(email));
         verify(mockedPasswordRecoveryDao).add(any());
         verify(mockedMailSender).sendMail(any(), any(), any());
@@ -457,10 +456,10 @@ class DefaultPasswordRecoveryServiceTest {
         //prepare
         String invalidUUID = "not uuid";
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class,
+        Exception exception = assertThrows(RuntimeException.class,
                 () -> passwordRecoveryService.stringToUUID(invalidUUID));
         //then
-        assertEquals(ErrorPasswordRecovery.TOKEN_NOT_CORRECT_UUID.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.TOKEN_NOT_CORRECT_UUID.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -479,9 +478,9 @@ class DefaultPasswordRecoveryServiceTest {
         long nonExistentUserId = 2;
         doThrow(DataIntegrityViolationException.class).when(mockedPasswordRecoveryDao).add(any());
         //when
-        Exception exception = assertThrows(PasswordRecoveryException.class, () -> passwordRecoveryService.addRecoveryTokenWithUserId(nonExistentUserId));
+        Exception exception = assertThrows(RuntimeException.class, () -> passwordRecoveryService.addRecoveryTokenWithUserId(nonExistentUserId));
         //then
-        assertEquals(ErrorPasswordRecovery.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
+        assertEquals(PasswordRecoveryError.ADD_TOKEN_ERROR.getMessage(), exception.getMessage());
     }
 
 }
