@@ -6,16 +6,6 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.common.unit.Fuzziness;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -26,10 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class DefaultUniqueVinylService implements UniqueVinylService {
-    private static final String INDEX = "unique_vinyl_index";
 
     private final UniqueVinylRepository uniqueVinylRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
 
     @Override
     public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
@@ -56,16 +44,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
         if (amount <= 0) {
             return new ArrayList<>();
         }
-        FunctionScoreQueryBuilder functionScore = QueryBuilders.functionScoreQuery(
-                QueryBuilders.termQuery("hasOffers", true),
-                ScoreFunctionBuilders.randomFunction());
-
-        Query searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(functionScore)
-                .withMaxResults(amount)
-                .build();
-
-        return getUniqueVinyls(searchQuery);
+        return uniqueVinylRepository.findManyRandom(amount);
     }
 
     @Override
@@ -74,29 +53,11 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
             log.error("Matcher is null, returning empty list.");
             return new ArrayList<>();
         }
-
-        log.info("Search with query {}", matcher);
-
-        QueryBuilder queryBuilder =
-                QueryBuilders.boolQuery()
-                        .must(QueryBuilders
-                                .matchQuery("fullName", matcher)
-                                .fuzziness(Fuzziness.AUTO)
-                        )
-                        .must(QueryBuilders
-                                .termQuery("hasOffers", true));
-
-        Query searchQuery = new NativeSearchQueryBuilder()
-                .withQuery(queryBuilder)
-                .build();
-
-        List<UniqueVinyl> vinylMatches = getUniqueVinyls(searchQuery);
-
-        if (vinylMatches.isEmpty()) {
-            return uniqueVinylRepository.findByFullNameIgnoreCaseContainingAndHasOffers(matcher, true);
+        var result = uniqueVinylRepository.findManyFiltered(matcher);
+        if (result.isEmpty()) {
+            result = uniqueVinylRepository.findByFullNameIgnoreCaseContainingAndHasOffers(matcher, true);
         }
-
-        return vinylMatches;
+        return result;
     }
 
     @Override
@@ -105,8 +66,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
             log.error("Artist is null, returning empty list.");
             return new ArrayList<>();
         }
-
-        return uniqueVinylRepository.findByArtistIgnoreCaseAndHasOffers(artist, true);
+        return uniqueVinylRepository.findByArtist(artist);
     }
 
     @Override
@@ -119,17 +79,6 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
                 .orElseThrow(() -> new RuntimeException("No uniqueVinyl with that id in table {'id':{" + id + "}}"));
         log.debug("Resulting uniqueVinyl is {'uniqueVinyl':{}}", uniqueVinyl);
         return uniqueVinyl;
-    }
-
-    List<UniqueVinyl> getUniqueVinyls(Query searchQuery) {
-        SearchHits<UniqueVinyl> productHits =
-                elasticsearchOperations
-                        .search(searchQuery, UniqueVinyl.class,
-                                IndexCoordinates.of(INDEX));
-
-        List<UniqueVinyl> vinylMatches = new ArrayList<>();
-        productHits.forEach(searchHit -> vinylMatches.add(searchHit.getContent()));
-        return vinylMatches;
     }
 
 }

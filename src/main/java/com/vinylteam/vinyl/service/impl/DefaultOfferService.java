@@ -75,6 +75,7 @@ public class DefaultOfferService implements OfferService {
         return shopsIds;
     }
 
+    @Override
     public void mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer) {
         if (shopParser.isValid(dynamicOffer)) {
             var actualPrice = dynamicOffer.getPrice();

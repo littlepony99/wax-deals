@@ -6,11 +6,16 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import java.util.List;
 
 public interface UniqueVinylRepository
-        extends ElasticsearchRepository<UniqueVinyl, String> {
+        extends ElasticsearchRepository<UniqueVinyl, String>, UniqueVinylRepositoryCustom {
 
     List<UniqueVinyl> findAll();
+
+    default List<UniqueVinyl> findByArtist(String artist){
+        return findByArtistIgnoreCaseAndHasOffers(artist, true);
+    }
 
     List<UniqueVinyl> findByArtistIgnoreCaseAndHasOffers(String artist, boolean hasOffer);
 
     List<UniqueVinyl> findByFullNameIgnoreCaseContainingAndHasOffers(String fullName, boolean hasOffer);
+
 }

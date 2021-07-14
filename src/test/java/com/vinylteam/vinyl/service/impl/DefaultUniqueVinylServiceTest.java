@@ -4,14 +4,18 @@ import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class DefaultUniqueVinylServiceTest {
 
-    private final UniqueVinylService uniqueVinylService = new DefaultUniqueVinylService(null, null);
+    @Autowired
+    private UniqueVinylService uniqueVinylService;
 
     @Test
     @DisplayName("Checks that when amount<=0 UniqueVinylDao.findManyRandom(amount) is not called, empty list is returned")
