@@ -1,7 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 @RequestMapping("/catalog")
 public class CatalogController {
 
-    private final DiscogsService discogsService;
     private final UniqueVinylService uniqueVinylService;
 
     @GetMapping

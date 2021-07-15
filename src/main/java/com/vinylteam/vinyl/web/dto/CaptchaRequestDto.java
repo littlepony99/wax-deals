@@ -1,13 +1,11 @@
 package com.vinylteam.vinyl.web.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class CaptchaRequestDto {
 
     @NonNull
