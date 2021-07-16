@@ -28,18 +28,10 @@ public class OneVinylOfferController {
         WebUtils.setUserAttributes(user, model);
         OneVinylPageFullResponse fullResponse = oneVinylOffersService.prepareOneVinylInfo(identifier);
 
-        //Discogs section
         SetDiscogsAttribute(model, fullResponse);
-        setMessageAttribute(model, fullResponse);
 
         WebUtils.setModelContext(fullResponse, model);
         return "vinyl";
-    }
-
-    private void setMessageAttribute(Model model, OneVinylPageFullResponse fullResponse) {
-        if (fullResponse.getOffersResponseList().isEmpty()) {
-            model.addAttribute("message", "No any offer found at the moment for the selected vinyl. Try to find it later");
-        }
     }
 
     void SetDiscogsAttribute(Model model, OneVinylPageFullResponse fullResponse) {

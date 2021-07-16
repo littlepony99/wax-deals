@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service.impl;
 
-import com.vinylteam.vinyl.dao.OfferDao;
+import com.vinylteam.vinyl.dao.elasticsearch.OfferRepository;
+import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.RawOffer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
@@ -13,33 +14,55 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class DefaultOfferService implements OfferService {
 
-    private final OfferDao offerDao;
+    private final OfferRepository offerRepository;
+    private final UniqueVinylRepository uniqueVinylRepository;
 
     private final ParserHolder parserHolder;
 
     @Override
-    public List<Offer> findManyByUniqueVinylId(long uniqueVinylId) {
-        List<Offer> offers;
-        if (uniqueVinylId > 0) {
-            offers = offerDao.findManyByUniqueVinylId(uniqueVinylId);
-        } else {
-            IllegalArgumentException e = new IllegalArgumentException();
-            log.error("uniqueVinylId is 0 or less {'uniqueVinylId':{}}", uniqueVinylId, e);
-            throw new RuntimeException(e);
+    public List<Offer> findManyByUniqueVinylId(String uniqueVinylId) {
+        if (uniqueVinylId == null) {
+            log.error("uniqueVinylId is null");
+            throw new IllegalArgumentException("uniqueVinylId is null");
         }
+        List<Offer> offers = offerRepository.findByUniqueVinylId(uniqueVinylId);
         log.debug("Resulting list of vinyls is {'vinyls':{}}", offers);
         return offers;
     }
 
     @Override
     public void updateUniqueVinylsRewriteAll(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
+        if (uniqueVinyls == null) {
+            log.error("List of unique vinyls is null");
+            throw new IllegalArgumentException("List of unique vinyls is null");
+        }
+        if (offers == null) {
+            log.error("List of offers is null");
+            throw new IllegalArgumentException("List of offers is null");
+        }
+        if (uniqueVinyls.isEmpty()) {
+            log.error("List of unique vinyls is empty");
+            throw new IllegalArgumentException("List of unique vinyls is empty");
+        }
+        if (offers.isEmpty()) {
+            log.error("List of offers is empty");
+            throw new IllegalArgumentException("List of offers is empty");
+        }
+        save(uniqueVinyls, offers);
+        log.info("Successfully updated database with {} unique vinyls and {} offers", uniqueVinyls.size(), offers.size());
+    }
 
+    public void save(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
+        uniqueVinylRepository.saveAll(uniqueVinyls);
+        offerRepository.deleteAll();
+        offerRepository.saveAll(offers);
     }
 
     public Offer getActualizedOffer(Offer dbOffer) {
@@ -51,16 +74,13 @@ public class DefaultOfferService implements OfferService {
 
     @Override
     public List<Integer> getListOfShopIds(List<Offer> offers) {
-        List<Integer> shopsIds = new ArrayList<>();
-        if (offers != null) {
-            for (Offer offer : offers) {
-                if (!shopsIds.contains(offer.getShopId())) {
-                    shopsIds.add(offer.getShopId());
-                }
-            }
-        } else {
-            log.error("List of offers is null, returning empty list.");
+        if (offers == null) {
+            return new ArrayList<>();
         }
+        List<Integer> shopsIds = offers.stream()
+                .map(Offer::getShopId)
+                .distinct()
+                .collect(Collectors.toList());
         log.debug("Resulting list of shop id-s is {'shopIds':{}}", shopsIds);
         return shopsIds;
     }

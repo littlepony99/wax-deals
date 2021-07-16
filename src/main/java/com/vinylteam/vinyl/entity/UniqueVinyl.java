@@ -1,91 +1,41 @@
 package com.vinylteam.vinyl.entity;
 
-import java.util.Objects;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
+@Data
+@Document(indexName = "unique_vinyl_index")
 public class UniqueVinyl {
 
-    private long id;
+    @Id
+    private String id;
+
+    @Field(type = FieldType.Keyword)
     private String release;
+
+    @Field(type = FieldType.Text)
     private String artist;
+
+    @Field(type = FieldType.Text)
     private String fullName;
+
+    @Field(type = FieldType.Keyword)
     private String imageLink;
+
+    @Field(type = FieldType.Boolean)
+    @EqualsAndHashCode.Exclude
     private boolean hasOffers;
 
-    public long getId() {
-        return id;
+
+    public boolean getHasOffers(){
+        return hasOffers;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public boolean isHasOffers(){
+        return hasOffers;
     }
-
-    public String getRelease() {
-        return release;
-    }
-
-    public void setRelease(String release) {
-        this.release = release;
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getImageLink() {
-        return imageLink;
-    }
-
-    public void setImageLink(String imageLink) {
-        this.imageLink = imageLink;
-    }
-
-    public boolean getHasOffers() {
-        return this.hasOffers;
-    }
-
-    public void setHasOffers(boolean hasOffers) {
-        this.hasOffers = hasOffers;
-    }
-
-    @Override
-    public String toString() {
-        return "\nUniqueVinyl{" +
-                "id=" + id +
-                ", release='" + release + '\'' +
-                ", artist='" + artist + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", imageLink='" + imageLink + '\'' +
-                ", hasOffers='" + hasOffers + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UniqueVinyl)) return false;
-        UniqueVinyl uniqueVinyl = (UniqueVinyl) o;
-        return id == uniqueVinyl.id &&
-                Objects.equals(release, uniqueVinyl.release) &&
-                Objects.equals(artist, uniqueVinyl.artist) &&
-                Objects.equals(fullName, uniqueVinyl.fullName) &&
-                Objects.equals(imageLink, uniqueVinyl.imageLink);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, release, artist, fullName, imageLink);
-    }
-
 }

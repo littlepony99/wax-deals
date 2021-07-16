@@ -94,7 +94,7 @@ class OneVinylOffersServiceImplTest {
     void prepareVinylsSection() {
         List<UniqueVinyl> vinylListToBeReturned = dataGenerator.getUniqueVinylsList();
         UniqueVinyl vinyl = dataGenerator.getUniqueVinylsList().get(1);
-        vinyl.setId(111);
+        vinyl.setId("111");
         when(uniqueVinylService.findManyByArtist(vinyl.getArtist())).thenReturn(vinylListToBeReturned);
         List<UniqueVinyl> vinylsList = oneVinylService.prepareVinylsSection(vinyl);
         assertEquals(0, vinylsList.indexOf(vinyl));
