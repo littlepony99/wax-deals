@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 
 @Data
 @Builder
-public class CaptchaRequestDto {
+public class AddUserPostDto {
 
     @NonNull
     private String name;

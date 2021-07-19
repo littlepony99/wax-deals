@@ -34,7 +34,7 @@ public class ConfigBeanFactory {
     }
 
     @Bean
-    public RestTemplate getRestTemplate() {
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 

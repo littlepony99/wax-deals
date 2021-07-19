@@ -6,7 +6,7 @@ import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.service.CaptchaService;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.util.MailSender;
-import com.vinylteam.vinyl.web.dto.CaptchaRequestDto;
+import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,32 +33,32 @@ public class DefaultUserPostService implements UserPostService {
         userPostDao.add(post);
         String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());
         mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
-        // expectedDataSet check that nothing was add to userPost table
-        //check that methods  getEmail, getTheme will invoked
     }
 
     @Override
-    public Boolean processRequest(CaptchaRequestDto dto) throws ForbiddenException {
+    @Transactional
+    public Boolean addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException {
         boolean isCaptchaValid = captchaService.validateCaptcha(dto.getCaptchaResponse());
 
         if (isCaptchaValid) {
-            UserPost post = UserPost.builder()
-                    .name(dto.getName())
-                    .email(dto.getEmail())
-                    .theme(dto.getSubject())
-                    .message(dto.getMessage())
-                    .createdAt(LocalDateTime.now())
-                    .build();
-            try {
-                processAdd(post);
-                log.info("Post added");
-                return Boolean.TRUE;
-            } catch (RuntimeException e) {
-                log.info("Post not added");
-                return Boolean.FALSE;
-            }
-        } else {
             throw new ForbiddenException("INVALID_CAPTCHA");
+
+        }
+
+        UserPost post = UserPost.builder()
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .theme(dto.getSubject())
+                .message(dto.getMessage())
+                .createdAt(LocalDateTime.now())
+                .build();
+        try {
+            processAdd(post);
+            log.info("Post added");
+            return Boolean.TRUE;
+        } catch (RuntimeException e) {
+            log.info("Post not added");
+            return Boolean.FALSE;
         }
     }
 

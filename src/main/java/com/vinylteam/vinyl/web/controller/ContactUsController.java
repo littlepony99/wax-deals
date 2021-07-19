@@ -3,7 +3,7 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.service.UserPostService;
-import com.vinylteam.vinyl.web.dto.CaptchaRequestDto;
+import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/contact")
 public class ContactUsController {
     private final UserPostService userPostService;
+    @Value("${project.mail}")
+    private String projectMail;
 
     @GetMapping
     public ModelAndView getContactUsPage(@SessionAttribute(value = "user", required = false) User user,
@@ -33,11 +35,10 @@ public class ContactUsController {
     public CaptchaResponseDto contactUs(@SessionAttribute(value = "user", required = false) User user,
                                         HttpServletResponse response,
                                         Model model,
-                                        @Value("${project.mail}") String projectMail,
-                                        @RequestBody CaptchaRequestDto dto) throws ForbiddenException {
+                                        @RequestBody AddUserPostDto dto) throws ForbiddenException {
         response.setContentType("text/html;charset=utf-8");
         try {
-            Boolean isSuccess = userPostService.processRequest(dto);
+            Boolean isSuccess = userPostService.addUserPostWithCaptchaRequest(dto);
             if (isSuccess) {
                 return new CaptchaResponseDto("Thank you. Your request was sent to us. We contact with you as soon as possible.");
             } else {

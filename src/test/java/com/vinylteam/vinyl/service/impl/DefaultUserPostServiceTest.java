@@ -4,11 +4,10 @@ import com.vinylteam.vinyl.dao.jdbc.JdbcUserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.util.MailSender;
-import com.vinylteam.vinyl.web.dto.CaptchaRequestDto;
+import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -45,7 +44,7 @@ class DefaultUserPostServiceTest {
     @DisplayName("Checks VALID captcha insertion")
     void validCaptchaProcessRequestTest() throws ForbiddenException {
         //prepare
-        CaptchaRequestDto requestDto = CaptchaRequestDto.builder()
+        AddUserPostDto requestDto = AddUserPostDto.builder()
                 .email("email.@mail.ru")
                 .captchaResponse("captcha")
                 .message("message")
@@ -54,7 +53,7 @@ class DefaultUserPostServiceTest {
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(true);
         //when
-        boolean result = userPostService.processRequest(requestDto);
+        boolean result = userPostService.addUserPostWithCaptchaRequest(requestDto);
         //then
         assertTrue(result);
     }
@@ -63,7 +62,7 @@ class DefaultUserPostServiceTest {
     @DisplayName("Checks inValid captcha insertion")
     void invalidCaptchaProcessTest() {
         //prepare
-        CaptchaRequestDto requestDto = CaptchaRequestDto.builder()
+        AddUserPostDto requestDto = AddUserPostDto.builder()
                 .email("email.@mail.ru")
                 .captchaResponse("captcha")
                 .message("message")
@@ -72,10 +71,9 @@ class DefaultUserPostServiceTest {
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(false);
         //when
-        Exception exception = assertThrows(ForbiddenException.class, () -> userPostService.processRequest(requestDto));
+        Exception exception = assertThrows(ForbiddenException.class, () -> userPostService.addUserPostWithCaptchaRequest(requestDto));
         //then
         assertEquals("INVALID_CAPTCHA", exception.getMessage());
-//        verify(userPostService, never()).processAdd(any());
     }
 
     @Test
