@@ -1,93 +1,79 @@
-
-/*
 package com.vinylteam.vinyl.service.impl;
 
-import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.dao.jdbc.JdbcUserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
+import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.util.MailSender;
+import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 class DefaultUserPostServiceTest {
-
-    private UserPostDao userPostDao = mock(JdbcUserPostDao.class);
-    private final MailSender mailSender = mock(MailSender.class);
-    DefaultUserPostService userPostService = new DefaultUserPostService(userPostDao, mailSender);
+    @MockBean
+    JdbcUserPostDao userPostDao;
+    @MockBean
+    MailSender mailSender;
+    @MockBean
+    private DefaultCaptchaService captchaService;
+    @Autowired
+    private DefaultUserPostService userPostService;
 
     @Test
-    @DisplayName("Checks that when user post saved successfully we receive true from add method")
-    void successfullyAddTest() {
+    @DisplayName("Checks all necessary methods invocation")
+    void rightMethodsInvokedProcessAddTest() {
         //prepare
-        when(userPostDao.add(any())).thenReturn(true);
+        UserPost post = mock(UserPost.class);
         //when
-        boolean result = userPostService.add(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
+        userPostService.processAdd(post);
         //then
-        assertSame(true, result);
+        verify(userPostDao, atMostOnce()).add(eq(post));
+        verify(post, atMostOnce()).getEmail();
+        verify(post, atMostOnce()).getTheme();
+        verify(post, atMostOnce()).getMessage();
+        verify(mailSender, atMostOnce()).sendMail(eq("recipient"), eq("Mail from customer"), eq("message"));
     }
 
     @Test
-    @DisplayName("Checks that when user post saving failed we receive false from add method")
-    void failedAddingTest() {
+    @DisplayName("Checks VALID captcha insertion")
+    void validCaptchaProcessRequestTest() throws ForbiddenException {
         //prepare
-        when(userPostDao.add(any())).thenReturn(false);
+        AddUserPostDto requestDto = AddUserPostDto.builder()
+                .email("email.@mail.ru")
+                .captchaResponse("captcha")
+                .message("message")
+                .name("name")
+                .subject("subject")
+                .build();
+        when(captchaService.validateCaptcha(any())).thenReturn(true);
         //when
-        boolean result = userPostService.add(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
+        boolean result = userPostService.addUserPostWithCaptchaRequest(requestDto);
         //then
-        assertSame(false, result);
+        assertTrue(result);
     }
 
     @Test
-    @DisplayName("Checks that when user post saving successfully and mail sending failed we will receive false from process method")
-    void failedMailingSuccessSavingProcessAddTest() {
+    @DisplayName("Checks inValid captcha insertion")
+    void invalidCaptchaProcessTest() {
         //prepare
-        when(userPostDao.add(any())).thenReturn(true);
-        when(mailSender.sendMail(anyString(), anyString(), anyString())).thenReturn(false);
+        AddUserPostDto requestDto = AddUserPostDto.builder()
+                .email("email.@mail.ru")
+                .captchaResponse("captcha")
+                .message("message")
+                .name("name")
+                .subject("subject")
+                .build();
+        when(captchaService.validateCaptcha(any())).thenReturn(false);
         //when
-        boolean result = userPostService.processAdd(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
+        Exception exception = assertThrows(ForbiddenException.class, () -> userPostService.addUserPostWithCaptchaRequest(requestDto));
         //then
-        assertSame(false, result);
-    }
-
-    @Test
-    @DisplayName("Checks that when user post saving failed and mail sending failed we will receive false from process method")
-    void failedMailingFailedSavingProcessAddTest() {
-        //prepare
-        when(userPostDao.add(any())).thenReturn(false);
-        when(mailSender.sendMail(anyString(), anyString(), anyString())).thenReturn(false);
-        //when
-        boolean result = userPostService.processAdd(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
-        //then
-        assertSame(false, result);
-    }
-
-    @Test
-    @DisplayName("Checks that when user post saving failed and mail sending success we will receive false from process method")
-    void SuccessMailingFailedSavingProcessAddTest() {
-        //prepare
-        when(userPostDao.add(any())).thenReturn(false);
-        when(mailSender.sendMail(anyString(), anyString(), anyString())).thenReturn(true);
-        //when
-        boolean result = userPostService.processAdd(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
-        //then
-        assertSame(false, result);
-    }
-
-    @Test
-    @DisplayName("Checks that when user post saving failed and mail sending success we will receive false from process method")
-    void SuccessMailingSuccessSavingProcessAddTest() {
-        //prepare
-        when(userPostDao.add(any())).thenReturn(true);
-        when(mailSender.sendMail(anyString(), anyString(), anyString())).thenReturn(true);
-        //when
-        boolean result = userPostService.processAdd(new UserPost("name", "email", "theme", "message", LocalDateTime.now()));
-        //then
-        assertSame(true, result);
+        assertEquals("INVALID_CAPTCHA", exception.getMessage());
     }
 
     @Test
@@ -104,5 +90,4 @@ class DefaultUserPostServiceTest {
         assertTrue((contactUsMessage.contains("subject")));
         assertTrue((contactUsMessage.contains("mailBody")));
     }
-
-}*/
+}
