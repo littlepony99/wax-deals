@@ -40,9 +40,8 @@ public class DefaultUserPostService implements UserPostService {
     public Boolean addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException {
         boolean isCaptchaValid = captchaService.validateCaptcha(dto.getCaptchaResponse());
 
-        if (isCaptchaValid) {
+        if (!isCaptchaValid) {
             throw new ForbiddenException("INVALID_CAPTCHA");
-
         }
 
         UserPost post = UserPost.builder()
