@@ -4,7 +4,6 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
-import com.vinylteam.vinyl.util.impl.ParserHolder;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
 import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
 import com.vinylteam.vinyl.web.util.WebUtils;
@@ -27,11 +26,10 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
-    private final ParserHolder parserHolder;
 
     @Override
     public OneVinylPageFullResponse prepareOneVinylInfo(String identifier) {
-        long uniqueVinylId = Long.parseLong(identifier);
+        String uniqueVinylId = identifier;
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
 
         List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());
