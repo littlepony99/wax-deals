@@ -1,1 +1,1 @@
-web: java -jar target/vinyl.jar
+web: java -jar target/wax-deals-1.0-SNAPSHOT.jar
