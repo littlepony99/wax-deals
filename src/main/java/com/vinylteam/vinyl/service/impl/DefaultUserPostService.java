@@ -19,11 +19,12 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 public class DefaultUserPostService implements UserPostService {
-
     private final static String CONTACT_US_DEFAULT_THEME = "Mail from customer";
+
     private final UserPostDao userPostDao;
     private final MailSender mailSender;
     private final CaptchaService captchaService;
+
     @Value("${project.mail}")
     private String projectMail;
 
@@ -62,14 +63,13 @@ public class DefaultUserPostService implements UserPostService {
     }
 
     String createContactUsMessage(String recipient, String subject, String mailBody) {
-        return new StringBuilder()
-                .append("MailFrom: ")
-                .append(recipient)
-                .append(System.lineSeparator())
-                .append("Theme: ")
-                .append(subject)
-                .append(System.lineSeparator())
-                .append("Message: ")
-                .append(mailBody).toString();
+        return "MailFrom: " +
+                recipient +
+                System.lineSeparator() +
+                "Theme: " +
+                subject +
+                System.lineSeparator() +
+                "Message: " +
+                mailBody;
     }
 }

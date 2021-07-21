@@ -28,15 +28,12 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     private final DiscogsService discogsService;
 
     @Override
-    public OneVinylPageFullResponse prepareOneVinylInfo(String identifier) {
-        String uniqueVinylId = identifier;
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
+    public OneVinylPageFullResponse prepareOneVinylInfo(String id) {
+        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
 
-        List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());
-        List<Integer> shopIds = offerService.getListOfShopIds(offers);
-        List<Shop> shopsFromOffers = shopService.getManyByListOfIds(shopIds);
+        List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
 
-        List<OneVinylOffersServletResponse> offersResponseList = prepareOffersSection(offers, shopsFromOffers);
+        List<OneVinylOffersServletResponse> offersResponseList = prepareOffersSection(offers);
 
         checkIsVinylInStock(uniqueVinyl, offersResponseList);
 
@@ -50,7 +47,7 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOffersServletResponse> offersResponseList) {
         if (offersResponseList.isEmpty()) {
             uniqueVinyl.setHasOffers(false);
-            uniqueVinylService.updateOneUniqueVinylAsHavingNoOffer(uniqueVinyl);
+            uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
         }
     }
 
@@ -64,9 +61,11 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         }
     }
 
-    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
+    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers) {
+        List<Integer> shopIds = offerService.findShopIds(dbOffers);
+        List<Shop> shopsList = shopService.findShopsByListOfIds(shopIds);
         return dbOffers.stream()
-                .map(offerService::getActualizedOffer)
+                .map(offerService::actualizeOffer)
                 .filter(Offer::isInStock)
                 .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
                 .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
@@ -84,9 +83,9 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
         List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
 
-        uniqueVinylService.findManyByArtist(uniqueVinyl.getArtist())
+        uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
                 .stream()
-                .filter(v -> v.getId() != uniqueVinyl.getId())
+                .filter(v -> !v.getId().equals(uniqueVinyl.getId()))
                 .forEach(preparedListById::add);
 
         return preparedListById;

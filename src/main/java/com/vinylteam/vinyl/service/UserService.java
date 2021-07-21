@@ -9,7 +9,7 @@ public interface UserService {
 
     void register(UserInfoRequest userProfileInfo);
 
-    Optional<User> confirmEmail(UserInfoRequest userInfo);
+    User confirmEmail(UserInfoRequest userInfo);
 
     void update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 
@@ -17,11 +17,11 @@ public interface UserService {
 
     Optional<User> findById(long id);
 
-    Optional<User> findByEmail(String email);
+    User findByEmail(String email);
 
     void signInCheck(UserInfoRequest userProfileInfo);
 
-    Optional<User> editProfile(UserInfoRequest userProfileInfo,
+    User editProfile(UserInfoRequest userProfileInfo,
                                User user);
 
 }

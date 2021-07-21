@@ -30,12 +30,8 @@ public class UniqueVinyl {
     @EqualsAndHashCode.Exclude
     private boolean hasOffers;
 
-
     public boolean getHasOffers(){
         return hasOffers;
     }
 
-    public boolean isHasOffers(){
-        return hasOffers;
-    }
 }

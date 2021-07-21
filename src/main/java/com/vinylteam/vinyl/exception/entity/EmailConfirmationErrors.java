@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum EmailConfirmationError {
+public enum EmailConfirmationErrors {
 
     TOKEN_FROM_LINK_NOT_FOUND("Sorry, we can't find this link. Would you like to request another?"),
     TOKEN_FROM_LINK_NOT_UUID("Sorry, this is not a valid link"),

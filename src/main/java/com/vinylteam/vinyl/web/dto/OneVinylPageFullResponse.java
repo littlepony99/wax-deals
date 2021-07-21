@@ -10,9 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 public class OneVinylPageFullResponse {
 
-    List<OneVinylOffersServletResponse> offersResponseList;
+    List<OneVinylOffersServletResponse> offersResponses;
 
-    List<UniqueVinyl> preparedVinylsList;
+    List<UniqueVinyl> preparedVinyls;
 
     String discogsLink;
 

@@ -25,9 +25,6 @@ import java.util.Arrays;
 @PropertySource({"classpath:application.properties"})
 public class ElasticSearchConfiguration extends AbstractElasticsearchConfiguration {
 
-    @Value("${spring.data.elasticsearch.cluster-nodes:localhost}")
-    private String elasticsearchNode;
-
     @Value("${elasticsearch.host}")
     private String elasticSearchHost;
 
@@ -37,10 +34,9 @@ public class ElasticSearchConfiguration extends AbstractElasticsearchConfigurati
     @Value("${elasticsearch.password}")
     private String elasticsearchUserPassword;
 
-    @Value("${ELASTICSEARCH_HOST:}")
-    private String awsElasticsearch;
     @Value("${elasticsearch.port}")
     private int elasticsearchPort;
+
     @Value("${elasticsearch.protocol}")
     private String elasticsearchProtocol;
 
@@ -64,4 +60,5 @@ public class ElasticSearchConfiguration extends AbstractElasticsearchConfigurati
                 new StringToCurrencyConverter())
         );
     }
+
 }

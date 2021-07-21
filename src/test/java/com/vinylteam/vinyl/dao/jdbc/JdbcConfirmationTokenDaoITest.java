@@ -8,7 +8,7 @@ import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.data.TestConfirmationTokenProvider;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationError;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -129,7 +129,7 @@ class JdbcConfirmationTokenDaoITest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -144,7 +144,7 @@ class JdbcConfirmationTokenDaoITest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -159,7 +159,7 @@ class JdbcConfirmationTokenDaoITest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -202,7 +202,7 @@ class JdbcConfirmationTokenDaoITest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
     }
 
     @Test

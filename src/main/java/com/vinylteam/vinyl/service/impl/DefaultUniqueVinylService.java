@@ -20,11 +20,11 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     private final UniqueVinylRepository uniqueVinylRepository;
 
     @Override
-    public UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl) {
-        if (vinyl.isHasOffers()) {
-            return vinyl;
+    public void updateOneUniqueVinyl(UniqueVinyl vinyl) {
+        if (vinyl.getHasOffers()) {
+            return;
         }
-        return uniqueVinylRepository.save(vinyl);
+        uniqueVinylRepository.save(vinyl);
     }
 
     @Override
@@ -40,20 +40,20 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     }
 
     @Override
-    public List<UniqueVinyl> findManyRandom(int amount) {
+    public List<UniqueVinyl> findRandom(int amount) {
         if (amount <= 0) {
             return new ArrayList<>();
         }
-        return uniqueVinylRepository.findManyRandom(amount);
+        return uniqueVinylRepository.findRandom(amount);
     }
 
     @Override
-    public List<UniqueVinyl> findManyFiltered(String matcher) {
+    public List<UniqueVinyl> findByFilter(String matcher) {
         if (matcher == null || matcher.isEmpty()) {
             log.error("Matcher is null, returning empty list.");
             return new ArrayList<>();
         }
-        var result = uniqueVinylRepository.findManyFiltered(matcher);
+        var result = uniqueVinylRepository.findByFilter(matcher);
         if (result.isEmpty()) {
             result = uniqueVinylRepository.findByFullNameIgnoreCaseContainingAndHasOffers(matcher, true);
         }
@@ -61,7 +61,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     }
 
     @Override
-    public List<UniqueVinyl> findManyByArtist(String artist) {
+    public List<UniqueVinyl> findByArtist(String artist) {
         if (artist == null || artist.isEmpty()) {
             log.error("Artist is null, returning empty list.");
             return new ArrayList<>();

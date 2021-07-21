@@ -31,6 +31,7 @@ public class PasswordRecoveryController {
     public ModelAndView sendRecoveryToken(@SessionAttribute(value = "user", required = false) User user,
                                           @RequestParam(value = "email") String email,
                                           Model model) {
+
         ModelAndView modelAndView = new ModelAndView("recoveryPassword");
         model.addAttribute("email", email);
         WebUtils.setUserAttributes(user, model);
@@ -53,6 +54,7 @@ public class PasswordRecoveryController {
     public ModelAndView getChangePasswordPage(@SessionAttribute(value = "user", required = false) User user,
                                               @RequestParam(value = "token") String token,
                                               Model model) {
+
         WebUtils.setUserAttributes(user, model);
         ModelAndView modelAndView = new ModelAndView("newPassword");
         try {
@@ -72,6 +74,7 @@ public class PasswordRecoveryController {
                                        @RequestParam(value = "confirmPassword") String confirmPassword,
                                        @RequestParam(value = "recoveryToken") String token,
                                        Model model) {
+
         WebUtils.setUserAttributes(user, model);
         UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .newPassword(newPassword)

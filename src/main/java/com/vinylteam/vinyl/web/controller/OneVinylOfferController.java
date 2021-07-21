@@ -23,10 +23,10 @@ public class OneVinylOfferController {
 
     @GetMapping
     public String getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
-                                       @RequestParam(value = "id") String identifier,
+                                       @RequestParam(value = "id") String id,
                                        Model model) {
         WebUtils.setUserAttributes(user, model);
-        OneVinylPageFullResponse fullResponse = oneVinylOffersService.prepareOneVinylInfo(identifier);
+        OneVinylPageFullResponse fullResponse = oneVinylOffersService.prepareOneVinylInfo(id);
 
         SetDiscogsAttribute(model, fullResponse);
 

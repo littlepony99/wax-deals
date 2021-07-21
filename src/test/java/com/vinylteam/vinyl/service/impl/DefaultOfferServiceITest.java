@@ -58,7 +58,7 @@ public class DefaultOfferServiceITest {
         String id = "1";
         List<Offer> expectedOffers = new ArrayList<>(offers.subList(0, 2));
         //when
-        List<Offer> actualOffers = offerService.findManyByUniqueVinylId(id);
+        List<Offer> actualOffers = offerService.findByUniqueVinylId(id);
         //then
         assertEquals(2, actualOffers.size());
         assertTrue(expectedOffers.containsAll(actualOffers));
@@ -70,7 +70,7 @@ public class DefaultOfferServiceITest {
         //prepare
         String id = "11";
         //when
-        List<Offer> actualOffers = offerService.findManyByUniqueVinylId(id);
+        List<Offer> actualOffers = offerService.findByUniqueVinylId(id);
         //then
         assertTrue(actualOffers.isEmpty());
     }

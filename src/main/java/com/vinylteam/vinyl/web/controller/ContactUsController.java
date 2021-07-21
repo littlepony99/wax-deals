@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/contact")
 public class ContactUsController {
     private final UserPostService userPostService;
+
     @Value("${project.mail}")
     private String projectMail;
 

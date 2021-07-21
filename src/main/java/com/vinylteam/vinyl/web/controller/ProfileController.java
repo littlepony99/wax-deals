@@ -43,6 +43,7 @@ public class ProfileController {
                                     @RequestParam(value = "discogsUserName") String newDiscogsUserName,
                                     HttpSession session,
                                     @SessionAttribute("user") User user) {
+
         UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .email(newEmail)
                 .password(oldPassword)
@@ -52,7 +53,7 @@ public class ProfileController {
                 .build();
         if (user != null) {
             ModelAndView modelAndView = new ModelAndView("editProfile");
-            User userAfterEdit = userService.editProfile(userProfileInfo, user).orElse(user);
+            User userAfterEdit = userService.editProfile(userProfileInfo, user);
             modelAndView.addObject("userRole", user.getRole().getName());
             session.setAttribute("user", userAfterEdit);
             return modelAndView;

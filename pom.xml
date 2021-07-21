@@ -29,6 +29,7 @@
         <persistence.version>2.2</persistence.version>
         <testcontainers.version>1.15.3</testcontainers.version>
         <flyway.version>7.7.2</flyway.version>
+        <apache.common.version>3.12.0</apache.common.version>
     </properties>
 
     <build>
@@ -163,6 +164,12 @@
             <artifactId>javax.persistence-api</artifactId>
             <version>${persistence.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.common.version}</version>
         </dependency>
 
         <!--TestContainers-->

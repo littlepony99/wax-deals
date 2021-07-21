@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationError;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.MailSender;
@@ -43,7 +43,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.findByToken("wrong value"));
         //then
-        assertEquals(EmailConfirmationError.TOKEN_FROM_LINK_NOT_UUID.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_UUID.getMessage(), exception.getMessage());
         verify(mockedConfirmationDao, never()).findByToken(any());
     }
 
@@ -56,7 +56,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.findByToken(token.toString()));
         //then
-        assertEquals(EmailConfirmationError.TOKEN_FROM_LINK_NOT_FOUND.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_FOUND.getMessage(), exception.getMessage());
         verify(mockedConfirmationDao).findByToken(eq(token));
     }
 
@@ -82,7 +82,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.findByUserId(nonexistentUserId));
         //then
-        assertEquals(EmailConfirmationError.TOKEN_FOR_USER_ID_NOT_FOUND.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.TOKEN_FOR_USER_ID_NOT_FOUND.getMessage(), exception.getMessage());
         verify(mockedConfirmationDao).findByUserId(nonexistentUserId);
     }
 
@@ -118,7 +118,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.update(null));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
         verify(mockedConfirmationDao, never()).update(null);
     }
 
@@ -130,7 +130,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(null, tokenAsString));
         //then
-        assertEquals(EmailConfirmationError.EMPTY_EMAIL.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.EMPTY_EMAIL.getMessage(), exception.getMessage());
         verify(mockedMailSender, never()).sendMail(eq(null), anyString(), anyString());
     }
 
@@ -142,7 +142,7 @@ class DefaultEmailConfirmationServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> confirmationService.sendMessageWithLinkToUserEmail(email, null));
         //then
-        assertEquals(EmailConfirmationError.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
+        assertEquals(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
         verify(mockedMailSender, never()).sendMail(eq(email), anyString(), anyString());
     }
 

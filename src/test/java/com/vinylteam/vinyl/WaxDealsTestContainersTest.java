@@ -19,7 +19,7 @@ public class WaxDealsTestContainersTest {
     private ElasticsearchContainer elasticsearchContainer;
 
     @Container
-    public PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
+    public PostgreSQLContainer<WaxDealsPostgresqlContainer> container = WaxDealsPostgresqlContainer.getInstance();
 
     @Test
     void test() {

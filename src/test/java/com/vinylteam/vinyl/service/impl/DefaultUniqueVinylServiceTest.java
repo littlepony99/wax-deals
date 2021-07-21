@@ -23,7 +23,7 @@ class DefaultUniqueVinylServiceTest {
         //prepare
         int amount = -300;
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findRandom(amount);
         assertTrue(actualUniqueVinyls.isEmpty());
     }
 
@@ -31,7 +31,7 @@ class DefaultUniqueVinylServiceTest {
     @DisplayName("Checks that when matcher is null UniqueVinylDao.findManyFiltered(matcher) is not called, empty list is returned")
     void findManyFilteredNullMatcherTest() {
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyFiltered(null);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByFilter(null);
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
     }
@@ -40,7 +40,7 @@ class DefaultUniqueVinylServiceTest {
     @DisplayName("Checks that when artist is null UniqueVinylDao.findManyByArtist(artist) is not called, empty list is returned")
     void findManyByArtistNullArtistTest() {
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyByArtist(null);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByArtist(null);
         assertTrue(actualUniqueVinyls.isEmpty());
     }
 

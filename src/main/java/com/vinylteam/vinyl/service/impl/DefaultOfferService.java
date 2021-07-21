@@ -11,6 +11,7 @@ import com.vinylteam.vinyl.util.impl.VinylParser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,40 +21,31 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class DefaultOfferService implements OfferService {
-
     private final OfferRepository offerRepository;
     private final UniqueVinylRepository uniqueVinylRepository;
-
     private final ParserHolder parserHolder;
 
     @Override
-    public List<Offer> findManyByUniqueVinylId(String uniqueVinylId) {
+    public List<Offer> findByUniqueVinylId(String uniqueVinylId) {
         if (uniqueVinylId == null) {
             log.error("uniqueVinylId is null");
             throw new IllegalArgumentException("uniqueVinylId is null");
         }
         List<Offer> offers = offerRepository.findByUniqueVinylId(uniqueVinylId);
+        log.info("Resulting list of vinyls fetched {'size':{}}", offers.size());
         log.debug("Resulting list of vinyls is {'vinyls':{}}", offers);
         return offers;
     }
 
     @Override
     public void updateUniqueVinylsRewriteAll(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
-        if (uniqueVinyls == null) {
-            log.error("List of unique vinyls is null");
-            throw new IllegalArgumentException("List of unique vinyls is null");
+        if (CollectionUtils.isEmpty(uniqueVinyls)) {
+            log.error("List of unique vinyls is null or empty");
+            throw new IllegalArgumentException("List of unique vinyls is null or empty");
         }
-        if (offers == null) {
-            log.error("List of offers is null");
-            throw new IllegalArgumentException("List of offers is null");
-        }
-        if (uniqueVinyls.isEmpty()) {
-            log.error("List of unique vinyls is empty");
-            throw new IllegalArgumentException("List of unique vinyls is empty");
-        }
-        if (offers.isEmpty()) {
-            log.error("List of offers is empty");
-            throw new IllegalArgumentException("List of offers is empty");
+        if (CollectionUtils.isEmpty(offers)) {
+            log.error("List of offers is null or empty");
+            throw new IllegalArgumentException("List of offers is null or empty");
         }
         save(uniqueVinyls, offers);
         log.info("Successfully updated database with {} unique vinyls and {} offers", uniqueVinyls.size(), offers.size());
@@ -65,7 +57,7 @@ public class DefaultOfferService implements OfferService {
         offerRepository.saveAll(offers);
     }
 
-    public Offer getActualizedOffer(Offer dbOffer) {
+    public Offer actualizeOffer(Offer dbOffer) {
         return parserHolder
                 .getShopParserByShopId(dbOffer.getShopId())
                 .map(parser -> mergeOfferChanges(dbOffer, parser, parser.getRawOfferFromOfferLink(dbOffer.getOfferLink())))
@@ -73,7 +65,7 @@ public class DefaultOfferService implements OfferService {
     }
 
     @Override
-    public List<Integer> getListOfShopIds(List<Offer> offers) {
+    public List<Integer> findShopIds(List<Offer> offers) {
         if (offers == null) {
             return new ArrayList<>();
         }

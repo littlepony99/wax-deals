@@ -3,7 +3,7 @@ package com.vinylteam.vinyl.dao.jdbc;
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationError;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -63,7 +63,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
                     .addValue("created_at", Timestamp.from(Instant.now()));
             namedParameterJdbcTemplate.update(INSERT, sqlParameterSource);
         } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException(EmailConfirmationError.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage());
+            throw new RuntimeException(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage());
         }
     }
 
@@ -77,7 +77,7 @@ public class JdbcConfirmationTokenDao implements ConfirmationTokenDao {
                     .addValue("user_id", token.getUserId());
             namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
         } catch (DuplicateKeyException e) {
-            throw new RuntimeException(EmailConfirmationError.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage());
+            throw new RuntimeException(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage());
         }
     }
 

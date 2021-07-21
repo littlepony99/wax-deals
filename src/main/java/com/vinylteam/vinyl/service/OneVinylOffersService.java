@@ -5,6 +5,6 @@ import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
 
 public interface OneVinylOffersService {
 
-    OneVinylPageFullResponse prepareOneVinylInfo(String identifier);
+    OneVinylPageFullResponse prepareOneVinylInfo(String id);
 
 }

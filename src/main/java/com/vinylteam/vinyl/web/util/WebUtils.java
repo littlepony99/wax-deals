@@ -35,55 +35,55 @@ public class WebUtils {
 
     public static void setModelContext(OneVinylPageFullResponse fullResponse, Model model) {
 
-        setModelContext(fullResponse.getPreparedVinylsList(), fullResponse.getOffersResponseList(), model);
+        setModelContext(fullResponse.getPreparedVinyls(), fullResponse.getOffersResponses(), model);
     }
 
-    public static void setModelContext(List<UniqueVinyl> vinylList, List<OneVinylOffersServletResponse> vinylOffersList, Model model) {
+    public static void setModelContext(List<UniqueVinyl> vinyls, List<OneVinylOffersServletResponse> vinylOffers, Model model) {
         List<UniqueVinyl> firstUniqueVinylRow = new ArrayList<>();
         List<UniqueVinyl> otherUniqueVinylRow = new ArrayList<>();
         List<UniqueVinyl> uniqueVinylsByArtist = new ArrayList<>();
 
 // for catalog page
 
-        model.addAttribute("vinylList", vinylList);
+        model.addAttribute("vinyls", vinyls);
 
 // for search & one vinyl with offers pages
 
-        if (!vinylList.isEmpty()) {
-            model.addAttribute("firstVinyl", vinylList.get(0));
+        if (!vinyls.isEmpty()) {
+            model.addAttribute("firstVinyl", vinyls.get(0));
         }
 
 // for search page
 
-        if (vinylList.size() > 1) {
-            if (vinylList.size() >= 7) {
+        if (vinyls.size() > 1) {
+            if (vinyls.size() >= 7) {
                 for (int i = 1; i < 7; i++) {
-                    firstUniqueVinylRow.add(vinylList.get(i));
+                    firstUniqueVinylRow.add(vinyls.get(i));
                 }
             } else {
-                for (int i = 1; i < vinylList.size(); i++) {
-                    firstUniqueVinylRow.add(vinylList.get(i));
+                for (int i = 1; i < vinyls.size(); i++) {
+                    firstUniqueVinylRow.add(vinyls.get(i));
                 }
             }
             model.addAttribute("firstVinylRow", firstUniqueVinylRow);
         }
-        if (vinylList.size() > 7) {
-            for (int i = 7; i < vinylList.size(); i++) {
-                otherUniqueVinylRow.add(vinylList.get(i));
+        if (vinyls.size() > 7) {
+            for (int i = 7; i < vinyls.size(); i++) {
+                otherUniqueVinylRow.add(vinyls.get(i));
             }
             model.addAttribute("otherVinylRow", otherUniqueVinylRow);
         }
 
 // for one vinyl with offers page
 
-        if (vinylList.size() > 1) {
-            for (int i = 1; i < vinylList.size(); i++) {
-                uniqueVinylsByArtist.add(vinylList.get(i));
+        if (vinyls.size() > 1) {
+            for (int i = 1; i < vinyls.size(); i++) {
+                uniqueVinylsByArtist.add(vinyls.get(i));
             }
             model.addAttribute("vinylsByArtist", uniqueVinylsByArtist);
         }
 
-        model.addAttribute("vinylOffersList", vinylOffersList);
+        model.addAttribute("vinylOffersList", vinylOffers);
     }
 
 }

@@ -57,12 +57,12 @@ class OneVinylOffersServiceImplTest {
         UniqueVinyl testedUniqueVinyl = vinylsList.get(0);
         //then
         oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
-        verify(uniqueVinylService, never()).updateOneUniqueVinylAsHavingNoOffer(testedUniqueVinyl);
+        verify(uniqueVinylService, never()).updateOneUniqueVinyl(testedUniqueVinyl);
         assertTrue(testedUniqueVinyl.getHasOffers());
 
         offersResponseList.clear();
         oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
-        verify(uniqueVinylService).updateOneUniqueVinylAsHavingNoOffer(testedUniqueVinyl);
+        verify(uniqueVinylService).updateOneUniqueVinyl(testedUniqueVinyl);
         assertFalse(testedUniqueVinyl.getHasOffers());
     }
 
@@ -71,9 +71,10 @@ class OneVinylOffersServiceImplTest {
     void prepareOffersSection() {
         List<Shop> shopsList = dataGenerator.getShopsList();
         List<Offer> offers = dataGenerator.getOffersList();
-        when(offerService.getActualizedOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
+        when(offerService.actualizeOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
         when(offerService.mergeOfferChanges(any(), any(), any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
-        List<OneVinylOffersServletResponse> offerResponseList = oneVinylService.prepareOffersSection(offers, shopsList);
+        when(offerService.findShopIds(any())).thenReturn(List.of(1, 2));//thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
+        List<OneVinylOffersServletResponse> offerResponseList = oneVinylService.prepareOffersSection(offers/*, shopsList*/);
         assertFalse(offerResponseList.isEmpty());
         assertEquals(offers.size(), offerResponseList.size());
     }
@@ -95,7 +96,7 @@ class OneVinylOffersServiceImplTest {
         List<UniqueVinyl> vinylListToBeReturned = dataGenerator.getUniqueVinylsList();
         UniqueVinyl vinyl = dataGenerator.getUniqueVinylsList().get(1);
         vinyl.setId("111");
-        when(uniqueVinylService.findManyByArtist(vinyl.getArtist())).thenReturn(vinylListToBeReturned);
+        when(uniqueVinylService.findByArtist(vinyl.getArtist())).thenReturn(vinylListToBeReturned);
         List<UniqueVinyl> vinylsList = oneVinylService.prepareVinylsSection(vinyl);
         assertEquals(0, vinylsList.indexOf(vinyl));
         assertEquals(vinylListToBeReturned.size() + 1, vinylsList.size());

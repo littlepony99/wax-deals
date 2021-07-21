@@ -20,13 +20,12 @@ import java.util.Optional;
 @RequestMapping("/emailConfirmation")
 public class EmailConfirmationController {
 
-    private final UserService userService;
     private final EmailConfirmationService emailConfirmationService;
 
     @GetMapping
     public ModelAndView getConfirmationPage(@RequestParam(value = "token") String tokenAsString) {
         ModelAndView modelAndView = new ModelAndView();
-        Optional<ConfirmationToken> optionalConfirmationToken = emailConfirmationService.findByToken(tokenAsString);
+        emailConfirmationService.findByToken(tokenAsString);
 
         modelAndView.setStatus(HttpStatus.OK);
         log.debug("Set response status to {'status':{}}", HttpStatus.OK);

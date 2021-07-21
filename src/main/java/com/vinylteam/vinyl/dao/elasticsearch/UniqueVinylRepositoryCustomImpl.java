@@ -23,10 +23,11 @@ import java.util.List;
 @Slf4j
 public class UniqueVinylRepositoryCustomImpl implements UniqueVinylRepositoryCustom {
     private static final String INDEX = "unique_vinyl_index";
+
     private final ElasticsearchOperations elasticsearchOperations;
 
     @Override
-    public List<UniqueVinyl> findManyFiltered(String matcher) {
+    public List<UniqueVinyl> findByFilter(String matcher) {
         log.info("Search with query {}", matcher);
 
         QueryBuilder queryBuilder =
@@ -42,14 +43,11 @@ public class UniqueVinylRepositoryCustomImpl implements UniqueVinylRepositoryCus
                 .withQuery(queryBuilder)
                 .build();
 
-        List<UniqueVinyl> vinylMatches = getUniqueVinyls(searchQuery);
-
-        return vinylMatches;
+        return getUniqueVinyls(searchQuery);
     }
 
     @Override
-    public List<UniqueVinyl> findManyRandom(int amount) {
-
+    public List<UniqueVinyl> findRandom(int amount) {
         FunctionScoreQueryBuilder functionScore = QueryBuilders.functionScoreQuery(
                 QueryBuilders.termQuery("hasOffers", true),
                 ScoreFunctionBuilders.randomFunction());

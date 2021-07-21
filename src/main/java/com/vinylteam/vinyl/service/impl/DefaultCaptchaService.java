@@ -17,10 +17,11 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class DefaultCaptchaService implements CaptchaService {
-
     private final RestTemplate template;
+
     @Value("${google.recaptcha.verification.endpoint}")
     private String recaptchaEndpoint;
+
     @Value("${google.recaptcha.secret}")
     private String recaptchaSecret;
 

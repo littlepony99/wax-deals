@@ -13,13 +13,9 @@ import org.testcontainers.utility.DockerImageName;
 
 @Configuration
 public class ElasticSearchTestConfiguration {
-
     private static final String ELASTIC_SEARCH_DOCKER = "elasticsearch:7.12.1";
-
     private static final String CLUSTER_NAME = "cluster.name";
-
     private static final String ELASTIC_SEARCH = "elasticsearch";
-
     private static ElasticsearchContainer ES_CONTAINER;
 
     @Bean(name = "elasticSearchContainer")
@@ -31,8 +27,8 @@ public class ElasticSearchTestConfiguration {
             ES_CONTAINER.withCreateContainerCmdModifier(cmd -> cmd
                     .getHostConfig()
                     .withPortBindings(PortBinding.parse("9200:9200/tcp"))
-                    .withMemory(512000000l)
-                    .withMemorySwap(512000000l));
+                    .withMemory(512000000L)
+                    .withMemorySwap(512000000L));
             ES_CONTAINER.addEnv(CLUSTER_NAME, ELASTIC_SEARCH);
         }
         if (!ES_CONTAINER.isRunning()){

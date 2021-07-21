@@ -11,10 +11,9 @@ public class CurrencyToStringConverter implements Converter<Optional<Currency>, 
 
     @Override
     public String convert(Optional<Currency> source) {
-        if (source.isEmpty()) {
-            return "";
-        }
-        return source.get().getSymbol();
+        return source
+                .map(Currency::getSymbol)
+                .orElse("");
     }
 
 }

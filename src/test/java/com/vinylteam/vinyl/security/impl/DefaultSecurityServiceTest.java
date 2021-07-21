@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.security.impl;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.entity.UserError;
+import com.vinylteam.vinyl.exception.entity.UserErrors;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,21 +50,21 @@ class DefaultSecurityServiceTest {
     @Test
     @DisplayName("Checks if comparing hashed right password against user's stored hash returns true.")
     void checkPasswordAgainstExistingUserPasswordWithRightPasswordTest() {
-        assertTrue(securityService.checkPasswordAgainstUserPassword(
+        assertTrue(securityService.validateIfPasswordMatches(
                 existingUser, rightPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed wrong password against user's stored hash returns false.")
     void checkPasswordAgainstUserPasswordWithWrongPasswordTest() {
-        assertFalse(securityService.checkPasswordAgainstUserPassword(
+        assertFalse(securityService.validateIfPasswordMatches(
                 existingUser, wrongPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed right password against null user returns false.")
     void checkPasswordAgainstUserPasswordNullUserTest() {
-        assertFalse(securityService.checkPasswordAgainstUserPassword(
+        assertFalse(securityService.validateIfPasswordMatches(
                 null, rightPassword.toCharArray()));
     }
 
@@ -86,7 +86,7 @@ class DefaultSecurityServiceTest {
         //when
         Exception exception = assertThrows(RuntimeException.class, () -> securityService.validatePassword(password, incorrectConfirmationPassword));
         //then
-        assertEquals(UserError.PASSWORDS_NOT_EQUAL.getMessage(), exception.getMessage());
+        assertEquals(UserErrors.PASSWORDS_NOT_EQUAL_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -95,7 +95,7 @@ class DefaultSecurityServiceTest {
         //prepare
         String password = "Qwerty1234";
         //when
-        securityService.passwordFormatCheck(password);
+        securityService.validatePassword(password);
     }
 
     @Test
@@ -104,9 +104,9 @@ class DefaultSecurityServiceTest {
         //prepare
         String passwordNoUppercase = "qwerty1234";
         //when
-        Exception exception = assertThrows(RuntimeException.class, () -> securityService.passwordFormatCheck(passwordNoUppercase));
+        Exception exception = assertThrows(RuntimeException.class, () -> securityService.validatePassword(passwordNoUppercase));
         //then
-        assertEquals(UserError.INVALID_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -115,9 +115,9 @@ class DefaultSecurityServiceTest {
         //prepare
         String passwordNoLowercase = "QWERTY1234";
         //when
-        Exception exception = assertThrows(RuntimeException.class, () -> securityService.passwordFormatCheck(passwordNoLowercase));
+        Exception exception = assertThrows(RuntimeException.class, () -> securityService.validatePassword(passwordNoLowercase));
         //then
-        assertEquals(UserError.INVALID_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -126,9 +126,9 @@ class DefaultSecurityServiceTest {
         //prepare
         String passwordNoNumber = "Qwertyui";
         //when
-        Exception exception = assertThrows(RuntimeException.class, () -> securityService.passwordFormatCheck(passwordNoNumber));
+        Exception exception = assertThrows(RuntimeException.class, () -> securityService.validatePassword(passwordNoNumber));
         //then
-        assertEquals(UserError.INVALID_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -137,9 +137,9 @@ class DefaultSecurityServiceTest {
         //prepare
         String passwordTooShort = "Qwe123";
         //when
-        Exception exception = assertThrows(RuntimeException.class, () -> securityService.passwordFormatCheck(passwordTooShort));
+        Exception exception = assertThrows(RuntimeException.class, () -> securityService.validatePassword(passwordTooShort));
         //then
-        assertEquals(UserError.INVALID_PASSWORD.getMessage(), exception.getMessage());
+        assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
     }
 
 }

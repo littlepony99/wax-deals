@@ -68,7 +68,7 @@ public class DefaultUniqueVinylServiceITest {
         //prepare
         int amount = 2;
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findRandom(amount);
 
         //then
         assertEquals(2, actualUniqueVinyls.size());
@@ -88,7 +88,7 @@ public class DefaultUniqueVinylServiceITest {
         //uniqueVinylRepository.saveAll(dataGenerator.getUniqueVinylsList(9));
 
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findRandom(amount);
 
         //then
         assertEquals(2, actualUniqueVinyls.size());
@@ -98,7 +98,7 @@ public class DefaultUniqueVinylServiceITest {
                 .map(UniqueVinyl::getId)
                 .reduce("", String::concat);
 
-        List<UniqueVinyl> invocation2UniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        List<UniqueVinyl> invocation2UniqueVinyls = uniqueVinylService.findRandom(amount);
         assertEquals(2, invocation2UniqueVinyls.size());
         assertFalse(invocation2UniqueVinyls.contains(vinylWithHasOffersFalse));
 
@@ -117,7 +117,7 @@ public class DefaultUniqueVinylServiceITest {
         List<UniqueVinyl> expectedUniqueVinyls = new ArrayList<>(uniqueVinyls);
         expectedUniqueVinyls.remove(3);
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(amount);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findRandom(amount);
 
         //then
         assertEquals(3, actualUniqueVinyls.size());
@@ -137,7 +137,7 @@ public class DefaultUniqueVinylServiceITest {
         //prepare
         uniqueVinylRepository.deleteAll();
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyRandom(3);
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findRandom(3);
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
     }
@@ -148,7 +148,7 @@ public class DefaultUniqueVinylServiceITest {
         List<UniqueVinyl> expectedUniqueVinyls = new ArrayList<>();
         expectedUniqueVinyls.add(uniqueVinyls.get(0));
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyFiltered("1");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByFilter("1");
         //then
         assertEquals(expectedUniqueVinyls, actualUniqueVinyls);
     }
@@ -157,7 +157,7 @@ public class DefaultUniqueVinylServiceITest {
     @DisplayName("Returns empty list by full name substring matcher that has no matches with offers in table")
     void findManyFilteredZeroMatchesTest() {
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyFiltered("4");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByFilter("4");
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
     }
@@ -165,7 +165,7 @@ public class DefaultUniqueVinylServiceITest {
     @Test
     @DisplayName("Return result when not whole word is in the matcher")
     void findManyFilteredNotWholeWord() {
-        List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("ongs");
+        List<UniqueVinyl> vinylList = uniqueVinylService.findByFilter("ongs");
         assertEquals(1, vinylList.size());
         assertEquals(uniqueVinyls.get(2), vinylList.get(0));
     }
@@ -173,7 +173,7 @@ public class DefaultUniqueVinylServiceITest {
     @Test
     @DisplayName("Return result when one letter is different")
     void findManyFilteredOneLetterIsDifferent() {
-        List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("bongs");
+        List<UniqueVinyl> vinylList = uniqueVinylService.findByFilter("bongs");
         assertEquals(1, vinylList.size());
         assertEquals(uniqueVinyls.get(2), vinylList.get(0));
     }
@@ -181,7 +181,7 @@ public class DefaultUniqueVinylServiceITest {
     @Test
     @DisplayName("Return some results when one letter is different")
     void findManyFilteredOneLetterIsDifferentSomeResults() {
-        List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("gelease");
+        List<UniqueVinyl> vinylList = uniqueVinylService.findByFilter("gelease");
         assertEquals(3, vinylList.size());
         assertFalse(vinylList.contains(uniqueVinyls.get(3)));
     }
@@ -189,7 +189,7 @@ public class DefaultUniqueVinylServiceITest {
     @Test
     @DisplayName("Return result when matcher is contains some words with mistake")
     void findManyFilteredSomeWordsWithMistakes() {
-        List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("acess word");
+        List<UniqueVinyl> vinylList = uniqueVinylService.findByFilter("acess word");
         assertEquals(1, vinylList.size());
         assertEquals(uniqueVinyls.get(1), vinylList.get(0));
     }
@@ -197,7 +197,7 @@ public class DefaultUniqueVinylServiceITest {
     @Test
     @DisplayName("Return result when matcher is contains some words with mistake and different order")
     void findManyFilteredSomeWordsWithMistakesDifferentOrder() {
-        List<UniqueVinyl> vinylList = uniqueVinylService.findManyFiltered("word acess");
+        List<UniqueVinyl> vinylList = uniqueVinylService.findByFilter("word acess");
         assertEquals(1, vinylList.size());
         assertEquals(uniqueVinyls.get(1), vinylList.get(0));
     }
@@ -209,7 +209,7 @@ public class DefaultUniqueVinylServiceITest {
         List<UniqueVinyl> expectedUniqueVinyls = dataGenerator.getUniqueVinylsList();
         expectedUniqueVinyls.subList(1, 4).clear();
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyByArtist("artist1");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByArtist("artist1");
         //then
         assertEquals(expectedUniqueVinyls, actualUniqueVinyls);
     }
@@ -218,7 +218,7 @@ public class DefaultUniqueVinylServiceITest {
     @DisplayName("Returns empty list by artist that has no matches with offers in the table")
     void findManyByArtistNoMatchesTest() {
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyByArtist("artist4");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByArtist("artist4");
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
     }
@@ -229,7 +229,7 @@ public class DefaultUniqueVinylServiceITest {
         //prepare
         uniqueVinylRepository.deleteAll();
         //when
-        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findManyByArtist("artist1");
+        List<UniqueVinyl> actualUniqueVinyls = uniqueVinylService.findByArtist("artist1");
         //then
         assertTrue(actualUniqueVinyls.isEmpty());
     }

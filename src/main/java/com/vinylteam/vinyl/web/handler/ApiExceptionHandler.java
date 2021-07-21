@@ -9,8 +9,8 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @ControllerAdvice
 public class ApiExceptionHandler {
 
-    @ExceptionHandler(value = {java.lang.RuntimeException.class})
-    public ResponseEntity<Object> handleApiExceptionHandler(java.lang.RuntimeException exception) {
+    @ExceptionHandler(value = {RuntimeException.class})
+    public ResponseEntity<Object> handleApiExceptionHandler(RuntimeException exception) {
         ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
                 exception.getMessage());
         return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);

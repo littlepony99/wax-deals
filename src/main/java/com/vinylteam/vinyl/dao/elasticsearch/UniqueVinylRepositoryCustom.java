@@ -5,8 +5,8 @@ import java.util.List;
 
 public interface UniqueVinylRepositoryCustom {
 
-    List<UniqueVinyl> findManyFiltered(String matcher);
+    List<UniqueVinyl> findByFilter(String matcher);
 
-    List<UniqueVinyl> findManyRandom(int amount);
+    List<UniqueVinyl> findRandom(int amount);
 
 }

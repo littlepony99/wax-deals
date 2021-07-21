@@ -33,6 +33,7 @@ public class SignInController {
     @GetMapping("/signIn")
     public String getSignInPage(@SessionAttribute(value = "user", required = false) User user,
                                 Model model) {
+
         WebUtils.setUserAttributes(user, model);
         return "signIn";
     }
@@ -43,6 +44,7 @@ public class SignInController {
                                HttpSession session,
                                @RequestParam(value = "email") String email,
                                @RequestParam(value = "password") String password) {
+
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("email", email);
         WebUtils.setUserAttributes(user, model);
@@ -58,17 +60,18 @@ public class SignInController {
     public ModelAndView confirmSignIn(@RequestParam(value = "token") String tokenAsString,
                                       @RequestParam(value = "email") String email,
                                       @RequestParam(value = "password") String password,
-                                      @Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval,
+                                      //@Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval,
                                       HttpSession session) {
+
         UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .token(tokenAsString)
                 .email(email)
                 .password(password)
                 .build();
+
         ModelAndView modelAndView = new ModelAndView();
         log.info("Sign in user with email {} and token {}", email, tokenAsString);
-        Optional<User> optionalUser = userService.confirmEmail(userProfileInfo);
-        User user = optionalUser.get();
+        User user = userService.confirmEmail(userProfileInfo);
         session.setMaxInactiveInterval(sessionMaxInactiveInterval);
         session.setAttribute("user", user);
         modelAndView.setStatus(HttpStatus.OK);

@@ -29,7 +29,7 @@ class DefaultOfferServiceTest {
         //prepare
         String id = null;
         //when
-        assertThrows(RuntimeException.class, () -> offerService.findManyByUniqueVinylId(id));
+        assertThrows(RuntimeException.class, () -> offerService.findByUniqueVinylId(id));
     }
 
     @Test
@@ -71,7 +71,7 @@ class DefaultOfferServiceTest {
         //prepare
         List<Integer> expectedIds = new ArrayList<>(List.of(1, 2));
         //when
-        List<Integer> actualIds = offerService.getListOfShopIds(offers);
+        List<Integer> actualIds = offerService.findShopIds(offers);
         //then
         assertEquals(expectedIds, actualIds);
     }
@@ -80,7 +80,7 @@ class DefaultOfferServiceTest {
     @DisplayName("Gets empty list of unique shop id-s from empty list of offers")
     void getListOfShopsIdsWithEmptyOffersListTest() {
         //when
-        List<Integer> actualIds = offerService.getListOfShopIds(new ArrayList<>());
+        List<Integer> actualIds = offerService.findShopIds(new ArrayList<>());
         //then
         assertTrue(actualIds.isEmpty());
     }
@@ -89,7 +89,7 @@ class DefaultOfferServiceTest {
     @DisplayName("Checks that when list of offers is null method returns empty list")
     void getListOfShopsIdsWithNullOffersListTest() {
         //when
-        List<Integer> actualIds = offerService.getListOfShopIds(null);
+        List<Integer> actualIds = offerService.findShopIds(null);
         //then
         assertTrue(actualIds.isEmpty());
     }
