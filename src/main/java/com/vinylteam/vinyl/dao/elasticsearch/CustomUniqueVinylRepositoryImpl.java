@@ -21,7 +21,7 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class UniqueVinylRepositoryCustomImpl implements UniqueVinylRepositoryCustom {
+public class CustomUniqueVinylRepositoryImpl implements CustomUniqueVinylRepository {
     private static final String INDEX = "unique_vinyl_index";
 
     private final ElasticsearchOperations elasticsearchOperations;
