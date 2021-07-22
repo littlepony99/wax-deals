@@ -29,11 +29,9 @@ class OneVinylOffersServiceImplTest {
     @InjectMocks
     private OneVinylOffersServiceImpl oneVinylService;
 
-    @Autowired
     @MockBean
     private OfferService offerService;
 
-    @Autowired
     @MockBean
     private UniqueVinylService uniqueVinylService;
 
