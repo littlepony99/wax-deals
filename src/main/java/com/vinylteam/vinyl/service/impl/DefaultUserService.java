@@ -175,7 +175,7 @@ public class DefaultUserService implements UserService {
     }
 
     boolean isNotEmptyNotNull(String string) {
-        return !StringUtils.isAllEmpty(string);
+        return !StringUtils.isBlank(string);
     }
 
 }

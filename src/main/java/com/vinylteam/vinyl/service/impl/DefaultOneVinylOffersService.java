@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class OneVinylOffersServiceImpl implements OneVinylOffersService {
+public class DefaultOneVinylOffersService implements OneVinylOffersService {
 
     private final UniqueVinylService uniqueVinylService;
     private final OfferService offerService;

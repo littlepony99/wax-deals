@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.service.impl.OneVinylOffersServiceImpl;
+import com.vinylteam.vinyl.service.impl.DefaultOneVinylOffersService;
 import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 @RequestMapping("/oneVinyl")
 public class OneVinylOfferController {
 
-    private final OneVinylOffersServiceImpl oneVinylOffersService;
+    private final DefaultOneVinylOffersService oneVinylOffersService;
 
     @GetMapping
     public String getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,

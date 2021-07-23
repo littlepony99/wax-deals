@@ -29,6 +29,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
 
     @Value("${application.link}")
     private String applicationLink;
+
     @Value("${recoveryToken.live.hours:24}")
     private int liveTokenHours;
 
@@ -81,7 +82,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         sendEmailWithLink(email, recoveryToken.getToken().toString());
     }
 
-    UUID stringToUUID(String token) {
+    private UUID stringToUUID(String token) {
         try {
             return UUID.fromString(token);
         } catch (IllegalArgumentException e) {
@@ -89,7 +90,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         }
     }
 
-    void sendEmailWithLink(String email, String recoveryToken) {
+    private void sendEmailWithLink(String email, String recoveryToken) {
         String recoveryLink = RECOVERY_MESSAGE.replace("{applicationLink}", applicationLink) + recoveryToken;
         String recoveryTopic = "Password Recovery - WaxDeals";
         try {
@@ -99,20 +100,20 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         }
     }
 
-    void checkPassword(String newPassword, String confirmPassword) {
+    private void checkPassword(String newPassword, String confirmPassword) {
         checkForIsNotEmptyNotNull(newPassword, PasswordRecoveryErrors.EMPTY_PASSWORD_ERROR);
         if (!newPassword.equals(confirmPassword)) {
             throw new RuntimeException(PasswordRecoveryErrors.PASSWORDS_NOT_EQUAL_ERROR.getMessage());
         }
     }
 
-    void checkForIsNotEmptyNotNull(String value, PasswordRecoveryErrors emptyValue) {
-        if (StringUtils.isAllEmpty(value)) {
+    private void checkForIsNotEmptyNotNull(String value, PasswordRecoveryErrors emptyValue) {
+        if (StringUtils.isBlank(value)) {
             throw new RuntimeException(emptyValue.getMessage());
         }
     }
 
-    RecoveryToken addRecoveryTokenWithUserId(long userId) {
+    private RecoveryToken addRecoveryTokenWithUserId(long userId) {
         UUID token = UUID.randomUUID();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);

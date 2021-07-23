@@ -23,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class OneVinylOffersServiceImplTest {
+class DefaultOneVinylOffersServiceTest {
 
     @Autowired
     @InjectMocks
-    private OneVinylOffersServiceImpl oneVinylService;
+    private DefaultOneVinylOffersService oneVinylService;
 
     @MockBean
     private OfferService offerService;
