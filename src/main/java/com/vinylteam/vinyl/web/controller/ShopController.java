@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.service.ShopService;
+import com.vinylteam.vinyl.util.impl.ShopMapper;
 import com.vinylteam.vinyl.web.dto.ShopDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +25,8 @@ public class ShopController {
     public List<ShopDto> getShopPage() {
         var shopList = shopService.findAll();
         List<ShopDto> result = new ArrayList<>();
-        if (null != shopList && !shopList.isEmpty()) {
-            for (Shop shop : shopList) {
-                result.add(ShopDto.toDto(shop));
-            }
+        for (Shop shop : shopList) {
+            result.add(ShopMapper.INSTANCE.userToUserDto(shop));
         }
         log.info("Shops list is prepared to be included in response, size {'shopsListSize':{}}", result.size());
         return result;
