@@ -20,13 +20,14 @@ import java.util.List;
 public class ShopController {
 
     private final ShopService shopService;
+    private final ShopMapper shopMapper;
 
     @GetMapping
     public List<ShopDto> getShopPage() {
         var shopList = shopService.findAll();
         List<ShopDto> result = new ArrayList<>();
         for (Shop shop : shopList) {
-            result.add(ShopMapper.INSTANCE.userToUserDto(shop));
+            result.add(shopMapper.userToUserDto(shop));
         }
         log.info("Shops list is prepared to be included in response, size {'shopsListSize':{}}", result.size());
         return result;
