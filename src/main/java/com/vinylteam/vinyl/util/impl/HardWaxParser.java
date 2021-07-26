@@ -136,7 +136,7 @@ public class HardWaxParser extends VinylParser {
     Set<String> getAllPagesByGenres(Set<String> allGenres) {
         return allGenres
                 .stream()
-                .flatMap(genre -> getAllPagesByGenre(genre+URL_FILTER_PARAMETER).stream())
+                .flatMap(genre -> getAllPagesByGenre(genre + URL_FILTER_PARAMETER).stream())
                 .collect(toSet());
     }
 
@@ -144,7 +144,7 @@ public class HardWaxParser extends VinylParser {
         Set<String> allPages = getDocument(genreLink)
                 .stream()
                 .flatMap(document -> document.select(PRELIMINARY_PAGE_LINK_SELECTOR).stream())
-                .map(pageLink -> genreLink + URL_FILTER_PARAMETER + pageLink.attr("href").replace("?","&"))
+                .map(pageLink -> genreLink + URL_FILTER_PARAMETER + pageLink.attr("href").replace("?", "&"))
                 .collect(toSet());
         if (allPages.isEmpty()) {
             return Set.of(genreLink);
@@ -199,7 +199,7 @@ public class HardWaxParser extends VinylParser {
 
     String getGenreFromLink(String pageLink) {
         Matcher matcher = GENRE_PATTERN.matcher(pageLink);
-        if (matcher.find()){
+        if (matcher.find()) {
             return matcher.group(1);
         }
         return "";
@@ -225,6 +225,6 @@ public class HardWaxParser extends VinylParser {
             String inStockText = document.select(config.getInStockMarkerSelector()).text();
             return !inStockText.contains(config.getInStockMarker());
         }
-        
+
     }
 }

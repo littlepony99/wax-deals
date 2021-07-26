@@ -1,9 +1,8 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.RecoveryPasswordException;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
-import com.vinylteam.vinyl.web.dto.UserChangeProfileInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +31,7 @@ public class PasswordRecoveryController {
     public ModelAndView sendRecoveryToken(@SessionAttribute(value = "user", required = false) User user,
                                           @RequestParam(value = "email") String email,
                                           Model model) {
+
         ModelAndView modelAndView = new ModelAndView("recoveryPassword");
         model.addAttribute("email", email);
         WebUtils.setUserAttributes(user, model);
@@ -41,7 +41,7 @@ public class PasswordRecoveryController {
             modelAndView.setStatus(HttpStatus.OK);
             log.debug("Set response status to {'status':{}}", HttpStatus.OK);
             model.addAttribute("message", "Follow the link that we sent you by email - " + email);
-        } catch (RecoveryPasswordException e) {
+        } catch (RuntimeException e) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
             log.error(e.getMessage());
@@ -54,12 +54,13 @@ public class PasswordRecoveryController {
     public ModelAndView getChangePasswordPage(@SessionAttribute(value = "user", required = false) User user,
                                               @RequestParam(value = "token") String token,
                                               Model model) {
+
         WebUtils.setUserAttributes(user, model);
         ModelAndView modelAndView = new ModelAndView("newPassword");
         try {
             passwordRecoveryService.checkToken(token);
             modelAndView.addObject("recoveryToken", token);
-        } catch (RecoveryPasswordException e) {
+        } catch (RuntimeException e) {
             log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
             modelAndView.addObject("errorMessage", e.getMessage());
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
@@ -73,10 +74,11 @@ public class PasswordRecoveryController {
                                        @RequestParam(value = "confirmPassword") String confirmPassword,
                                        @RequestParam(value = "recoveryToken") String token,
                                        Model model) {
+
         WebUtils.setUserAttributes(user, model);
-        UserChangeProfileInfoRequest userProfileInfo = UserChangeProfileInfoRequest.builder()
+        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .newPassword(newPassword)
-                .confirmNewPassword(confirmPassword)
+                .newPasswordConfirmation(confirmPassword)
                 .token(token)
                 .build();
         ModelAndView modelAndView = new ModelAndView("signIn");
@@ -84,7 +86,7 @@ public class PasswordRecoveryController {
             passwordRecoveryService.changePassword(userProfileInfo);
             modelAndView.setStatus(HttpStatus.SEE_OTHER);
             modelAndView.addObject("message", "Your password was changed. Please, try to log in use new password.");
-        } catch (RecoveryPasswordException e) {
+        } catch (RuntimeException e) {
             modelAndView.setStatus(HttpStatus.BAD_REQUEST);
             log.debug("Set response status to {'status':{}}, error - {}", HttpStatus.BAD_REQUEST, e.getMessage());
             modelAndView.addObject("message", e.getMessage());

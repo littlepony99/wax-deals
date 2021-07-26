@@ -84,7 +84,7 @@ class JdbcPasswordRecoveryDaoITest {
     @Test
     @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class)
-    @DisplayName("Add new recovery token if this token already exist into recovery_password table in db")
+    @DisplayName("Add new recovery token if this uuid token already exist into recovery_password table in db")
     void addRecoveryTokenIfTokenAlreadyExist() {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2);
@@ -95,7 +95,19 @@ class JdbcPasswordRecoveryDaoITest {
 
     @Test
     @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @DisplayName("Get optional recovery token by token from Recovery_token in db")
+    @ExpectedDataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class)
+    @DisplayName("Add new recovery token if uuid token is null into recovery_password table in db")
+    void addRecoveryTokenNullToken() {
+        //prepare
+        RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(2);
+        recoveryToken.setToken(null);
+        //when
+        assertThrows(DataAccessException.class, () -> passwordRecoveryDao.add(recoveryToken));
+    }
+
+    @Test
+    @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DisplayName("Find optional recovery token by token from Recovery_token in db")
     void getRecoveryTokenByToken() {
         //when
         Optional<RecoveryToken> optionalRecoveryToken = passwordRecoveryDao.findByToken(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
@@ -105,7 +117,7 @@ class JdbcPasswordRecoveryDaoITest {
 
     @Test
     @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @DisplayName("Try get token if it doesn't exist into recovery_password in db")
+    @DisplayName("Try finding token if token with this uuid token doesn't exist in recovery_password in db")
     void getRecoveryTokenByTokenIfTokenDoesNotExist() {
         //when
         Optional<RecoveryToken> optionalRecoveryToken = passwordRecoveryDao.findByToken(UUID.randomUUID());

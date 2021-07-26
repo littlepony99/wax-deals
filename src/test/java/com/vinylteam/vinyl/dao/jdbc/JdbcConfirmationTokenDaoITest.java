@@ -8,13 +8,12 @@ import com.github.database.rider.spring.api.DBRider;
 import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.data.TestConfirmationTokenProvider;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -119,7 +118,7 @@ class JdbcConfirmationTokenDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, executeStatementsBefore = "SELECT setval('confirmation_tokens_id_seq', 3, false);", cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Throws DataIntegrityViolationException when there is user with status false with this user_id and token with same userId exists")
     void addDuplicateUserId() {
         //prepare
@@ -128,11 +127,13 @@ class JdbcConfirmationTokenDaoITest {
                 .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))
                 .build();
         //when
-        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        //then
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
-    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, executeStatementsBefore = "SELECT setval('confirmation_tokens_id_seq', 3, false);", cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Throws DataIntegrityViolationException when there is no user with given userId")
     void addNotExistingUserId() {
         //prepare
@@ -141,11 +142,13 @@ class JdbcConfirmationTokenDaoITest {
                 .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440002"))
                 .build();
         //when
-        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        //then
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
-    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, executeStatementsBefore = "SELECT setval('confirmation_tokens_id_seq', 3, false);", cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Throws DuplicateKeyException when confirmation token with same token exists")
     void addExistingTokenValidUserId() {
         //prepare
@@ -154,7 +157,9 @@ class JdbcConfirmationTokenDaoITest {
                 .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440000"))
                 .build();
         //when
-        assertThrows(DuplicateKeyException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.add(confirmationToken));
+        //then
+        assertEquals(EmailConfirmationErrors.CAN_NOT_ADD_LINK_FOR_EMAIL.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -173,6 +178,20 @@ class JdbcConfirmationTokenDaoITest {
 
     @Test
     @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @ExpectedDataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class)
+    @DisplayName("Update when confirmation token with that user_id doesn't exist")
+    void updateNonExistentUserId() {
+        //prepare
+        ConfirmationToken expectedConfirmationToken = ConfirmationToken.builder()
+                .userId(3)
+                .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440020"))
+                .build();
+        //when
+        jdbcConfirmationTokenDao.update(expectedConfirmationToken);
+    }
+
+    @Test
+    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Throws DuplicateKeyException when updating confirmation token with uuid token that already exists in the table in another confirmation token")
     void updateWithTokenWithDuplicateUUIDToken() {
         //prepare
@@ -181,20 +200,9 @@ class JdbcConfirmationTokenDaoITest {
                 .token(UUID.fromString("123e4567-e89b-12d3-a456-556642440001"))
                 .build();
         //when
-        assertThrows(DuplicateKeyException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
-    }
-
-    @Test
-    @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
-    @DisplayName("Throws DataIntegrityViolationException when updating confirmation token with null token")
-    void updateWithTokenWithNullUUIDToken() {
-        //prepare
-        ConfirmationToken confirmationToken = ConfirmationToken.builder()
-                .userId(2)
-                .token(null)
-                .build();
-        //when
-        assertThrows(DataIntegrityViolationException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
+        Exception exception = assertThrows(RuntimeException.class, () -> jdbcConfirmationTokenDao.update(confirmationToken));
+        //then
+        assertEquals(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage(), exception.getMessage());
     }
 
     @Test

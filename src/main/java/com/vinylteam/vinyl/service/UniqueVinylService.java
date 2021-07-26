@@ -10,15 +10,15 @@ public interface UniqueVinylService {
 
     List<UniqueVinyl> findAll();
 
-    UniqueVinyl findById(long id);
+    UniqueVinyl findById(String id);
 
-    List<UniqueVinyl> findManyRandom(int amount);
+    List<UniqueVinyl> findRandom(int amount);
 
-    List<UniqueVinyl> findManyFiltered(String matcher);
+    List<UniqueVinyl> findByFilter(String matcher);
 
-    List<UniqueVinyl> findManyByArtist(String artist);
+    List<UniqueVinyl> findByArtist(String artist);
 
-    UniqueVinyl updateOneUniqueVinylAsHavingNoOffer(UniqueVinyl vinyl);
+    void updateOneUniqueVinyl(UniqueVinyl vinyl);
 
     void prepareCatalog(User user, Model model, String wantList);
 

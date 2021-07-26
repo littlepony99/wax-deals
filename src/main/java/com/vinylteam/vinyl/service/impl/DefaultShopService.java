@@ -17,7 +17,7 @@ public class DefaultShopService implements ShopService {
 
     private final ShopDao shopDao;
 
-    public List<Shop> getManyByListOfIds(List<Integer> ids) {
+    public List<Shop> findShopsByListOfIds(List<Integer> ids) {
         List<Shop> shops;
         if (ids != null) {
             shops = shopDao.findByListOfIds(ids);

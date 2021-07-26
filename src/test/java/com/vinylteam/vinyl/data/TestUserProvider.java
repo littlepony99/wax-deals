@@ -20,7 +20,19 @@ public class TestUserProvider {
     public static class AddedUserResultProvider implements DataSetProvider {
         @Override
         public IDataSet provide() {
-            System.out.println("ResultProvider");
+            return new DataSetBuilder()
+                    .table("users")
+                    .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .values("user1@wax-deals.com", "salt1", "1", "hash1", "false", "USER", "discogsUserName1")
+                    .values("user2@wax-deals.com", "salt2", "2", "hash2", "false", "USER", "discogsUserName2")
+                    .build();
+        }
+
+    }
+
+    public static class UsersBeforeUpdateResultProvider implements DataSetProvider {
+        @Override
+        public IDataSet provide() {
             return new DataSetBuilder()
                     .table("users")
                     .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
@@ -37,6 +49,7 @@ public class TestUserProvider {
             return new DataSetBuilder()
                     .table("users")
                     .columns("email", "salt", "iterations", "password", "status", "role", "discogs_user_name")
+                    .values("user1@wax-deals.com", "salt1", "1", "hash1", "false", "USER", "discogsUserName1")
                     .values("user3@wax-deals.com", "salt3", "3", "hash3", "false", "USER", "discogsUserName3")
                     .build();
         }

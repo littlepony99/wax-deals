@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.security.impl;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -52,7 +54,7 @@ public class DefaultSecurityService implements SecurityService {
     }
 
     @Override
-    public boolean checkPasswordAgainstUserPassword(User user, char[] password) {
+    public boolean validateIfPasswordMatches(User user, char[] password) {
         boolean isSame = false;
         if (user != null) {
             isSame = (user.getPassword().equals(hashPassword(password,
@@ -61,6 +63,28 @@ public class DefaultSecurityService implements SecurityService {
         }
         log.debug("Result of comparing password against user's password is {'isSame': {}, 'user':{}}", isSame, user);
         return isSame;
+    }
+
+    @Override
+    public void validatePassword(String password, String confirmationPassword) {
+        if (!Objects.equals(password, confirmationPassword)) {
+            throw new RuntimeException(UserErrors.PASSWORDS_NOT_EQUAL_ERROR.getMessage());
+        }
+        validatePassword(password);
+    }
+
+    @Override
+    public void emailFormatCheck(String email) {
+        if (!email.matches("/^[^\\s@]+@[^\\s@]+$/")) {
+            throw new RuntimeException(UserErrors.INVALID_EMAIL_ERROR.getMessage());
+        }
+    }
+
+    @Override
+    public void validatePassword(String password) {
+        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
+            throw new RuntimeException(UserErrors.INVALID_PASSWORD_ERROR.getMessage());
+        }
     }
 
     String hashPassword(char[] password, byte[] salt, int iterations) {

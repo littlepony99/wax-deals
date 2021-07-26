@@ -2,9 +2,9 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.entity.CaptchaResponse;
 import com.vinylteam.vinyl.service.CaptchaService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -15,17 +15,15 @@ import java.util.Objects;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DefaultCaptchaService implements CaptchaService {
-
     private final RestTemplate template;
+
     @Value("${google.recaptcha.verification.endpoint}")
     private String recaptchaEndpoint;
+
     @Value("${google.recaptcha.secret}")
     private String recaptchaSecret;
-
-    public DefaultCaptchaService(RestTemplateBuilder templateBuilder) {
-        this.template = templateBuilder.build();
-    }
 
     @Override
     public boolean validateCaptcha(String captchaResponse) {

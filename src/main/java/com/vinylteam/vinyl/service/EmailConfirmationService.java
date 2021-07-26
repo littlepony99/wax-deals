@@ -4,7 +4,7 @@ import com.vinylteam.vinyl.entity.ConfirmationToken;
 
 import java.util.Optional;
 
-public interface ConfirmationService {
+public interface EmailConfirmationService {
 
     Optional<ConfirmationToken> findByToken(String token);
 

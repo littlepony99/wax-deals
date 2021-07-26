@@ -28,7 +28,7 @@ public class SearchResultsController {
     public String getSearchResultPage(@SessionAttribute(value = "user", required = false) User user,
                                       @RequestParam(value = "matcher") String matcher,
                                       Model model) {
-        List<UniqueVinyl> filteredUniqueVinyls = vinylService.findManyFiltered(matcher);
+        List<UniqueVinyl> filteredUniqueVinyls = vinylService.findByFilter(matcher);
         model.addAttribute("matcher", matcher);
         WebUtils.setUserAttributes(user, model);
         WebUtils.setModelContext(filteredUniqueVinyls, new ArrayList<>(), model);

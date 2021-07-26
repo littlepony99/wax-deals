@@ -1,6 +1,5 @@
-package com.vinylteam.vinyl.dao.jdbc.mapper;
+package com.vinylteam.vinyl.dao.jdbc.extractor;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.ConfirmationTokenResultSetExtractor;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.ResultSetExtractor;

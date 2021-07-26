@@ -6,6 +6,12 @@ public interface SecurityService {
 
     User createUserWithHashedPassword(String email, char[] password);
 
-    boolean checkPasswordAgainstUserPassword(User user, char[] password);
+    boolean validateIfPasswordMatches(User user, char[] password);
+
+    void validatePassword(String password, String confirmationPassword);
+
+    void validatePassword(String password);
+
+    void emailFormatCheck(String email);
 
 }

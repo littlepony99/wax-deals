@@ -9,12 +9,14 @@ import java.util.List;
 
 public interface OfferService {
 
-    List<Offer> findManyByUniqueVinylId(long uniqueVinylId);
+    List<Offer> findByUniqueVinylId(String uniqueVinylId);
 
     void updateUniqueVinylsRewriteAll(List<UniqueVinyl> uniqueVinyls, List<Offer> offers);
 
-    List<Integer> getListOfShopIds(List<Offer> offers);
+    List<Integer> findShopIds(List<Offer> offers);
 
-    void mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer);
+    Offer mergeOfferChanges(Offer offer, VinylParser shopParser, RawOffer dynamicOffer);
+
+    Offer actualizeOffer(Offer dbOffer);
 
 }
