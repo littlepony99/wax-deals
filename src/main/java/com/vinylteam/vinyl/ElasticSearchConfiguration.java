@@ -35,7 +35,7 @@ public class ElasticSearchConfiguration extends AbstractElasticsearchConfigurati
     private String elasticsearchUserPassword;
 
     @Value("${elasticsearch.port}")
-    private int elasticsearchPort;
+    private Integer elasticsearchPort;
 
     @Value("${elasticsearch.protocol}")
     private String elasticsearchProtocol;

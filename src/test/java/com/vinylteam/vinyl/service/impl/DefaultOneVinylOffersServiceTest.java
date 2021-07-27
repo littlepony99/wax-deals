@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
+import com.vinylteam.vinyl.service.ShopService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
@@ -34,6 +35,9 @@ class DefaultOneVinylOffersServiceTest {
 
     @MockBean
     private UniqueVinylService uniqueVinylService;
+
+    @MockBean
+    private ShopService shopService;
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
@@ -67,8 +71,12 @@ class DefaultOneVinylOffersServiceTest {
     @Test
     @DisplayName("Checks whether OneVinylOffersServletResponse`s list is prepared based on offers list")
     void prepareOffersSection() {
+        //prepare
         List<Shop> shopsList = dataGenerator.getShopsList();
         List<Offer> offers = dataGenerator.getOffersList();
+
+        //when
+        when(shopService.findShopsByListOfIds(any())).thenReturn(shopsList);
         when(offerService.actualizeOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
         when(offerService.mergeOfferChanges(any(), any(), any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
         when(offerService.findShopIds(any())).thenReturn(List.of(1, 2));//thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);

@@ -29,9 +29,9 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public void register(UserInfoRequest userProfileInfo) {
-        String email = userProfileInfo.getEmail();
-        String password = userProfileInfo.getPassword();
+    public void register(UserInfoRequest userInfoRequest) {
+        String email = userInfoRequest.getEmail();
+        String password = userInfoRequest.getPassword();
         if (!isNotEmptyNotNull(email)) {
             throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
         }
@@ -39,10 +39,10 @@ public class DefaultUserService implements UserService {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
         securityService.emailFormatCheck(email);
-        securityService.validatePassword(password, userProfileInfo.getPasswordConfirmation());
+        securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService
                 .createUserWithHashedPassword(email, password.toCharArray());
-        userToAdd.setDiscogsUserName(userProfileInfo.getDiscogsUserName());
+        userToAdd.setDiscogsUserName(userInfoRequest.getDiscogsUserName());
         long userId;
         try {
             userId = userDao.add(userToAdd);

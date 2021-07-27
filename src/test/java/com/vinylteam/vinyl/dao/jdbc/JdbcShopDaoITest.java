@@ -5,7 +5,6 @@ import com.github.database.rider.core.api.configuration.DBUnit;
 import com.github.database.rider.core.api.configuration.Orthography;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.github.database.rider.spring.api.DBRider;
-import com.vinylteam.vinyl.WaxDealsPostgresqlContainer;
 import com.vinylteam.vinyl.dao.ShopDao;
 import com.vinylteam.vinyl.data.TestShopProvider;
 import com.vinylteam.vinyl.entity.Shop;
@@ -15,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -33,16 +30,18 @@ class JdbcShopDaoITest {
     @Autowired
     private ShopDao shopDao;
 
+/*
     @Container
     public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
+*/
 
-    @DynamicPropertySource
+/*    @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
         container.start();
         registry.add("spring.datasource.url", container::getJdbcUrl);
         registry.add("spring.datasource.username", container::getUsername);
         registry.add("spring.datasource.password", container::getPassword);
-    }
+    }*/
 
     @Test
     @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
@@ -67,7 +66,7 @@ class JdbcShopDaoITest {
     }
 
     @Test
-    @DataSet(cleanBefore = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets empty list of all shops from empty table")
     void findAllShopsFromEmptyTable() throws SQLException {
         //when
@@ -101,7 +100,7 @@ class JdbcShopDaoITest {
     }
 
     @Test
-    @DataSet(cleanBefore = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets empty list of shops with list id-s from empty table")
     void getManyByListOfIdsFromEmptyTable() throws SQLException {
         //prepare
