@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/emailConfirmation")
+@CrossOrigin(origins = { "http://localhost:3000", "http://react-wax-deals.herokuapp.com" })
 public class EmailConfirmationController {
 
     private final EmailConfirmationService emailConfirmationService;
