@@ -22,7 +22,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.vinylteam.vinyl.dao.elasticsearch")
-@PropertySource({"classpath:application.properties"})
 public class ElasticSearchConfiguration extends AbstractElasticsearchConfiguration {
 
     @Value("${elasticsearch.host}")
