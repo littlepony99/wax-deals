@@ -29,7 +29,6 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public void prepareCatalog(User user, Model model, String wantList) {
-
     }
 
     @Override
