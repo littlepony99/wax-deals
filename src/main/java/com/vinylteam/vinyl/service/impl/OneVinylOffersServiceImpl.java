@@ -94,7 +94,7 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     }
 
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
-        List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
+        List<UniqueVinyl> preparedListById = new ArrayList<>();
 
         uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
                 .stream()
