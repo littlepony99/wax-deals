@@ -38,11 +38,11 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
 
         // find offers for uniqyeVinyl
-        List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());
+        List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
         // find shopIds for offers
-        List<Integer> shopIds = offerService.getListOfShopIds(offers);
+        List<Integer> shopIds = offerService.findShopIds(offers);
         // find shops by their ids
-        List<Shop> shopsFromOffers = shopService.getManyByListOfIds(shopIds);
+        List<Shop> shopsFromOffers = shopService.findShopsByListOfIds(shopIds);
 
         // 1 prepare offers -- validate and parse
         List<OneVinylOfferDto> offersList = prepareOffersSection(offers, shopsFromOffers);
@@ -72,13 +72,13 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOfferDto> offersResponseList) {
         if (offersResponseList.isEmpty()) {
             uniqueVinyl.setHasOffers(false);
-            uniqueVinylService.updateOneUniqueVinylAsHavingNoOffer(uniqueVinyl);
+            uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
         }
     }
 
     List<OneVinylOfferDto> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
         return dbOffers.stream()
-                .map(offerService::getActualizedOffer)
+                .map(offerService::actualizeOffer)
                 .filter(Offer::isInStock)
                 .map(offer -> offerMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shopsList, offer)))
                 .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
@@ -96,7 +96,7 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
         List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
 
-        uniqueVinylService.findManyByArtist(uniqueVinyl.getArtist())
+        uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
                 .stream()
                 .filter(v -> v.getId() != uniqueVinyl.getId())
                 .forEach(preparedListById::add);

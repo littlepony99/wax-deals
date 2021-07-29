@@ -32,7 +32,7 @@ public class OneVinylOfferController {
         OneVinylPageDto result = OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
                 .offersResponseList(offers)
-                .preparedVinylsList(uniqueVinylMapper.listVinylsToListVinylsDto(vinyls))
+                .preparedVinylsList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
                 .build();
         return result;
     }

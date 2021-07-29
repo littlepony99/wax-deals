@@ -84,7 +84,7 @@ public class OneVinylOfferControllerTest {
         when(oneVinylOffersService.addAuthorVinyls(any(UniqueVinyl.class))).thenReturn(authorVinyls);
         when(oneVinylOffersService.getDiscogsLink(any(UniqueVinyl.class))).thenReturn("www.disckogs.com");
         // when
-        MockHttpServletResponse response = mockMvc.perform(get("/oneVinyl?id=1"))
+        MockHttpServletResponse response = mockMvc.perform(get("/oneVinyl").param("id", "1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
 
                 .andExpect(status().isOk()).andReturn().getResponse();
@@ -93,6 +93,7 @@ public class OneVinylOfferControllerTest {
         Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
         Assertions.assertEquals("application/json", response.getContentType());
         Assertions.assertNotNull(response.getContentAsString());
+        System.out.println(response.getContentAsString());
         System.out.println(response.getContentAsString());
     }
 
@@ -103,13 +104,11 @@ public class OneVinylOfferControllerTest {
                 .imageLink("imageLine")
                 .id("123")
                 .hasOffers(true)
-                .fullName("funn lame")
                 .artist("artist")
                 .build();
-        UniqueVinylDto dto = uniqueVinylMapper.map(vinyl);
+        UniqueVinylDto dto = uniqueVinylMapper.uniqueVinylToDto(vinyl);
         Assertions.assertEquals(dto.getId(), vinyl.getId());
         Assertions.assertEquals(dto.getArtist(), vinyl.getArtist());
-        Assertions.assertEquals(dto.getFullName(), vinyl.getFullName());
         Assertions.assertEquals(dto.getImageLink(), vinyl.getImageLink());
         Assertions.assertEquals(dto.getRelease(), vinyl.getRelease());
     }
@@ -126,11 +125,10 @@ public class OneVinylOfferControllerTest {
                 .artist("artist")
                 .build();
         vinylList.add(vinyl);
-        List<UniqueVinylDto> dto = uniqueVinylMapper.listVinylsToListVinylsDto(vinylList);
+        List<UniqueVinylDto> dto = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinylList);
         Assertions.assertEquals(dto.get(0).getId(), vinylList.get(0).getId());
         Assertions.assertEquals(dto.get(0).getRelease(), vinylList.get(0).getRelease());
         Assertions.assertEquals(dto.get(0).getImageLink(), vinylList.get(0).getImageLink());
-        Assertions.assertEquals(dto.get(0).getFullName(), vinylList.get(0).getFullName());
         Assertions.assertEquals(dto.get(0).getArtist(), vinylList.get(0).getArtist());
     }
 }

@@ -10,6 +10,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UniqueVinylMapper {
 
+    UniqueVinylDto uniqueVinylToDto(UniqueVinyl uniqueVinyl);
+
     List<UniqueVinylDto> uniqueVinylsToUniqueVinylDtoList(List<UniqueVinyl> uniqueVinyls);
 
 }
