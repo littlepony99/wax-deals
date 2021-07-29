@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 public class ShopControllerTest {
+
     @Autowired
     private ShopController shopController;
     @Autowired

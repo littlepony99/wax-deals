@@ -15,7 +15,7 @@ import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 @RequestMapping("/catalog")
 @CrossOrigin(origins = { "http://localhost:3000", "http://react-wax-deals.herokuapp.com" })
 public class CatalogController {
@@ -24,9 +24,7 @@ public class CatalogController {
     private final UniqueVinylMapper uniqueVinylMapper;
 
     @GetMapping
-    public List<UniqueVinylDto> getCatalogPage(@SessionAttribute(value = "user", required = false) User user,
-                                               @RequestParam(value = "wantlist", required = false) String wantList,
-                                               Model model) {
+    public List<UniqueVinylDto> getCatalogPage() {
         List<UniqueVinyl> uniqueVinyls = uniqueVinylService.findRandom(50);
         return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinyls);
     }

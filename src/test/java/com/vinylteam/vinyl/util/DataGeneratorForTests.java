@@ -2,6 +2,7 @@
 package com.vinylteam.vinyl.util;
 
 import com.vinylteam.vinyl.entity.*;
+import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 import java.sql.Timestamp;
@@ -250,6 +251,23 @@ public class DataGeneratorForTests {
                 .newPasswordConfirmation("newPassword")
                 .discogsUserName("newDiscogsUserName")
                 .build();
+    }
+
+    public UniqueVinylDto getUniqueVinylDtoFromUniqueVinyl(UniqueVinyl uniqueVinyl) {
+        return UniqueVinylDto.builder()
+                .id(uniqueVinyl.getId())
+                .artist(uniqueVinyl.getArtist())
+                .release(uniqueVinyl.getRelease())
+                .imageLink(uniqueVinyl.getImageLink())
+                .build();
+    }
+
+    public List<UniqueVinylDto> getUniqueVinylDtoListFromUniqueVinylList(List<UniqueVinyl> uniqueVinyls) {
+        List<UniqueVinylDto> uniqueVinylDtoList = new ArrayList<>();
+        for (UniqueVinyl uniqueVinyl : uniqueVinyls) {
+            uniqueVinylDtoList.add(getUniqueVinylDtoFromUniqueVinyl(uniqueVinyl));
+        }
+        return  uniqueVinylDtoList;
     }
 
 }
