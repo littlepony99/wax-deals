@@ -12,7 +12,7 @@ import org.mapstruct.Named;
 import java.util.Optional;
 
 @Mapper(componentModel = "spring", uses = ShopController.class)
-public interface OnyVinylOfferMapper {
+public interface OneVinylOfferMapper {
     @Mappings({
             @Mapping(target = "shopImageLink", constant = "shop.smallImageLink"),
             @Mapping(target = "currency", source = "offer.currency", qualifiedByName = "currency")

@@ -22,17 +22,19 @@ public class OneVinylOfferController {
     private final OneVinylOffersServiceImpl oneVinylOffersService;
     private final UniqueVinylMapper uniqueVinylMapper;
 
-    @GetMapping
+    @GetMapping("/{id}")
     public OneVinylPageDto getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
-                                                @RequestParam(value = "id") String identifier) {
-        UniqueVinyl uniqueVinyl = oneVinylOffersService.getUniqueVinyl(identifier);
-        List<OneVinylOfferDto> offers = oneVinylOffersService.getOffers(identifier);
+                                                @PathVariable("id") String id) {
+        UniqueVinyl uniqueVinyl = oneVinylOffersService.getUniqueVinyl(id);
+        List<OneVinylOfferDto> offers = oneVinylOffersService.getOffers(id);
         List<UniqueVinyl> vinyls = oneVinylOffersService.addAuthorVinyls(uniqueVinyl);
+        vinyls.remove(uniqueVinyl);
         String discogsLink = oneVinylOffersService.getDiscogsLink(uniqueVinyl);
         OneVinylPageDto result = OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
-                .offersResponseList(offers)
-                .preparedVinylsList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
+                .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
+                .offersList(offers)
+                .vinylsByArtistList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
                 .build();
         return result;
     }

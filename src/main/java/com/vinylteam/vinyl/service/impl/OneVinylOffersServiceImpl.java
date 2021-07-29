@@ -4,7 +4,7 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
-import com.vinylteam.vinyl.util.impl.OnyVinylOfferMapper;
+import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
-    private final OnyVinylOfferMapper offerMapper;
+    private final OneVinylOfferMapper offerMapper;
 
     public UniqueVinyl getUniqueVinyl(String id) {
         return uniqueVinylService.findById(id);

@@ -11,9 +11,11 @@ import java.util.List;
 @AllArgsConstructor
 public class OneVinylPageDto {
 
-    List<OneVinylOfferDto> offersResponseList;
+    List<OneVinylOfferDto> offersList;
 
-    List<UniqueVinylDto> preparedVinylsList;
+    UniqueVinylDto mainVinyl;
+
+    List<UniqueVinylDto> vinylsByArtistList;
 
     String discogsLink;
 
