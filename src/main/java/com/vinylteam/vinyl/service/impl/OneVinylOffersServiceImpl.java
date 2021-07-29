@@ -4,9 +4,8 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
-import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
-import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
-import com.vinylteam.vinyl.web.util.WebUtils;
+import com.vinylteam.vinyl.util.impl.OnyVinylOfferMapper;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
@@ -26,32 +25,41 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
+    private final OnyVinylOfferMapper offerMapper;
+
+    public UniqueVinyl getUniqueVinyl(String id) {
+        return uniqueVinylService.findById(id);
+    }
 
     @Override
-    public OneVinylPageFullResponse prepareOneVinylInfo(String id) {
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
+    public List<OneVinylOfferDto> getOffers(String identifier) {
+        String uniqueVinylId = identifier;
+        // find vinyl
+        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
 
-        List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
+        // find offers for uniqyeVinyl
+        List<Offer> offers = offerService.findManyByUniqueVinylId(uniqueVinyl.getId());
+        // find shopIds for offers
+        List<Integer> shopIds = offerService.getListOfShopIds(offers);
+        // find shops by their ids
+        List<Shop> shopsFromOffers = shopService.getManyByListOfIds(shopIds);
 
-        List<OneVinylOffersServletResponse> offersResponseList = prepareOffersSection(offers);
+        // 1 prepare offers -- validate and parse
+        List<OneVinylOfferDto> offersList = prepareOffersSection(offers, shopsFromOffers);
+        // if there is no offers
+        checkIsVinylInStock(uniqueVinyl, offersList);
 
-        checkIsVinylInStock(uniqueVinyl, offersResponseList);
-
-        List<UniqueVinyl> preparedVinylsList = prepareVinylsSection(uniqueVinyl);
-
-        String discogsLink = getDiscogsLink(uniqueVinyl);
-
-        return new OneVinylPageFullResponse(offersResponseList, preparedVinylsList, discogsLink);
+        return offersList;
     }
 
-    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOffersServletResponse> offersResponseList) {
-        if (offersResponseList.isEmpty()) {
-            uniqueVinyl.setHasOffers(false);
-            uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
-        }
+    @Override
+    public List<UniqueVinyl> addAuthorVinyls(UniqueVinyl uniqueVinyl) {
+        // 2 add artists vinyls to searchable vinyl
+        return prepareVinylsSection(uniqueVinyl);
     }
 
-    String getDiscogsLink(UniqueVinyl uniqueVinyl) {
+    @Override
+    public String getDiscogsLink(UniqueVinyl uniqueVinyl) {
         try {
             return discogsService.getDiscogsLink(uniqueVinyl.getArtist(),
                     uniqueVinyl.getRelease(), uniqueVinyl.getFullName());
@@ -61,13 +69,18 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         }
     }
 
-    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers) {
-        List<Integer> shopIds = offerService.findShopIds(dbOffers);
-        List<Shop> shopsList = shopService.findShopsByListOfIds(shopIds);
+    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOfferDto> offersResponseList) {
+        if (offersResponseList.isEmpty()) {
+            uniqueVinyl.setHasOffers(false);
+            uniqueVinylService.updateOneUniqueVinylAsHavingNoOffer(uniqueVinyl);
+        }
+    }
+
+    List<OneVinylOfferDto> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
         return dbOffers.stream()
-                .map(offerService::actualizeOffer)
+                .map(offerService::getActualizedOffer)
                 .filter(Offer::isInStock)
-                .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
+                .map(offer -> offerMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shopsList, offer)))
                 .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
                 .collect(Collectors.toList());
     }
@@ -83,9 +96,9 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
         List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
 
-        uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
+        uniqueVinylService.findManyByArtist(uniqueVinyl.getArtist())
                 .stream()
-                .filter(v -> !v.getId().equals(uniqueVinyl.getId()))
+                .filter(v -> v.getId() != uniqueVinyl.getId())
                 .forEach(preparedListById::add);
 
         return preparedListById;

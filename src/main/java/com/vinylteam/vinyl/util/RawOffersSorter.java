@@ -20,13 +20,14 @@ public class RawOffersSorter {
                 ListIterator<UniqueVinyl> vinylIterator = uniqueVinyls.listIterator();
                 while (!rawOffers.isEmpty()) {
                     if (!vinylIterator.hasNext()) {
-                        String lastVinylId = uniqueVinyls.isEmpty() ? "1" : (Integer.toString(Integer.valueOf(uniqueVinyls.get(uniqueVinyls.size() - 1).getId()) + 1));
-                        UniqueVinyl uniqueVinyl = new UniqueVinyl();
-                        uniqueVinyl.setId(lastVinylId);
-                        uniqueVinyl.setRelease(rawOffers.get(0).getRelease());
-                        uniqueVinyl.setArtist(rawOffers.get(0).getArtist());
-                        uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
-                        uniqueVinyl.setImageLink(rawOffers.get(0).getImageLink());
+                        String lastVinylId = uniqueVinyls.isEmpty() ? "1" :
+                                (Integer.toString(Integer.valueOf(uniqueVinyls.get(uniqueVinyls.size() - 1).getId()) + 1));
+                        UniqueVinyl uniqueVinyl = UniqueVinyl.builder().id(lastVinylId)
+                                .release(rawOffers.get(0).getRelease())
+                                .artist(rawOffers.get(0).getArtist())
+                                .fullName(rawOffers.get(0).getRelease() + " - " + rawOffers.get(0).getArtist())
+                                .imageLink(rawOffers.get(0).getImageLink())
+                                .build();
                         vinylIterator.add(uniqueVinyl);
                         log.debug("Added new uniqueVinyl {'uniqueVinyl':{}}", uniqueVinyl);
                         vinylIterator.previous();
