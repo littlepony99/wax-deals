@@ -28,6 +28,7 @@ public class OneVinylOfferController {
         UniqueVinyl uniqueVinyl = oneVinylOffersService.getUniqueVinyl(id);
         List<OneVinylOfferDto> offers = oneVinylOffersService.getOffers(id);
         List<UniqueVinyl> vinyls = oneVinylOffersService.addAuthorVinyls(uniqueVinyl);
+        vinyls.remove(uniqueVinyl);
         String discogsLink = oneVinylOffersService.getDiscogsLink(uniqueVinyl);
         OneVinylPageDto result = OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
