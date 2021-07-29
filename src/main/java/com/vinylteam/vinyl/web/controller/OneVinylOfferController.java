@@ -1,45 +1,39 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.impl.OneVinylOffersServiceImpl;
-import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
-import com.vinylteam.vinyl.web.util.WebUtils;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
+import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 @RequestMapping("/oneVinyl")
 public class OneVinylOfferController {
 
     private final OneVinylOffersServiceImpl oneVinylOffersService;
+    private final UniqueVinylMapper uniqueVinylMapper;
 
     @GetMapping
-    public String getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
-                                       @RequestParam(value = "id") String identifier,
-                                       Model model) {
-        WebUtils.setUserAttributes(user, model);
-        OneVinylPageFullResponse fullResponse = oneVinylOffersService.prepareOneVinylInfo(identifier);
-
-        SetDiscogsAttribute(model, fullResponse);
-
-        WebUtils.setModelContext(fullResponse, model);
-        return "vinyl";
-    }
-
-    void SetDiscogsAttribute(Model model, OneVinylPageFullResponse fullResponse) {
-        String discogsLink = fullResponse.getDiscogsLink();
-
-        if (!discogsLink.isEmpty()) {
-            model.addAttribute("discogsLink", discogsLink);
-        }
+    public OneVinylPageDto getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
+                                                @RequestParam(value = "id") String identifier) {
+        UniqueVinyl uniqueVinyl = oneVinylOffersService.getUniqueVinyl(identifier);
+        List<OneVinylOfferDto> offers = oneVinylOffersService.getOffers(identifier);
+        List<UniqueVinyl> vinyls = oneVinylOffersService.addAuthorVinyls(uniqueVinyl);
+        String discogsLink = oneVinylOffersService.getDiscogsLink(uniqueVinyl);
+        OneVinylPageDto result = OneVinylPageDto.builder()
+                .discogsLink(discogsLink)
+                .offersResponseList(offers)
+                .preparedVinylsList(uniqueVinylMapper.listVinylsToListVinylsDto(vinyls))
+                .build();
+        return result;
     }
 
 }

@@ -82,12 +82,12 @@ public class DefaultOfferServiceITest {
         List<UniqueVinyl> vinylsToUpdate = new ArrayList<>(uniqueVinyls);
         List<Offer> offersToUpdate = new ArrayList<>(offers);
 
-        UniqueVinyl newUniqueVinyl = new UniqueVinyl();
-        newUniqueVinyl.setId("10");
-        newUniqueVinyl.setHasOffers(false);
-        newUniqueVinyl.setFullName("Test fullname");
-        newUniqueVinyl.setArtist("Artist new");
-
+        UniqueVinyl newUniqueVinyl = UniqueVinyl.builder()
+        .id("10")
+        .hasOffers(false)
+        .fullName("Test fullname")
+        .artist("Artist new")
+        .build();
         vinylsToUpdate.add(newUniqueVinyl);
         vinylsToUpdate.get(3).setHasOffers(true);
         vinylsToUpdate.remove(0);

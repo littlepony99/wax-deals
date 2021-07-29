@@ -6,7 +6,7 @@ import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -46,24 +46,24 @@ class OneVinylOffersServiceImplTest {
         var vinylsList = dataGenerator
                 .getUniqueVinylsList()
                 .stream()
-                .filter(UniqueVinyl::getHasOffers)
+                .filter(UniqueVinyl::isHasOffers)
                 .collect(Collectors.toList());
-        List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
+        List<OneVinylOfferDto> offersResponseList = new ArrayList<>();
         for (UniqueVinyl uniqueVinyl : vinylsList) {
-            assertTrue(uniqueVinyl.getHasOffers());
+            assertTrue(uniqueVinyl.isHasOffers());
         }
         //when
-        offersResponseList.add(new OneVinylOffersServletResponse());
+        offersResponseList.add(new OneVinylOfferDto());
         UniqueVinyl testedUniqueVinyl = vinylsList.get(0);
         //then
         oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
         verify(uniqueVinylService, never()).updateOneUniqueVinylAsHavingNoOffer(testedUniqueVinyl);
-        assertTrue(testedUniqueVinyl.getHasOffers());
+        assertTrue(testedUniqueVinyl.isHasOffers());
 
         offersResponseList.clear();
         oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
         verify(uniqueVinylService).updateOneUniqueVinylAsHavingNoOffer(testedUniqueVinyl);
-        assertFalse(testedUniqueVinyl.getHasOffers());
+        assertFalse(testedUniqueVinyl.isHasOffers());
     }
 
     @Test
@@ -73,7 +73,7 @@ class OneVinylOffersServiceImplTest {
         List<Offer> offers = dataGenerator.getOffersList();
         when(offerService.getActualizedOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
         when(offerService.mergeOfferChanges(any(), any(), any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
-        List<OneVinylOffersServletResponse> offerResponseList = oneVinylService.prepareOffersSection(offers, shopsList);
+        List<OneVinylOfferDto> offerResponseList = oneVinylService.prepareOffersSection(offers, shopsList);
         assertFalse(offerResponseList.isEmpty());
         assertEquals(offers.size(), offerResponseList.size());
     }

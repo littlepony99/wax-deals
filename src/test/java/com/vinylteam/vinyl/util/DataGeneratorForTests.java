@@ -61,13 +61,14 @@ public class DataGeneratorForTests {
         if (number < 1) {
             throw new RuntimeException("Don't generate template unique vinyl from number < 1! number: " + number);
         }
-        UniqueVinyl uniqueVinyl = new UniqueVinyl();
-        uniqueVinyl.setId(Integer.toString(number));
-        uniqueVinyl.setRelease("release" + number);
-        uniqueVinyl.setArtist("artist" + number);
-        uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
-        uniqueVinyl.setImageLink("/image" + number);
-        uniqueVinyl.setHasOffers(false);
+        UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                .id(Integer.toString(number))
+                .release("release" + number)
+                .artist("artist" + number)
+                .fullName("release" + number + " - " + "artist" + number)
+                .imageLink("/image" + number)
+                .hasOffers(false)
+                .build();
         return uniqueVinyl;
     }
 
@@ -133,13 +134,14 @@ public class DataGeneratorForTests {
     public List<UniqueVinyl> getUniqueVinylsList() {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            UniqueVinyl uniqueVinyl = new UniqueVinyl();
-            uniqueVinyl.setId(Integer.toString(i + 1));
-            uniqueVinyl.setRelease("release" + (i + 1));
-            uniqueVinyl.setArtist("artist" + (i + 1));
-            uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
-            uniqueVinyl.setImageLink("/image" + (i + 1));
-            uniqueVinyl.setHasOffers(true);
+            UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                    .id(Integer.toString(i + 1))
+                    .release("release" + (i + 1))
+                    .artist("artist" + (i + 1))
+                    .fullName("release" + (i + 1) + " - " + "artist" + (i + 1))
+                    .imageLink("/image" + (i + 1))
+                    .hasOffers(true)
+                    .build();
             uniqueVinyls.add(uniqueVinyl);
         }
         uniqueVinyls.get(3).setHasOffers(false);
@@ -224,13 +226,14 @@ public class DataGeneratorForTests {
                 offer.setOfferLink(rawOffer.getOfferLink());
                 offers.add(offer);
             }
-            UniqueVinyl uniqueVinyl = new UniqueVinyl();
-            uniqueVinyl.setId(Integer.toString(i + 1));
-            uniqueVinyl.setRelease(rawOffers.get(i * 2).getRelease());
-            uniqueVinyl.setArtist(rawOffers.get(i * 2).getArtist());
-            uniqueVinyl.setFullName(uniqueVinyl.getRelease() + " - " + uniqueVinyl.getArtist());
-            uniqueVinyl.setImageLink("/image" + (i + 1));
-            uniqueVinyl.setHasOffers(true);
+            UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                    .id(Integer.toString(i + 1))
+                    .release(rawOffers.get(i * 2).getRelease())
+                    .artist(rawOffers.get(i * 2).getArtist())
+                    .fullName(rawOffers.get(i * 2).getRelease() + " - " + rawOffers.get(i * 2).getArtist())
+                    .imageLink("/image" + (i + 1))
+                    .hasOffers(true)
+                    .build();
             uniqueVinyls.add(uniqueVinyl);
         }
     }

@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
@@ -8,6 +9,7 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
+@Builder
 @Document(indexName = "unique_vinyl_index")
 public class UniqueVinyl {
 
@@ -30,12 +32,4 @@ public class UniqueVinyl {
     @EqualsAndHashCode.Exclude
     private boolean hasOffers;
 
-
-    public boolean getHasOffers(){
-        return hasOffers;
-    }
-
-    public boolean isHasOffers(){
-        return hasOffers;
-    }
 }

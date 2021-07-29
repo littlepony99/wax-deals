@@ -24,7 +24,7 @@ public class ShopController {
 
     @GetMapping
     public List<ShopDto> getShopPage() {
-        var shopList = shopService.findAll();
+        List<Shop> shopList = shopService.findAll();
         List<ShopDto> result = new ArrayList<>();
         for (Shop shop : shopList) {
             result.add(shopMapper.userToUserDto(shop));

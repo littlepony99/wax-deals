@@ -31,7 +31,6 @@ public class SearchResultsController {
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findManyFiltered(matcher);
         model.addAttribute("matcher", matcher);
         WebUtils.setUserAttributes(user, model);
-        WebUtils.setModelContext(filteredUniqueVinyls, new ArrayList<>(), model);
         return "search";
     }
 
