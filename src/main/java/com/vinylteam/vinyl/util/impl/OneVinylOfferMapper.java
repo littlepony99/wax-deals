@@ -14,7 +14,7 @@ import java.util.Optional;
 @Mapper(componentModel = "spring", uses = ShopController.class)
 public interface OneVinylOfferMapper {
     @Mappings({
-            @Mapping(target = "shopImageLink", constant = "shop.smallImageLink"),
+            @Mapping(target = "shopImageLink", source = "shop.smallImageLink"),
             @Mapping(target = "currency", source = "offer.currency", qualifiedByName = "currency")
     })
     OneVinylOfferDto offerAndShopToVinylOfferDto(Offer offer, Shop shop);
