@@ -13,11 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
-import java.util.Optional;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = { "http://localhost:3000", "http://react-wax-deals.herokuapp.com" })
+@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class SignInController {
     private final UserService userService;
     private final Integer sessionMaxInactiveInterval;

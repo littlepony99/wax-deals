@@ -10,7 +10,7 @@ public interface UniqueVinylRepository
 
     List<UniqueVinyl> findAll();
 
-    default List<UniqueVinyl> findByArtist(String artist){
+    default List<UniqueVinyl> findByArtist(String artist) {
         return findByArtistIgnoreCaseAndHasOffers(artist, true);
     }
 

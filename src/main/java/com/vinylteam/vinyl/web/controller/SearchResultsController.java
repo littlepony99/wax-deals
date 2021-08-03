@@ -1,25 +1,20 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
-import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/search")
-@CrossOrigin(origins = { "http://localhost:3000", "http://react-wax-deals.herokuapp.com" })
+@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class SearchResultsController {
 
     private final UniqueVinylService vinylService;

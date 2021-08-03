@@ -1,15 +1,14 @@
 
 package com.vinylteam.vinyl.util;
 
+import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.*;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class DataGeneratorForTests {
 
@@ -132,6 +131,13 @@ public class DataGeneratorForTests {
         return shops;
     }
 
+    public HashMap<String, List> getOneVinylOffersAndShopsMap() {
+        HashMap<String, List> offersAndShopsMap = new HashMap<>();
+        offersAndShopsMap.put("offers", getOffersList().subList(0, 2));
+        offersAndShopsMap.put("shops", getShopsList().subList(0, 2));
+        return offersAndShopsMap;
+    }
+
     public List<UniqueVinyl> getUniqueVinylsList() {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
@@ -146,6 +152,22 @@ public class DataGeneratorForTests {
             uniqueVinyls.add(uniqueVinyl);
         }
         uniqueVinyls.get(3).setHasOffers(false);
+        return uniqueVinyls;
+    }
+
+    public List<UniqueVinyl> getUniqueVinylsByArtistList(String artist) {
+        List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                    .id(Integer.toString(i + 1))
+                    .release("release" + (i + 1))
+                    .artist(artist)
+                    .fullName("release" + (i + 1) + " - " + artist + (i + 1))
+                    .imageLink("/image" + (i + 1))
+                    .hasOffers(true)
+                    .build();
+            uniqueVinyls.add(uniqueVinyl);
+        }
         return uniqueVinyls;
     }
 
@@ -270,7 +292,30 @@ public class DataGeneratorForTests {
         for (UniqueVinyl uniqueVinyl : uniqueVinyls) {
             uniqueVinylDtoList.add(getUniqueVinylDtoFromUniqueVinyl(uniqueVinyl));
         }
-        return  uniqueVinylDtoList;
+        return uniqueVinylDtoList;
+    }
+
+    public OneVinylOfferDto getOneVinylOfferDtoFromOfferAndShop(Offer offer, Shop shop) {
+        if (offer == null && shop == null) {
+            return null;
+        }
+
+        OneVinylOfferDto.OneVinylOfferDtoBuilder oneVinylOfferDto = OneVinylOfferDto.builder();
+
+        if (offer != null) {
+            if (offer.getCurrency() != null) {
+                oneVinylOfferDto.currency(offer.getCurrency().toString());
+            }
+            oneVinylOfferDto.price(offer.getPrice());
+            oneVinylOfferDto.catNumber(offer.getCatNumber());
+            oneVinylOfferDto.inStock(offer.isInStock());
+            oneVinylOfferDto.offerLink(offer.getOfferLink());
+        }
+        if (shop != null) {
+            oneVinylOfferDto.shopImageLink(shop.getSmallImageLink());
+        }
+
+        return oneVinylOfferDto.build();
     }
 
 }

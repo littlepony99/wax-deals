@@ -5,15 +5,14 @@ import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
-import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,24 +31,26 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
     }
 
     @Override
-    public List<OneVinylOfferDto> getOffers(String identifier) {
+    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) {
         String uniqueVinylId = identifier;
         // find vinyl
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
-
         // find offers for uniqyeVinyl
         List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
+        // 1 prepare offers -- validate and parse
+        List<Offer> sortedInStockOffers = getInStockOffersByPrice(offers);
         // find shopIds for offers
-        List<Integer> shopIds = offerService.findShopIds(offers);
+        List<Integer> shopIds = offerService.findShopIds(sortedInStockOffers);
         // find shops by their ids
         List<Shop> shopsFromOffers = shopService.findShopsByListOfIds(shopIds);
-
-        // 1 prepare offers -- validate and parse
-        List<OneVinylOfferDto> offersList = prepareOffersSection(offers, shopsFromOffers);
         // if there is no offers
-        checkIsVinylInStock(uniqueVinyl, offersList);
+        checkIsVinylInStock(uniqueVinyl, sortedInStockOffers);
 
-        return offersList;
+        HashMap<String, List> offersAndShopsMap = new HashMap<>();
+        offersAndShopsMap.put("offers", sortedInStockOffers);
+        offersAndShopsMap.put("shops", shopsFromOffers);
+
+        return offersAndShopsMap;
     }
 
     @Override
@@ -69,26 +70,25 @@ public class OneVinylOffersServiceImpl implements OneVinylOffersService {
         }
     }
 
-    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOfferDto> offersResponseList) {
-        if (offersResponseList.isEmpty()) {
+    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<Offer> inStockOffers) {
+        if (inStockOffers.isEmpty()) {
             uniqueVinyl.setHasOffers(false);
             uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
         }
     }
 
-    List<OneVinylOfferDto> prepareOffersSection(List<Offer> dbOffers, List<Shop> shopsList) {
+    List<Offer> getInStockOffersByPrice(List<Offer> dbOffers) {
         return dbOffers.stream()
                 .map(offerService::actualizeOffer)
                 .filter(Offer::isInStock)
-                .map(offer -> offerMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shopsList, offer)))
                 .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
                 .collect(Collectors.toList());
     }
 
-    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+    public Shop findOfferShop(List<Shop> shopsList, Offer offer) {
         return shopsList
                 .stream()
-                .filter(store -> Objects.equals(store.getId(), offer.getShopId()))
+                .filter(store -> store.getId() == offer.getShopId())
                 .findFirst()
                 .get();
     }

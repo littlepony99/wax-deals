@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/contact")
-@CrossOrigin(origins = { "http://localhost:3000", "http://react-wax-deals.herokuapp.com" })
+@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class ContactUsController {
     private final UserPostService userPostService;
 

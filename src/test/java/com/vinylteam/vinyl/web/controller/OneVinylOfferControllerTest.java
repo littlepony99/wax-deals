@@ -1,9 +1,11 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.Offer;
+import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.impl.OneVinylOffersServiceImpl;
+import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
-import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,14 +20,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 public class OneVinylOfferControllerTest {
@@ -39,6 +41,8 @@ public class OneVinylOfferControllerTest {
     @MockBean
     private OneVinylOffersServiceImpl oneVinylOffersService;
 
+    DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
+
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -49,52 +53,103 @@ public class OneVinylOfferControllerTest {
     @Test
     public void getOneVinyl() throws Exception {
         // prepare
-        UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
-                .artist("AC/DC")
-                .fullName("AC/DC - Razor's Edge")
-                .hasOffers(true)
-                .id("AQYASABEgLaHPD_BwE")
-                .imageLink("https://vinyla.com/files/products/3d9d222277344794bfdc706d2f735c82.800x800.png?92bb0783d44f109e08cc28b2963d572b")
-                .release("2010")
-                .build();
-        List<OneVinylOfferDto> offersList = new ArrayList<>();
-        offersList.add(OneVinylOfferDto.builder()
-                .catNumber("catNumber")
-                .currency("UAH")
-                .inStock(true)
-                .offerLink("www.offers.com/ao901")
-                .price(50.6)
-                .shopImageLink("www.shelagio.com/acdc-201012387.png")
-                .build());
+        UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
+        HashMap<String, List> offersAndShopsMap = dataGenerator.getOneVinylOffersAndShopsMap();
+        List<Offer> offersList = offersAndShopsMap.get("offers");
+        List<Shop> shopList = offersAndShopsMap.get("shops");
 
-        List<UniqueVinyl> authorVinyls = new ArrayList<>();
-        UniqueVinyl anotherAuthorVinyl = UniqueVinyl.builder()
-                .artist("AC/DC")
-                .fullName("AC/DC - Highway To Hell (Limited Edition)")
-                .hasOffers(true)
-                .id("EAIaIQobChMIpIqQ4_WH8gIVDrh")
-                .imageLink("https://vinyla.com/files/products/ac-dc-highway-to-hell-limited-edition.1280x1280.jpg?d5e5db11fe0b2263ab644ab906259e51")
-                .release("2010")
-                .build();
-        authorVinyls.add(uniqueVinyl);
-        authorVinyls.add(anotherAuthorVinyl);
+        List<UniqueVinyl> authorVinyls = dataGenerator.getUniqueVinylsByArtistList(uniqueVinyl.getArtist());
 
         when(oneVinylOffersService.getUniqueVinyl(anyString())).thenReturn(uniqueVinyl);
-        when(oneVinylOffersService.getOffers(anyString())).thenReturn(offersList);
+        when(oneVinylOffersService.getSortedInStockOffersAndShops(anyString())).thenReturn(offersAndShopsMap);
+        when(oneVinylOffersService.findOfferShop(shopList, offersList.get(0))).thenReturn(shopList.get(0));
+        when(oneVinylOffersService.findOfferShop(shopList, offersList.get(1))).thenReturn(shopList.get(1));
         when(oneVinylOffersService.addAuthorVinyls(any(UniqueVinyl.class))).thenReturn(authorVinyls);
-        when(oneVinylOffersService.getDiscogsLink(any(UniqueVinyl.class))).thenReturn("www.disckogs.com");
+        when(oneVinylOffersService.getDiscogsLink(any(UniqueVinyl.class))).thenReturn("www.discogs.com");
         // when
-        MockHttpServletResponse response = mockMvc.perform(get("/oneVinyl").param("id", "1"))
+        MockHttpServletResponse response = mockMvc.perform(get("/oneVinyl/1").param("id", "1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-
+                .andExpect(jsonPath("$.offersList").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].price").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].currency").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].catNumber").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].inStock").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].offerLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].shopImageLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].price").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].currency").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].catNumber").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].inStock").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].offerLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].shopImageLink").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.id").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.release").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.artist").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[0].release").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[0].artist").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[0].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[1].id").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[1].release").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[1].artist").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[1].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.discogsLink").isNotEmpty())
                 .andExpect(status().isOk()).andReturn().getResponse();
         // then
         Assertions.assertNotNull(response.getHeader("Content-Type"));
         Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
         Assertions.assertEquals("application/json", response.getContentType());
         Assertions.assertNotNull(response.getContentAsString());
-        System.out.println(response.getContentAsString());
-        System.out.println(response.getContentAsString());
+    }
+
+    @Test
+    public void getOneVinylNoVinylsByArtist() throws Exception {
+        // prepare
+        UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
+        HashMap<String, List> offersAndShopsMap = dataGenerator.getOneVinylOffersAndShopsMap();
+        List<Offer> offersList = offersAndShopsMap.get("offers");
+        List<Shop> shopList = offersAndShopsMap.get("shops");
+
+        List<UniqueVinyl> authorVinyls = new ArrayList<>();
+
+        when(oneVinylOffersService.getUniqueVinyl(anyString())).thenReturn(uniqueVinyl);
+        when(oneVinylOffersService.getSortedInStockOffersAndShops(anyString())).thenReturn(offersAndShopsMap);
+        when(oneVinylOffersService.findOfferShop(shopList, offersList.get(0))).thenReturn(shopList.get(0));
+        when(oneVinylOffersService.findOfferShop(shopList, offersList.get(1))).thenReturn(shopList.get(1));
+        when(oneVinylOffersService.addAuthorVinyls(any(UniqueVinyl.class))).thenReturn(authorVinyls);
+        when(oneVinylOffersService.getDiscogsLink(any(UniqueVinyl.class))).thenReturn("www.discogs.com");
+        // when
+        MockHttpServletResponse response = mockMvc.perform(get("/oneVinyl/1").param("id", "1"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.offersList").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].price").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].currency").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].catNumber").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].inStock").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].offerLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[0].shopImageLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].price").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].currency").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].catNumber").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].inStock").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].offerLink").isNotEmpty())
+                .andExpect(jsonPath("$.offersList[1].shopImageLink").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.id").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.release").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.artist").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList").isEmpty())
+                .andExpect(jsonPath("$.discogsLink").isNotEmpty())
+                .andExpect(status().isOk()).andReturn().getResponse();
+        // then
+        Assertions.assertNotNull(response.getHeader("Content-Type"));
+        Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
+        Assertions.assertEquals("application/json", response.getContentType());
+        Assertions.assertNotNull(response.getContentAsString());
     }
 
     @Test
