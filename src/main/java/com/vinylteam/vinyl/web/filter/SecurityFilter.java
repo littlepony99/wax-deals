@@ -12,7 +12,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.EnumSet;
 
-@Component
+//@Component
 public class SecurityFilter implements Filter {
 
     @Override

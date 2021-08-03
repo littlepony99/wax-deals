@@ -5,15 +5,13 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 import java.util.Random;
@@ -24,6 +22,8 @@ public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
+    @Autowired
+    private PasswordEncoder encoder;
 
     private final String algorithm = "PBKDF2WithHmacSHA512";
 
@@ -45,7 +45,7 @@ public class DefaultSecurityService implements SecurityService {
         User user = new User();
         user.setEmail(email);
         user.setPassword(hashedPassword);
-        user.setSalt(Base64.getEncoder().encodeToString(salt));
+        user.setSalt(salt.toString());
         user.setIterations(iterations);
         user.setRole(Role.USER);
         user.setStatus(false);
@@ -88,18 +88,7 @@ public class DefaultSecurityService implements SecurityService {
     }
 
     String hashPassword(char[] password, byte[] salt, int iterations) {
-        try {
-            PBEKeySpec pbeKeySpec = new PBEKeySpec(password, salt, iterations, 256);
-            Arrays.fill(password, '\u0000');
-            SecretKey secretKey = secretKeyFactory.generateSecret(pbeKeySpec);
-            log.debug("Generated secretKey from pbeKeySpeck");
-            byte[] result = secretKey.getEncoded();
-            log.debug("Encoded password into hash");
-            return Base64.getEncoder().encodeToString(result);
-        } catch (InvalidKeySpecException e) {
-            log.error("Error during hashing password", e);
-            throw new RuntimeException(e);
-        }
+        return encoder.encode(new String(password));
     }
 
     byte[] generateSalt() {

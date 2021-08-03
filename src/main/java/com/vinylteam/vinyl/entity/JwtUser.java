@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.entity;
 
-import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,11 +12,16 @@ public class JwtUser implements UserDetails {
 
     private String username;
     private String password;
+    private String salt;
     private List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
+    }
+
+    public void setAuthorities(List<SimpleGrantedAuthority> authorities){
+        this.authorities = authorities;
     }
 
     @Override

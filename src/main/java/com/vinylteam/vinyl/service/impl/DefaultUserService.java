@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ public class DefaultUserService implements UserService {
     private final UserDao userDao;
     private final SecurityService securityService;
     private final EmailConfirmationService emailConfirmationService;
+    private final PasswordEncoder encoder;
 
     @Override
     @Transactional
@@ -38,7 +40,7 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(password)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
-        securityService.emailFormatCheck(email);
+        //securityService.emailFormatCheck(email);
         securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService
                 .createUserWithHashedPassword(email, password.toCharArray());
@@ -52,8 +54,8 @@ public class DefaultUserService implements UserService {
             throw new RuntimeException(UserErrors.ADD_USER_INVALID_VALUES_ERROR.getMessage());
         }
         log.debug("Added created user to db {'user':{}}", userToAdd);
-        ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
-        emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+        //ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
+        //emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
     }
 
     @Transactional

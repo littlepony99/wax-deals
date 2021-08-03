@@ -1,11 +1,15 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.security.SecurityConfiguration;
+import com.vinylteam.vinyl.security.impl.SpringSecurityService;
+import com.vinylteam.vinyl.service.JwtTokenProvider;
 import com.vinylteam.vinyl.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +27,12 @@ class ProfileControllerTest {
 
     @MockBean
     private UserService mockedUserService;
+
+    @MockBean
+    private SpringSecurityService securityService;
+
+    @MockBean
+    private JwtTokenProvider tokenProvider;
 
     private MockMvc mockMvc;
 
