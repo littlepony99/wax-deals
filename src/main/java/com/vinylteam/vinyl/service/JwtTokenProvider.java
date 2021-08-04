@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 
@@ -71,9 +73,11 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public String createToken(String userEmail) {
+    public String createToken(String userEmail, Collection<? extends GrantedAuthority> authorities) {
 
-        Claims claims = Jwts.claims().setSubject(userEmail);
+        Claims claims = Jwts.claims()
+                .setSubject(userEmail);
+        claims.put("authorities", authorities);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);

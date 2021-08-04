@@ -45,7 +45,7 @@ public class JwtLoginController {
         try {
             Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.getPassword());
             authenticationManager.authenticate(auth);
-            String token = jwtTokenProvider.createToken(user.getUsername()/*, user.getRoles()*/);
+            String token = jwtTokenProvider.createToken(user.getUsername(), user.getAuthorities());
             User originalUser = userService.findByEmail(user.getUsername());
             Map<Object, Object> response = Map.of(
                     "user", originalUser,
