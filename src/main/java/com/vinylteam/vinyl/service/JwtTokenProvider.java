@@ -66,10 +66,7 @@ public class JwtTokenProvider implements JwtService {
     @Override
     public String extractToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER_NAME);
-        if (!Objects.isNull(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
-            bearerToken = bearerToken.replace(TOKEN_PREFIX, "");
-        }
-        return bearerToken;
+        return extractToken(bearerToken);
     }
 
     @Override
@@ -104,6 +101,13 @@ public class JwtTokenProvider implements JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    private String extractToken(String bearerToken) {
+        if (!Objects.isNull(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
+            bearerToken = bearerToken.replace(TOKEN_PREFIX, "");
+        }
+        return bearerToken;
     }
 
 }

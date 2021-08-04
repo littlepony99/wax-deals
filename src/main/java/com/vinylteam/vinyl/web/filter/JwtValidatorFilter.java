@@ -1,11 +1,9 @@
 package com.vinylteam.vinyl.web.filter;
 
 import com.vinylteam.vinyl.entity.JwtUser;
-import com.vinylteam.vinyl.security.SecurityConstants;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,7 +25,6 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         String token = jwtService.extractToken(request);
         if (jwtService.validateToken(token)) {
             Authentication auth = jwtService.getAuthentication(token);
-
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUser principal = (JwtUser)auth.getPrincipal();
