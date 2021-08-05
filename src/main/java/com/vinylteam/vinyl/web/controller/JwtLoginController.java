@@ -23,6 +23,7 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 public class JwtLoginController {
 
     private final AuthenticationManager authenticationManager;
@@ -30,6 +31,7 @@ public class JwtLoginController {
     private final UserService userService;
 
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
+
     public ResponseEntity<Map<String, Object>> login(@RequestHeader(name = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
         if (jwtTokenProvider.validateToken(token)) {

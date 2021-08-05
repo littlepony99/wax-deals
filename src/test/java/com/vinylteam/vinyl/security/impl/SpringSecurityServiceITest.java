@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DBRider
 @DBUnit(caseInsensitiveStrategy = Orthography.LOWERCASE)
 @SpringBootTest
-//@DirtiesContext
 class SpringSecurityServiceITest {
 
     @Autowired
