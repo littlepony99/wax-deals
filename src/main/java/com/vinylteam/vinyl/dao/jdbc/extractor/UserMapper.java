@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.dao.jdbc.extractor;
 
-
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
@@ -25,4 +24,5 @@ public interface UserMapper {
         list.add(new SimpleGrantedAuthority("ROLE_"+role.getName()));
         return list;
     }
+
 }

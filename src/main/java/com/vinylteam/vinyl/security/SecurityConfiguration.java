@@ -32,12 +32,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserAttributeFilter userAttributeFilter;
     private final JwtValidatorFilter jwtValidatorField;
-    private final DefaultSecurityService defaultSecurityService;
+    private final SecurityService defaultSecurityService;
 
     @PostConstruct
     void init(){
         defaultSecurityService.setEncoder(encoder());
     }
+
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(
