@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +26,6 @@ public class DefaultUserService implements UserService {
     private final UserDao userDao;
     private final SecurityService securityService;
     private final EmailConfirmationService emailConfirmationService;
-    private final PasswordEncoder encoder;
 
     @Override
     @Transactional

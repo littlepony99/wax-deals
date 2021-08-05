@@ -1,6 +1,8 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
@@ -29,12 +31,15 @@ public class JwtLoginController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtTokenProvider;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
-
-    public ResponseEntity<Map<String, Object>> login(@RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<Map<String, Object>> tokenChecking(@RequestHeader(name = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
         if (jwtTokenProvider.validateToken(token)) {
+            var auth = jwtTokenProvider.getAuthentication(token);
+            var authUser = (JwtUser) auth.getPrincipal();
+            response.putAll(getUserCredentialsMap(token, authUser));
             response.putAll(Map.of("token", token));
             response.putAll(getSuccessStatusInfoMap());
             return new ResponseEntity<>(response, OK);
@@ -52,9 +57,7 @@ public class JwtLoginController {
             Authentication authentication = authenticationManager.authenticate(preparedAuth);
             var authUser = (JwtUser) authentication.getPrincipal();
             String token = jwtTokenProvider.createToken(authUser.getUsername(), authUser.getAuthorities());
-            response.putAll(Map.of(
-                    "user", userService.findByEmail(authUser.getUsername()),
-                    "token", token));
+            response.putAll(getUserCredentialsMap(token, authUser));
             response.putAll(getSuccessStatusInfoMap());
             return new ResponseEntity<>(response, CREATED);
         } catch (AuthenticationException e) {
@@ -68,7 +71,6 @@ public class JwtLoginController {
         }
     }
 
-
     private Map<String, String> getSuccessStatusInfoMap() {
         return getStatusInfoMap("0", "");
     }
@@ -78,4 +80,13 @@ public class JwtLoginController {
                 "resultCode", code,
                 "message", s);
     }
+
+    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
+        String username = authUser.getUsername();
+        User byEmail = userService.findByEmail(username);
+        return Map.of(
+                "user", userMapper.mapUserToDto(byEmail),
+                "token", token);
+    }
+
 }

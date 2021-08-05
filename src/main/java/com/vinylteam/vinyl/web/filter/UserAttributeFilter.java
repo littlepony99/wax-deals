@@ -21,8 +21,9 @@ public class UserAttributeFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return false;
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.contains("/login") || path.contains("/token");
     }
 
     @Override
@@ -33,7 +34,7 @@ public class UserAttributeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Optional<User> sessionUser = Optional.ofNullable((User) request.getSession().getAttribute("user"));
-        if (!sessionUser.isPresent()) {
+        if (sessionUser.isEmpty()) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null) {
                 UserDetails principal = (UserDetails) authentication.getPrincipal();
@@ -45,5 +46,6 @@ public class UserAttributeFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
 
 }

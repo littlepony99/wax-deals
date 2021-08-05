@@ -5,7 +5,6 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,7 +21,6 @@ public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
-    @Autowired
     private PasswordEncoder encoder;
 
     private final String algorithm = "PBKDF2WithHmacSHA512";
@@ -35,6 +33,10 @@ public class DefaultSecurityService implements SecurityService {
             log.error("Error during initialisation of secretKeyFactory", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void setEncoder(PasswordEncoder encoder) {
+        this.encoder = encoder;
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.JwtService;
+import com.vinylteam.vinyl.web.dto.UserDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +54,6 @@ class JwtLoginControllerITest {
     private PasswordEncoder encoder;
 
     private String testUserEmail = "testuser2@gmail.com";
-    ;
     private String testUserPassword = "password";
     private User builtUser;
 
@@ -94,10 +94,9 @@ class JwtLoginControllerITest {
                 .getContentAsString();
         String jwtToken = JsonPath.read(response, "$.token");
         DocumentContext context = JsonPath.parse(response);
-        User responseUser = context.read("$['user']", User.class);
+        UserDto responseUser = context.read("$['user']", UserDto.class);
         assertTrue(jwtService.validateToken(jwtToken));
         assertEquals(testUserEmail, responseUser.getEmail());
-        assertTrue(encoder.matches(testUserPassword, responseUser.getPassword()));
         assertEquals(Role.USER, responseUser.getRole());
     }
 
@@ -136,6 +135,9 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", hasKey("token")))
                 .andExpect(jsonPath("$", hasKey("message")))
                 .andExpect(jsonPath("$", hasKey("resultCode")))
+                .andExpect(jsonPath("$.user", not(empty())))
+                .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
+                .andExpect(jsonPath("$.user.role", equalTo("USER")))
                 .andExpect(jsonPath("$.token", not(emptyString())))
                 .andExpect(jsonPath("$.token", equalTo(token)))
                 .andExpect(jsonPath("$.message", emptyString()))

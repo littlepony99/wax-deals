@@ -12,7 +12,6 @@ public class JwtUser implements UserDetails {
 
     private String username;
     private String password;
-    private String salt;
     private List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
     @Override

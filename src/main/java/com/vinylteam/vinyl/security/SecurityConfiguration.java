@@ -1,12 +1,10 @@
 package com.vinylteam.vinyl.security;
 
+import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.security.impl.SpringSecurityService;
-import com.vinylteam.vinyl.service.JwtService;
-import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.filter.JwtValidatorFilter;
 import com.vinylteam.vinyl.web.filter.UserAttributeFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.annotation.PostConstruct;
+
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity(debug = true)
@@ -28,13 +28,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final String algorithm = "PBKDF2WithHmacSHA512";
 
-   @Autowired
-    private UserService userService;
-    @Autowired
-    private SpringSecurityService securityService;
+    private final SpringSecurityService securityService;
 
-    private final JwtService jwtService;
+    private final UserAttributeFilter userAttributeFilter;
+    private final JwtValidatorFilter jwtValidatorField;
+    private final DefaultSecurityService defaultSecurityService;
 
+    @PostConstruct
+    void init(){
+        defaultSecurityService.setEncoder(encoder());
+    }
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(
@@ -51,8 +54,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .anyRequest().permitAll()
                 .and()
-                .addFilterAfter(getUserAttributeFilter(userService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtValidatorFilter(jwtService, userService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(userAttributeFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtValidatorField, UsernamePasswordAuthenticationFilter.class)
                 .formLogin().loginPage("/signIn").permitAll().usernameParameter("email").defaultSuccessUrl("/profile");/*.successHandler()*///;
     }
 
@@ -76,10 +79,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         pbkdf2PasswordEncoder.setAlgorithm(Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA512);
         pbkdf2PasswordEncoder.setEncodeHashAsBase64(true);
         return pbkdf2PasswordEncoder;
-    }
-
-    public UserAttributeFilter getUserAttributeFilter(UserService userService){
-        return new UserAttributeFilter(userService);
     }
 
 }
