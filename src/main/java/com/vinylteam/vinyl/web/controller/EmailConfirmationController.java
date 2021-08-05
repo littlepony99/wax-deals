@@ -1,23 +1,21 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
-import com.vinylteam.vinyl.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Optional;
-
 @Slf4j
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/emailConfirmation")
+@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class EmailConfirmationController {
 
     private final EmailConfirmationService emailConfirmationService;

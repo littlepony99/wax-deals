@@ -19,7 +19,7 @@ public class ElasticSearchTestConfiguration {
     private static ElasticsearchContainer ES_CONTAINER;
 
     @Bean(name = "elasticSearchContainer")
-    public ElasticsearchContainer createESTestContainer(){
+    public ElasticsearchContainer createESTestContainer() {
         if (ES_CONTAINER == null) {
             ES_CONTAINER = new ElasticsearchContainer(DockerImageName
                     .parse(ELASTIC_SEARCH_DOCKER)
@@ -31,7 +31,7 @@ public class ElasticSearchTestConfiguration {
                     .withMemorySwap(512000000L));
             ES_CONTAINER.addEnv(CLUSTER_NAME, ELASTIC_SEARCH);
         }
-        if (!ES_CONTAINER.isRunning()){
+        if (!ES_CONTAINER.isRunning()) {
             ES_CONTAINER.start();
         }
         return ES_CONTAINER;
@@ -40,7 +40,7 @@ public class ElasticSearchTestConfiguration {
     @Bean
     @DependsOn("elasticSearchContainer")
     @Primary
-    public RestHighLevelClient getESClient(@Autowired RestHighLevelClient client){
+    public RestHighLevelClient getESClient(@Autowired RestHighLevelClient client) {
         return client;
     }
 

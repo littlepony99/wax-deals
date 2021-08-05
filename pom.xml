@@ -152,7 +152,11 @@
             <artifactId>mapstruct</artifactId>
             <version>${org.mapstruct.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${org.mapstruct.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -199,6 +203,8 @@
             <artifactId>json-simple</artifactId>
             <version>${json.simple.version}</version>
         </dependency>
+
+
 
         <!--TESTS-->
 

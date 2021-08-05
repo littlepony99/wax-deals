@@ -21,7 +21,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public void updateOneUniqueVinyl(UniqueVinyl vinyl) {
-        if (vinyl.getHasOffers()) {
+        if (vinyl.isHasOffers()) {
             return;
         }
         uniqueVinylRepository.save(vinyl);
@@ -29,7 +29,6 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public void prepareCatalog(User user, Model model, String wantList) {
-
     }
 
     @Override

@@ -13,7 +13,6 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.core.convert.ElasticsearchCustomConversions;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
@@ -22,7 +21,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.vinylteam.vinyl.dao.elasticsearch")
-@PropertySource({"classpath:application.properties"})
 public class ElasticSearchConfiguration extends AbstractElasticsearchConfiguration {
 
     @Value("${elasticsearch.host}")

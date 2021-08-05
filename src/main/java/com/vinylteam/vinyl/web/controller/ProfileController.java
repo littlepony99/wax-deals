@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping(path = "/profile", produces = "text/html;charset=UTF-8")
+@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class ProfileController {
 
     private final UserService userService;

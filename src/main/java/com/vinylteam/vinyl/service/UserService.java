@@ -22,6 +22,6 @@ public interface UserService {
     void signInCheck(UserInfoRequest userProfileInfo);
 
     User editProfile(UserInfoRequest userProfileInfo,
-                               User user);
+                     User user);
 
 }
