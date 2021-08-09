@@ -18,7 +18,7 @@ import javax.servlet.http.HttpSession;
 
 @Slf4j
 @Controller
-@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class SignInController {
     private final UserService userService;
     private final Integer sessionMaxInactiveInterval;
