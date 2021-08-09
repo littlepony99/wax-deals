@@ -30,9 +30,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final SpringSecurityService securityService;
 
-    private final UserAttributeFilter userAttributeFilter;
     private final JwtValidatorFilter jwtValidatorField;
     private final SecurityService defaultSecurityService;
+    private final LogoutHandlerService logoutHandlerService;
 
     @PostConstruct
     void init(){
@@ -55,9 +55,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .anyRequest().permitAll()
                 .and()
-                .addFilterAfter(userAttributeFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtValidatorField, UsernamePasswordAuthenticationFilter.class)
-                .formLogin().loginPage("/signIn").permitAll().usernameParameter("email").defaultSuccessUrl("/profile");/*.successHandler()*///;
+                .formLogin().loginPage("/signIn").permitAll().usernameParameter("email").defaultSuccessUrl("/profile")
+                .and()
+                .logout().addLogoutHandler(logoutHandlerService).logoutSuccessUrl("/successlogout");
     }
 
     @Bean

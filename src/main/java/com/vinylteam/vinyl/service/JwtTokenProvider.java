@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.service;
 
+import com.vinylteam.vinyl.security.LogoutTokenStorageService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
@@ -29,7 +32,10 @@ public class JwtTokenProvider implements JwtService {
 
     private SecretKey secretKey;
 
-    @Value("${jwt.token.expired:120000}")
+    @Autowired
+    private LogoutTokenStorageService tokenStorageService;
+
+    @Value("${jwt.token.expired:300000}")
     private int validityInMilliseconds;
 
     @Autowired
@@ -47,20 +53,25 @@ public class JwtTokenProvider implements JwtService {
             return false;
         }
         try {
-            Jws<Claims> claims = Jwts
-                    .parserBuilder()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token);
+            Jws<Claims> claims = getClaims(token);
 
             if (claims.getBody().getExpiration().before(new Date())) {
                 return false;
             }
-            return true;
+            return true && !tokenStorageService.isTokenBlocked(token);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
             return false;
         }
+    }
+
+    private Jws<Claims> getClaims(String token) {
+        Jws<Claims> claims = Jwts
+                .parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token);
+        return claims;
     }
 
     @Override
@@ -91,6 +102,16 @@ public class JwtTokenProvider implements JwtService {
     public Authentication getAuthentication(String token) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+    }
+
+    @Override
+    public LocalDateTime getExpirationDate(String token) {
+        Jws<Claims> claims = getClaims(token);
+
+        Date expirationDate = claims.getBody().getExpiration();
+        return expirationDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 
     private String getUsername(String token) {

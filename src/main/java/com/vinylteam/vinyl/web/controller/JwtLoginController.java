@@ -33,6 +33,15 @@ public class JwtLoginController {
     private final UserService userService;
     private final UserMapper userMapper;
 
+    @GetMapping(value = "/successlogout", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<Map<String, Object>> logout(@RequestHeader(name = "Authorization") String token) {
+        Map<String, Object> response = new HashMap<>();
+        response.putAll(getSuccessStatusInfoMap());
+
+
+        return new ResponseEntity<>(response, OK);
+    }
+
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Object>> tokenChecking(@RequestHeader(name = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
