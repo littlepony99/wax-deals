@@ -25,7 +25,7 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", "http://react-wax-deals.herokuapp.com")
 public class JwtLoginController {
 
     private final AuthenticationManager authenticationManager;
@@ -37,7 +37,6 @@ public class JwtLoginController {
     public ResponseEntity<Map<String, Object>> logout(@RequestHeader(name = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
         response.putAll(getSuccessStatusInfoMap());
-
 
         return new ResponseEntity<>(response, OK);
     }
