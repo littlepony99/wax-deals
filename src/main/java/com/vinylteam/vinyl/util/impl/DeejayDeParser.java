@@ -18,7 +18,11 @@ import static java.util.stream.Collectors.toSet;
 public class DeejayDeParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://www.deejay.de";
-    protected static final String START_PAGE_LINK = BASE_LINK + "/m_All/sm_News/stock_1/perpage_160";
+    protected static final String GENRE_HOUSE = "/m_House/sm_News/stock_1/perpage_160";
+    protected static final String GENRE_TECHNO = "/m_Techno/sm_News/stock_1/perpage_160";
+    protected static final String GENRE_BEATS = "/m_Beats/sm_News/stock_1/perpage_160";
+    protected static final String GENRE_POP_N_MORE = "/m_More/sm_News/stock_1/perpage_160";
+
 
     private static final int SHOP_ID = 6;
     private static final String PRELIMINARY_PAGE_LINK_SELECTOR = "UL.pagination";
@@ -82,7 +86,7 @@ public class DeejayDeParser extends VinylParser {
 
     @Override
     public List<RawOffer> getRawOffersList() {
-        Set<String> pageLinks = getAllPages(START_PAGE_LINK);
+        Set<String> pageLinks = getAllPages(BASE_LINK);
         log.info("got page links {'pageLinks':{}}", pageLinks.size());
 
         Set<RawOffer> rawOffersSet = readOffersFromAllPages(pageLinks);
@@ -111,7 +115,11 @@ public class DeejayDeParser extends VinylParser {
 
     Set<String> getAllPages(String baseLink) {
         Set<String> linkSet = new HashSet<>();
-        return getAllPages(linkSet, baseLink);
+        getAllPages(linkSet, baseLink + GENRE_HOUSE);
+        getAllPages(linkSet, baseLink + GENRE_TECHNO);
+        getAllPages(linkSet, baseLink + GENRE_BEATS);
+        getAllPages(linkSet, baseLink + GENRE_POP_N_MORE);
+        return linkSet;
     }
 
     Set<String> getAllPages(Set<String> linkSet, String baseLink) {
