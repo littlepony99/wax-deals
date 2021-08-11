@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +20,12 @@ public class InMemoryLogoutTokenStorageService implements LogoutTokenStorageServ
 
     private Cache<String, LocalDateTime> logoutTokensCache;
 
-    private final JwtService jwtService;
+    private JwtService jwtService;
+
+    @Autowired
+    public void setJwtService(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
     @PostConstruct
     public void initCache() {

@@ -59,8 +59,7 @@ public class DefaultSecurityService implements SecurityService {
     public boolean validateIfPasswordMatches(User user, char[] password) {
         boolean isSame = false;
         if (user != null) {
-            isSame = (user.getPassword().equals(hashPassword(password,
-                    Base64.getDecoder().decode(user.getSalt()), user.getIterations())));
+            isSame = encoder.matches(new String(password), user.getPassword());
             log.debug("Compared hash of passed password against user's hashed password");
         }
         log.debug("Result of comparing password against user's password is {'isSame': {}, 'user':{}}", isSame, user);

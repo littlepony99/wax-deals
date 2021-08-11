@@ -15,7 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Slf4j
 @RequiredArgsConstructor
 @Controller
-@RequestMapping("/signUp")
+@RequestMapping("/signUpOld")
 @CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class SignUpController {
     private final UserService userService;

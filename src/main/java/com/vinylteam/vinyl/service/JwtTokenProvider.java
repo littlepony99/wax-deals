@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service;
 import com.vinylteam.vinyl.security.LogoutTokenStorageService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +28,23 @@ import static com.vinylteam.vinyl.security.SecurityConstants.AUTHORIZATION_HEADE
 import static com.vinylteam.vinyl.security.SecurityConstants.TOKEN_PREFIX;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class JwtTokenProvider implements JwtService {
 
     private SecretKey secretKey;
 
     @Autowired
+    public void setTokenStorageService(LogoutTokenStorageService tokenStorageService) {
+        this.tokenStorageService = tokenStorageService;
+    }
+
     private LogoutTokenStorageService tokenStorageService;
 
     @Value("${jwt.token.expired:300000}")
     private int validityInMilliseconds;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
     @PostConstruct
     public void init() {

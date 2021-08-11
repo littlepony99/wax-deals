@@ -52,10 +52,18 @@ public class DefaultEmailConfirmationService implements EmailConfirmationService
     public ConfirmationToken addByUserId(long userId) {
         ConfirmationToken newConfirmationToken = ConfirmationToken.builder()
                 .userId(userId)
-                .token(UUID.randomUUID())
+                .token(generateToken())
                 .build();
+        log.info("Generated token: {}", newConfirmationToken.getToken());
         confirmationTokenDao.add(newConfirmationToken);
         return newConfirmationToken;
+    }
+
+    @Override
+    public UUID generateToken() {
+
+        UUID uuid = UUID.randomUUID();
+        return uuid;
     }
 
     @Override

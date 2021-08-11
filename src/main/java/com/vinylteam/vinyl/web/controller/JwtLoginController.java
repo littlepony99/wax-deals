@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -69,6 +70,10 @@ public class JwtLoginController {
             response.putAll(getUserCredentialsMap(token, authUser));
             response.putAll(getSuccessStatusInfoMap());
             return new ResponseEntity<>(response, CREATED);
+        } catch (DisabledException e) {
+            log.warn("User is not activated yet", e);
+            response.putAll(getStatusInfoMap("1", "User is not activated yet"));
+            return new ResponseEntity<>(response, BAD_REQUEST);
         } catch (AuthenticationException e) {
             log.warn("Invalid username or password", e);
             response.putAll(getStatusInfoMap("1", "Invalid username or password"));

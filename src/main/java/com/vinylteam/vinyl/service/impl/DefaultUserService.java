@@ -52,8 +52,8 @@ public class DefaultUserService implements UserService {
             throw new RuntimeException(UserErrors.ADD_USER_INVALID_VALUES_ERROR.getMessage());
         }
         log.debug("Added created user to db {'user':{}}", userToAdd);
-        //ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
-        //emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+        ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
+        emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
     }
 
     @Transactional
@@ -133,9 +133,9 @@ public class DefaultUserService implements UserService {
         if (!securityService.validateIfPasswordMatches(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
             throw new RuntimeException(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage());
         }
-        if (!userToCheckAgainst.getStatus()) {
+/*        if (!userToCheckAgainst.getStatus()) {
             throw new RuntimeException(UserErrors.EMAIL_NOT_VERIFIED_ERROR.getMessage());
-        }
+        }*/
     }
 
     @Override

@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -17,7 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpSession;
 
 @Slf4j
-@Controller
+//@Controller
 @CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class SignInController {
     private final UserService userService;
@@ -43,7 +42,7 @@ public class SignInController {
         return "signIn";
     }
 
-    @PostMapping("/emailConfirmation")
+    //@PostMapping("/emailConfirmation")
     public ModelAndView confirmSignIn(@RequestParam(value = "token") String tokenAsString,
                                       @RequestParam(value = "email") String email,
                                       @RequestParam(value = "password") String password,
@@ -66,5 +65,7 @@ public class SignInController {
         modelAndView.setViewName("redirect:/");
         return modelAndView;
     }
+
+
 
 }
