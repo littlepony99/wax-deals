@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/stores")
-@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class ShopController {
 
     private final ShopService shopService;

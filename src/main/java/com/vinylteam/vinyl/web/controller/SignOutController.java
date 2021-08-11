@@ -11,7 +11,7 @@ import javax.servlet.http.HttpSession;
 @Slf4j
 @Controller
 @RequestMapping("/signOut")
-@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class SignOutController {
 
     @GetMapping

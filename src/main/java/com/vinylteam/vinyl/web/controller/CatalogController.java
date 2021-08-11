@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/catalog")
-@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class CatalogController {
 
     private final UniqueVinylService uniqueVinylService;
