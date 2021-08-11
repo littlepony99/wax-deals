@@ -42,28 +42,4 @@ public class SignInController {
         return "signIn";
     }
 
-    //@PostMapping("/emailConfirmation")
-    public ModelAndView confirmSignIn(@RequestParam(value = "token") String tokenAsString,
-                                      @RequestParam(value = "email") String email,
-                                      @RequestParam(value = "password") String password,
-                                      //@Value("${session.maxInactiveInterval}") Integer sessionMaxInactiveInterval,
-                                      HttpSession session) {
-
-        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
-                .token(tokenAsString)
-                .email(email)
-                .password(password)
-                .build();
-
-        ModelAndView modelAndView = new ModelAndView();
-        log.info("Sign in user with email {} and token {}", email, tokenAsString);
-        User user = userService.confirmEmail(userProfileInfo);
-        session.setMaxInactiveInterval(sessionMaxInactiveInterval);
-        session.setAttribute("user", user);
-        modelAndView.setStatus(HttpStatus.OK);
-        log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-        modelAndView.setViewName("redirect:/");
-        return modelAndView;
-    }
-
 }

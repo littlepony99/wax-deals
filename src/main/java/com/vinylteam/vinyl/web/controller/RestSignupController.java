@@ -31,7 +31,6 @@ public class RestSignupController {
     @PostMapping("/signUp")
     public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
         Map<String, Object> responseMap = new HashMap<>();
-
         try {
             userService.register(userProfileInfo);
             log.debug("User was added with " +
@@ -49,27 +48,13 @@ public class RestSignupController {
     }
 
     @PostMapping("/emailConfirmation")
-    public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestBody UserInfoRequest request) {
-        var token = request.getToken();
+    public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestParam(value = "token") String token) {
         Map<String, Object> responseMap = new HashMap<>();
-        JwtUser user = getUserWhoNeedsConfirmation(token);
-        UserInfoRequest userProfileInfo = request;
-        userProfileInfo.setEmail(user.getUsername());
-        log.info("Sign in user with email {} and token {}", user.getUsername(), token);
-        try {
-            JwtUser confirmedUser = userMapper.mapToDto(userService.confirmEmail(userProfileInfo));
-
-            responseMap.putAll(getUserCredentialsMap(jwtService.createToken(confirmedUser.getUsername(), user.getAuthorities()), user));
-            responseMap.putAll(getStatusInfoMap("0", ""));
-            log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-            ResponseEntity response = new ResponseEntity(responseMap, HttpStatus.OK);
-            return response;
-        } catch (Exception e){
-            log.error("Error during confirmation ", e);
-            responseMap.putAll(getStatusInfoMap("1", e.getMessage()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
-            return response;
-        }
+        userService.confirmEmailByToken(token);
+        responseMap.putAll(getStatusInfoMap("0", "Email verified!"));
+        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
+        log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
+        return response;
     }
 
 
@@ -79,16 +64,6 @@ public class RestSignupController {
         return Map.of(
                 "user", userMapper.mapUserToDto(byEmail),
                 "token", token);
-    }
-
-    private JwtUser getUserWhoNeedsConfirmation(String tokenAsString) {
-        JwtUser user = emailConfirmationService
-                .findByToken(tokenAsString)
-                .map(foundConfirmationToken -> foundConfirmationToken.getUserId())
-                .flatMap(userFromToken -> userService.findById(userFromToken))
-                .map(foundUser -> userMapper.mapToDto(foundUser))
-                .get();
-        return user;
     }
 
     private Map<String, String> getStatusInfoMap(String code, String s) {
