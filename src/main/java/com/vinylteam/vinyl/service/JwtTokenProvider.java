@@ -1,6 +1,10 @@
 package com.vinylteam.vinyl.service;
 
+import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
+import com.vinylteam.vinyl.entity.JwtUser;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.LogoutTokenStorageService;
+import com.vinylteam.vinyl.web.dto.LoginRequest;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,9 +25,7 @@ import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 import static com.vinylteam.vinyl.security.SecurityConstants.AUTHORIZATION_HEADER_NAME;
 import static com.vinylteam.vinyl.security.SecurityConstants.TOKEN_PREFIX;
@@ -32,11 +35,20 @@ import static com.vinylteam.vinyl.security.SecurityConstants.TOKEN_PREFIX;
 @Slf4j
 public class JwtTokenProvider implements JwtService {
 
+    private AuthenticationManager authenticationManager;
+
+    private final UserService userService;
+    private final UserMapper userMapper;
     private SecretKey secretKey;
 
     @Autowired
     public void setTokenStorageService(LogoutTokenStorageService tokenStorageService) {
         this.tokenStorageService = tokenStorageService;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     private LogoutTokenStorageService tokenStorageService;
@@ -63,7 +75,7 @@ public class JwtTokenProvider implements JwtService {
             if (claims.getBody().getExpiration().before(new Date())) {
                 return false;
             }
-            return true && !tokenStorageService.isTokenBlocked(token);
+            return !tokenStorageService.isTokenBlocked(token);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
             return false;
@@ -71,12 +83,11 @@ public class JwtTokenProvider implements JwtService {
     }
 
     private Jws<Claims> getClaims(String token) {
-        Jws<Claims> claims = Jwts
+        return Jwts
                 .parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token);
-        return claims;
     }
 
     @Override
@@ -119,6 +130,33 @@ public class JwtTokenProvider implements JwtService {
                 .toLocalDateTime();
     }
 
+    @Override
+    public Map<String, Object> checkTokenAndReturnCredentialsMap(String token) {
+        if (validateToken(token)) {
+            var auth = getAuthentication(token);
+            var authUser = (JwtUser) auth.getPrincipal();
+            return getUserCredentialsMap(token, authUser);
+        }
+        return Map.of();
+    }
+
+    @Override
+    public Map<String, Object> authenticateAndReturnCredentialsMap(LoginRequest loginRequest) {
+        Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+        Authentication authentication = authenticationManager.authenticate(preparedAuth);
+        var authUser = (JwtUser) authentication.getPrincipal();
+        var token = createToken(authUser.getUsername(), authUser.getAuthorities());
+        return getUserCredentialsMap(token, authUser);
+    }
+
+    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
+        String username = authUser.getUsername();
+        User byEmail = userService.findByEmail(username);
+        return Map.of(
+                "user", userMapper.mapUserToDto(byEmail),
+                "token", token);
+    }
+
     private String getUsername(String token) {
         return Jwts
                 .parserBuilder()
@@ -135,5 +173,6 @@ public class JwtTokenProvider implements JwtService {
         }
         return bearerToken;
     }
+
 
 }

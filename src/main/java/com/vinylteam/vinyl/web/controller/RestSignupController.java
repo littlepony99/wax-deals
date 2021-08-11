@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,13 +37,13 @@ public class RestSignupController {
             userService.register(userProfileInfo);
             log.debug("User was added with " +
                     "passed email and password to db {'email':{}}", userProfileInfo.getEmail());
-            responseMap.putAll(getStatusInfoMap("0", "Please confirm your registration. To do this, follow the link that we sent to your email - " + userProfileInfo.getEmail()));
+            responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("0", "Please confirm your registration. To do this, follow the link that we sent to your email - " + userProfileInfo.getEmail()));
             ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
             log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
             return response;
         } catch (Exception e) {
             log.error("Error during registration", e);
-            responseMap.putAll(getStatusInfoMap("1", e.getMessage()));
+            responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("1", e.getMessage()));
             ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
             return response;
         }
@@ -52,49 +53,35 @@ public class RestSignupController {
     public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestBody UserInfoRequest request) {
         var token = request.getToken();
         Map<String, Object> responseMap = new HashMap<>();
-        JwtUser user = getUserWhoNeedsConfirmation(token);
+        User user = getUserWhoNeedsConfirmation(token);
         UserInfoRequest userProfileInfo = request;
-        userProfileInfo.setEmail(user.getUsername());
-        log.info("Sign in user with email {} and token {}", user.getUsername(), token);
+        userProfileInfo.setEmail(user.getEmail());
+        log.info("Sign in user with email {} and token {}", user.getEmail(), token);
         try {
             JwtUser confirmedUser = userMapper.mapToDto(userService.confirmEmail(userProfileInfo));
 
-            responseMap.putAll(getUserCredentialsMap(jwtService.createToken(confirmedUser.getUsername(), user.getAuthorities()), user));
-            responseMap.putAll(getStatusInfoMap("0", ""));
+            responseMap.putAll(ControllerResponseUtils.getUserCredentialsMap(jwtService.createToken(confirmedUser.getUsername(), confirmedUser.getAuthorities()), user));
+            responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("0", ""));
             log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-            ResponseEntity response = new ResponseEntity(responseMap, HttpStatus.OK);
+            ResponseEntity<Map<String, Object>> response = new ResponseEntity(responseMap, HttpStatus.OK);
             return response;
         } catch (Exception e){
             log.error("Error during confirmation ", e);
-            responseMap.putAll(getStatusInfoMap("1", e.getMessage()));
+            responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("1", e.getMessage()));
             ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
             return response;
         }
     }
 
 
-    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
-        String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
-        return Map.of(
-                "user", userMapper.mapUserToDto(byEmail),
-                "token", token);
-    }
 
-    private JwtUser getUserWhoNeedsConfirmation(String tokenAsString) {
-        JwtUser user = emailConfirmationService
+    private User getUserWhoNeedsConfirmation(String tokenAsString) {
+        User user = emailConfirmationService
                 .findByToken(tokenAsString)
                 .map(foundConfirmationToken -> foundConfirmationToken.getUserId())
                 .flatMap(userFromToken -> userService.findById(userFromToken))
-                .map(foundUser -> userMapper.mapToDto(foundUser))
                 .get();
         return user;
-    }
-
-    private Map<String, String> getStatusInfoMap(String code, String s) {
-        return Map.of(
-                "resultCode", code,
-                "message", s);
     }
 
 }

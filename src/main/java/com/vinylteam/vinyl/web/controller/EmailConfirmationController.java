@@ -1,8 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.JwtUser;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
@@ -11,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -37,23 +33,6 @@ public class EmailConfirmationController {
         modelAndView.addObject("token", tokenAsString);
         modelAndView.setViewName("confirmation-signin");
         return modelAndView;
-    }
-
-
-
-
-    private Map<String, String> getStatusInfoMap(String code, String s) {
-        return Map.of(
-                "resultCode", code,
-                "message", s);
-    }
-
-    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
-        String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
-        return Map.of(
-                "user", userMapper.mapUserToDto(byEmail),
-                "token", token);
     }
 
 }
