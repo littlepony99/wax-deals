@@ -8,7 +8,6 @@ import org.springframework.security.core.GrantedAuthority;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Map;
 
 public interface JwtService {
 

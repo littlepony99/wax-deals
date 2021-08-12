@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 class SignupControllerITest {
 
-    private String testUserEmail = "testuser2@gmail.com";
-    private String testUserPassword = "Password123";
+    private final String testUserEmail = "testuser2@gmail.com";
+    private final String testUserPassword = "Password123";
 
     @Autowired
     private MockMvc mockMvc;

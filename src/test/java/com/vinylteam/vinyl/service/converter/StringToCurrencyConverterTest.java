@@ -8,7 +8,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StringToCurrencyConverterTest {
-    private StringToCurrencyConverter stringToCurrencyConverter = new StringToCurrencyConverter();
+
+    private final StringToCurrencyConverter stringToCurrencyConverter = new StringToCurrencyConverter();
 
     @Test
     void convert() {

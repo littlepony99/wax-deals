@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
 import com.vinylteam.vinyl.service.JwtService;
-import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,7 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
     private Expiry<String, LocalDateTime> getExpirationStrategy() {
         return new Expiry<String, LocalDateTime>() {
 
-            private ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
+            private final ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
 
             @Override
             public long expireAfterCreate(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime) {
