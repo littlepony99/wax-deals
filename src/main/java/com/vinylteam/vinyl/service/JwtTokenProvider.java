@@ -4,7 +4,9 @@ import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.LogoutTokenStorageService;
+import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.vinylteam.vinyl.security.SecurityConstants.AUTHORIZATION_HEADER_NAME;
 import static com.vinylteam.vinyl.security.SecurityConstants.TOKEN_PREFIX;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 @Service
 @RequiredArgsConstructor
@@ -43,8 +48,8 @@ public class JwtTokenProvider implements JwtService {
 
     private LogoutTokenStorageService tokenStorageService;
 
-    @Value("${jwt.token.expired:300000}")
-    private int validityInMilliseconds;
+    @Value("${jwt.token.expirationInSeconds:600}")
+    private int validityInSeconds;
 
     private final UserDetailsService userDetailsService;
 
@@ -62,7 +67,6 @@ public class JwtTokenProvider implements JwtService {
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
-
 
     @Override
     public boolean isTokenValid(String token) {
@@ -83,13 +87,6 @@ public class JwtTokenProvider implements JwtService {
         }
     }
 
-    private Jws<Claims> getClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(secretKey)
-                .build()
-                .parseClaimsJws(token);
-    }
 
     @Override
     public String extractToken(HttpServletRequest request) {
@@ -104,7 +101,7 @@ public class JwtTokenProvider implements JwtService {
         claims.put("authorities", authorities);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
+        Date validity = new Date(now.getTime() + SECONDS.toMillis(validityInSeconds));
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -131,22 +128,24 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public Map<String, Object> checkToken(String token) {
+    public UserSecurityResponse getCheckResponseIfTokenValid(String token) {
+        UserSecurityResponse response = new UserSecurityResponse();
         if (isTokenValid(token)) {
             var auth = getAuthentication(token);
             var authUser = (JwtUser) auth.getPrincipal();
-            return getUserCredentialsMap(token, authUser);
+            var map = getUserCredentialsMap(token, authUser);
+            response = ControllerResponseUtils.getResponseFromMap(map);
         }
-        return Map.of();
+        return response;
     }
 
     @Override
-    public Map<String, Object> authenticateByRequest(LoginRequest loginRequest) {
+    public UserSecurityResponse authenticateByRequest(LoginRequest loginRequest) {
         Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(preparedAuth);
         var authUser = (JwtUser) authentication.getPrincipal();
         var token = createToken(authUser.getUsername(), authUser.getAuthorities());
-        return getUserCredentialsMap(token, authUser);
+        return ControllerResponseUtils.getResponseFromMap(getUserCredentialsMap(token, authUser));
     }
 
     private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
@@ -174,5 +173,12 @@ public class JwtTokenProvider implements JwtService {
         return bearerToken;
     }
 
+    private Jws<Claims> getClaims(String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token);
+    }
 
 }

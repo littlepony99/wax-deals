@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.web.dto.LoginRequest;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -21,8 +22,8 @@ public interface JwtService {
 
     LocalDateTime getExpirationDate(String token);
 
-    Map<String, Object> checkToken(String token);
+    UserSecurityResponse getCheckResponseIfTokenValid(String token);
 
-    Map<String, Object> authenticateByRequest(LoginRequest loginRequest);
+    UserSecurityResponse authenticateByRequest(LoginRequest loginRequest);
 
 }

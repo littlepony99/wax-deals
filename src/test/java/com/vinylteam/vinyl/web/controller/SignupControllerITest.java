@@ -39,7 +39,7 @@ class SignupControllerITest {
     @DisplayName("Failure during registration of user")
     void signUpUserWithFailure() throws Exception {
         UUID token = UUID.randomUUID();
-        when(confirmationTokenDao.generateToken()).thenReturn(token);
+        when(confirmationTokenDao.generateConfirmationToken()).thenReturn(token);
         var signUpRequest = Map.of("email", testUserEmail,
                 "password", testUserPassword,
                 "confirmPassword", testUserPassword + "21",
@@ -59,7 +59,7 @@ class SignupControllerITest {
     void signUpUser() throws Exception {
         UUID token = UUID.randomUUID();
         log.info("Generated test token: {}", token);
-        Mockito.doReturn(token).when(confirmationTokenDao).generateToken();
+        Mockito.doReturn(token).when(confirmationTokenDao).generateConfirmationToken();
         var signUpRequest = Map.of("email", testUserEmail,
                 "password", testUserPassword,
                 "confirmPassword", testUserPassword,
@@ -79,7 +79,7 @@ class SignupControllerITest {
     void signUpExistingUser() throws Exception {
         UUID token = UUID.randomUUID();
         log.info("Generated test token: {}", token);
-        Mockito.doReturn(token).when(confirmationTokenDao).generateToken();
+        Mockito.doReturn(token).when(confirmationTokenDao).generateConfirmationToken();
         String testExistingUserEmail = "bill@ms.com";
         String testExistingUserPassword = "Password0987";
         var signUpRequest = Map.of("email", testExistingUserEmail,

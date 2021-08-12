@@ -13,7 +13,7 @@ public interface EmailConfirmationService {
 
     ConfirmationToken addByUserId(long userId);
 
-    UUID generateToken();
+    UUID generateConfirmationToken();
 
     void update(ConfirmationToken confirmationToken);
 

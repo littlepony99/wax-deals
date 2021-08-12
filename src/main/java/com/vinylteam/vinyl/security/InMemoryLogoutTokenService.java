@@ -16,7 +16,6 @@ import java.time.ZoneOffset;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
 
     private Cache<String, LocalDateTime> logoutTokensCache;

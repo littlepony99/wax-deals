@@ -1,10 +1,9 @@
 package com.vinylteam.vinyl.security;
 
 import com.vinylteam.vinyl.security.impl.SpringSecurityService;
-import com.vinylteam.vinyl.service.JwtService;
-import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.filter.JwtValidatorFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -37,6 +37,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final SecurityService defaultSecurityService;
     private final LogoutService logoutHandlerService;
 
+    @Value("#{${cors.allowedOrigins}}")
+    private List<String> allowedOrigins;
+
+    @Value("#{${cors.allowedMethods}}")
+    private List<String> allowedMethods;
+
     @PostConstruct
     void init(){
         defaultSecurityService.setEncoder(encoder());
@@ -45,7 +51,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         web.ignoring().antMatchers(
-                //static resources
                 "/css/**", "/img/**", "/favicon.ico", "/fonts/**", "/*.js");
     }
 
@@ -68,8 +73,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://react-wax-deals.herokuapp.com"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST"));
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(allowedMethods);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
