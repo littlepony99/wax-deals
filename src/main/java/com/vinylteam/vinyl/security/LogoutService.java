@@ -9,26 +9,21 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 @Service
-public class LogoutHandlerService implements LogoutHandler {
+public class LogoutService implements LogoutHandler {
 
     @Autowired
     private JwtService jwtService;
 
     @Autowired
-    private InMemoryLogoutTokenStorageService logoutStorageService;
+    private InMemoryLogoutTokenService logoutStorageService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-
-        //extract token
         String token = jwtService.extractToken(request);
-        //check validity
-        if (jwtService.validateToken(token)) {
+        if (jwtService.isTokenValid(token)) {
             logoutStorageService.storeToken(token);
         }
-        //store token in logout token storage
-
     }
+
 }

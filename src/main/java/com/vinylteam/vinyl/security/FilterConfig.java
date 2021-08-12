@@ -11,9 +11,11 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class FilterConfig {
 
-    @Bean
-    public JwtValidatorFilter getJwtValidatorFilter(JwtService jwtService, UserService userService) {
+/*    @Bean
+    public JwtValidatorFi
+
+    lter getJwtValidatorFilter(JwtService jwtService, UserService userService) {
         return new JwtValidatorFilter(jwtService, userService);
-    }
+    }*/
 
 }

@@ -41,16 +41,6 @@ public class JwtTokenProvider implements JwtService {
     private final UserMapper userMapper;
     private SecretKey secretKey;
 
-    @Autowired
-    public void setTokenStorageService(LogoutTokenStorageService tokenStorageService) {
-        this.tokenStorageService = tokenStorageService;
-    }
-
-    @Autowired
-    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-
     private LogoutTokenStorageService tokenStorageService;
 
     @Value("${jwt.token.expired:300000}")
@@ -63,10 +53,21 @@ public class JwtTokenProvider implements JwtService {
         secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
+    @Autowired
+    public void setTokenStorageService(LogoutTokenStorageService tokenStorageService) {
+        this.tokenStorageService = tokenStorageService;
+    }
+
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+
+
     @Override
-    public boolean validateToken(String token) {
+    public boolean isTokenValid(String token) {
         if (StringUtils.isBlank(token)) {
-            log.debug("JWT token is  invalid");
+            log.debug("JWT token is invalid");
             return false;
         }
         try {
@@ -98,7 +99,6 @@ public class JwtTokenProvider implements JwtService {
 
     @Override
     public String createToken(String userEmail, Collection<? extends GrantedAuthority> authorities) {
-
         Claims claims = Jwts.claims()
                 .setSubject(userEmail);
         claims.put("authorities", authorities);
@@ -131,8 +131,8 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public Map<String, Object> checkTokenAndReturnCredentialsMap(String token) {
-        if (validateToken(token)) {
+    public Map<String, Object> checkToken(String token) {
+        if (isTokenValid(token)) {
             var auth = getAuthentication(token);
             var authUser = (JwtUser) auth.getPrincipal();
             return getUserCredentialsMap(token, authUser);
@@ -141,7 +141,7 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public Map<String, Object> authenticateAndReturnCredentialsMap(LoginRequest loginRequest) {
+    public Map<String, Object> authenticateByRequest(LoginRequest loginRequest) {
         Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
         Authentication authentication = authenticationManager.authenticate(preparedAuth);
         var authUser = (JwtUser) authentication.getPrincipal();

@@ -126,7 +126,7 @@ class JwtLoginControllerITest {
         String jwtToken = JsonPath.read(response, "$.token");
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
-        assertTrue(jwtService.validateToken(jwtToken));
+        assertTrue(jwtService.isTokenValid(jwtToken));
         assertEquals(testUserEmail, responseUser.getEmail());
         assertEquals(Role.USER, responseUser.getRole());
     }

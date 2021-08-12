@@ -61,7 +61,6 @@ public class DefaultEmailConfirmationService implements EmailConfirmationService
 
     @Override
     public UUID generateToken() {
-
         UUID uuid = UUID.randomUUID();
         return uuid;
     }

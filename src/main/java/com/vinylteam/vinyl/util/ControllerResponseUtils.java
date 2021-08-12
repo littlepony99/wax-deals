@@ -10,10 +10,10 @@ public class ControllerResponseUtils {
 
     private static UserMapper userMapper = new DefaultUserMapper();
 
-    public static Map<String, String> getStatusInfoMap(String code, String s) {
+    public static Map<String, String> getStatusInfoMap(String code, String message) {
         return Map.of(
                 "resultCode", code,
-                "message", s);
+                "message", message);
     }
 
     public static Map<String, String> getSuccessStatusInfoMap() {

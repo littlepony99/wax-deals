@@ -28,14 +28,13 @@ public class JwtLoginController {
 
     @GetMapping(value = "/successlogout", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Object>> logout() {
-        Map<String, Object> response = new HashMap<>(getSuccessStatusInfoMap());
-        return new ResponseEntity<>(response, OK);
+        return new ResponseEntity<>(new HashMap<>(getSuccessStatusInfoMap()), OK);
     }
 
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Map<String, Object>> tokenChecking(@RequestHeader(name = "Authorization") String token) {
         Map<String, Object> response = new HashMap<>();
-        Map<String, Object> credentialsMap = jwtTokenProvider.checkTokenAndReturnCredentialsMap(token);
+        Map<String, Object> credentialsMap = jwtTokenProvider.checkToken(token);
         if (!credentialsMap.isEmpty()) {
             response.putAll(credentialsMap);
             response.putAll(getSuccessStatusInfoMap());
@@ -50,7 +49,7 @@ public class JwtLoginController {
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Map<String, Object> credentialsMap = jwtTokenProvider.authenticateAndReturnCredentialsMap(loginRequest);
+            Map<String, Object> credentialsMap = jwtTokenProvider.authenticateByRequest(loginRequest);
             response.putAll(credentialsMap);
             response.putAll(getSuccessStatusInfoMap());
             return new ResponseEntity<>(response, CREATED);

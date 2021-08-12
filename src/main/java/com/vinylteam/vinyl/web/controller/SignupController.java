@@ -21,7 +21,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
-public class RestSignupController {
+public class SignupController {
 
     private final UserService userService;
     private final EmailConfirmationService emailConfirmationService;
@@ -30,7 +30,7 @@ public class RestSignupController {
 
 
     @PostMapping("/signUp")
-    public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
+    public ResponseEntity<Map<String, Object>> signUp(@RequestBody UserInfoRequest userProfileInfo) {
         Map<String, Object> responseMap = new HashMap<>();
 
         try {
@@ -38,14 +38,12 @@ public class RestSignupController {
             log.debug("User was added with " +
                     "passed email and password to db {'email':{}}", userProfileInfo.getEmail());
             responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("0", "Please confirm your registration. To do this, follow the link that we sent to your email - " + userProfileInfo.getEmail()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
             log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
-            return response;
+            return new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
         } catch (Exception e) {
             log.error("Error during registration", e);
             responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("1", e.getMessage()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
-            return response;
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -63,25 +61,20 @@ public class RestSignupController {
             responseMap.putAll(ControllerResponseUtils.getUserCredentialsMap(jwtService.createToken(confirmedUser.getUsername(), confirmedUser.getAuthorities()), user));
             responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("0", ""));
             log.debug("Set response status to {'status':{}}", HttpStatus.OK);
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity(responseMap, HttpStatus.OK);
-            return response;
+            return new ResponseEntity(responseMap, HttpStatus.OK);
         } catch (Exception e){
             log.error("Error during confirmation ", e);
             responseMap.putAll(ControllerResponseUtils.getStatusInfoMap("1", e.getMessage()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
-            return response;
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
-
-
     private User getUserWhoNeedsConfirmation(String tokenAsString) {
-        User user = emailConfirmationService
+        return emailConfirmationService
                 .findByToken(tokenAsString)
                 .map(foundConfirmationToken -> foundConfirmationToken.getUserId())
                 .flatMap(userFromToken -> userService.findById(userFromToken))
-                .get();
-        return user;
+                .orElse(null);
     }
 
 }

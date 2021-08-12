@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface JwtService {
 
-    boolean validateToken(String token);
+    boolean isTokenValid(String token);
 
     String extractToken(HttpServletRequest request);
 
@@ -21,7 +21,8 @@ public interface JwtService {
 
     LocalDateTime getExpirationDate(String token);
 
-    Map<String, Object> checkTokenAndReturnCredentialsMap(String token);
+    Map<String, Object> checkToken(String token);
 
-    Map<String, Object> authenticateAndReturnCredentialsMap(LoginRequest loginRequest);
+    Map<String, Object> authenticateByRequest(LoginRequest loginRequest);
+
 }
