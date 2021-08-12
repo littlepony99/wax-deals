@@ -30,8 +30,7 @@ public class JwtLoginController {
     public ResponseEntity<UserSecurityResponse> tokenChecking(@RequestHeader(name = "Authorization") String token) {
         UserSecurityResponse responseObject = jwtTokenProvider.getCheckResponseIfTokenValid(token);
         if (responseObject.getUser() != null) {
-            responseObject = setSuccessStatusInfo(responseObject);
-            return new ResponseEntity<>(responseObject, OK);
+            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } else {
             responseObject = setStatusInfo(responseObject, "1", "Token is not valid");
             return new ResponseEntity<>(responseObject, ACCEPTED);
@@ -42,8 +41,7 @@ public class JwtLoginController {
     public ResponseEntity<UserSecurityResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
             UserSecurityResponse responseObject = jwtTokenProvider.authenticateByRequest(loginRequest);
-            responseObject = setSuccessStatusInfo(responseObject);
-            return new ResponseEntity<>(responseObject, CREATED);
+            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), CREATED);
         } catch (DisabledException e) {
             log.warn("User is not activated yet", e);
             return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "User is not activated yet"), BAD_REQUEST);
