@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -114,12 +115,11 @@ class RestSignupControllerITest {
         String token = UUID.randomUUID().toString();
         Mockito.doReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(1))).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
-        mockMvc.perform((post("/emailConfirmation"))
-                        .param("token", token))
-                .andExpect(status().isSeeOther())
+        mockMvc.perform((put("/emailConfirmation"))
+                        .param("confirm-token", token))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.message", equalTo("Email verified!")))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")));
+                .andExpect(jsonPath("$.message", equalTo("your email confirmed. Now you can log in")));
     }
 
     @Test
@@ -128,9 +128,9 @@ class RestSignupControllerITest {
         String token = UUID.randomUUID().toString();
         Mockito.doReturn(Optional.empty()).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
-        mockMvc.perform((post("/emailConfirmation"))
-                .param("token", token))
-                .andExpect(status().isBadRequest())
+        mockMvc.perform((put("/emailConfirmation"))
+                .param("confirm-token", token))
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_FOUND.getMessage())));
     }
@@ -139,9 +139,9 @@ class RestSignupControllerITest {
     @DisplayName("Confirming email with non-existent in db token")
     void getConfirmationResponseNotUUIDToken() throws Exception {
         String token = "not uuid format";
-        mockMvc.perform((post("/emailConfirmation"))
-                .param("token", token))
-                .andExpect(status().isBadRequest())
+        mockMvc.perform((put("/emailConfirmation"))
+                .param("confirm-token", token))
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_UUID.getMessage())));
     }

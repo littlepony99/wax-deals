@@ -47,13 +47,13 @@ public class RestSignupController {
         }
     }
 
-    @PostMapping("/emailConfirmation")
-    public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestParam(value = "token") String token) {
+    @PutMapping("/emailConfirmation")
+    public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestParam(value = "confirm-token") String token) {
         Map<String, Object> responseMap = new HashMap<>();
         userService.confirmEmailByToken(token);
-        responseMap.putAll(getStatusInfoMap("0", "Email verified!"));
-        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
-        log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
+        responseMap.putAll(getStatusInfoMap("0", "your email confirmed. Now you can log in"));
+        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+        log.debug("Set response status to {'status':{}}", HttpStatus.OK);
         return response;
     }
 
