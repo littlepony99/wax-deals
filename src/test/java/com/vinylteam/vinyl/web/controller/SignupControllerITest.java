@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Slf4j
-class RestSignupControllerITest {
+class SignupControllerITest {
 
     private String testUserEmail = "testuser2@gmail.com";
     private String testUserPassword = "Password123";
