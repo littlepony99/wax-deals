@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -11,12 +12,14 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.cli.UserException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,12 +61,13 @@ public class DefaultUserService implements UserService {
 
     @Transactional
     @Override
-    public User confirmEmail(UserInfoRequest userInfo) {
-        signInCheck(userInfo);
-        User user = findByEmail(userInfo.getEmail());
+    public void confirmEmailByToken(String token) {
+        Optional<ConfirmationToken> optionalConfirmationToken = emailConfirmationService.findByToken(token);
+        ConfirmationToken confirmationToken = optionalConfirmationToken.get();
+        Optional<User> optionalUser = findById(confirmationToken.getUserId());
+        User user = optionalUser.get();
         emailConfirmationService.deleteByUserId(user.getId());
         userDao.setUserStatusTrue(user.getId());
-        return findByEmail(userInfo.getEmail());
     }
 
     @Override

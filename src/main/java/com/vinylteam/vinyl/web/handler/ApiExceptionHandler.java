@@ -5,15 +5,16 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
-//@ControllerAdvice
 public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {RuntimeException.class})
     public ResponseEntity<Object> handleApiExceptionHandler(RuntimeException exception) {
         ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
+                "1",
                 exception.getMessage());
-        return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);
+        return ResponseEntity.status(FORBIDDEN).body(apiExceptionDto);
     }
 //FIXME: Fix situation with exceptions in a smart way.
 /*    @ExceptionHandler(RuntimeException.class)

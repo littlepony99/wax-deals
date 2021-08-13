@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -802,6 +803,22 @@ class DefaultUserServiceTest {
         verify(mockedUserDao).findByEmail(eq(user.getEmail()));
         verify(mockedEmailConfirmationService, never()).addByUserId(user.getId());
         verify(mockedEmailConfirmationService, never()).sendMessageWithLinkToUserEmail(eq(user.getEmail()), anyString());
+    }
+
+    @Test
+    @DisplayName("confirmEmailByToken when token exists in the db")
+    void confirmEmailByTokenTest() {
+        //prepare
+        String token = UUID.randomUUID().toString();
+        when(mockedEmailConfirmationService.findByToken(token)).thenReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(1)));
+        when(mockedUserDao.findById(1)).thenReturn(Optional.of(dataGenerator.getUserWithNumber(1)));
+        //when
+        userService.confirmEmailByToken(token);
+        //then
+        verify(mockedEmailConfirmationService).findByToken(token);
+        verify(mockedUserDao).findById(1);
+        verify(mockedEmailConfirmationService).deleteByUserId(1);
+        verify(mockedUserDao).setUserStatusTrue(1);
     }
 
 }
