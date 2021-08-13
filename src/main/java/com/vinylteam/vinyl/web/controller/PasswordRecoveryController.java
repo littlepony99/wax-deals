@@ -16,7 +16,6 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("/recoveryPassword")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "http://react-wax-deals.herokuapp.com"})
 public class PasswordRecoveryController {
 
     private final PasswordRecoveryService passwordRecoveryService;

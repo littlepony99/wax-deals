@@ -14,7 +14,10 @@ import java.util.List;
 public interface UserMapper {
 
     @Mappings({@Mapping(source = "email", target = "username"),
-            @Mapping(source = "role", target = "authorities")})
+            @Mapping(source = "role", target = "authorities"),
+            @Mapping(source = "status", target = "enabled")
+    }
+    )
     JwtUser mapToDto(User user);
 
     UserDto mapUserToDto(User user);

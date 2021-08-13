@@ -1,92 +1,57 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.JwtUser;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.JwtService;
-import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import static com.vinylteam.vinyl.util.ControllerResponseUtils.*;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
 public class JwtLoginController {
 
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtTokenProvider;
-    private final UserService userService;
-    private final UserMapper userMapper;
+
+    @GetMapping(value = "/successlogout", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<UserSecurityResponse> logout() {
+        return new ResponseEntity<>(setSuccessStatusInfo(new UserSecurityResponse()), OK);
+    }
 
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, Object>> tokenChecking(@RequestHeader(name = "Authorization") String token) {
-        Map<String, Object> response = new HashMap<>();
-        if (jwtTokenProvider.validateToken(token)) {
-            var auth = jwtTokenProvider.getAuthentication(token);
-            var authUser = (JwtUser) auth.getPrincipal();
-            response.putAll(getUserCredentialsMap(token, authUser));
-            response.putAll(Map.of("token", token));
-            response.putAll(getSuccessStatusInfoMap());
-            return new ResponseEntity<>(response, OK);
+    public ResponseEntity<UserSecurityResponse> tokenChecking(@RequestHeader(name = "Authorization") String token) {
+        UserSecurityResponse responseObject = jwtTokenProvider.getCheckResponseIfTokenValid(token);
+        if (responseObject.getUser() != null) {
+            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } else {
-            response.putAll(getStatusInfoMap("1", "Token is not valid"));
-            return new ResponseEntity<>(response, ACCEPTED);
+            responseObject = setStatusInfo(responseObject, "1", "Token is not valid");
+            return new ResponseEntity<>(responseObject, ACCEPTED);
         }
     }
 
     @PostMapping(value = "/login", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<UserSecurityResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
-            Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-            Authentication authentication = authenticationManager.authenticate(preparedAuth);
-            var authUser = (JwtUser) authentication.getPrincipal();
-            String token = jwtTokenProvider.createToken(authUser.getUsername(), authUser.getAuthorities());
-            response.putAll(getUserCredentialsMap(token, authUser));
-            response.putAll(getSuccessStatusInfoMap());
-            return new ResponseEntity<>(response, CREATED);
+            UserSecurityResponse responseObject = jwtTokenProvider.authenticateByRequest(loginRequest);
+            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), CREATED);
+        } catch (DisabledException e) {
+            log.warn("User is not activated yet", e);
+            return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "User is not activated yet"), BAD_REQUEST);
         } catch (AuthenticationException e) {
             log.warn("Invalid username or password", e);
-            response.putAll(getStatusInfoMap("1", "Invalid username or password"));
-            return new ResponseEntity<>(response, BAD_REQUEST);
+            return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "Invalid username or password"), BAD_REQUEST);
         } catch (Exception e) {
             log.error("Unexpected error during login attempt, user {}", loginRequest, e);
-            response.putAll(getStatusInfoMap("1", e.getMessage()));
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", e.getMessage()), INTERNAL_SERVER_ERROR);
         }
-    }
-
-    private Map<String, String> getSuccessStatusInfoMap() {
-        return getStatusInfoMap("0", "");
-    }
-
-    private Map<String, String> getStatusInfoMap(String code, String s) {
-        return Map.of(
-                "resultCode", code,
-                "message", s);
-    }
-
-    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
-        String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
-        return Map.of(
-                "user", userMapper.mapUserToDto(byEmail),
-                "token", token);
     }
 
 }

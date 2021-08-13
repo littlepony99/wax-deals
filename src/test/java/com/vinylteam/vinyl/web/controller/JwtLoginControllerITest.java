@@ -9,6 +9,7 @@ import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.web.dto.UserDto;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@WithMockUser(username = "testuser2@gmail.com")
+@Slf4j
 class JwtLoginControllerITest {
 
     @Autowired
@@ -53,26 +52,58 @@ class JwtLoginControllerITest {
     @Autowired
     private PasswordEncoder encoder;
 
-    private String testUserEmail = "testuser2@gmail.com";
-    private String testUserPassword = "password";
+    private final String testUserEmail = "testuser2@gmail.com";
+    private final String testUserPassword = "password";
     private User builtUser;
 
-    @PostConstruct
-    public void init() {
+    public void mockUserWithStatus(boolean status) {
         builtUser = User
                 .builder()
                 .role(Role.USER)
                 .email(testUserEmail)
                 .password(encoder.encode(testUserPassword))
+                .status(status)
                 .build();
         when(userDao.findByEmail(testUserEmail)).thenReturn(Optional.of(builtUser));
+    }
+
+    @Test
+    @DisplayName("Correct Credentials but non-active user: login controller returns error")
+    public void loginTestWithNonActivatedUser() throws Exception {
+        //prepare
+        mockUserWithStatus(false);
+        var loginRequest = Map.of(
+                "email", testUserEmail,
+                "password", testUserPassword);
+        String json = new ObjectMapper().writeValueAsString(loginRequest);
+        //when
+        String response = mockMvc.perform(post("/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                //then
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$", not(hasKey("user"))))
+                .andExpect(jsonPath("$", not(hasKey("token"))))
+                .andExpect(jsonPath("$.message", not(emptyString())))
+                .andExpect(jsonPath("$.message", equalTo("User is not activated yet")))
+                .andExpect(jsonPath("$.resultCode", equalTo("1")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        log.info("Response for login of non-activated user {}", response);
     }
 
     @Test
     @DisplayName("Correct Credentials: login controller returns valid JWT")
     public void loginTest() throws Exception {
         //prepare
-        var loginRequest = Map.of("email", testUserEmail, "password", testUserPassword);
+        mockUserWithStatus(true);
+        var loginRequest = Map.of(
+                "email", testUserEmail,
+                "password", testUserPassword);
         String json = new ObjectMapper().writeValueAsString(loginRequest);
         //when
         String response = mockMvc.perform(post("/login")
@@ -95,7 +126,7 @@ class JwtLoginControllerITest {
         String jwtToken = JsonPath.read(response, "$.token");
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
-        assertTrue(jwtService.validateToken(jwtToken));
+        assertTrue(jwtService.isTokenValid(jwtToken));
         assertEquals(testUserEmail, responseUser.getEmail());
         assertEquals(Role.USER, responseUser.getRole());
     }
@@ -104,7 +135,9 @@ class JwtLoginControllerITest {
     @DisplayName("Bad Credentials: Login controller returns appropriate response")
     public void badCredentialsLoginTest() throws Exception {
         //prepare
-        var loginRequest = Map.of("email", testUserEmail + "2", "password", testUserPassword);
+        var loginRequest = Map.of(
+                "email", testUserEmail + "2",
+                "password", testUserPassword);
         String json = new ObjectMapper().writeValueAsString(loginRequest);
         //when
         mockMvc.perform(post("/login")
@@ -126,10 +159,11 @@ class JwtLoginControllerITest {
     @DisplayName("Correct Token: Login controller checks token and returns it in response")
     public void checkCorrectToken() throws Exception {
         //prepare
+        mockUserWithStatus(true);
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
         String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
         //when
-        mockMvc.perform(get("/token").header("Authorization", token))
+        var response = mockMvc.perform(get("/token").header("Authorization", token))
                 //then
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", hasKey("token")))
@@ -141,12 +175,18 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$.token", not(emptyString())))
                 .andExpect(jsonPath("$.token", equalTo(token)))
                 .andExpect(jsonPath("$.message", emptyString()))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")));
+                .andExpect(jsonPath("$.resultCode", equalTo("0")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        log.info("Response for check token request {}", response);
     }
 
     @Test
     @DisplayName("Incorrect Token: Login controller checks token and does not return it in response")
     public void checkIncorrectToken() throws Exception {
+        mockUserWithStatus(true);
         //prepare
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
         String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
