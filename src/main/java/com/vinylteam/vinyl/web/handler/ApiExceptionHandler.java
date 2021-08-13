@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
+@ControllerAdvice
 public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {RuntimeException.class})

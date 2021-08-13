@@ -116,7 +116,7 @@ class SignupControllerITest {
         Mockito.doReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(1))).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
         mockMvc.perform((put("/emailConfirmation"))
-                        .param("confirm-token", token))
+                        .param("confirmToken", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.resultCode", equalTo("0")))
@@ -130,7 +130,7 @@ class SignupControllerITest {
         Mockito.doReturn(Optional.empty()).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
         mockMvc.perform((put("/emailConfirmation"))
-                .param("confirm-token", token))
+                .param("confirmToken", token))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.resultCode", equalTo("1")))
@@ -142,7 +142,7 @@ class SignupControllerITest {
     void getConfirmationResponseNotUUIDToken() throws Exception {
         String token = "not uuid format";
         mockMvc.perform((put("/emailConfirmation"))
-                .param("confirm-token", token))
+                .param("confirmToken", token))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.resultCode", equalTo("1")))
