@@ -12,8 +12,8 @@ public class JwtUser implements UserDetails {
 
     private String username;
     private String password;
+    private boolean enabled;
 
-    private boolean isEnabled;
     private List<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
     @Override
@@ -60,11 +60,11 @@ public class JwtUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isEnabled;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+        this.enabled = enabled;
     }
 
 }

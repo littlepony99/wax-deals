@@ -6,7 +6,6 @@ import com.vinylteam.vinyl.util.impl.ShopMapper;
 import com.vinylteam.vinyl.web.dto.ShopDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/stores")
-@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class ShopController {
 
     private final ShopService shopService;

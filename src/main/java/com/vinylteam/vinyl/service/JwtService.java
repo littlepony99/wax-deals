@@ -1,5 +1,7 @@
 package com.vinylteam.vinyl.service;
 
+import com.vinylteam.vinyl.web.dto.LoginRequest;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -9,7 +11,7 @@ import java.util.Collection;
 
 public interface JwtService {
 
-    boolean validateToken(String token);
+    boolean isTokenValid(String token);
 
     String extractToken(HttpServletRequest request);
 
@@ -18,4 +20,9 @@ public interface JwtService {
     Authentication getAuthentication(String token);
 
     LocalDateTime getExpirationDate(String token);
+
+    UserSecurityResponse getCheckResponseIfTokenValid(String token);
+
+    UserSecurityResponse authenticateByRequest(LoginRequest loginRequest);
+
 }

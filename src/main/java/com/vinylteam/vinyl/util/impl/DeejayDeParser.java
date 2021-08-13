@@ -18,10 +18,10 @@ import static java.util.stream.Collectors.toSet;
 public class DeejayDeParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://www.deejay.de";
-    protected static final String GENRE_HOUSE = "/m_House/sm_News/stock_1/perpage_160";
-    protected static final String GENRE_TECHNO = "/m_Techno/sm_News/stock_1/perpage_160";
-    protected static final String GENRE_BEATS = "/m_Beats/sm_News/stock_1/perpage_160";
-    protected static final String GENRE_POP_N_MORE = "/m_More/sm_News/stock_1/perpage_160";
+    private static final String GENRE_HOUSE = "/m_House/sm_News/stock_1/perpage_160";
+    private static final String GENRE_TECHNO = "/m_Techno/sm_News/stock_1/perpage_160";
+    private static final String GENRE_BEATS = "/m_Beats/sm_News/stock_1/perpage_160";
+    private static final String GENRE_POP_N_MORE = "/m_More/sm_News/stock_1/perpage_160";
 
 
     private static final int SHOP_ID = 6;

@@ -137,9 +137,6 @@ public class DefaultUserService implements UserService {
         if (!securityService.validateIfPasswordMatches(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
             throw new RuntimeException(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage());
         }
-/*        if (!userToCheckAgainst.getStatus()) {
-            throw new RuntimeException(UserErrors.EMAIL_NOT_VERIFIED_ERROR.getMessage());
-        }*/
     }
 
     @Override

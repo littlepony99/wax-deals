@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.security;
 
 import com.vinylteam.vinyl.service.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
@@ -9,26 +9,20 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 @Service
-public class LogoutHandlerService implements LogoutHandler {
+@RequiredArgsConstructor
+public class LogoutService implements LogoutHandler {
 
-    @Autowired
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
-    @Autowired
-    private InMemoryLogoutTokenStorageService logoutStorageService;
+    private final InMemoryLogoutTokenService logoutStorageService;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-
-        //extract token
         String token = jwtService.extractToken(request);
-        //check validity
-        if (jwtService.validateToken(token)) {
+        if (jwtService.isTokenValid(token)) {
             logoutStorageService.storeToken(token);
         }
-        //store token in logout token storage
-
     }
+
 }

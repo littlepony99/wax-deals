@@ -52,8 +52,8 @@ class JwtLoginControllerITest {
     @Autowired
     private PasswordEncoder encoder;
 
-    private String testUserEmail = "testuser2@gmail.com";
-    private String testUserPassword = "password";
+    private final String testUserEmail = "testuser2@gmail.com";
+    private final String testUserPassword = "password";
     private User builtUser;
 
     public void mockUserWithStatus(boolean status) {
@@ -126,7 +126,7 @@ class JwtLoginControllerITest {
         String jwtToken = JsonPath.read(response, "$.token");
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
-        assertTrue(jwtService.validateToken(jwtToken));
+        assertTrue(jwtService.isTokenValid(jwtToken));
         assertEquals(testUserEmail, responseUser.getEmail());
         assertEquals(Role.USER, responseUser.getRole());
     }
