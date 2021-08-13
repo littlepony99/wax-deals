@@ -47,7 +47,9 @@ public class JdbcUserDao implements UserDao {
                 .addValue("role", user.getRole().getName())
                 .addValue("status", user.getStatus())
                 .addValue("discogs_user_name", user.getDiscogsUserName());
-        return namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
+        namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
+        Long id = Long.parseLong(keyHolder.getKeys().get("id").toString());
+        return id;
     }
 
     @Override
