@@ -13,6 +13,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {RuntimeException.class})
     public ResponseEntity<Object> handleApiExceptionHandler(RuntimeException exception) {
         ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
+                "1",
                 exception.getMessage());
         return ResponseEntity.status(FORBIDDEN).body(apiExceptionDto);
     }

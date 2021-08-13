@@ -119,6 +119,7 @@ class RestSignupControllerITest {
                         .param("confirm-token", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$.resultCode", equalTo("0")))
                 .andExpect(jsonPath("$.message", equalTo("your email confirmed. Now you can log in")));
     }
 
@@ -132,6 +133,7 @@ class RestSignupControllerITest {
                 .param("confirm-token", token))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_FOUND.getMessage())));
     }
 
@@ -143,6 +145,7 @@ class RestSignupControllerITest {
                 .param("confirm-token", token))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_UUID.getMessage())));
     }
 

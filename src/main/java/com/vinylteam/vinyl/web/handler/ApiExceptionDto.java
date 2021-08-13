@@ -6,5 +6,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public class ApiExceptionDto {
+    private final String resultCode;
     private final String message;
 }
