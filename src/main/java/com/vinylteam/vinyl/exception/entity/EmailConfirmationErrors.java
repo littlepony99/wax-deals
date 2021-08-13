@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public enum EmailConfirmationErrors {
 
-    TOKEN_FROM_LINK_NOT_FOUND("your link isn't correct. Please, try again or contact us"),
-    TOKEN_FROM_LINK_NOT_UUID("your link isn't correct. Please, try again or contact us"),
+    TOKEN_FROM_LINK_NOT_FOUND("Your link isn't correct. Please, try again or contact us"),
+    TOKEN_FROM_LINK_NOT_UUID("Your link isn't correct. Please, try again or contact us"),
     TOKEN_EXPIRED("Sorry, this link expired. We sent you a new one!"),
 
     EMPTY_EMAIL("Error. Email to confirm is empty. Please, contact us."),

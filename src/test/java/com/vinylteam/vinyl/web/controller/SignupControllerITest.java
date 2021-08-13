@@ -51,7 +51,7 @@ class RestSignupControllerITest {
     @DisplayName("Failure during registration of user")
     void signUpUserWithFailure() throws Exception {
         UUID token = UUID.randomUUID();
-        when(emailConfirmationService.generateToken()).thenReturn(token);
+        when(emailConfirmationService.generateConfirmationToken()).thenReturn(token);
         var signUpRequest = Map.of("email", testUserEmail,
                 "password", testUserPassword,
                 "confirmPassword", testUserPassword + "21",
@@ -71,7 +71,7 @@ class RestSignupControllerITest {
     void signUpUser() throws Exception {
         UUID token = UUID.randomUUID();
         log.info("Generated test token: {}", token);
-        Mockito.doReturn(token).when(emailConfirmationService).generateToken();
+        Mockito.doReturn(token).when(emailConfirmationService).generateConfirmationToken();
         var signUpRequest = Map.of("email", testUserEmail,
                 "password", testUserPassword,
                 "confirmPassword", testUserPassword,
@@ -85,7 +85,7 @@ class RestSignupControllerITest {
     void signUpExistingUser() throws Exception {
         UUID token = UUID.randomUUID();
         log.info("Generated test token: {}", token);
-        Mockito.doReturn(token).when(emailConfirmationService).generateToken();
+        Mockito.doReturn(token).when(emailConfirmationService).generateConfirmationToken();
         String testExistingUserEmail = "bill@ms.com";
         String testExistingUserPassword = "Password0987";
         var signUpRequest = Map.of("email", testExistingUserEmail,
