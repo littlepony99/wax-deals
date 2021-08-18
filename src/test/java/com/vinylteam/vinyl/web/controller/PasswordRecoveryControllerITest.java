@@ -37,7 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Slf4j
-class RestPasswordRecoveryControllerITest {
+class PasswordRecoveryControllerITest {
 
     @Autowired
     private MockMvc mockMvc;
