@@ -54,29 +54,29 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void delete(User user) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("email", user.getEmail());
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail());
         namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
     }
 
     @Override
     public void update(String email, User user) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("email", user.getEmail());
-        sqlParameterSource.addValue("password", user.getPassword());
-        sqlParameterSource.addValue("salt", user.getSalt());
-        sqlParameterSource.addValue("iterations", user.getIterations());
-        sqlParameterSource.addValue("role", user.getRole().getName());
-        sqlParameterSource.addValue("status", user.getStatus());
-        sqlParameterSource.addValue("discogs_user_name", user.getDiscogsUserName());
-        sqlParameterSource.addValue("old_email", email);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword())
+                .addValue("salt", user.getSalt())
+                .addValue("iterations", user.getIterations())
+                .addValue("role", user.getRole().getName())
+                .addValue("status", user.getStatus())
+                .addValue("discogs_user_name", user.getDiscogsUserName())
+                .addValue("old_email", email);
         namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("email", email);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", email);
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 FIND_BY_EMAIL,
                 sqlParameterSource,
@@ -85,8 +85,8 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public Optional<User> findById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("id", id);
         return Optional.ofNullable(namedParameterJdbcTemplate.query(
                 FIND_BY_ID,
                 sqlParameterSource,
@@ -95,8 +95,8 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void setUserStatusTrue(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
-        sqlParameterSource.addValue("id", id);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("id", id);
         namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
