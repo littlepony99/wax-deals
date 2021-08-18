@@ -20,8 +20,6 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    void signInCheck(UserInfoRequest userProfileInfo);
-
     User editProfile(UserInfoRequest userProfileInfo,
                      User user);
 

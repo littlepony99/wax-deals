@@ -120,25 +120,6 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public void signInCheck(UserInfoRequest userProfileInfo) {
-        if (!isNotEmptyNotNull(userProfileInfo.getEmail())) {
-            throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
-        }
-        if (!isNotEmptyNotNull(userProfileInfo.getPassword())) {
-            throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
-        }
-        User userToCheckAgainst;
-        try {
-            userToCheckAgainst = findByEmail(userProfileInfo.getEmail());
-        } catch (RuntimeException e) {
-            throw new RuntimeException(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage());
-        }
-        if (!securityService.validateIfPasswordMatches(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
-            throw new RuntimeException(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage());
-        }
-    }
-
-    @Override
     public User editProfile(UserInfoRequest userProfileInfo,
                             User user) {
         String oldEmail = user.getEmail();

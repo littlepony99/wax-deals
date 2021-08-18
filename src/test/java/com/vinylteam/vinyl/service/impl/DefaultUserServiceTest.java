@@ -55,7 +55,6 @@ class DefaultUserServiceTest {
         //when
         userService.register(userInfo);
         //then
-        verify(mockedSecurityService).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getPassword()), eq(userInfo.getPasswordConfirmation()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getPassword().toCharArray()));
         verify(mockedUserDao).add(user);
@@ -113,7 +112,6 @@ class DefaultUserServiceTest {
         //then
         assertEquals(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage(), exception.getMessage());
         verify(mockedSecurityService).validatePassword(eq(userInfo.getPassword()), eq(userInfo.getPasswordConfirmation()));
-        verify(mockedSecurityService).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getPassword().toCharArray()));
         verify(mockedUserDao).add(user);
         verify(mockedEmailConfirmationService, never()).addByUserId(user.getId());
@@ -149,7 +147,6 @@ class DefaultUserServiceTest {
         Exception exception = assertThrows(RuntimeException.class, () -> userService.register(userInfo));
         //then
         assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedSecurityService).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getPassword()), eq(userInfo.getPasswordConfirmation()));
         verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getPassword().toCharArray()));
         verify(mockedUserDao, never()).add(any());
@@ -237,101 +234,6 @@ class DefaultUserServiceTest {
     }
 
     @Test
-    @DisplayName("Checks valid credentials for sign in")
-    void signInCheck() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        User user = dataGenerator.getUserWithNumber(1);
-        user.setStatus(true);
-        when(mockedUserDao.findByEmail(userInfo.getEmail())).thenReturn(Optional.of(user));
-        when(mockedSecurityService.validateIfPasswordMatches(user, userInfo.getPassword().toCharArray())).thenReturn(true);
-        //when
-        userService.signInCheck(userInfo);
-        //then
-        verify(mockedUserDao).findByEmail(userInfo.getEmail());
-        verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
-    }
-
-    @Test
-    @DisplayName("Checks credentials for sign in when email is null")
-    void signInCheckNullEmail() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        userInfo.setEmail(null);
-        //when
-        Exception exception = assertThrows(RuntimeException.class,
-                () -> userService.signInCheck(userInfo));
-        //then
-        assertEquals(UserErrors.EMPTY_EMAIL_ERROR.getMessage(), exception.getMessage());
-        verify(mockedUserDao, never()).findByEmail(null);
-        verify(mockedSecurityService, never()).validateIfPasswordMatches(any(), eq(userInfo.getPassword().toCharArray()));
-    }
-
-    @Test
-    @DisplayName("Checks credentials for sign in when email is non-existent")
-    void signInCheckNonExistentEmail() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        when(mockedUserDao.findByEmail(userInfo.getEmail())).thenReturn(Optional.empty());
-        //when
-        Exception exception = assertThrows(RuntimeException.class,
-                () -> userService.signInCheck(userInfo));
-        //then
-        assertEquals(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage(), exception.getMessage());
-        verify(mockedUserDao).findByEmail(userInfo.getEmail());
-        verify(mockedSecurityService, never()).validateIfPasswordMatches(any(), eq(userInfo.getPassword().toCharArray()));
-    }
-
-    @Test
-    @DisplayName("Checks credentials for sign in when password is null")
-    void signInCheckNullPassword() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        userInfo.setPassword(null);
-        //when
-        Exception exception = assertThrows(RuntimeException.class,
-                () -> userService.signInCheck(userInfo));
-        //then
-        assertEquals(UserErrors.EMPTY_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedUserDao, never()).findByEmail(userInfo.getEmail());
-        verify(mockedSecurityService, never()).validateIfPasswordMatches(any(), any());
-    }
-
-    @Test
-    @DisplayName("Checks credentials for sign in when password is incorrect")
-    void signInCheckIncorrectPassword() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        User user = dataGenerator.getUserWithNumber(1);
-        when(mockedUserDao.findByEmail(userInfo.getEmail())).thenReturn(Optional.of(user));
-        when(mockedSecurityService.validateIfPasswordMatches(user, userInfo.getPassword().toCharArray())).thenReturn(false);
-        //when
-        Exception exception = assertThrows(RuntimeException.class,
-                () -> userService.signInCheck(userInfo));
-        //then
-        assertEquals(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage(), exception.getMessage());
-        verify(mockedUserDao).findByEmail(userInfo.getEmail());
-        verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
-    }
-
-    @Test
-    @DisplayName("Checks credentials for sign in when user status is false")
-    void signInCheckStatusFalse() {
-        //prepare
-        UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
-        User user = dataGenerator.getUserWithNumber(1);
-        when(mockedUserDao.findByEmail(userInfo.getEmail())).thenReturn(Optional.of(user));
-        when(mockedSecurityService.validateIfPasswordMatches(user, userInfo.getPassword().toCharArray())).thenReturn(true);
-        //when
-        Exception exception = assertThrows(RuntimeException.class,
-                () -> userService.signInCheck(userInfo));
-        //then
-        assertEquals(UserErrors.EMAIL_NOT_VERIFIED_ERROR.getMessage(), exception.getMessage());
-        verify(mockedUserDao).findByEmail(userInfo.getEmail());
-        verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
-    }
-
-    @Test
     @DisplayName("Tests that string isn't empty and isn't null with not empty string")
     void isNotEmptyNotNull() {
         //prepare
@@ -373,7 +275,6 @@ class DefaultUserServiceTest {
         //when
         userService.update(email, email, newPassword, newDiscogsUserName);
         //then
-        verify(mockedSecurityService).emailFormatCheck(email);
         verify(mockedSecurityService).validatePassword(newPassword);
         verify(mockedSecurityService).createUserWithHashedPassword(eq(email), eq(newPassword.toCharArray()));
         assertTrue(user.getStatus());
@@ -399,7 +300,6 @@ class DefaultUserServiceTest {
         //when
         userService.update(oldEmail, newEmail, newPassword, newDiscogsUserName);
         //then
-        verify(mockedSecurityService).emailFormatCheck(newEmail);
         verify(mockedSecurityService).validatePassword(newPassword);
         verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         assertFalse(user.getStatus());
@@ -449,7 +349,6 @@ class DefaultUserServiceTest {
                 () -> userService.update(oldEmail, newEmail, newPassword, newDiscogsUserName));
         //then
         assertEquals(UserErrors.EMAIL_NOT_FOUND_IN_DB_ERROR.getMessage(), exception.getMessage());
-        verify(mockedSecurityService).emailFormatCheck(newEmail);
         verify(mockedSecurityService).validatePassword(newPassword);
         verify(mockedSecurityService).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         assertFalse(user.getStatus());
@@ -498,7 +397,6 @@ class DefaultUserServiceTest {
                 () -> userService.update(oldEmail, newEmail, newPassword, newDiscogsUserName));
         //then
         assertEquals(UserErrors.INVALID_EMAIL_ERROR.getMessage(), exception.getMessage());
-        verify(mockedSecurityService).emailFormatCheck(newEmail);
         verify(mockedSecurityService, never()).validatePassword(newPassword);
         verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         assertFalse(user.getStatus());
@@ -522,7 +420,6 @@ class DefaultUserServiceTest {
                 () -> userService.update(oldEmail, newEmail, newPassword, newDiscogsUserName));
         //then
         assertEquals(UserErrors.EMPTY_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedSecurityService).emailFormatCheck(newEmail);
         verify(mockedSecurityService, never()).validatePassword(newPassword);
         verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(null));
         assertFalse(user.getStatus());
@@ -547,7 +444,6 @@ class DefaultUserServiceTest {
                 () -> userService.update(oldEmail, newEmail, newPassword, newDiscogsUserName));
         //then
         assertEquals(UserErrors.INVALID_PASSWORD_ERROR.getMessage(), exception.getMessage());
-        verify(mockedSecurityService).emailFormatCheck(newEmail);
         verify(mockedSecurityService).validatePassword(newPassword);
         verify(mockedSecurityService, never()).createUserWithHashedPassword(eq(newEmail), eq(newPassword.toCharArray()));
         assertFalse(user.getStatus());
@@ -576,7 +472,6 @@ class DefaultUserServiceTest {
         assertEquals(changedUser, actualUser);
         verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
         verify(mockedSecurityService).validatePassword(userInfo.getNewPassword(), userInfo.getNewPasswordConfirmation());
-        verify(mockedSecurityService, times(2)).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getNewPassword()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getNewPassword().toCharArray()));
         verify(mockedUserDao).update(eq(user.getEmail()), eq(changedUser));
@@ -627,7 +522,6 @@ class DefaultUserServiceTest {
         assertEquals(UserErrors.EMAIL_NOT_FOUND_IN_DB_ERROR.getMessage(), exception.getMessage());
         verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
         verify(mockedSecurityService).validatePassword(userInfo.getNewPassword(), userInfo.getNewPasswordConfirmation());
-        verify(mockedSecurityService, times(2)).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getNewPassword()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getNewPassword().toCharArray()));
         verify(mockedUserDao).update(eq(user.getEmail()), eq(changedUser));
@@ -769,7 +663,6 @@ class DefaultUserServiceTest {
         assertEquals(UserErrors.UPDATE_USER_EXISTING_EMAIL_ERROR.getMessage(), exception.getMessage());
         verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
         verify(mockedSecurityService).validatePassword(userInfo.getNewPassword(), userInfo.getNewPasswordConfirmation());
-        verify(mockedSecurityService, times(2)).emailFormatCheck(eq(userInfo.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getNewPassword()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(userInfo.getEmail()), eq(userInfo.getNewPassword().toCharArray()));
         verify(mockedUserDao).update(eq(user.getEmail()), eq(changedUser));
@@ -796,7 +689,6 @@ class DefaultUserServiceTest {
         assertEquals(user, actualUser);
         verify(mockedSecurityService).validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()));
         verify(mockedSecurityService, never()).validatePassword(userInfo.getNewPassword(), userInfo.getNewPasswordConfirmation());
-        verify(mockedSecurityService).emailFormatCheck(eq(user.getEmail()));
         verify(mockedSecurityService).validatePassword(eq(userInfo.getPassword()));
         verify(mockedSecurityService).createUserWithHashedPassword(eq(user.getEmail()), eq(userInfo.getPassword().toCharArray()));
         verify(mockedUserDao).update(eq(user.getEmail()), eq(user));
