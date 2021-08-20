@@ -38,13 +38,4 @@ class SpringSecurityServiceITest {
         assertEquals(expectedUser.getPassword(), loadedUSer.getPassword());
     }
 
-/*    @Test
-    @ExpectedDataSet(provider = TestUserProvider.AddedUserResultProvider.class)
-    @DisplayName("Adds user to db")
-    void add() {
-        //prepare
-        User expectedUser = dataGenerator.getUserWithNumber(2);
-        //when
-        assertEquals(1, userDao.add(expectedUser));
-    }*/
 }

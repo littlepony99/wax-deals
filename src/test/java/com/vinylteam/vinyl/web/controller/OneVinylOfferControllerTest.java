@@ -159,7 +159,7 @@ public class OneVinylOfferControllerTest {
                 .release("RELEASE")
                 .imageLink("imageLine")
                 .id("123")
-                .hasOffers(true)
+                .offers(true)
                 .artist("artist")
                 .build();
         UniqueVinylDto dto = uniqueVinylMapper.uniqueVinylToDto(vinyl);
@@ -176,7 +176,7 @@ public class OneVinylOfferControllerTest {
                 .release("RELEASE")
                 .imageLink("imageLine")
                 .id("123")
-                .hasOffers(true)
+                .offers(true)
                 .fullName("funn lame")
                 .artist("artist")
                 .build();

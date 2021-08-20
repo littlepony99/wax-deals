@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Component
 @RequiredArgsConstructor
 public class JwtValidatorFilter extends OncePerRequestFilter {
 
@@ -46,7 +45,7 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return "/login".equals(path) || "/signIn".equals(path);
+        return path.contains("/login") || path.contains("/signUp");
     }
 
 }

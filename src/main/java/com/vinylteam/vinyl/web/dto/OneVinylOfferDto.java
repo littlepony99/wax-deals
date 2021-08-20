@@ -11,12 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OneVinylOfferDto {
-
     private Double price;
     private String currency;
     private String catNumber;
     private boolean inStock;
     private String offerLink;
     private String shopImageLink;
-
 }

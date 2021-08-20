@@ -16,16 +16,13 @@ public interface UserMapper {
     @Mappings({@Mapping(source = "email", target = "username"),
             @Mapping(source = "role", target = "authorities"),
             @Mapping(source = "status", target = "enabled")
-    }
-    )
+    })
     JwtUser mapToDto(User user);
 
     UserDto mapUserToDto(User user);
 
     default List<SimpleGrantedAuthority> roleToSimpleGrantedAuthoritiesList(Role role){
-        ArrayList<SimpleGrantedAuthority> list = new ArrayList<>();
-        list.add(new SimpleGrantedAuthority("ROLE_"+role.getName()));
-        return list;
+        return List.of(new SimpleGrantedAuthority("ROLE_"+role.getName()));
     }
 
 }

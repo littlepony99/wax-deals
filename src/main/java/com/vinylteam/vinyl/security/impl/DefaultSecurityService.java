@@ -3,32 +3,28 @@ package com.vinylteam.vinyl.security.impl;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
+import com.vinylteam.vinyl.security.SecurityConstants;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
-@Service
 public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
     private PasswordEncoder encoder;
 
-    private final String algorithm = "PBKDF2WithHmacSHA512";
-
     public DefaultSecurityService() {
         log.debug("Started initializer in DefaultSecurityService");
         try {
-            secretKeyFactory = SecretKeyFactory.getInstance(algorithm);
+            secretKeyFactory = SecretKeyFactory.getInstance(SecurityConstants.ENCODE_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             log.error("Error during initialisation of secretKeyFactory", e);
             throw new RuntimeException(e);

@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -12,7 +11,7 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cli.UserException;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,6 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(password)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
-        //securityService.emailFormatCheck(email);
         securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService
                 .createUserWithHashedPassword(email, password.toCharArray());

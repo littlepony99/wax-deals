@@ -10,10 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UniqueVinylDto {
-
     private String id;
     private String release;
     private String artist;
     private String imageLink;
-
 }

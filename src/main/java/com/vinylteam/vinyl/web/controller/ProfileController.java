@@ -27,16 +27,14 @@ public class ProfileController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                 Model model) {
+    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user, Model model) {
         WebUtils.setUserAttributes(user, model);
         return "profile";
     }
 
     @GetMapping(path = "/edit-profile")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                     Model model) {
+    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,  Model model) {
         WebUtils.setUserAttributes(user, model);
         return "editProfile";
     }

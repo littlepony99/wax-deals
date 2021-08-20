@@ -25,8 +25,6 @@ public class SignupController {
     private final UserService userService;
     private final EmailConfirmationService emailConfirmationService;
     private final UserMapper userMapper;
-    private final JwtService jwtService;
-
 
     @PostMapping("/signUp")
     public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
@@ -42,8 +40,7 @@ public class SignupController {
         } catch (Exception e) {
             log.error("Error during registration", e);
             responseMap.putAll(getStatusInfoMap("1", e.getMessage()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
-            return response;
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -57,12 +54,10 @@ public class SignupController {
         return response;
     }
 
-
     private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
         String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
         return Map.of(
-                "user", userMapper.mapUserToDto(byEmail),
+                "user", userMapper.mapUserToDto(userService.findByEmail(username)),
                 "token", token);
     }
 

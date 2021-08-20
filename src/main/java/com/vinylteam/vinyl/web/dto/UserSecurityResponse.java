@@ -6,10 +6,8 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserSecurityResponse {
-
-    String token;
-    UserDto user;
-    String resultCode;
-    String message;
-
+    private String token;
+    private UserDto user;
+    private String resultCode;
+    private String message;
 }

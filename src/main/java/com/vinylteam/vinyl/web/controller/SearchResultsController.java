@@ -21,7 +21,7 @@ public class SearchResultsController {
     private final UniqueVinylMapper uniqueVinylMapper;
 
     @GetMapping
-    public List<UniqueVinylDto> getSearchResultPage(@RequestParam(value = "matcher") String matcher) {
+    public List<UniqueVinylDto> getSearchResults(@RequestParam(value = "matcher") String matcher) {
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findByFilter(matcher);
         return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);
     }
