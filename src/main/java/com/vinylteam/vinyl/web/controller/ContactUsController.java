@@ -9,11 +9,17 @@ import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.vinylteam.vinyl.util.ControllerResponseUtils.getStatusInfoMap;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,31 +31,14 @@ public class ContactUsController {
     @Value("${project.mail}")
     private String projectMail;
 
-    @GetMapping
-    public ModelAndView getContactUsPage(@SessionAttribute(value = "user", required = false) User user,
-                                         Model model) {
-        WebUtils.setUserAttributes(user, model);
-        return new ModelAndView("contactUs");
+    @PostMapping
+    public ResponseEntity<Map<String, Object>> contactUs(@RequestBody AddUserPostDto dto) throws ForbiddenException {
+        Map<String, Object> responseMap = new HashMap<>();
+        userPostService.addUserPostWithCaptchaRequest(dto);
+        responseMap.put("message", "Thank you. We will answer you as soon as possible.");
+        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+        log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+        return response;
     }
 
-    @PostMapping
-    public CaptchaResponseDto contactUs(@SessionAttribute(value = "user", required = false) User user,
-                                        HttpServletResponse response,
-                                        Model model,
-                                        @RequestBody AddUserPostDto dto) throws ForbiddenException {
-        response.setContentType("text/html;charset=utf-8");
-        try {
-            Boolean isSuccess = userPostService.addUserPostWithCaptchaRequest(dto);
-            if (isSuccess) {
-                return new CaptchaResponseDto("Thank you. Your request was sent to us. We contact with you as soon as possible.");
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                log.info("Post not added");
-                return new CaptchaResponseDto("Sorry. but your request wasn't sent to us. Please, write to us - " + projectMail);
-            }
-        } catch (ForbiddenException e) {
-            WebUtils.setUserAttributes(user, model);
-            throw new ForbiddenException("INVALID_CAPTCHA");
-        }
-    }
 }
