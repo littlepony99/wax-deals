@@ -15,21 +15,17 @@ public class ControllerResponseUtils {
     public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap){
         UserSecurityResponse response = new UserSecurityResponse();
         response.setMessage((String)responseMap.get("message"));
-        response.setResultCode((String)responseMap.get("resultCode"));
         response.setToken((String)responseMap.get("token"));
         response.setUser((UserDto)responseMap.get("user"));
         return response;
     }
 
     public static Map<String, String> getStatusInfoMap(String code, String message) {
-        return Map.of(
-                "resultCode", code,
-                "message", message);
+        return Map.of("message", message);
     }
 
     public static UserSecurityResponse setStatusInfo(UserSecurityResponse response, String code, String message) {
         response.setMessage(message);
-        response.setResultCode(code);
         return response;
     }
 

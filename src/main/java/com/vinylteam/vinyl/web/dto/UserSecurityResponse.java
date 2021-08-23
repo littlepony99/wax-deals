@@ -9,7 +9,6 @@ public class UserSecurityResponse {
 
     String token;
     UserDto user;
-    String resultCode;
     String message;
 
 }

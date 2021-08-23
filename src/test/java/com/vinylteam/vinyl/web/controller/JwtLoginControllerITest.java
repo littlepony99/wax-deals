@@ -87,8 +87,7 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", not(hasKey("user"))))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.message", equalTo("User is not activated yet")))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")))
+                .andExpect(jsonPath("$.message", equalTo("Your email isn't confirmed. Check your mailbox for the confirmation link")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -110,13 +109,12 @@ class JwtLoginControllerITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 //then
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", hasKey("user")))
                 .andExpect(jsonPath("$.user", not(empty())))
                 .andExpect(jsonPath("$.message", emptyString()))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")))
                 .andExpect(jsonPath("$.token", not(empty())))
                 .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
                 .andExpect(jsonPath("$.user.role", equalTo("USER")))
@@ -150,9 +148,7 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", not(hasKey("user"))))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$", hasKey("message")))
-                .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$", hasKey("resultCode")))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")));
+                .andExpect(jsonPath("$.message", not(emptyString())));
     }
 
     @Test
@@ -168,14 +164,12 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", hasKey("token")))
                 .andExpect(jsonPath("$", hasKey("message")))
-                .andExpect(jsonPath("$", hasKey("resultCode")))
                 .andExpect(jsonPath("$.user", not(empty())))
                 .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
                 .andExpect(jsonPath("$.user.role", equalTo("USER")))
                 .andExpect(jsonPath("$.token", not(emptyString())))
                 .andExpect(jsonPath("$.token", equalTo(token)))
                 .andExpect(jsonPath("$.message", emptyString()))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -197,9 +191,7 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$", hasKey("message")))
-                .andExpect(jsonPath("$", hasKey("resultCode")))
-                .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")));
+                .andExpect(jsonPath("$.message", not(emptyString())));
     }
 
 }
