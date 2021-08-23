@@ -87,7 +87,6 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(oldEmail) || !isNotEmptyNotNull(newEmail)) {
             throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
         }
-        securityService.emailFormatCheck(newEmail);
         if (!isNotEmptyNotNull(newPassword)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }

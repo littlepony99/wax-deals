@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.entity.UserPostErrors;
 import com.vinylteam.vinyl.service.CaptchaService;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.util.MailSender;
@@ -32,42 +33,36 @@ public class DefaultUserPostService implements UserPostService {
     @Transactional
     public void processAdd(UserPost post) {
         userPostDao.add(post);
-        String mailMessage = createContactUsMessage(post.getEmail(), post.getTheme(), post.getMessage());
+        String mailMessage = createContactUsMessage(post.getEmail(), post.getMessage());
         mailSender.sendMail(projectMail, CONTACT_US_DEFAULT_THEME, mailMessage);
     }
 
     @Override
     @Transactional
-    public Boolean addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException {
+    public void addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException {
         boolean isCaptchaValid = captchaService.validateCaptcha(dto.getCaptchaResponse());
 
         if (!isCaptchaValid) {
-            throw new ForbiddenException("INVALID_CAPTCHA");
+            throw new ForbiddenException(UserPostErrors.INCORRECT_CAPTCHA_ERROR.getMessage());
         }
 
         UserPost post = UserPost.builder()
                 .name(dto.getName())
                 .email(dto.getEmail())
-                .theme(dto.getSubject())
                 .message(dto.getMessage())
                 .createdAt(LocalDateTime.now())
                 .build();
         try {
             processAdd(post);
             log.info("Post added");
-            return Boolean.TRUE;
         } catch (RuntimeException e) {
             log.info("Post not added");
-            return Boolean.FALSE;
         }
     }
 
-    String createContactUsMessage(String recipient, String subject, String mailBody) {
+    String createContactUsMessage(String recipient, String mailBody) {
         return "MailFrom: " +
                 recipient +
-                System.lineSeparator() +
-                "Theme: " +
-                subject +
                 System.lineSeparator() +
                 "Message: " +
                 mailBody;

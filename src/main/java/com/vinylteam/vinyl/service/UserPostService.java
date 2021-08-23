@@ -8,5 +8,6 @@ public interface UserPostService {
 
     void processAdd(UserPost post);
 
-    Boolean addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException;
+    void addUserPostWithCaptchaRequest(AddUserPostDto dto) throws ForbiddenException;
+
 }

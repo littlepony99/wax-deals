@@ -2,6 +2,8 @@ package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
+import java.util.UUID;
+
 public interface PasswordRecoveryService {
 
     void changePassword(UserInfoRequest userInfoRequest);
@@ -10,4 +12,5 @@ public interface PasswordRecoveryService {
 
     void checkToken(String token);
 
+    UUID generateToken();
 }

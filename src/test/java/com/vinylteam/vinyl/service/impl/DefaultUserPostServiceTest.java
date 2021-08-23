@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.jdbc.JdbcUserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.entity.UserPostErrors;
 import com.vinylteam.vinyl.util.MailSender;
 import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import org.junit.jupiter.api.DisplayName;
@@ -49,13 +50,10 @@ class DefaultUserPostServiceTest {
                 .captchaResponse("captcha")
                 .message("message")
                 .name("name")
-                .subject("subject")
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(true);
         //when
-        boolean result = userPostService.addUserPostWithCaptchaRequest(requestDto);
-        //then
-        assertTrue(result);
+        userPostService.addUserPostWithCaptchaRequest(requestDto);
     }
 
     @Test
@@ -67,27 +65,24 @@ class DefaultUserPostServiceTest {
                 .captchaResponse("captcha")
                 .message("message")
                 .name("name")
-                .subject("subject")
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(false);
         //when
         Exception exception = assertThrows(ForbiddenException.class, () -> userPostService.addUserPostWithCaptchaRequest(requestDto));
         //then
-        assertEquals("INVALID_CAPTCHA", exception.getMessage());
+        assertEquals(UserPostErrors.INCORRECT_CAPTCHA_ERROR.getMessage(), exception.getMessage());
     }
 
     @Test
     @DisplayName("Checks email message creating contains all words")
     void createContactUsMessageTest() {
         //when
-        String contactUsMessage = userPostService.createContactUsMessage("recipient", "subject", "mailBody");
+        String contactUsMessage = userPostService.createContactUsMessage("recipient", "mailBody");
         //then
         assertNotNull((contactUsMessage));
         assertTrue((contactUsMessage.contains("MailFrom:")));
-        assertTrue((contactUsMessage.contains("Theme:")));
         assertTrue((contactUsMessage.contains("Message:")));
         assertTrue((contactUsMessage.contains("recipient")));
-        assertTrue((contactUsMessage.contains("subject")));
         assertTrue((contactUsMessage.contains("mailBody")));
     }
 }

@@ -11,8 +11,8 @@ public class TestUserPostProvider {
         public IDataSet provide() {
             return new DataSetBuilder()
                     .table("user_posts")
-                    .columns("name", "email", "theme", "message", "created_at")
-                    .values("roma", "user1@wax-deals.com", "registration", "hello", "2004-10-19 10:23:10")
+                    .columns("name", "email", "message", "created_at")
+                    .values("roma", "user1@wax-deals.com", "hello", "2004-10-19 10:23:10")
                     .build();
         }
     }
@@ -22,9 +22,9 @@ public class TestUserPostProvider {
         public IDataSet provide() {
             return new DataSetBuilder()
                     .table("user_posts")
-                    .columns("name", "email", "theme", "message", "created_at")
-                    .values("roma", "user1@wax-deals.com", "registration", "hello", "2004-10-19 10:23:10")
-                    .values("taras", "user2@wax-deals.com", "help", "help", "2004-10-19 10:23:10")
+                    .columns("name", "email", "message", "created_at")
+                    .values("roma", "user1@wax-deals.com", "hello", "2004-10-19 10:23:10")
+                    .values("taras", "user2@wax-deals.com", "help", "2004-10-19 10:23:10")
                     .build();
         }
     }

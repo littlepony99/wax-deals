@@ -42,8 +42,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         String newPassword = userInfoRequest.getNewPassword();
         checkPassword(newPassword, userInfoRequest.getNewPasswordConfirmation());
         UUID tokenUUID = stringToUUID(userInfoRequest.getToken());
-        RecoveryToken recoveryToken = passwordRecoveryDao.findByToken(tokenUUID)
-                .orElseThrow(() -> new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_FOUND_IN_DB_ERROR.getMessage()));
+        RecoveryToken recoveryToken = getRecoveryToken(tokenUUID);
         User user = userService.findById(recoveryToken.getUserId())
                 .orElseThrow(() -> new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_FOUND_IN_DB_ERROR.getMessage()));
         String email = user.getEmail();
@@ -58,8 +57,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
     @Override
     public void checkToken(String token) {
         UUID tokenUUID = stringToUUID(token);
-        RecoveryToken recoveryToken = passwordRecoveryDao.findByToken(tokenUUID)
-                .orElseThrow(() -> new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_FOUND_IN_DB_ERROR.getMessage()));
+        RecoveryToken recoveryToken = getRecoveryToken(tokenUUID);
         LocalDateTime tokenLifetime = recoveryToken.getCreatedAt().toLocalDateTime().plusHours(liveTokenHours);
         if (tokenLifetime.compareTo(LocalDateTime.now()) < 0) {
             log.debug("Token lifetime has come to an end.");
@@ -81,12 +79,23 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         sendEmailWithLink(email, recoveryToken.getToken().toString());
     }
 
+    @Override
+    public UUID generateToken() {
+        UUID uuid = UUID.randomUUID();
+        return uuid;
+    }
+
     private UUID stringToUUID(String token) {
         try {
             return UUID.fromString(token);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_CORRECT_UUID_ERROR.getMessage());
         }
+    }
+
+    private RecoveryToken getRecoveryToken(UUID tokenUUID) {
+        return passwordRecoveryDao.findByToken(tokenUUID)
+                .orElseThrow(() -> new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_FOUND_IN_DB_ERROR.getMessage()));
     }
 
     private void sendEmailWithLink(String email, String recoveryToken) {
@@ -112,8 +121,9 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         }
     }
 
+
     private RecoveryToken addRecoveryTokenWithUserId(long userId) {
-        UUID token = UUID.randomUUID();
+        UUID token = generateToken();
         RecoveryToken recoveryToken = new RecoveryToken();
         recoveryToken.setUserId(userId);
         recoveryToken.setToken(token);
