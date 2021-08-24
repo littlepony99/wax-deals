@@ -3,38 +3,36 @@ package com.vinylteam.vinyl.security.impl;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
+import com.vinylteam.vinyl.security.SecurityConstants;
 import com.vinylteam.vinyl.security.SecurityService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
-@Service
 public class DefaultSecurityService implements SecurityService {
 
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
-
-    private final String algorithm = "PBKDF2WithHmacSHA512";
+    private PasswordEncoder encoder;
 
     public DefaultSecurityService() {
         log.debug("Started initializer in DefaultSecurityService");
         try {
-            secretKeyFactory = SecretKeyFactory.getInstance(algorithm);
+            secretKeyFactory = SecretKeyFactory.getInstance(SecurityConstants.ENCODE_ALGORITHM);
         } catch (NoSuchAlgorithmException e) {
             log.error("Error during initialisation of secretKeyFactory", e);
             throw new RuntimeException(e);
         }
+    }
+
+    public void setEncoder(PasswordEncoder encoder) {
+        this.encoder = encoder;
     }
 
     @Override
@@ -45,7 +43,7 @@ public class DefaultSecurityService implements SecurityService {
         User user = new User();
         user.setEmail(email);
         user.setPassword(hashedPassword);
-        user.setSalt(Base64.getEncoder().encodeToString(salt));
+        user.setSalt(salt.toString());
         user.setIterations(iterations);
         user.setRole(Role.USER);
         user.setStatus(false);
@@ -55,14 +53,13 @@ public class DefaultSecurityService implements SecurityService {
 
     @Override
     public boolean validateIfPasswordMatches(User user, char[] password) {
-        boolean isSame = false;
+        boolean isMatched = false;
         if (user != null) {
-            isSame = (user.getPassword().equals(hashPassword(password,
-                    Base64.getDecoder().decode(user.getSalt()), user.getIterations())));
+            isMatched = encoder.matches(new String(password), user.getPassword());
             log.debug("Compared hash of passed password against user's hashed password");
         }
-        log.debug("Result of comparing password against user's password is {'isSame': {}, 'user':{}}", isSame, user);
-        return isSame;
+        log.debug("Result of comparing password against user's password is {'isMatched': {}, 'user':{}}", isMatched, user);
+        return isMatched;
     }
 
     @Override
@@ -88,18 +85,7 @@ public class DefaultSecurityService implements SecurityService {
     }
 
     String hashPassword(char[] password, byte[] salt, int iterations) {
-        try {
-            PBEKeySpec pbeKeySpec = new PBEKeySpec(password, salt, iterations, 256);
-            Arrays.fill(password, '\u0000');
-            SecretKey secretKey = secretKeyFactory.generateSecret(pbeKeySpec);
-            log.debug("Generated secretKey from pbeKeySpeck");
-            byte[] result = secretKey.getEncoded();
-            log.debug("Encoded password into hash");
-            return Base64.getEncoder().encodeToString(result);
-        } catch (InvalidKeySpecException e) {
-            log.error("Error during hashing password", e);
-            throw new RuntimeException(e);
-        }
+        return encoder.encode(new String(password));
     }
 
     byte[] generateSalt() {

@@ -1,5 +1,4 @@
 
-/*
 package com.vinylteam.vinyl.util.impl;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DeejayDeParserITest {
 
-    private static final String START_PAGE_LINK = DeejayDeParser.BASE_LINK + "/m_All/sm_News/substyles_211_223_312_305_309_403_405/stock_1/perpage_160";
+    private static final String START_PAGE_LINK = DeejayDeParser.BASE_LINK + "/m_Techno/sm_News/substyles_211_223_312_305_309_403_405/stock_1/perpage_160";
     private final DeejayDeParser parser = new DeejayDeParser();
 
     @Test
@@ -61,4 +60,4 @@ class DeejayDeParserITest {
         assertFalse(allPageLinks.isEmpty());
     }
 
-}*/
+}

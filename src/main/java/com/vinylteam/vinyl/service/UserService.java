@@ -4,12 +4,13 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserService {
 
     void register(UserInfoRequest userProfileInfo);
 
-    User confirmEmail(UserInfoRequest userInfo);
+    void confirmEmailByToken(String token);
 
     void update(String oldEmail, String newEmail, String newPassword, String discogsUserName);
 
@@ -22,6 +23,6 @@ public interface UserService {
     void signInCheck(UserInfoRequest userProfileInfo);
 
     User editProfile(UserInfoRequest userProfileInfo,
-                               User user);
+                     User user);
 
 }

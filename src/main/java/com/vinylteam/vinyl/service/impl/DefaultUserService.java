@@ -11,12 +11,14 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,20 +31,19 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public void register(UserInfoRequest userProfileInfo) {
-        String email = userProfileInfo.getEmail();
-        String password = userProfileInfo.getPassword();
+    public void register(UserInfoRequest userInfoRequest) {
+        String email = userInfoRequest.getEmail();
+        String password = userInfoRequest.getPassword();
         if (!isNotEmptyNotNull(email)) {
             throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
         }
         if (!isNotEmptyNotNull(password)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
-        securityService.emailFormatCheck(email);
-        securityService.validatePassword(password, userProfileInfo.getPasswordConfirmation());
+        securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService
                 .createUserWithHashedPassword(email, password.toCharArray());
-        userToAdd.setDiscogsUserName(userProfileInfo.getDiscogsUserName());
+        userToAdd.setDiscogsUserName(userInfoRequest.getDiscogsUserName());
         long userId;
         try {
             userId = userDao.add(userToAdd);
@@ -58,12 +59,13 @@ public class DefaultUserService implements UserService {
 
     @Transactional
     @Override
-    public User confirmEmail(UserInfoRequest userInfo) {
-        signInCheck(userInfo);
-        User user = findByEmail(userInfo.getEmail());
+    public void confirmEmailByToken(String token) {
+        Optional<ConfirmationToken> optionalConfirmationToken = emailConfirmationService.findByToken(token);
+        ConfirmationToken confirmationToken = optionalConfirmationToken.get();
+        Optional<User> optionalUser = findById(confirmationToken.getUserId());
+        User user = optionalUser.get();
         emailConfirmationService.deleteByUserId(user.getId());
         userDao.setUserStatusTrue(user.getId());
-        return findByEmail(userInfo.getEmail());
     }
 
     @Override
@@ -132,9 +134,6 @@ public class DefaultUserService implements UserService {
         }
         if (!securityService.validateIfPasswordMatches(userToCheckAgainst, userProfileInfo.getPassword().toCharArray())) {
             throw new RuntimeException(UserErrors.WRONG_CREDENTIALS_ERROR.getMessage());
-        }
-        if (!userToCheckAgainst.getStatus()) {
-            throw new RuntimeException(UserErrors.EMAIL_NOT_VERIFIED_ERROR.getMessage());
         }
     }
 

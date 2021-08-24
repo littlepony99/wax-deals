@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.security;
 
 import com.vinylteam.vinyl.entity.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public interface SecurityService {
 
@@ -13,5 +14,7 @@ public interface SecurityService {
     void validatePassword(String password);
 
     void emailFormatCheck(String email);
+
+    void setEncoder(PasswordEncoder encoder);
 
 }

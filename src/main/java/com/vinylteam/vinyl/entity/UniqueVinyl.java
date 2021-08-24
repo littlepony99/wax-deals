@@ -1,13 +1,13 @@
 package com.vinylteam.vinyl.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
+@Builder
 @Document(indexName = "unique_vinyl_index")
 public class UniqueVinyl {
 
@@ -26,12 +26,17 @@ public class UniqueVinyl {
     @Field(type = FieldType.Keyword)
     private String imageLink;
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     @Field(type = FieldType.Boolean)
     @EqualsAndHashCode.Exclude
-    private boolean hasOffers;
+    private boolean offers;
 
-    public boolean getHasOffers(){
-        return hasOffers;
+    public boolean hasOffers() {
+        return offers;
     }
 
+    public void setHasOffers(boolean offers) {
+        this.offers = offers;
+    }
 }

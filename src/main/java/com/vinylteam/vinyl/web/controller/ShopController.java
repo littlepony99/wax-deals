@@ -1,32 +1,40 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.service.ShopService;
-import com.vinylteam.vinyl.web.util.WebUtils;
+import com.vinylteam.vinyl.util.impl.ShopMapper;
+import com.vinylteam.vinyl.web.dto.ShopDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 @RequestMapping("/stores")
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class ShopController {
 
     private final ShopService shopService;
+    private final ShopMapper shopMapper;
 
     @GetMapping
-    public String getShopPage(@SessionAttribute(value = "user", required = false) User user,
-                              Model model) {
-        var shopList = shopService.findAll();
-        log.info("Shops list is prepared to be included in response, size {'shopsListSize':{}}", shopList.size());
-        WebUtils.setUserAttributes(user, model);
-        model.addAttribute("shopList", shopList);
-        return "stores";
+    public List<ShopDto> getShopInfo() {
+        List<ShopDto> result = shopService
+                .findAll()
+                .stream()
+                .map(shopMapper::userToUserDto)
+                .collect(toList());
+        log.info("Shops list is prepared to be included in response, size {'shopsListSize':{}}", result.size());
+        return result;
     }
 
 }

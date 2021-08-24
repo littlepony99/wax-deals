@@ -7,23 +7,31 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class DefaultSecurityServiceTest {
 
-    private final DefaultSecurityService securityService = new DefaultSecurityService();
+    @Autowired
+    private PasswordEncoder encoder;
+    @Autowired
+    private DefaultSecurityService securityService;// = new DefaultSecurityService();
     private final String rightPassword = "existingUserRightPassword";
     private final String wrongPassword = "existingUserWrongPassword";
     private final String passwordToHash = "password";
-    private final byte[] salt = securityService.generateSalt();
+    private byte[] salt;
     private final User existingUser = new User();
 
     @BeforeAll
     void beforeAll() {
+        salt = securityService.generateSalt();
         existingUser.setEmail("testuser1@vinyl.com");
         existingUser.setPassword(securityService
                 .hashPassword(rightPassword.toCharArray(), salt, 10000));
@@ -33,18 +41,10 @@ class DefaultSecurityServiceTest {
     }
 
     @Test
-    @DisplayName("Checkes if the result of hashing with 10000 iterations is the same for equal inputs.")
+    @DisplayName("Checks if the result of hashing with 10000 iterations is the same for equal inputs.")
     void hashPasswordWithTenThousandIterationsTest() {
         String resultHash = securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000);
-        assertEquals(resultHash,
-                securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000));
-    }
-
-    @Test
-    @DisplayName("Checks if hashing with zero iterations throws an IllegalArgumentException.")
-    void hashPasswordWithZeroIterationsTest() {
-        assertThrows(IllegalArgumentException.class, () ->
-                securityService.hashPassword(passwordToHash.toCharArray(), salt, 0));
+        assertTrue(encoder.matches(passwordToHash, securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000)));
     }
 
     @Test

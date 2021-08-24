@@ -4,17 +4,18 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
-import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
-import com.vinylteam.vinyl.web.dto.OneVinylPageFullResponse;
-import com.vinylteam.vinyl.web.util.WebUtils;
+import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
+import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,31 +28,57 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     private final ShopService shopService;
     private final DiscogsService discogsService;
 
+    private final UniqueVinylMapper uniqueVinylMapper;
+    private final OneVinylOfferMapper oneVinylOfferMapper;
+
+    public UniqueVinyl getUniqueVinyl(String id) {
+        return uniqueVinylService.findById(id);
+    }
+
     @Override
-    public OneVinylPageFullResponse prepareOneVinylInfo(String id) {
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
-
-        List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
-
-        List<OneVinylOffersServletResponse> offersResponseList = prepareOffersSection(offers);
-
-        checkIsVinylInStock(uniqueVinyl, offersResponseList);
-
-        List<UniqueVinyl> preparedVinylsList = prepareVinylsSection(uniqueVinyl);
-
+    public OneVinylPageDto prepareOneVinylInfo(String id) {
+        UniqueVinyl uniqueVinyl = getUniqueVinyl(id);
+        HashMap<String, List> offersAndShopsMap = getSortedInStockOffersAndShops(id);
+        List<Shop> shops = offersAndShopsMap.get("shops");
+        List<Offer> offers = offersAndShopsMap.get("offers");
+        List<OneVinylOfferDto> offerDtoList = offers.stream()
+                .map(offer -> oneVinylOfferMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shops, offer)))
+                .collect(Collectors.toList());
+        List<UniqueVinyl> vinyls = addAuthorVinyls(uniqueVinyl);
+        vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
-
-        return new OneVinylPageFullResponse(offersResponseList, preparedVinylsList, discogsLink);
+        return OneVinylPageDto.builder()
+                .discogsLink(discogsLink)
+                .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
+                .offersList(offerDtoList)
+                .vinylsByArtistList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
+                .build();
     }
 
-    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<OneVinylOffersServletResponse> offersResponseList) {
-        if (offersResponseList.isEmpty()) {
-            uniqueVinyl.setHasOffers(false);
-            uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
-        }
+    @Override
+    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) {
+        String uniqueVinylId = identifier;
+        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
+        List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
+        List<Offer> sortedInStockOffers = getInStockOffersByPrice(offers);
+        List<Integer> shopIds = offerService.findShopIds(sortedInStockOffers);
+        List<Shop> shopsFromOffers = shopService.findShopsByListOfIds(shopIds);
+        checkIsVinylInStock(uniqueVinyl, sortedInStockOffers);
+
+        HashMap<String, List> offersAndShopsMap = new HashMap<>();
+        offersAndShopsMap.put("offers", sortedInStockOffers);
+        offersAndShopsMap.put("shops", shopsFromOffers);
+
+        return offersAndShopsMap;
     }
 
-    String getDiscogsLink(UniqueVinyl uniqueVinyl) {
+    @Override
+    public List<UniqueVinyl> addAuthorVinyls(UniqueVinyl uniqueVinyl) {
+        return prepareVinylsSection(uniqueVinyl);
+    }
+
+    @Override
+    public String getDiscogsLink(UniqueVinyl uniqueVinyl) {
         try {
             return discogsService.getDiscogsLink(uniqueVinyl.getArtist(),
                     uniqueVinyl.getRelease(), uniqueVinyl.getFullName());
@@ -61,31 +88,35 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
         }
     }
 
-    List<OneVinylOffersServletResponse> prepareOffersSection(List<Offer> dbOffers) {
-        List<Integer> shopIds = offerService.findShopIds(dbOffers);
-        List<Shop> shopsList = shopService.findShopsByListOfIds(shopIds);
+    void checkIsVinylInStock(UniqueVinyl uniqueVinyl, List<Offer> inStockOffers) {
+        if (inStockOffers.isEmpty()) {
+            uniqueVinyl.setHasOffers(false);
+            uniqueVinylService.updateOneUniqueVinyl(uniqueVinyl);
+        }
+    }
+
+    List<Offer> getInStockOffersByPrice(List<Offer> dbOffers) {
         return dbOffers.stream()
                 .map(offerService::actualizeOffer)
                 .filter(Offer::isInStock)
-                .map(offer -> WebUtils.getOfferResponseFromOffer(offer, findOfferShop(shopsList, offer)))
                 .sorted((offer1, offer2) -> (int) (offer1.getPrice() - offer2.getPrice()))
                 .collect(Collectors.toList());
     }
 
-    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+    public Shop findOfferShop(List<Shop> shopsList, Offer offer) {
         return shopsList
                 .stream()
-                .filter(store -> Objects.equals(store.getId(), offer.getShopId()))
+                .filter(store -> store.getId() == offer.getShopId())
                 .findFirst()
                 .get();
     }
 
     List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
-        List<UniqueVinyl> preparedListById = new ArrayList<>(List.of(uniqueVinyl));
+        List<UniqueVinyl> preparedListById = new ArrayList<>();
 
         uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
                 .stream()
-                .filter(v -> !v.getId().equals(uniqueVinyl.getId()))
+                .filter(v -> v.getId() != uniqueVinyl.getId())
                 .forEach(preparedListById::add);
 
         return preparedListById;

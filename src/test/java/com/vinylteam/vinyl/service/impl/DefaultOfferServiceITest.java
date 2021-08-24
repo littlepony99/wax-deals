@@ -7,7 +7,9 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,12 +84,12 @@ public class DefaultOfferServiceITest {
         List<UniqueVinyl> vinylsToUpdate = new ArrayList<>(uniqueVinyls);
         List<Offer> offersToUpdate = new ArrayList<>(offers);
 
-        UniqueVinyl newUniqueVinyl = new UniqueVinyl();
-        newUniqueVinyl.setId("10");
-        newUniqueVinyl.setHasOffers(false);
-        newUniqueVinyl.setFullName("Test fullname");
-        newUniqueVinyl.setArtist("Artist new");
-
+        UniqueVinyl newUniqueVinyl = UniqueVinyl.builder()
+                .id("10")
+                .offers(false)
+                .fullName("Test fullname")
+                .artist("Artist new")
+                .build();
         vinylsToUpdate.add(newUniqueVinyl);
         vinylsToUpdate.get(3).setHasOffers(true);
         vinylsToUpdate.remove(0);

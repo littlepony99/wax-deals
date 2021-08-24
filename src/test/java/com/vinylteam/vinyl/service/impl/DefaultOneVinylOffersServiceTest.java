@@ -4,9 +4,10 @@ import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.OfferService;
+import com.vinylteam.vinyl.service.ShopService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.web.dto.OneVinylOffersServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,52 +31,52 @@ class DefaultOneVinylOffersServiceTest {
     @InjectMocks
     private DefaultOneVinylOffersService oneVinylService;
 
+    @Autowired
     @MockBean
-    private OfferService offerService;
+    private OfferService mockedOfferService;
 
+    @MockBean
+    private ShopService shopService;
+
+    @Autowired
     @MockBean
     private UniqueVinylService uniqueVinylService;
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
+    @BeforeEach
+    void beforeEach() {
+        reset(mockedOfferService);
+        reset(shopService);
+    }
+
     @Test
     @DisplayName("Checks whether vinyl.hasOffers flag is true when there are offers and is false when there ias no any offer for the vinyl")
     void givenVinylListWithNoOffer_whenHasOffersSetToFalse_thenCorrect() {
-        //given
+        //prepare
         var vinylsList = dataGenerator
                 .getUniqueVinylsList()
                 .stream()
-                .filter(UniqueVinyl::getHasOffers)
+                .filter(UniqueVinyl::hasOffers)
                 .collect(Collectors.toList());
-        List<OneVinylOffersServletResponse> offersResponseList = new ArrayList<>();
-        for (UniqueVinyl uniqueVinyl : vinylsList) {
-            assertTrue(uniqueVinyl.getHasOffers());
-        }
-        //when
-        offersResponseList.add(new OneVinylOffersServletResponse());
+        List<Offer> offers = new ArrayList<>();
         UniqueVinyl testedUniqueVinyl = vinylsList.get(0);
+        //when
+        oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offers);
         //then
-        oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
-        verify(uniqueVinylService, never()).updateOneUniqueVinyl(testedUniqueVinyl);
-        assertTrue(testedUniqueVinyl.getHasOffers());
-
-        offersResponseList.clear();
-        oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offersResponseList);
         verify(uniqueVinylService).updateOneUniqueVinyl(testedUniqueVinyl);
-        assertFalse(testedUniqueVinyl.getHasOffers());
+        assertFalse(testedUniqueVinyl.hasOffers());
     }
 
     @Test
     @DisplayName("Checks whether OneVinylOffersServletResponse`s list is prepared based on offers list")
     void prepareOffersSection() {
-        List<Shop> shopsList = dataGenerator.getShopsList();
         List<Offer> offers = dataGenerator.getOffersList();
-        when(offerService.actualizeOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
-        when(offerService.mergeOfferChanges(any(), any(), any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
-        when(offerService.findShopIds(any())).thenReturn(List.of(1, 2));//thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
-        List<OneVinylOffersServletResponse> offerResponseList = oneVinylService.prepareOffersSection(offers/*, shopsList*/);
-        assertFalse(offerResponseList.isEmpty());
-        assertEquals(offers.size(), offerResponseList.size());
+        when(mockedOfferService.actualizeOffer(any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
+        when(mockedOfferService.mergeOfferChanges(any(), any(), any())).thenAnswer((Answer<Offer>) invocation -> (Offer) invocation.getArguments()[0]);
+        List<Offer> sortedInStockOffers = oneVinylService.getInStockOffersByPrice(offers);
+        assertFalse(sortedInStockOffers.isEmpty());
+        assertEquals(offers.size(), sortedInStockOffers.size());
     }
 
     @Test
@@ -96,10 +98,41 @@ class DefaultOneVinylOffersServiceTest {
         vinyl.setId("111");
         when(uniqueVinylService.findByArtist(vinyl.getArtist())).thenReturn(vinylListToBeReturned);
         List<UniqueVinyl> vinylsList = oneVinylService.prepareVinylsSection(vinyl);
-        assertEquals(0, vinylsList.indexOf(vinyl));
-        assertEquals(vinylListToBeReturned.size() + 1, vinylsList.size());
+        assertEquals(-1, vinylsList.indexOf(vinyl));
+        assertEquals(vinylListToBeReturned.size(), vinylsList.size());
         for (UniqueVinyl uniqueVinyl : vinylListToBeReturned) {
             assertTrue(vinylsList.contains(uniqueVinyl));
         }
     }
+
+    @Test
+    @DisplayName("gets  in-stock offers and shops for them when unique vinyl has valid offers")
+    void getInStockOffersAndShops_whenUniqueVinylHasValidOffers_thenCorrect() {
+        //prepare
+        String id = "1";
+        UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
+        List<Offer> offers = dataGenerator.getOffersList().subList(0, 2);
+        List<Integer> shopIds = new ArrayList<>(List.of(1, 2));
+        List<Shop> shops = dataGenerator.getShopsList().subList(0, 2);
+        when(uniqueVinylService.findById(id)).thenReturn(uniqueVinyl);
+        when(mockedOfferService.findByUniqueVinylId(id)).thenReturn(offers);
+        when(mockedOfferService.actualizeOffer(offers.get(0))).thenReturn(offers.get(0));
+        when(mockedOfferService.actualizeOffer(offers.get(1))).thenReturn(offers.get(1));
+        when(mockedOfferService.findShopIds(offers)).thenReturn(shopIds);
+        when(shopService.findShopsByListOfIds(shopIds)).thenReturn(shops);
+        HashMap<String, List> expectedSortedOffersAndShopsMap = new HashMap<>();
+        expectedSortedOffersAndShopsMap.put("offers", offers);
+        expectedSortedOffersAndShopsMap.put("shops", shops);
+        //when
+        HashMap<String, List> actualSortedOffersAndShopsMap = oneVinylService.getSortedInStockOffersAndShops(id);
+        //then
+        assertEquals(expectedSortedOffersAndShopsMap, actualSortedOffersAndShopsMap);
+        verify(uniqueVinylService).findById(id);
+        verify(mockedOfferService).findByUniqueVinylId(id);
+        verify(mockedOfferService).actualizeOffer(offers.get(0));
+        verify(mockedOfferService).actualizeOffer(offers.get(1));
+        verify(mockedOfferService).findShopIds(offers);
+        verify(shopService).findShopsByListOfIds(shopIds);
+    }
+
 }

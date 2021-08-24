@@ -2,10 +2,8 @@ package com.vinylteam.vinyl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.PropertySource;
 
 @SpringBootApplication
-@PropertySource({"classpath:application.properties", "classpath:dev.application.properties"})
 public class Starter {
 
     public static void main(String[] args) throws Exception {

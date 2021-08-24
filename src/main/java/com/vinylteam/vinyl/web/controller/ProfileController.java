@@ -1,11 +1,14 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,25 +20,27 @@ import javax.servlet.http.HttpSession;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping(path = "/profile", produces = "text/html;charset=UTF-8")
+@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class ProfileController {
 
     private final UserService userService;
 
     @GetMapping
-    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                 Model model) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user, Model model) {
         WebUtils.setUserAttributes(user, model);
         return "profile";
     }
 
     @GetMapping(path = "/edit-profile")
-    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                     Model model) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,  Model model) {
         WebUtils.setUserAttributes(user, model);
         return "editProfile";
     }
 
     @PostMapping(path = "/edit-profile")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ModelAndView editProfile(@RequestParam(value = "email") String newEmail,
                                     @RequestParam(value = "oldPassword") String oldPassword,
                                     @RequestParam(value = "newPassword") String newPassword,
@@ -63,6 +68,7 @@ public class ProfileController {
     }
 
     @PostMapping(path = "/delete-profile")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ModelAndView deleteProfile(HttpSession session, @SessionAttribute("user") User user) {
         if (user != null) {
             ModelAndView modelAndView = new ModelAndView("redirect:/signUp");

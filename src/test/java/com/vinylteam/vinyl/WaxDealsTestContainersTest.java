@@ -18,12 +18,8 @@ public class WaxDealsTestContainersTest {
     @Autowired
     private ElasticsearchContainer elasticsearchContainer;
 
-    @Container
-    public PostgreSQLContainer<WaxDealsPostgresqlContainer> container = WaxDealsPostgresqlContainer.getInstance();
-
     @Test
     void test() {
         assertTrue(elasticsearchContainer.isRunning());
-        assertTrue(container.isRunning());
     }
 }
