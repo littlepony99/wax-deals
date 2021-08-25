@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.PasswordRecoveryErrors;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.service.UserService;
@@ -49,7 +50,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
         try {
             userService.update(email, email, newPassword, user.getDiscogsUserName());
             passwordRecoveryDao.deleteById(recoveryToken.getId());
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | ServerException e) {
             throw new RuntimeException(PasswordRecoveryErrors.UPDATE_PASSWORD_ERROR.getMessage());
         }
     }
@@ -72,7 +73,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
 
     @Override
     @Transactional
-    public void sendLink(String email) {
+    public void sendLink(String email) throws ServerException {
         checkForIsNotEmptyNotNull(email, PasswordRecoveryErrors.EMPTY_EMAIL_ERROR);
         User user = userService.findByEmail(email);
         RecoveryToken recoveryToken = addRecoveryTokenWithUserId(user.getId());
@@ -98,13 +99,13 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
                 .orElseThrow(() -> new RuntimeException(PasswordRecoveryErrors.TOKEN_NOT_FOUND_IN_DB_ERROR.getMessage()));
     }
 
-    private void sendEmailWithLink(String email, String recoveryToken) {
+    private void sendEmailWithLink(String email, String recoveryToken) throws ServerException {
         String recoveryLink = RECOVERY_MESSAGE.replace("{applicationLink}", applicationLink) + recoveryToken;
         String recoveryTopic = "Password Recovery - WaxDeals";
         try {
             mailSender.sendMail(email, recoveryTopic, recoveryLink);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(PasswordRecoveryErrors.EMAIL_SEND_ERROR.getMessage());
+        } catch (ServerException e) {
+            throw new ServerException(PasswordRecoveryErrors.EMAIL_SEND_ERROR.getMessage());
         }
     }
 

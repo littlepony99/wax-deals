@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.PasswordRecoveryDao;
 import com.vinylteam.vinyl.entity.RecoveryToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.PasswordRecoveryErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.service.UserService;
@@ -78,7 +79,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Change password - new password is null")
-    void changePasswordNullNewPassword() {
+    void changePasswordNullNewPassword() throws ServerException {
         //prepare
         UUID token = UUID.randomUUID();
         UserInfoRequest userProfileInfoNullPassword = UserInfoRequest.builder()
@@ -97,7 +98,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Change password - new password is empty")
-    void changePasswordEmptyNewPassword() {
+    void changePasswordEmptyNewPassword() throws ServerException {
         //prepare
         UUID token = UUID.randomUUID();
         UserInfoRequest userProfileInfoEmptyPassword = UserInfoRequest.builder()
@@ -117,7 +118,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Change password - token not found in db")
-    void changePasswordTokenNotCorrect() {
+    void changePasswordTokenNotCorrect() throws ServerException {
         //prepare
         UUID token = UUID.randomUUID();
         when(mockedPasswordRecoveryDao.findByToken(eq(token))).thenReturn(Optional.empty());
@@ -139,7 +140,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Change password - error while updating user")
-    void changePasswordUserUpdateError() {
+    void changePasswordUserUpdateError() throws ServerException {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
         UUID token = recoveryToken.getToken();
@@ -165,7 +166,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Change password - success")
-    void changePasswordSuccess() {
+    void changePasswordSuccess() throws ServerException {
         //prepare
         RecoveryToken recoveryToken = dataGenerator.getRecoveryTokenWithUserId(1);
         UUID token = recoveryToken.getToken();
@@ -309,7 +310,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Send link - email sending error")
-    void sendLinkEmailSendError() {
+    void sendLinkEmailSendError() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();
@@ -327,7 +328,7 @@ class DefaultPasswordRecoveryServiceTest {
 
     @Test
     @DisplayName("Send link - success")
-    void sendLinkSuccess() {
+    void sendLinkSuccess() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();

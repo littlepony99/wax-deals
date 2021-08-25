@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.util.MailSender;
@@ -74,7 +75,7 @@ public class DefaultEmailConfirmationService implements EmailConfirmationService
     }
 
     @Override
-    public void sendMessageWithLinkToUserEmail(String email, String token) {
+    public void sendMessageWithLinkToUserEmail(String email, String token) throws ServerException {
         if (email == null) {
             throw new RuntimeException(EmailConfirmationErrors.EMPTY_EMAIL.getMessage());
         }

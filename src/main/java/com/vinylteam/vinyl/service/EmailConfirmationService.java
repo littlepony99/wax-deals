@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.exception.ServerException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,7 +18,7 @@ public interface EmailConfirmationService {
 
     void update(ConfirmationToken confirmationToken);
 
-    void sendMessageWithLinkToUserEmail(String email, String token);
+    void sendMessageWithLinkToUserEmail(String email, String token) throws ServerException;
 
     void deleteByUserId(long userId);
 

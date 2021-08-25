@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.util.WebUtils;
@@ -48,7 +49,7 @@ public class ProfileController {
                                     @RequestParam(value = "confirmNewPassword") String confirmNewPassword,
                                     @RequestParam(value = "discogsUserName") String newDiscogsUserName,
                                     HttpSession session,
-                                    @SessionAttribute("user") User user) {
+                                    @SessionAttribute("user") User user) throws ServerException {
 
         UserInfoRequest userProfileInfo = UserInfoRequest.builder()
                 .email(newEmail)

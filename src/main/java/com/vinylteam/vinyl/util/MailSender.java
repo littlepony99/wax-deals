@@ -1,5 +1,7 @@
 package com.vinylteam.vinyl.util;
 
+import com.vinylteam.vinyl.exception.ServerException;
+import com.vinylteam.vinyl.exception.entity.MailSenderErrors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,7 +15,7 @@ public class MailSender {
 
     private final JavaMailSender emailSender;
 
-    public void sendMail(String recipient, String subject, String mailBody) {
+    public void sendMail(String recipient, String subject, String mailBody) throws ServerException {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom("vinyl.project.sender@gmail.com");
@@ -24,7 +26,7 @@ public class MailSender {
             log.info("Email sent successfully for recipient : {}", recipient);
         } catch (Exception e) {
             log.error("Can't send email to recipient : {}  due to error : {}", recipient, e);
-            throw new RuntimeException(e);
+            throw new ServerException(MailSenderErrors.FAILED_TO_SEND_EMAIL.getMessage());
         }
     }
 

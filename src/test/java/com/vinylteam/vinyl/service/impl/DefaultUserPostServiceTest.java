@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.jdbc.JdbcUserPostDao;
 import com.vinylteam.vinyl.entity.UserPost;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.UserPostErrors;
 import com.vinylteam.vinyl.util.MailSender;
 import com.vinylteam.vinyl.web.dto.AddUserPostDto;
@@ -28,7 +29,7 @@ class DefaultUserPostServiceTest {
 
     @Test
     @DisplayName("Checks all necessary methods invocation")
-    void rightMethodsInvokedProcessAddTest() {
+    void rightMethodsInvokedProcessAddTest() throws ServerException {
         //prepare
         UserPost post = mock(UserPost.class);
         //when
@@ -43,12 +44,12 @@ class DefaultUserPostServiceTest {
 
     @Test
     @DisplayName("Checks VALID captcha insertion")
-    void validCaptchaProcessRequestTest() throws ForbiddenException {
+    void validCaptchaProcessRequestTest() throws ForbiddenException, ServerException {
         //prepare
         AddUserPostDto requestDto = AddUserPostDto.builder()
                 .email("email.@mail.ru")
-                .captchaResponse("captcha")
-                .message("message")
+                .recaptchaToken("captcha")
+                .contactUsMessage("message")
                 .name("name")
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(true);
@@ -62,8 +63,8 @@ class DefaultUserPostServiceTest {
         //prepare
         AddUserPostDto requestDto = AddUserPostDto.builder()
                 .email("email.@mail.ru")
-                .captchaResponse("captcha")
-                .message("message")
+                .recaptchaToken("captcha")
+                .contactUsMessage("message")
                 .name("name")
                 .build();
         when(captchaService.validateCaptcha(any())).thenReturn(false);
