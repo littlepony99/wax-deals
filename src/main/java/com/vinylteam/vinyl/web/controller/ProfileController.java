@@ -1,84 +1,69 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.JwtUser;
+import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ServerException;
+import com.vinylteam.vinyl.security.LogoutService;
+import com.vinylteam.vinyl.service.JwtTokenProvider;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
+import com.vinylteam.vinyl.web.dto.LoginRequest;
+import com.vinylteam.vinyl.web.dto.UserDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
-import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 @RequestMapping(path = "/profile", produces = "text/html;charset=UTF-8")
 public class ProfileController {
 
     private final UserService userService;
+    private final LogoutService logoutService;
+    private final JwtTokenProvider jwtService;
+    private final UserMapper userMapper;
 
-    @GetMapping
+    @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public String getProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                 Model model) {
-        WebUtils.setUserAttributes(user, model);
-        return "profile";
+    public ResponseEntity<UserDto> submitProfileChanges(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
+        var userAfterEdit = Optional.ofNullable((User) request.getAttribute("userEntity"))
+                .map(foundUser -> userService.changeDiscogsUserName(userProfileInfo.getDiscogsUserName(), foundUser))
+                .get();
+        return new ResponseEntity<>(userMapper.mapUserToDto(userAfterEdit), OK);
     }
 
-    @GetMapping(path = "/edit-profile")
+    @PutMapping(path = "/change-password", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public String getEditProfilePage(@SessionAttribute(value = "user", required = false) User user,
-                                     Model model) {
-        WebUtils.setUserAttributes(user, model);
-        return "editProfile";
+    public ResponseEntity<ChangePasswordResponse> changePassword(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
+        User user = (User) request.getAttribute("userEntity");
+        userService.changeUserPassword(userProfileInfo, user);
+        var authResponse = jwtService.authenticateByRequest(new LoginRequest(user.getEmail(), userProfileInfo.getNewPassword()));
+        String token = authResponse.getToken();
+        logoutService.logout(request, null, null);
+        var response = new ChangePasswordResponse("Your password has been changed.", token);
+        return new ResponseEntity<>(response, OK);
     }
 
-    @PostMapping(path = "/edit-profile")
+    @DeleteMapping(path = "/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ModelAndView editProfile(@RequestParam(value = "email") String newEmail,
-                                    @RequestParam(value = "oldPassword") String oldPassword,
-                                    @RequestParam(value = "newPassword") String newPassword,
-                                    @RequestParam(value = "confirmNewPassword") String confirmNewPassword,
-                                    @RequestParam(value = "discogsUserName") String newDiscogsUserName,
-                                    HttpSession session,
-                                    @SessionAttribute("user") User user) throws ServerException {
-
-        UserInfoRequest userProfileInfo = UserInfoRequest.builder()
-                .email(newEmail)
-                .password(oldPassword)
-                .newPassword(newPassword)
-                .newPasswordConfirmation(confirmNewPassword)
-                .discogsUserName(newDiscogsUserName)
-                .build();
-        if (user != null) {
-            ModelAndView modelAndView = new ModelAndView("editProfile");
-            User userAfterEdit = userService.editProfile(userProfileInfo, user);
-            modelAndView.addObject("userRole", user.getRole().getName());
-            session.setAttribute("user", userAfterEdit);
-            return modelAndView;
+    public ResponseEntity<String> deleteUserProfile(HttpServletRequest request, @PathVariable("userId") String userId) {
+        User currentUser = (User) request.getAttribute("userEntity");
+        if (currentUser.getId().equals(Long.valueOf(userId))) {
+            userService.delete(currentUser);
+            logoutService.logout(request, null, null);
+            return ResponseEntity.ok("Profile has been successfully deleted");
         } else {
-            return new ModelAndView("redirect:/signIn");
-        }
-    }
-
-    @PostMapping(path = "/delete-profile")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ModelAndView deleteProfile(HttpSession session, @SessionAttribute("user") User user) {
-        if (user != null) {
-            ModelAndView modelAndView = new ModelAndView("redirect:/signUp");
-            userService.delete(user);
-            session.invalidate();
-            return modelAndView;
-        } else {
-            return new ModelAndView("redirect:/signIn");
+            return ResponseEntity.badRequest().body("User is not allowed to manage someone else`s profile");
         }
     }
 

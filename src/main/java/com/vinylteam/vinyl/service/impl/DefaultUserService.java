@@ -13,14 +13,12 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cli.UserException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -119,6 +117,25 @@ public class DefaultUserService implements UserService {
         return userDao.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException(UserErrors.EMAIL_NOT_FOUND_IN_DB_ERROR.getMessage()));
     }
+
+    @Override
+    public User changeDiscogsUserName(String discogsUserName, User user) {
+        userDao.changeDiscogsUserName(user, discogsUserName);
+        user.setDiscogsUserName(discogsUserName);
+        return user;
+    }
+
+    @Override
+    public User changeUserPassword(UserInfoRequest changeRequest, User user) {
+        String newPassword = changeRequest.getNewPassword();
+        String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
+        securityService.validatePassword(newPassword);
+        securityService.validatePassword(newPassword, newPasswordConfirmation);
+        User changedUser = securityService.createUserWithHashedPassword(user.getEmail(), newPassword.toCharArray());
+        userDao.changeUserPassword(changedUser);
+        return null;
+    }
+
 
     @Override
     public void signInCheck(UserInfoRequest userProfileInfo) {

@@ -64,7 +64,6 @@ public class SignupController {
         return response;
     }
 
-
     private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
         String username = authUser.getUsername();
         User byEmail = userService.findByEmail(username);
