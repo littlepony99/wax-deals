@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.web.dto.AddUserPostDto;
 import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
@@ -32,7 +33,7 @@ public class ContactUsController {
     private String projectMail;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> contactUs(@RequestBody AddUserPostDto dto) throws ForbiddenException {
+    public ResponseEntity<Map<String, Object>> contactUs(@RequestBody AddUserPostDto dto) throws ForbiddenException, ServerException {
         Map<String, Object> responseMap = new HashMap<>();
         userPostService.addUserPostWithCaptchaRequest(dto);
         responseMap.put("message", "Thank you. We will answer you as soon as possible.");

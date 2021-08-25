@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
@@ -32,7 +33,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     @Transactional
-    public void register(UserInfoRequest userInfoRequest) {
+    public void register(UserInfoRequest userInfoRequest) throws ServerException {
         String email = userInfoRequest.getEmail();
         String password = userInfoRequest.getPassword();
         if (!isNotEmptyNotNull(email)) {
@@ -83,7 +84,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public void update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) {
+    public void update(String oldEmail, String newEmail, String newPassword, String newDiscogsUserName) throws ServerException {
         if (!isNotEmptyNotNull(oldEmail) || !isNotEmptyNotNull(newEmail)) {
             throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
         }
@@ -140,7 +141,7 @@ public class DefaultUserService implements UserService {
 
     @Override
     public User editProfile(UserInfoRequest userProfileInfo,
-                            User user) {
+                            User user) throws ServerException {
         String oldEmail = user.getEmail();
         String oldPassword = userProfileInfo.getPassword();
         if (!isNotEmptyNotNull(oldPassword)) {

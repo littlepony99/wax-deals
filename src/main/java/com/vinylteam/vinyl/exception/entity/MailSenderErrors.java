@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum UserPostErrors {
+public enum MailSenderErrors {
 
-    INCORRECT_CAPTCHA_ERROR("Sorry, but you did not pass the captcha validation. Please contact us via social media.");
+    FAILED_TO_SEND_EMAIL("Sorry, we weren't able to handle your request. Please contact us via social media.");
 
     private String message;
 

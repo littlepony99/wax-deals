@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
@@ -124,7 +125,7 @@ class DefaultEmailConfirmationServiceTest {
 
     @Test
     @DisplayName("sendMessageWithLinkToUserEmail - email is null")
-    void sendMessageWithLinkToUserEmailNullEmail() {
+    void sendMessageWithLinkToUserEmailNullEmail() throws ServerException {
         //prepare
         String tokenAsString = UUID.randomUUID().toString();
         //when
@@ -136,7 +137,7 @@ class DefaultEmailConfirmationServiceTest {
 
     @Test
     @DisplayName("sendMessageWithLinkToUserEmail - token as string is null")
-    void sendMessageWithLinkToUserEmailNullToken() {
+    void sendMessageWithLinkToUserEmailNullToken() throws ServerException {
         //prepare
         String email = dataGenerator.getUserWithNumber(1).getEmail();
         //when
@@ -148,7 +149,7 @@ class DefaultEmailConfirmationServiceTest {
 
     @Test
     @DisplayName("sendMessageWithLinkToUserEmail - email and confirmation token aren't null")
-    void sendMessageWithLinkToUserEmail() {
+    void sendMessageWithLinkToUserEmail() throws ServerException {
         //prepare
         String tokenAsString = UUID.randomUUID().toString();
         String email = dataGenerator.getUserWithNumber(1).getEmail();

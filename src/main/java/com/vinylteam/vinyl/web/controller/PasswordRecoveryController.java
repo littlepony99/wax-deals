@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
@@ -18,11 +19,11 @@ public class PasswordRecoveryController {
     private final PasswordRecoveryService passwordRecoveryService;
 
     @PostMapping("/password-recovery")
-    public ResponseEntity<UserSecurityResponse> startPasswordRecoveryProcess(@RequestBody UserInfoRequest request) {
+    public ResponseEntity<UserSecurityResponse> startPasswordRecoveryProcess(@RequestBody UserInfoRequest request) throws ServerException {
         UserSecurityResponse response = new UserSecurityResponse();
         passwordRecoveryService.sendLink(request.getEmail());
         ControllerResponseUtils.setSuccessStatusInfo(response);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/password-recovery")
