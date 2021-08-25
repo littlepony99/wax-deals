@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.Role;
@@ -11,8 +10,10 @@ import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.Filter;
 
 import static org.hamcrest.Matchers.*;
@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Slf4j
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ProfileControllerITest {
 
     @Autowired
@@ -60,8 +61,8 @@ public class ProfileControllerITest {
     private JwtTokenProvider jwtService;
     private UserDao userService;
 
-    @PostConstruct
-    public void init() {
+    @BeforeAll
+    void beforeAll() {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .addFilters(jwtValidatorFilter)
