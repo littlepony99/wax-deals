@@ -21,7 +21,7 @@ import java.util.UUID;
 public class DefaultEmailConfirmationService implements EmailConfirmationService {
     private static final String SUBJECT = "Confirm your email on wax-deals.com";
     private static final String MAIL_BODY_BEGINNING = "To confirm click on the link below and log into your account.\n";
-    private static final String LINK_PATH = "/emailConfirmation?token=";
+    private static final String LINK_PATH = "/email-confirmation/";
     private static final String MAIL_BODY_ENDING = "\n Thank you!\n\nWith kindest regards,\nWax-Deals team";
 
     private final ConfirmationTokenDao confirmationTokenDao;
@@ -82,7 +82,11 @@ public class DefaultEmailConfirmationService implements EmailConfirmationService
         if (token == null) {
             throw new RuntimeException(EmailConfirmationErrors.CAN_NOT_CREATE_LINK_TRY_AGAIN.getMessage());
         }
-        mailSender.sendMail(email, SUBJECT, composeEmail(token));
+        try {
+            mailSender.sendMail(email, SUBJECT, composeEmail(token));
+        } catch (ServerException e) {
+            throw new ServerException(EmailConfirmationErrors.CAN_NOT_SEND_EMAIL.getMessage());
+        }
     }
 
     @Override
