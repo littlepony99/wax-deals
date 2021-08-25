@@ -68,7 +68,7 @@ class ContactUsControllerTest {
         var response = mockMvc.perform(post("/contact")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo(UserPostErrors.INCORRECT_CAPTCHA_ERROR.getMessage())));
     }

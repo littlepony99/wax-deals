@@ -84,9 +84,7 @@ class PasswordRecoveryControllerITest {
                         .content(json))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.resultCode", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("We can't find matching email. Please check your email or contact us.")))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -114,9 +112,8 @@ class PasswordRecoveryControllerITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 //then
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")))
                 .andExpect(jsonPath("$.message", emptyString()));
 
         UserInfoRequest stage2Request = UserInfoRequest.builder()
@@ -132,7 +129,6 @@ class PasswordRecoveryControllerITest {
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.resultCode", equalTo("0")))
                 .andExpect(jsonPath("$.message", emptyString()));
 
         User user = userDao.findByEmail(testUserEmail).get();
@@ -149,7 +145,6 @@ class PasswordRecoveryControllerITest {
                 //then
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("Your link is incorrect! Please check the link in the your email or contact support.")))
                 .andReturn()
@@ -175,7 +170,6 @@ class PasswordRecoveryControllerITest {
                 //then
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("Your link is incorrect! Please check the link in the your email or contact support.")));
     }

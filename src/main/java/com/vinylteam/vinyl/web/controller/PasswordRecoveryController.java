@@ -23,7 +23,7 @@ public class PasswordRecoveryController {
         UserSecurityResponse response = new UserSecurityResponse();
         passwordRecoveryService.sendLink(request.getEmail());
         ControllerResponseUtils.setSuccessStatusInfo(response);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/password-recovery")
