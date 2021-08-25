@@ -315,9 +315,9 @@ class DefaultPasswordRecoveryServiceTest {
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();
         when(mockedUserService.findByEmail(email)).thenReturn(user);
-        doThrow(RuntimeException.class).when(mockedMailSender).sendMail(any(), any(), any());
+        doThrow(ServerException.class).when(mockedMailSender).sendMail(any(), any(), any());
         //when
-        Exception exception = assertThrows(RuntimeException.class,
+        Exception exception = assertThrows(ServerException.class,
                 () -> passwordRecoveryService.sendLink(email));
         //then
         assertEquals(PasswordRecoveryErrors.EMAIL_SEND_ERROR.getMessage(), exception.getMessage());
