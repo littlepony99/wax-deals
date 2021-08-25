@@ -37,7 +37,7 @@ public class ProfileController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<UserDto> submitProfileChanges(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
         var userAfterEdit = Optional.ofNullable((User) request.getAttribute("userEntity"))
-                .map(foundUser -> userService.changeDiscogsUserName(userProfileInfo.getDiscogsUserName(), foundUser))
+                .map(foundUser -> userService.changeDiscogsUserName(foundUser, userProfileInfo.getDiscogsUserName()))
                 .get();
         return new ResponseEntity<>(userMapper.mapUserToDto(userAfterEdit), OK);
     }

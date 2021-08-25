@@ -20,7 +20,7 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    User changeDiscogsUserName(String discogsUserNAme, User user);
+    User changeDiscogsUserName(User user, String discogsUserName);
 
     User changeUserPassword(UserInfoRequest password, User user);
 

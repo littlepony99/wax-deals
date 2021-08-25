@@ -119,7 +119,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User changeDiscogsUserName(String discogsUserName, User user) {
+    public User changeDiscogsUserName(User user, String discogsUserName) {
         userDao.changeDiscogsUserName(user, discogsUserName);
         user.setDiscogsUserName(discogsUserName);
         return user;
