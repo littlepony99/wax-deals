@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -12,14 +11,12 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cli.UserException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -120,6 +117,25 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
+    public User changeDiscogsUserName(String discogsUserName, User user) {
+        userDao.changeDiscogsUserName(user, discogsUserName);
+        user.setDiscogsUserName(discogsUserName);
+        return user;
+    }
+
+    @Override
+    public User changeUserPassword(UserInfoRequest changeRequest, User user) {
+        String newPassword = changeRequest.getNewPassword();
+        String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
+        securityService.validatePassword(newPassword);
+        securityService.validatePassword(newPassword, newPasswordConfirmation);
+        User changedUser = securityService.createUserWithHashedPassword(user.getEmail(), newPassword.toCharArray());
+        userDao.changeUserPassword(changedUser);
+        return null;
+    }
+
+
+    @Override
     public void signInCheck(UserInfoRequest userProfileInfo) {
         if (!isNotEmptyNotNull(userProfileInfo.getEmail())) {
             throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
@@ -139,8 +155,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User editProfile(UserInfoRequest userProfileInfo,
-                            User user) {
+    public User editProfile(UserInfoRequest userProfileInfo, User user) {
         String oldEmail = user.getEmail();
         String oldPassword = userProfileInfo.getPassword();
         if (!isNotEmptyNotNull(oldPassword)) {

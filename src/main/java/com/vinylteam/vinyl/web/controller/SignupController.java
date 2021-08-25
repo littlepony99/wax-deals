@@ -3,8 +3,6 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.service.EmailConfirmationService;
-import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,10 +20,7 @@ import java.util.Map;
 public class SignupController {
 
     private final UserService userService;
-    private final EmailConfirmationService emailConfirmationService;
     private final UserMapper userMapper;
-    private final JwtService jwtService;
-
 
     @PostMapping("/signUp")
     public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
@@ -55,7 +50,6 @@ public class SignupController {
         log.debug("Set response status to {'status':{}}", HttpStatus.OK);
         return response;
     }
-
 
     private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
         String username = authUser.getUsername();

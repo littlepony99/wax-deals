@@ -4,7 +4,6 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface UserService {
 
@@ -19,6 +18,10 @@ public interface UserService {
     Optional<User> findById(long id);
 
     User findByEmail(String email);
+
+    User changeDiscogsUserName(String discogsUserNAme, User user);
+
+    User changeUserPassword(UserInfoRequest password, User user);
 
     void signInCheck(UserInfoRequest userProfileInfo);
 

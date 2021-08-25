@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service;
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.JwtAuthenticationException;
 import com.vinylteam.vinyl.security.LogoutTokenStorageService;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
@@ -81,7 +82,8 @@ public class JwtTokenProvider implements JwtService {
             return !tokenStorageService.isTokenBlocked(token);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
-            return false;
+            //return false;
+            throw new JwtAuthenticationException("JWT token is incorrect");
         }
     }
 

@@ -30,6 +30,13 @@ public class JdbcUserDao implements UserDao {
     private static final String UPDATE = "UPDATE users" +
             " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
             " WHERE email ILIKE :old_email";
+    private static final String UPDATE_DISCOGS = "UPDATE users" +
+            " SET discogs_user_name = :discogs_user_name" +
+            " WHERE email ILIKE :email";
+    private static final String UPDATE_PASSWORD = "UPDATE users" +
+            " SET password = :password" +
+            " WHERE email ILIKE :email";
+
     private static final String UPDATE_USER_STATUS = "UPDATE users SET status = true WHERE id = :id";
 
     private static final ResultSetExtractor<User> RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
@@ -98,6 +105,22 @@ public class JdbcUserDao implements UserDao {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("id", id);
         namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
+    }
+
+    @Override
+    public void changeDiscogsUserName(User user, String discogsUserName) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("discogs_user_name", discogsUserName);
+        namedParameterJdbcTemplate.update(UPDATE_DISCOGS, sqlParameterSource);
+    }
+
+    @Override
+    public void changeUserPassword(User user) {
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword());
+        namedParameterJdbcTemplate.update(UPDATE_PASSWORD, sqlParameterSource);
     }
 
 }
