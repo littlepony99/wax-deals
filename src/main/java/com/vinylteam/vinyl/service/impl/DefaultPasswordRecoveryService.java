@@ -25,7 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
-    private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/recoveryPassword/newPassword/";
+    private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/new-password/";
 
     @Value("${application.link}")
     private String applicationLink;
