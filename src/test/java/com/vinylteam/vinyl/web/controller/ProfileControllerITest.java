@@ -139,6 +139,7 @@ public class ProfileControllerITest {
         String newUserPassword = "discogsUserPassword3267";
         UserInfoRequest userChangeRequest = UserInfoRequest
                 .builder()
+                .password(testUserPassword)
                 .newPassword(newUserPassword)
                 .newPasswordConfirmation(newUserPassword)
                 .build();

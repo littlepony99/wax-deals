@@ -128,7 +128,6 @@ class SignupControllerITest {
                 .getResponse()
                 .getContentAsString();
         log.info("Response for signUp request {}", response);
-
     }
 
     @Test

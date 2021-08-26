@@ -127,13 +127,21 @@ public class DefaultUserService implements UserService {
 
     @Override
     public User changeUserPassword(UserInfoRequest changeRequest, User user) {
+        String oldPassword = changeRequest.getPassword();
+        if (!isNotEmptyNotNull(oldPassword)) {
+            throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
+        }
+        boolean checkOldPassword = securityService.validateIfPasswordMatches(user, oldPassword.toCharArray());
+        if (!checkOldPassword) {
+            throw new RuntimeException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
+        }
         String newPassword = changeRequest.getNewPassword();
         String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
         securityService.validatePassword(newPassword);
         securityService.validatePassword(newPassword, newPasswordConfirmation);
         User changedUser = securityService.createUserWithHashedPassword(user.getEmail(), newPassword.toCharArray());
         userDao.changeUserPassword(changedUser);
-        return null;
+        return changedUser;
     }
 
 
