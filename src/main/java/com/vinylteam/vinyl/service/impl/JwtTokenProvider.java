@@ -1,10 +1,12 @@
-package com.vinylteam.vinyl.service;
+package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.JwtAuthenticationException;
 import com.vinylteam.vinyl.security.LogoutTokenStorageService;
+import com.vinylteam.vinyl.service.JwtService;
+import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;

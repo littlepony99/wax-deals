@@ -5,7 +5,7 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.JwtAuthenticationException;
-import com.vinylteam.vinyl.service.JwtTokenProvider;
+import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
@@ -85,15 +85,18 @@ public class ProfileControllerITest {
     public void changeDiscogsUserNameForAnonymousUserTest() throws Exception {
         UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
-        mockMvc.perform(put("/profile")
+        var response = mockMvc.perform(put("/profile")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 //then
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
-                .andExpect(jsonPath("$.resultCode", equalTo("1")))
+                //.andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.message", equalTo("Access is denied")));
+                .andExpect(jsonPath("$.message", equalTo("Access is denied")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
     }
 
     @Test
