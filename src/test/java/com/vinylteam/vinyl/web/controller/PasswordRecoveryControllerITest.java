@@ -79,16 +79,12 @@ class PasswordRecoveryControllerITest {
         UserInfoRequest request = new UserInfoRequest();
         request.setEmail("IAmNotExisting@google.com");
         String json = new ObjectMapper().writeValueAsString(request);
-        String response = mockMvc.perform(post("/password-recovery")
+        mockMvc.perform(post("/password-recovery")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.message", equalTo("We can't find matching email. Please check your email or contact us.")))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        System.out.println(response);//{"resultCode":"1","message":"We can't find matching email. Please check your email or contact us."}
+                .andExpect(jsonPath("$.message", equalTo("We can't find matching email. Please check your email or contact us.")));
     }
 
     @Test
