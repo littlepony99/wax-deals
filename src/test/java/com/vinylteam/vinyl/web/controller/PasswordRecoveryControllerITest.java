@@ -153,6 +153,23 @@ class PasswordRecoveryControllerITest {
     }
 
     @Test
+    @DisplayName("Checks non-existing token: new endpoint")
+    public void testCheckTokenRestEndPoint() throws Exception {
+        //prepare
+        UUID token = UUID.randomUUID();
+        //when
+        String recoveryResponse = mockMvc.perform(get("/password-recovery/" + token.toString()))
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$.message", not(emptyString())))
+                .andExpect(jsonPath("$.message", equalTo("Your link is incorrect! Please check the link in the your email or contact support.")))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
+
+    @Test
     @DisplayName("Controller rejects 2nd stage recovery request with non-existing token")
     public void testBadRecoveryPasswordRequest() throws Exception {
         //prepare

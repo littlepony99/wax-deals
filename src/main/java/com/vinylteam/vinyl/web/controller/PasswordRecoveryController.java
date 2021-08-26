@@ -34,6 +34,14 @@ public class PasswordRecoveryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @GetMapping("/password-recovery/{recoveryToken}")
+    public ResponseEntity<UserSecurityResponse> checkTokenRestEndPoint(@PathVariable(name = "recoveryToken") String token) {
+        passwordRecoveryService.checkToken(token);
+        UserSecurityResponse response = new UserSecurityResponse();
+        ControllerResponseUtils.setSuccessStatusInfo(response);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     @GetMapping("/password-recovery")
     public ResponseEntity<UserSecurityResponse> checkToken(@RequestParam String token) {
         passwordRecoveryService.checkToken(token);
