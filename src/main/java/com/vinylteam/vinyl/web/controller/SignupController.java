@@ -23,10 +23,6 @@ import java.util.Map;
 public class SignupController {
 
     private final UserService userService;
-    private final EmailConfirmationService emailConfirmationService;
-    private final UserMapper userMapper;
-    private final JwtService jwtService;
-
 
     @PostMapping("/sign-up")
     public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
@@ -54,10 +50,20 @@ public class SignupController {
         }
     }
 
-    @PutMapping("/email-confirmation")
+    @PutMapping("/email-confirmation-old")
     public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestParam(value = "confirmToken") String token) {
         Map<String, Object> responseMap = new HashMap<>();
         userService.confirmEmailByToken(token);
+        responseMap.putAll(getMessageMap("Your email is confirmed. Now you can log in."));
+        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+        log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+        return response;
+    }
+
+    @PutMapping("/email-confirmation")
+    public ResponseEntity<Map<String, Object>> getConfirmationResponseRestEndPoint(@RequestBody Map<String, String> confirmToken) {
+        Map<String, Object> responseMap = new HashMap<>();
+        userService.confirmEmailByToken(confirmToken.get("confirmToken"));
         responseMap.putAll(getMessageMap("Your email is confirmed. Now you can log in."));
         ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
         log.debug("Set response status to {'status':{}}", HttpStatus.OK);

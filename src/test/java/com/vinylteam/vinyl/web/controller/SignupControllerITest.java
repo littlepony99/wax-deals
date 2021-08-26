@@ -11,6 +11,7 @@ import com.vinylteam.vinyl.util.MailSender;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Slf4j
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SignupControllerITest {
 
     private String testUserEmail = "testuser2@gmail.com";
@@ -49,6 +51,7 @@ class SignupControllerITest {
     private EmailConfirmationService emailConfirmationService;
     @SpyBean
     private UserService userService;
+
     @SpyBean
     private ConfirmationTokenDao confirmationTokenDao;
     @SpyBean
@@ -136,8 +139,24 @@ class SignupControllerITest {
         String token = UUID.randomUUID().toString();
         Mockito.doReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(1))).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
-        mockMvc.perform((put("/email-confirmation"))
+        mockMvc.perform((put("/email-confirmation-old"))
                         .param("confirmToken", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$.message", equalTo("Your email is confirmed. Now you can log in.")));
+    }
+
+    @Test
+    @DisplayName("Confirming email with existing token, rest end point")
+    void getConfirmationResponseExistingTokenRestEndPoint() throws Exception {
+        String token = UUID.randomUUID().toString();
+        Mockito.doReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(2))).when(emailConfirmationService).findByToken(eq(token));
+        Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(2))).when(userService).findById(2);
+        var bodyMap = Map.of("confirmToken", token);
+        String json = new ObjectMapper().writeValueAsString(bodyMap);
+        mockMvc.perform((put("/email-confirmation")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(json)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo("Your email is confirmed. Now you can log in.")));
@@ -147,10 +166,13 @@ class SignupControllerITest {
     @DisplayName("Confirming email with non-existent in db token")
     void getConfirmationResponseNonExistingToken() throws Exception {
         String token = UUID.randomUUID().toString();
+        var bodyMap = Map.of("confirmToken", token);
+        String json = new ObjectMapper().writeValueAsString(bodyMap);
         Mockito.doReturn(Optional.empty()).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
-        mockMvc.perform((put("/email-confirmation"))
-                .param("confirmToken", token))
+        mockMvc.perform((put("/email-confirmation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_FOUND.getMessage())));
@@ -160,8 +182,11 @@ class SignupControllerITest {
     @DisplayName("Confirming email with non-existent in db token")
     void getConfirmationResponseNotUUIDToken() throws Exception {
         String token = "not uuid format";
-        mockMvc.perform((put("/email-confirmation"))
-                .param("confirmToken", token))
+        var bodyMap = Map.of("confirmToken", token);
+        String json = new ObjectMapper().writeValueAsString(bodyMap);
+        mockMvc.perform((put("/email-confirmation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_UUID.getMessage())));
