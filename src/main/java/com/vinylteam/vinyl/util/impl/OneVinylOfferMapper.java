@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface OneVinylOfferMapper {
     @Mappings({
             @Mapping(target = "shopImageLink", source = "shop.smallImageLink"),
+            @Mapping(target = "id", source = "offer.id"),
             @Mapping(target = "currency", source = "offer.currency", qualifiedByName = "currency")
     })
     OneVinylOfferDto offerAndShopToVinylOfferDto(Offer offer, Shop shop);
