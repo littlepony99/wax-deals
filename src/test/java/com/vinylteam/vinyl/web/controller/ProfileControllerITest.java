@@ -103,19 +103,6 @@ public class ProfileControllerITest {
     }
 
     @Test
-    @Order(2)
-    @DisplayName("Change Discogs user name attribute with bad JWT")
-    public void changeDiscogsUserTest() throws Exception {
-        UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
-        String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
-        Exception exception = assertThrows(JwtAuthenticationException.class,
-                () -> mockMvc.perform(put("/profile")
-                        .header("Authorization", "Bearer_badJWT")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest)));
-    }
-
-    @Test
     @Order(1)
     @DisplayName("Empty Email: Change Discogs user name and empty Email attributes")
     public void changeDiscogsUserEmptyEmailTest() throws Exception {
@@ -135,7 +122,21 @@ public class ProfileControllerITest {
     }
 
     @Test
-    @DisplayName("Happy Path: Change Discogs user name and Email attributes")
+    @Order(2)
+    @DisplayName("Change Discogs user name attribute with bad JWT")
+    public void changeDiscogsUserTest() throws Exception {
+        UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
+        String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
+        Exception exception = assertThrows(JwtAuthenticationException.class,
+                () -> mockMvc.perform(put("/profile")
+                        .header("Authorization", "Bearer_badJWT")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest)));
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Happy Path: Change Discogs user name attribute")
     public void changeDiscogsUserHappyPathTest() throws Exception {
         UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
 
@@ -152,6 +153,7 @@ public class ProfileControllerITest {
                         .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", not(emptyString())))
+                .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$.message", equalTo("Your email and/or discogs username have been changed.")));
         User user = userDao.findByEmail(testUserEmail).get();
         assertEquals(changedDiscogsUserName, user.getDiscogsUserName());
@@ -159,6 +161,35 @@ public class ProfileControllerITest {
     }
 
     @Test
+    @Order(4)
+    @DisplayName("Happy Path: Change Discogs user name and Email attributes")
+    public void changeAllProfileFieldsHappyPathTest() throws Exception {
+        UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
+
+        String changedDiscogsUserName = "changedDiscogsUserName";
+        String newTestUserEmail = testUserEmail + "1";
+        UserInfoRequest userChangeRequest = UserInfoRequest
+                .builder()
+                .email(newTestUserEmail)
+                .discogsUserName(changedDiscogsUserName)
+                .build();
+        String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
+        mockMvc.perform(put("/profile")
+                        .header("Authorization", loginResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message", not(emptyString())))
+                .andExpect(jsonPath("$.token", not(emptyString())))
+                .andExpect(jsonPath("$.message", equalTo("Your email and/or discogs username have been changed.")));
+        User user = userDao.findByEmail(newTestUserEmail).get();
+        assertEquals(changedDiscogsUserName, user.getDiscogsUserName());
+        assertEquals(newTestUserEmail, user.getEmail());
+        testUserEmail = newTestUserEmail;
+    }
+
+    @Test
+    @Order(6)
     @DisplayName("Happy Path: Change user password attribute")
     public void changePasswordHappyPathTest() throws Exception {
         UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
@@ -171,9 +202,9 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         var response = mockMvc.perform(put("/profile/change-password")
-                .header("Authorization", loginResponse.getToken())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonRequest))
+                        .header("Authorization", loginResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -181,4 +212,23 @@ public class ProfileControllerITest {
         assertTrue(!loginResponseForNewPassword.getToken().isEmpty());
     }
 
+    @Test
+    @Order(5)
+    @DisplayName("Happy Path: Change user password attribute with wrong old password")
+    public void changePasswordBadOldPasswordTest() throws Exception {
+        UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
+
+        UserInfoRequest userChangeRequest = UserInfoRequest
+                .builder()
+                .password(testUserPassword + "1")
+                .newPassword(newUserPassword)
+                .newPasswordConfirmation(newUserPassword)
+                .build();
+        String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
+        mockMvc.perform(put("/profile/change-password")
+                        .header("Authorization", loginResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonRequest))
+                .andExpect(status().isBadRequest());
+    }
 }

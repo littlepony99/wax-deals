@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.web.handler;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.ServerException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -10,6 +11,13 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
+
+    @ExceptionHandler(value = {BadCredentialsException.class})
+    public ResponseEntity<Object> handleBadCredentialsExceptionHandler(BadCredentialsException exception) {
+        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
+                exception.getMessage());
+        return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);
+    }
 
     @ExceptionHandler(value = {RuntimeException.class})
     public ResponseEntity<Object> handleRuntimeExceptionApiExceptionHandler(RuntimeException exception) {

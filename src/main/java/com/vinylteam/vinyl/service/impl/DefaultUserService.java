@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,7 +141,8 @@ public class DefaultUserService implements UserService {
         }
         boolean checkOldPassword = securityService.validateIfPasswordMatches(user, oldPassword.toCharArray());
         if (!checkOldPassword) {
-            throw new RuntimeException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
+            throw new BadCredentialsException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
+            //throw new RuntimeException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
         }
         String newPassword = changeRequest.getNewPassword();
         String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
