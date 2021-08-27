@@ -7,7 +7,6 @@ import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,11 +21,10 @@ public class DefaultProfileManagementService implements ProfileManagementService
     private final JwtTokenProvider jwtService;
 
     @Override
-    public User changeDiscogsUserNameAndReturnUser(HttpServletRequest request, UserInfoRequest userProfileInfo) {
-        var userAfterEdit = Optional.ofNullable((User) request.getAttribute("userEntity"))
-                .map(foundUser -> userService.changeDiscogsUserName(foundUser, userProfileInfo.getDiscogsUserName()))
+    public User changeProfileAndReturnUser(HttpServletRequest request, UserInfoRequest userProfileInfo) {
+        return Optional.ofNullable((User) request.getAttribute("userEntity"))
+                .map(foundUser -> userService.changeProfile(foundUser, userProfileInfo.getEmail(), userProfileInfo.getDiscogsUserName()))
                 .get();
-        return userAfterEdit;
     }
 
     @Override

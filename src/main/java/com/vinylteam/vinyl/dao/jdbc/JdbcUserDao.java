@@ -30,8 +30,9 @@ public class JdbcUserDao implements UserDao {
     private static final String UPDATE = "UPDATE users" +
             " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
             " WHERE email ILIKE :old_email";
-    private static final String UPDATE_DISCOGS = "UPDATE users" +
-            " SET discogs_user_name = :discogs_user_name" +
+    private static final String UPDATE_PROFILE_FIELDS = "UPDATE users SET " +
+            " discogs_user_name = :discogs_user_name, " +
+            " email = CASE WHEN email <> :new_email THEN :new_email ELSE email END" +
             " WHERE email ILIKE :email";
     private static final String UPDATE_PASSWORD = "UPDATE users" +
             " SET password = :password" +
@@ -108,11 +109,12 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
-    public void changeDiscogsUserName(User user, String discogsUserName) {
+    public void changeProfile(User user, String email, String discogsUserName) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", user.getEmail())
-                .addValue("discogs_user_name", discogsUserName);
-        namedParameterJdbcTemplate.update(UPDATE_DISCOGS, sqlParameterSource);
+                .addValue("new_email", email)
+                .addValue("discogs_user_name", discogsUserName)
+                .addValue("email", user.getEmail());
+        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FIELDS, sqlParameterSource);
     }
 
     @Override

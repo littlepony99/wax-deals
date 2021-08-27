@@ -4,7 +4,6 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ServerException;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -119,9 +118,17 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User changeDiscogsUserName(User user, String discogsUserName) {
-        userDao.changeDiscogsUserName(user, discogsUserName);
+    public User changeProfile(User user, String email, String discogsUserName) {
+        if (!isNotEmptyNotNull(email)) {
+            throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
+        }
+        try {
+            userDao.changeProfile(user, email, discogsUserName);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage());
+        }
         user.setDiscogsUserName(discogsUserName);
+        user.setEmail(email);
         return user;
     }
 

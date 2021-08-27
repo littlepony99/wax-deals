@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface ProfileManagementService {
 
-    User changeDiscogsUserNameAndReturnUser(HttpServletRequest request, UserInfoRequest userProfileInfo);
+    User changeProfileAndReturnUser(HttpServletRequest request, UserInfoRequest userProfileInfo);
 
     ChangePasswordResponse changeProfilePassword(HttpServletRequest request, UserInfoRequest userProfileInfo);
 
