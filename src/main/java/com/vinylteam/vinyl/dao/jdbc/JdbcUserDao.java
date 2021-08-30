@@ -110,19 +110,19 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void changeProfile(User user, String email, String discogsUserName) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("new_email", email)
-                .addValue("discogs_user_name", discogsUserName)
-                .addValue("email", user.getEmail());
-        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FIELDS, sqlParameterSource);
+        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FIELDS,
+                new MapSqlParameterSource()
+                        .addValue("new_email", email)
+                        .addValue("discogs_user_name", discogsUserName)
+                        .addValue("email", user.getEmail()));
     }
 
     @Override
     public void changeUserPassword(User user) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", user.getEmail())
-                .addValue("password", user.getPassword());
-        namedParameterJdbcTemplate.update(UPDATE_PASSWORD, sqlParameterSource);
+        namedParameterJdbcTemplate.update(UPDATE_PASSWORD,
+                new MapSqlParameterSource()
+                        .addValue("email", user.getEmail())
+                        .addValue("password", user.getPassword()));
     }
 
 }

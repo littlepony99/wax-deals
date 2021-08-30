@@ -142,7 +142,6 @@ public class DefaultUserService implements UserService {
         boolean checkOldPassword = securityService.validateIfPasswordMatches(user, oldPassword.toCharArray());
         if (!checkOldPassword) {
             throw new BadCredentialsException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
-            //throw new RuntimeException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
         }
         String newPassword = changeRequest.getNewPassword();
         String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();

@@ -84,7 +84,6 @@ public class JwtTokenProvider implements JwtService {
             return !tokenStorageService.isTokenBlocked(token);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
-            //return false;
             throw new JwtAuthenticationException("JWT token is incorrect");
         }
     }
