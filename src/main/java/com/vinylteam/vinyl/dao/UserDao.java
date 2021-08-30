@@ -18,4 +18,7 @@ public interface UserDao {
 
     void setUserStatusTrue(long userId);
 
+    void changeProfile(User user, String email, String discogsUserName);
+
+    void changeUserPassword(User user);
 }

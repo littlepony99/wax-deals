@@ -24,6 +24,10 @@ public class ControllerResponseUtils {
         return Map.of("message", message);
     }
 
+    public static UserSecurityResponse getResponseWithMessage(String message) {
+        return setStatusInfo(new UserSecurityResponse(), null, message);
+    }
+
     public static UserSecurityResponse setStatusInfo(UserSecurityResponse response, String code, String message) {
         response.setMessage(message);
         return response;

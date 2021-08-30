@@ -4,7 +4,6 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ServerException;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -13,14 +12,13 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.cli.UserException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -119,6 +117,41 @@ public class DefaultUserService implements UserService {
         return userDao.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException(UserErrors.EMAIL_NOT_FOUND_IN_DB_ERROR.getMessage()));
     }
+
+    @Override
+    public User changeProfile(User user, String email, String discogsUserName) {
+        if (!isNotEmptyNotNull(email)) {
+            throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
+        }
+        try {
+            userDao.changeProfile(user, email, discogsUserName);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage());
+        }
+        user.setDiscogsUserName(discogsUserName);
+        user.setEmail(email);
+        return user;
+    }
+
+    @Override
+    public User changeUserPassword(UserInfoRequest changeRequest, User user) {
+        String oldPassword = changeRequest.getPassword();
+        if (!isNotEmptyNotNull(oldPassword)) {
+            throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
+        }
+        boolean checkOldPassword = securityService.validateIfPasswordMatches(user, oldPassword.toCharArray());
+        if (!checkOldPassword) {
+            throw new BadCredentialsException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
+        }
+        String newPassword = changeRequest.getNewPassword();
+        String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
+        securityService.validatePassword(newPassword);
+        securityService.validatePassword(newPassword, newPasswordConfirmation);
+        User changedUser = securityService.createUserWithHashedPassword(user.getEmail(), newPassword.toCharArray());
+        userDao.changeUserPassword(changedUser);
+        return changedUser;
+    }
+
 
     @Override
     public void signInCheck(UserInfoRequest userProfileInfo) {
