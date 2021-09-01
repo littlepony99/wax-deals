@@ -15,7 +15,7 @@ public class ControllerResponseUtils {
     public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap){
         UserSecurityResponse response = new UserSecurityResponse();
         response.setMessage((String)responseMap.get("message"));
-        response.setToken((String)responseMap.get("token"));
+        response.setAccessToken((String)responseMap.get("token"));
         response.setUser((UserDto)responseMap.get("user"));
         return response;
     }

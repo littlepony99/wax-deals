@@ -7,7 +7,8 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserSecurityResponse {
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private UserDto user;
     private String message;
 
