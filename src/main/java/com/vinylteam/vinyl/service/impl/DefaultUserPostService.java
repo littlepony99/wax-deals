@@ -63,10 +63,6 @@ public class DefaultUserPostService implements UserPostService {
     }
 
     String createContactUsMessage(String recipient, String mailBody) {
-        return "MailFrom: " +
-                recipient +
-                System.lineSeparator() +
-                "Message: " +
-                mailBody;
+        return "MailFrom: " + recipient + System.lineSeparator() + "Message: " + mailBody;
     }
 }

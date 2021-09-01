@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 @Repository
 @RequiredArgsConstructor
 public class JdbcUserDao implements UserDao {
@@ -42,7 +44,7 @@ public class JdbcUserDao implements UserDao {
 
     private static final ResultSetExtractor<User> RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public long add(User user) {
@@ -55,16 +57,14 @@ public class JdbcUserDao implements UserDao {
                 .addValue("role", user.getRole().getName())
                 .addValue("status", user.getStatus())
                 .addValue("discogs_user_name", user.getDiscogsUserName());
-        namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
-        Long id = Long.parseLong(keyHolder.getKeys().get("id").toString());
-        return id;
+        jdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
+        return Long.parseLong(keyHolder.getKeys().get("id").toString());
     }
 
     @Override
     public void delete(User user) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", user.getEmail());
-        namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
+        jdbcTemplate.update(DELETE, new MapSqlParameterSource()
+                .addValue("email", user.getEmail()));
     }
 
     @Override
@@ -78,14 +78,14 @@ public class JdbcUserDao implements UserDao {
                 .addValue("status", user.getStatus())
                 .addValue("discogs_user_name", user.getDiscogsUserName())
                 .addValue("old_email", email);
-        namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
+        jdbcTemplate.update(UPDATE, sqlParameterSource);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("email", email);
-        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+        return ofNullable(jdbcTemplate.query(
                 FIND_BY_EMAIL,
                 sqlParameterSource,
                 RESULT_SET_EXTRACTOR));
@@ -93,24 +93,20 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public Optional<User> findById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("id", id);
-        return Optional.ofNullable(namedParameterJdbcTemplate.query(
-                FIND_BY_ID,
-                sqlParameterSource,
-                RESULT_SET_EXTRACTOR));
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        return ofNullable(jdbcTemplate.query(FIND_BY_ID, sqlParameterSource, RESULT_SET_EXTRACTOR));
     }
 
     @Override
     public void setUserStatusTrue(long id) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("id", id);
-        namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
+        jdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
     @Override
     public void changeProfile(User user, String email, String discogsUserName) {
-        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FIELDS,
+        jdbcTemplate.update(UPDATE_PROFILE_FIELDS,
                 new MapSqlParameterSource()
                         .addValue("new_email", email)
                         .addValue("discogs_user_name", discogsUserName)
@@ -119,7 +115,7 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void changeUserPassword(User user) {
-        namedParameterJdbcTemplate.update(UPDATE_PASSWORD,
+        jdbcTemplate.update(UPDATE_PASSWORD,
                 new MapSqlParameterSource()
                         .addValue("email", user.getEmail())
                         .addValue("password", user.getPassword()));

@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.service;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.DefaultUserMapper;
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.LogoutService;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +28,10 @@ public class DefaultProfileManagementService implements ProfileManagementService
         User user = (User) request.getAttribute("userEntity");
         String oldEmail = user.getEmail();
 
-        User updatedUser = userService.changeProfile(user, userProfileInfo.getEmail(), userProfileInfo.getDiscogsUserName());
+        userService.changeProfile(user, userProfileInfo.getEmail(), userProfileInfo.getDiscogsUserName());
         var response = ControllerResponseUtils.getResponseWithMessage("Your email and/or discogs username have been changed.");
         if (!user.getEmail().equals(oldEmail)) {
-            response.setToken(jwtService
-                    .createToken(user.getEmail(), userMapper.mapToDto(user).getAuthorities()));
+            response.setToken(jwtService.createToken(user.getEmail(), userMapper.mapToDto(user).getAuthorities()));
             logoutService.logout(request, null, null);
         }
         return response;

@@ -25,6 +25,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
+
     private static final String RECOVERY_MESSAGE = "Hello, to change your password, follow this link: \n{applicationLink}/new-password/";
 
     @Value("${application.link}")
@@ -82,8 +83,7 @@ public class DefaultPasswordRecoveryService implements PasswordRecoveryService {
 
     @Override
     public UUID generateToken() {
-        UUID uuid = UUID.randomUUID();
-        return uuid;
+        return UUID.randomUUID();
     }
 
     private UUID stringToUUID(String token) {

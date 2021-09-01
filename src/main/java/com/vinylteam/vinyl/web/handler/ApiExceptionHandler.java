@@ -14,30 +14,24 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {BadCredentialsException.class})
     public ResponseEntity<Object> handleBadCredentialsExceptionHandler(BadCredentialsException exception) {
-        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
-                exception.getMessage());
-        return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);
+        return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
 
     @ExceptionHandler(value = {RuntimeException.class})
     public ResponseEntity<Object> handleRuntimeExceptionApiExceptionHandler(RuntimeException exception) {
-        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
-                exception.getMessage());
-        return ResponseEntity.status(FORBIDDEN).body(apiExceptionDto);
+        return ResponseEntity.status(FORBIDDEN).body(new ApiExceptionDto(exception.getMessage()));
     }
 
     @ExceptionHandler(value = {ForbiddenException.class})
     public ResponseEntity<Object> handleForbiddenExceptionApiExceptionHandler(ForbiddenException exception) {
-        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
-                exception.getMessage());
-        return ResponseEntity.status(BAD_REQUEST).body(apiExceptionDto);
+        return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
+
+
 
     @ExceptionHandler(value = {ServerException.class})
     public ResponseEntity<Object> handleServerExceptionApiExceptionHandler(ServerException exception) {
-        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
-                exception.getMessage());
-        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(apiExceptionDto);
+        return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiExceptionDto(exception.getMessage()));
     }
 //FIXME: Fix situation with exceptions in a smart way.
 /*    @ExceptionHandler(RuntimeException.class)
