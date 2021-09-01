@@ -11,6 +11,8 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 import static com.vinylteam.vinyl.util.ControllerResponseUtils.*;
 import static org.springframework.http.HttpStatus.*;
 
@@ -52,6 +54,12 @@ public class JwtLoginController {
             log.error("Unexpected error during login attempt, user {}", loginRequest, e);
             return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", e.getMessage()), INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PostMapping(value = "/refresh", produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<UserSecurityResponse> refresh(@RequestBody Map<String, String> refreshRequest) {
+        String refreshToken = refreshRequest.get("refreshToken");
+        return ResponseEntity.ok(new UserSecurityResponse());
     }
 
 }

@@ -50,7 +50,10 @@ public class JwtTokenProvider implements JwtService {
     private LogoutTokenStorageService tokenStorageService;
 
     @Value("${jwt.token.expirationInSeconds:600}")
-    private int validityInSeconds;
+    private int accessTokenValidityInSeconds;
+
+    @Value("${jwt.refreshtoken.expirationInSeconds:1800}")
+    private int refreshTokenValidityInSeconds;
 
     private final UserDetailsService userDetailsService;
 
@@ -102,7 +105,23 @@ public class JwtTokenProvider implements JwtService {
         claims.put("authorities", authorities);
 
         Date now = new Date();
-        Date validity = new Date(now.getTime() + SECONDS.toMillis(validityInSeconds));
+        Date validity = new Date(now.getTime() + SECONDS.toMillis(accessTokenValidityInSeconds));
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(secretKey)
+                .compact();
+    }
+
+    @Override
+    public String createRefreshToken(String userEmail, Collection<? extends GrantedAuthority> authorities) {
+        Claims claims = Jwts.claims()
+                .setSubject(userEmail);
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + SECONDS.toMillis(refreshTokenValidityInSeconds));
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -146,7 +165,8 @@ public class JwtTokenProvider implements JwtService {
         Authentication authentication = authenticationManager.authenticate(preparedAuth);
         var authUser = (JwtUser) authentication.getPrincipal();
         var token = createToken(authUser.getUsername(), authUser.getAuthorities());
-        return ControllerResponseUtils.getResponseFromMap(getUserCredentialsMap(token, authUser));
+        var refreshToken = createRefreshToken(authUser.getUsername(), authUser.getAuthorities());
+        return ControllerResponseUtils.getResponseFromMap(getUserCredentialsMap(token, refreshToken, authUser));
     }
 
     private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
@@ -154,6 +174,15 @@ public class JwtTokenProvider implements JwtService {
         User byEmail = userService.findByEmail(username);
         return Map.of(
                 "user", userMapper.mapUserToDto(byEmail),
+                "token", token);
+    }
+
+    private Map<String, Object> getUserCredentialsMap(String token, String refreshToken, JwtUser authUser) {
+        String username = authUser.getUsername();
+        User byEmail = userService.findByEmail(username);
+        return Map.of(
+                "user", userMapper.mapUserToDto(byEmail),
+                "refreshToken", refreshToken,
                 "token", token);
     }
 

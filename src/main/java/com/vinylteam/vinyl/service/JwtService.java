@@ -17,6 +17,8 @@ public interface JwtService {
 
     String createToken(String userEmail, Collection<? extends GrantedAuthority> authorities);
 
+    String createRefreshToken(String userEmail, Collection<? extends GrantedAuthority> authorities);
+
     Authentication getAuthentication(String token);
 
     LocalDateTime getExpirationDate(String token);
