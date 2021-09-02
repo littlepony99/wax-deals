@@ -136,8 +136,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public LogoutService logoutService(JwtService jwtService,
                                        InMemoryLogoutTokenService logoutStorageService) {
-        var logoutService = new LogoutService(jwtService, logoutStorageService);
-        return logoutService;
+        return new LogoutService(jwtService, logoutStorageService);
     }
 
     protected DelegatingFilterProxy getJwtValidatorFilterDelegatingProxy() {
