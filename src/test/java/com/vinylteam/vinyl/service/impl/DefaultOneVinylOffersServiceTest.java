@@ -35,9 +35,8 @@ class DefaultOneVinylOffersServiceTest {
     @MockBean
     private OfferService mockedOfferService;
 
-    @Autowired
     @MockBean
-    private ShopService mockedShopService;
+    private ShopService shopService;
 
     @Autowired
     @MockBean
@@ -48,7 +47,7 @@ class DefaultOneVinylOffersServiceTest {
     @BeforeEach
     void beforeEach() {
         reset(mockedOfferService);
-        reset(mockedShopService);
+        reset(shopService);
     }
 
     @Test
@@ -58,7 +57,7 @@ class DefaultOneVinylOffersServiceTest {
         var vinylsList = dataGenerator
                 .getUniqueVinylsList()
                 .stream()
-                .filter(UniqueVinyl::isHasOffers)
+                .filter(UniqueVinyl::hasOffers)
                 .collect(Collectors.toList());
         List<Offer> offers = new ArrayList<>();
         UniqueVinyl testedUniqueVinyl = vinylsList.get(0);
@@ -66,7 +65,7 @@ class DefaultOneVinylOffersServiceTest {
         oneVinylService.checkIsVinylInStock(testedUniqueVinyl, offers);
         //then
         verify(uniqueVinylService).updateOneUniqueVinyl(testedUniqueVinyl);
-        assertFalse(testedUniqueVinyl.isHasOffers());
+        assertFalse(testedUniqueVinyl.hasOffers());
     }
 
     @Test
@@ -107,8 +106,8 @@ class DefaultOneVinylOffersServiceTest {
     }
 
     @Test
-    @DisplayName("gets sorted in stock offers and shops for them when unique vinyl has currently valid offers")
-    void getSortedInStockOffersAndShops_whenUniqueVinylHasValidOffers() {
+    @DisplayName("gets  in-stock offers and shops for them when unique vinyl has valid offers")
+    void getInStockOffersAndShops_whenUniqueVinylHasValidOffers_thenCorrect() {
         //prepare
         String id = "1";
         UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
@@ -120,7 +119,7 @@ class DefaultOneVinylOffersServiceTest {
         when(mockedOfferService.actualizeOffer(offers.get(0))).thenReturn(offers.get(0));
         when(mockedOfferService.actualizeOffer(offers.get(1))).thenReturn(offers.get(1));
         when(mockedOfferService.findShopIds(offers)).thenReturn(shopIds);
-        when(mockedShopService.findShopsByListOfIds(shopIds)).thenReturn(shops);
+        when(shopService.findShopsByListOfIds(shopIds)).thenReturn(shops);
         HashMap<String, List> expectedSortedOffersAndShopsMap = new HashMap<>();
         expectedSortedOffersAndShopsMap.put("offers", offers);
         expectedSortedOffersAndShopsMap.put("shops", shops);
@@ -133,13 +132,7 @@ class DefaultOneVinylOffersServiceTest {
         verify(mockedOfferService).actualizeOffer(offers.get(0));
         verify(mockedOfferService).actualizeOffer(offers.get(1));
         verify(mockedOfferService).findShopIds(offers);
-        verify(mockedShopService).findShopsByListOfIds(shopIds);
-    }
-
-    @Test
-    @DisplayName("Finds shop that corresponds to the offer from list")
-    void findOfferShop_ShopExists() {
-
+        verify(shopService).findShopsByListOfIds(shopIds);
     }
 
 }

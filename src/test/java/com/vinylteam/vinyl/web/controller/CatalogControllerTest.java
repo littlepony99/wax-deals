@@ -31,7 +31,7 @@ class CatalogControllerTest {
     @Autowired
     private CatalogController catalogController;
     @Autowired
-    WebApplicationContext context;
+    private WebApplicationContext context;
     @MockBean
     private UniqueVinylService mockedUniqueVinylService;
 

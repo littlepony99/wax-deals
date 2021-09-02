@@ -22,8 +22,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 public class DefaultOfferServiceITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
@@ -35,6 +34,7 @@ public class DefaultOfferServiceITest {
 
     @Autowired
     private ElasticsearchOperations elasticsearchOperations;
+
 
     @Autowired
     private UniqueVinylRepository uniqueVinylRepository;
@@ -86,7 +86,7 @@ public class DefaultOfferServiceITest {
 
         UniqueVinyl newUniqueVinyl = UniqueVinyl.builder()
                 .id("10")
-                .hasOffers(false)
+                .offers(false)
                 .fullName("Test fullname")
                 .artist("Artist new")
                 .build();

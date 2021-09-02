@@ -27,9 +27,9 @@ public class JwtLoginController {
     }
 
     @GetMapping(value = "/token", produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<UserSecurityResponse> tokenChecking(@RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<UserSecurityResponse> checkToken(@RequestHeader(name = "Authorization") String token) {
         UserSecurityResponse responseObject = jwtTokenProvider.getCheckResponseIfTokenValid(token);
-        if (responseObject.getUser() != null) {
+            if (responseObject.getUser() != null) {
             return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } else {
             responseObject = setStatusInfo(responseObject, "1", "Token is expired");
