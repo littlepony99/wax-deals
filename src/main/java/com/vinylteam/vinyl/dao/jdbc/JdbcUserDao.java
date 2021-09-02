@@ -108,8 +108,7 @@ public class JdbcUserDao implements UserDao {
                 .addValue("new_email", email)
                 .addValue("discogs_user_name", discogsUserName)
                 .addValue("email", user.getEmail());
-        jdbcTemplate.update(UPDATE_PROFILE_FIELDS,
-                sqlParameterSource);
+        jdbcTemplate.update(UPDATE_PROFILE_FIELDS, sqlParameterSource);
     }
 
     @Override
