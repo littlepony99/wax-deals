@@ -13,10 +13,8 @@ public class AddUserPostDto {
     @NonNull
     private String email;
     @NonNull
-    private String subject;
+    private String contactUsMessage;
     @NonNull
-    private String message;
-    @NonNull
-    private String captchaResponse;
+    private String recaptchaToken;
 
 }

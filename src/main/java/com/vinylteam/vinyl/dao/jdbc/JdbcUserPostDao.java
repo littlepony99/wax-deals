@@ -14,8 +14,8 @@ import org.springframework.stereotype.Repository;
 public class JdbcUserPostDao implements UserPostDao {
 
     private static final String INSERT_USER_POST = "INSERT INTO user_posts" +
-            " (name, email, theme, message, created_at)" +
-            " VALUES (:name , :email, :theme, :message, :create_at)";
+            " (name, email, message, created_at)" +
+            " VALUES (:name, :email, :message, :create_at)";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -25,7 +25,6 @@ public class JdbcUserPostDao implements UserPostDao {
         sqlParameterSource
                 .addValue("name", post.getName())
                 .addValue("email", post.getEmail())
-                .addValue("theme", post.getTheme())
                 .addValue("message", post.getMessage())
                 .addValue("create_at", post.getCreatedAt());
         jdbcTemplate.update(INSERT_USER_POST, sqlParameterSource);

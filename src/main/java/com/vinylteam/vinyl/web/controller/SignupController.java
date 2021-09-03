@@ -1,10 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.JwtUser;
-import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.service.EmailConfirmationService;
-import com.vinylteam.vinyl.service.JwtService;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,52 +15,58 @@ import java.util.Map;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class SignupController {
 
     private final UserService userService;
-    private final EmailConfirmationService emailConfirmationService;
-    private final UserMapper userMapper;
 
-    @PostMapping("/signUp")
-    public ResponseEntity<Map<String, Object>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
-        Map<String, Object> responseMap = new HashMap<>();
+    @PostMapping("/sign-up")
+    public ResponseEntity<Map<String, String>> signUpUser(@RequestBody UserInfoRequest userProfileInfo) {
+        Map<String, String> responseMap = new HashMap<>();
         try {
             userService.register(userProfileInfo);
             log.debug("User was added with " +
                     "passed email and password to db {'email':{}}", userProfileInfo.getEmail());
-            responseMap.putAll(getStatusInfoMap("0", "Please confirm your registration. To do this, follow the link that we sent to your email - " + userProfileInfo.getEmail()));
-            ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.SEE_OTHER);
-            log.debug("Set response status to {'status':{}}", HttpStatus.SEE_OTHER);
+            responseMap.putAll(getMessageMap("In order to confirm your email click on the confirmation link we sent to your mailbox. Might be in \"spam\"!"));
+            ResponseEntity<Map<String, String>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+            log.debug("Set response status to {'status':{}}", HttpStatus.OK);
             return response;
-        } catch (Exception e) {
+        } catch (ServerException e) {
+            log.error("Error during sending confirmation email", e);
+            responseMap.putAll(getMessageMap(e.getMessage()));
+            ResponseEntity<Map<String, String>> response = new ResponseEntity<>(responseMap, HttpStatus.INTERNAL_SERVER_ERROR);
+            log.debug("Set response status to {'status':{}}", HttpStatus.INTERNAL_SERVER_ERROR);
+            return response;
+        } catch (RuntimeException e) {
             log.error("Error during registration", e);
-            responseMap.putAll(getStatusInfoMap("1", e.getMessage()));
-            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
+            responseMap.putAll(getMessageMap(e.getMessage()));
+            ResponseEntity<Map<String, String>> response = new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
+            log.debug("Set response status to {'status':{}}", HttpStatus.BAD_REQUEST);
+            return response;
         }
     }
 
-    @PutMapping("/emailConfirmation")
-    public ResponseEntity<Map<String, Object>> getConfirmationResponse(@RequestParam(value = "confirmToken") String token) {
-        Map<String, Object> responseMap = new HashMap<>();
+    @PutMapping("/email-confirmation-old")
+    public ResponseEntity<Map<String, String>> getConfirmationResponse(@RequestParam(value = "confirmToken") String token) {
+        Map<String, String> responseMap = new HashMap<>();
         userService.confirmEmailByToken(token);
-        responseMap.putAll(getStatusInfoMap("0", "Your email confirmed. Now you can log in"));
-        ResponseEntity<Map<String, Object>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+        responseMap.putAll(getMessageMap("Your email is confirmed. Now you can log in."));
+        ResponseEntity<Map<String, String>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
         log.debug("Set response status to {'status':{}}", HttpStatus.OK);
         return response;
     }
 
-    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
-        String username = authUser.getUsername();
-        return Map.of(
-                "user", userMapper.mapUserToDto(userService.findByEmail(username)),
-                "token", token);
+    @PutMapping("/email-confirmation")
+    public ResponseEntity<Map<String, String>> getConfirmationResponseRestEndPoint(@RequestBody Map<String, String> confirmToken) {
+        Map<String, String> responseMap = new HashMap<>();
+        userService.confirmEmailByToken(confirmToken.get("confirmToken"));
+        responseMap.putAll(getMessageMap("Your email is confirmed. Now you can log in."));
+        ResponseEntity<Map<String, String>> response = new ResponseEntity<>(responseMap, HttpStatus.OK);
+        log.debug("Set response status to {'status':{}}", HttpStatus.OK);
+        return response;
     }
 
-    private Map<String, String> getStatusInfoMap(String code, String s) {
-        return Map.of(
-                "resultCode", code,
-                "message", s);
+    private Map<String, String> getMessageMap(String message) {
+        return Map.of("message", message);
     }
 
 }

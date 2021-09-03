@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+@Component
 @RequiredArgsConstructor
 public class JwtValidatorFilter extends OncePerRequestFilter {
 
@@ -36,7 +37,8 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUser principal = (JwtUser)auth.getPrincipal();
                 var user = userService.findByEmail(principal.getUsername());
-                request.getSession().setAttribute("user", user);
+                request.setAttribute("jwtToken", token);
+                request.setAttribute("userEntity", user);
             }
         }
         filterChain.doFilter(request, response);

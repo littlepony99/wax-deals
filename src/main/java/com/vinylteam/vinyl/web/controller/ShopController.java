@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toList;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/stores")
-@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class ShopController {
 
     private final ShopService shopService;

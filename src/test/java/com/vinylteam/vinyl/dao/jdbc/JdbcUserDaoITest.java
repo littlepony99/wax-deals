@@ -74,14 +74,14 @@ class JdbcUserDaoITest {
     }
 
     @Test
-    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
+    @DataSet(provider = TestUserProvider.UsersProvider.class, cleanAfter = true, executeStatementsBefore = "SELECT setval('users_id_seq', 1, false);", skipCleaningFor = {"public.flyway_schema_history"})
     @ExpectedDataSet(provider = TestUserProvider.AddedUserResultProvider.class)
     @DisplayName("Adds user to db")
     void add() {
         //prepare
         User expectedUser = dataGenerator.getUserWithNumber(2);
         //when
-        assertEquals(1, userDao.add(expectedUser));
+        assertEquals(2, userDao.add(expectedUser));
     }
 
     @Test

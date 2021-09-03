@@ -36,7 +36,6 @@ class JdbcUserPostDaoITest {
         UserPost expectedUserPost = UserPost.builder()
                 .name("taras")
                 .email("user2@wax-deals.com")
-                .theme("help")
                 .message("help")
                 .createdAt(LocalDateTime.of(2004, 10, 19, 10, 23, 10)).build();
         //when

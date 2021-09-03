@@ -17,7 +17,6 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "https://react-wax-deals.herokuapp.com"})
 public class JwtLoginController {
 
     private final JwtService jwtTokenProvider;
@@ -33,7 +32,7 @@ public class JwtLoginController {
             if (responseObject.getUser() != null) {
             return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } else {
-            responseObject = setStatusInfo(responseObject, "1", "Token is not valid");
+            responseObject = setStatusInfo(responseObject, "1", "Token is expired");
             return new ResponseEntity<>(responseObject, ACCEPTED);
         }
     }
@@ -42,10 +41,10 @@ public class JwtLoginController {
     public ResponseEntity<UserSecurityResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
             UserSecurityResponse responseObject = jwtTokenProvider.authenticateByRequest(loginRequest);
-            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), CREATED);
+            return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } catch (DisabledException e) {
             log.warn("User is not activated yet", e);
-            return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "User is not activated yet"), BAD_REQUEST);
+            return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "Your email isn't confirmed. Check your mailbox for the confirmation link"), BAD_REQUEST);
         } catch (AuthenticationException e) {
             log.warn("Invalid username or password", e);
             return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "Invalid username or password"), BAD_REQUEST);

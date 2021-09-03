@@ -4,8 +4,8 @@ import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.security.impl.DefaultSecurityService;
 import com.vinylteam.vinyl.security.impl.SpringSecurityService;
 import com.vinylteam.vinyl.service.JwtService;
-import com.vinylteam.vinyl.service.JwtTokenProvider;
 import com.vinylteam.vinyl.service.UserService;
+import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.web.filter.JwtValidatorFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.DelegatingFilterProxy;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.ServletContext;
 import java.util.List;
@@ -71,6 +73,18 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .formLogin().loginPage("/signIn").permitAll().usernameParameter("email").defaultSuccessUrl("/profile")
                 .and()
                 .logout().addLogoutHandler(logoutHandlerService).logoutSuccessUrl("/successlogout");
+    }
+
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins(allowedOrigins.get(0), allowedOrigins.get(1))
+                        .allowedMethods(allowedMethods.get(0), allowedMethods.get(1), allowedMethods.get(2), allowedMethods.get(3));
+            }
+        };
     }
 
     @Bean
@@ -122,8 +136,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public LogoutService logoutService(JwtService jwtService,
                                        InMemoryLogoutTokenService logoutStorageService) {
-        var logoutService = new LogoutService(jwtService, logoutStorageService);
-        return logoutService;
+        return new LogoutService(jwtService, logoutStorageService);
     }
 
     protected DelegatingFilterProxy getJwtValidatorFilterDelegatingProxy() {

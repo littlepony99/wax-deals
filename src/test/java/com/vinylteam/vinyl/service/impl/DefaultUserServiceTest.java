@@ -3,11 +3,13 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with valid fields")
-    void register() {
+    void register() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         User user = dataGenerator.getUserWithNumber(1);
@@ -65,7 +67,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with null email")
-    void registerNullEmail() {
+    void registerNullEmail() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         userInfo.setEmail(null);
@@ -83,7 +85,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with invalid email")
-    void registerInvalidEmail() {
+    void registerInvalidEmail() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         userInfo.setEmail("invalid Email");
@@ -102,7 +104,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with duplicate email")
-    void registerDuplicateEmail() {
+    void registerDuplicateEmail() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         User user = dataGenerator.getUserWithNumber(1);
@@ -122,7 +124,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with null password")
-    void registerNullPassword() {
+    void registerNullPassword() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         userInfo.setPassword(null);
@@ -140,7 +142,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with invalid password")
-    void registerInvalidPassword() {
+    void registerInvalidPassword() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         userInfo.setPassword("no number");
@@ -159,7 +161,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Registers user with password confirmation not matching password")
-    void registerNotEqualPasswordConfirmation() {
+    void registerNotEqualPasswordConfirmation() throws ServerException {
         //prepare
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(1);
         userInfo.setPasswordConfirmation("not equal password confirmation");
@@ -363,7 +365,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with new email same as old email, new password, and new discogs user name")
-    void update() {
+    void update() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String email = user.getEmail();
@@ -385,7 +387,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with new email different from old email, new password, and new discogs user name")
-    void updateDifferentNewEmail() {
+    void updateDifferentNewEmail() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -411,7 +413,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by null old email with new email, new password, and new discogs user name")
-    void updateNullOldEmail() {
+    void updateNullOldEmail() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = null;
@@ -435,7 +437,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by non-existent old email with new email, new password, and new discogs user name")
-    void updateNonExistentOldEmail() {
+    void updateNonExistentOldEmail() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -461,7 +463,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with null new email, new password, and new discogs user name")
-    void updateNullNewEmail() {
+    void updateNullNewEmail() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -485,7 +487,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with invalid new email, new password, and new discogs user name")
-    void updateInvalidNewEmail() {
+    void updateInvalidNewEmail() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -510,7 +512,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with new email, null new password, and new discogs user name")
-    void updateNullNewPassword() {
+    void updateNullNewPassword() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -534,7 +536,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("Updates user by old email with new email, invalid new password, and new discogs user name")
-    void updateInvalidNewPassword() {
+    void updateInvalidNewPassword() throws ServerException {
         //prepare
         User user = dataGenerator.getUserWithNumber(1);
         String oldEmail = dataGenerator.getUserWithNumber(2).getEmail();
@@ -557,9 +559,10 @@ class DefaultUserServiceTest {
         verify(mockedEmailConfirmationService, never()).sendMessageWithLinkToUserEmail(eq(newEmail), anyString());
     }
 
+    @SneakyThrows
     @Test
     @DisplayName("edits profile of existing user with new email, new password, new discogs user name, with correct old password.")
-    void editProfile() {
+    void editProfile() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         User changedUser = dataGenerator.getUserWithNumber(2);
@@ -587,7 +590,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of user with null old email with new email, new password, new discogs user name, with correct old password.")
-    void editProfileNullOldEmail() {
+    void editProfileNullOldEmail() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         user.setEmail(null);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
@@ -610,7 +613,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of non-existent user with new email, new password, new discogs user name, with correct old password.")
-    void editProfileNonExistentOldEmail() {
+    void editProfileNonExistentOldEmail() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         User changedUser = dataGenerator.getUserWithNumber(2);
@@ -638,7 +641,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with new email, new password, new discogs user name, with null old password.")
-    void editProfileNullOldPassword() {
+    void editProfileNullOldPassword() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         userInfo.setPassword(null);
@@ -660,7 +663,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with new email, new password, new discogs user name, with incorrect old password.")
-    void editProfileIncorrectOldPassword() {
+    void editProfileIncorrectOldPassword() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         when(mockedSecurityService.validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()))).thenReturn(false);
@@ -682,7 +685,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with new email, invalid new password, new discogs user name, with correct old password.")
-    void editProfileInvalidNewPassword() {
+    void editProfileInvalidNewPassword() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         when(mockedSecurityService.validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()))).thenReturn(true);
@@ -705,7 +708,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with new email, new password, new discogs user name, with correct old password and new password confirmation not equal new password.")
-    void editProfileNotEqualNewPasswordConfirmation() {
+    void editProfileNotEqualNewPasswordConfirmation() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         userInfo.setNewPasswordConfirmation("not equal");
@@ -729,7 +732,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with invalid new email, new password, new discogs user name, with correct old password.")
-    void editProfileInvalidNewEmail() {
+    void editProfileInvalidNewEmail() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         when(mockedSecurityService.validateIfPasswordMatches(eq(user), eq(userInfo.getPassword().toCharArray()))).thenReturn(true);
@@ -752,7 +755,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with new email that has duplicate in database, new password, new discogs user name, with correct old password.")
-    void editProfileDuplicateNewEmail() {
+    void editProfileDuplicateNewEmail() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         UserInfoRequest userInfo = dataGenerator.getUserInfoRequestWithNumber(2);
         User changedUser = dataGenerator.getUserWithNumber(2);
@@ -780,7 +783,7 @@ class DefaultUserServiceTest {
 
     @Test
     @DisplayName("edits profile of existing user with empty new email, empty new password, empty new discogs user name, with correct old password.")
-    void editProfileAllFieldsEmpty() {
+    void editProfileAllFieldsEmpty() throws ServerException {
         User user = dataGenerator.getUserWithNumber(1);
         user.setId(1L);
         UserInfoRequest userInfo = UserInfoRequest.builder()
