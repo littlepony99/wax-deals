@@ -63,8 +63,8 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void delete(User user) {
-        jdbcTemplate.update(DELETE, new MapSqlParameterSource()
-                .addValue("email", user.getEmail()));
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("email", user.getEmail());
+        jdbcTemplate.update(DELETE, sqlParameterSource);
     }
 
     @Override
@@ -83,8 +83,7 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public Optional<User> findByEmail(String email) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", email);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("email", email);
         return ofNullable(jdbcTemplate.query(
                 FIND_BY_EMAIL,
                 sqlParameterSource,
@@ -99,26 +98,25 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public void setUserStatusTrue(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("id", id);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
         jdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
     @Override
     public void changeProfile(User user, String email, String discogsUserName) {
-        jdbcTemplate.update(UPDATE_PROFILE_FIELDS,
-                new MapSqlParameterSource()
-                        .addValue("new_email", email)
-                        .addValue("discogs_user_name", discogsUserName)
-                        .addValue("email", user.getEmail()));
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("new_email", email)
+                .addValue("discogs_user_name", discogsUserName)
+                .addValue("email", user.getEmail());
+        jdbcTemplate.update(UPDATE_PROFILE_FIELDS, sqlParameterSource);
     }
 
     @Override
     public void changeUserPassword(User user) {
-        jdbcTemplate.update(UPDATE_PASSWORD,
-                new MapSqlParameterSource()
-                        .addValue("email", user.getEmail())
-                        .addValue("password", user.getPassword()));
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
+                .addValue("email", user.getEmail())
+                .addValue("password", user.getPassword());
+        jdbcTemplate.update(UPDATE_PASSWORD, sqlParameterSource);
     }
 
 }

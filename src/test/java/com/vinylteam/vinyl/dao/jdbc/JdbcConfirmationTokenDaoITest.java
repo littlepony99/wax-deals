@@ -30,19 +30,6 @@ class JdbcConfirmationTokenDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-/*
-    @Container
-    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
-*/
-
-/*    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        container.start();
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }*/
-
     @Test
     @DataSet(provider = TestConfirmationTokenProvider.ConfirmationTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Returns optional with confirmation token when there is token with that user_id")

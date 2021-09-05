@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -24,12 +26,12 @@ public class ShopController {
     private final ShopMapper shopMapper;
 
     @GetMapping
-    public List<ShopDto> getShopPage() {
-        List<Shop> shopList = shopService.findAll();
-        List<ShopDto> result = new ArrayList<>();
-        for (Shop shop : shopList) {
-            result.add(shopMapper.userToUserDto(shop));
-        }
+    public List<ShopDto> getShopInfo() {
+        List<ShopDto> result = shopService
+                .findAll()
+                .stream()
+                .map(shopMapper::userToUserDto)
+                .collect(toList());
         log.info("Shops list is prepared to be included in response, size {'shopsListSize':{}}", result.size());
         return result;
     }

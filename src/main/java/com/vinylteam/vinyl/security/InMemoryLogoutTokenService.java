@@ -19,13 +19,6 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
 
     private Cache<String, LocalDateTime> logoutTokensCache;
 
-    private JwtService jwtService;
-
-    @Autowired
-    public void setJwtService(JwtService jwtService) {
-        this.jwtService = jwtService;
-    }
-
     @PostConstruct
     public void initCache() {
         logoutTokensCache = Caffeine.newBuilder()
@@ -60,8 +53,8 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
     }
 
     @Override
-    public void storeToken(String token) {
-        logoutTokensCache.put(token, jwtService.getExpirationDate(token));
+    public void storeToken(String token, LocalDateTime expirationDate) {
+        logoutTokensCache.put(token, expirationDate);
     }
 
     @Override
