@@ -20,13 +20,12 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    User changeDiscogsUserName(User user, String discogsUserName);
+    User changeProfile(User user, String email, String discogsUserName);
 
     User changeUserPassword(UserInfoRequest password, User user);
 
     void signInCheck(UserInfoRequest userProfileInfo);
 
-    User editProfile(UserInfoRequest userProfileInfo,
-                     User user) throws ServerException;
+    User editProfile(UserInfoRequest userProfileInfo, User user) throws ServerException;
 
 }

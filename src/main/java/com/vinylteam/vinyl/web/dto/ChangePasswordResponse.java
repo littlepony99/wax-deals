@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ChangePasswordResponse {
+
     private final String message;
     private final String jwtToken;
     private String refreshToken;

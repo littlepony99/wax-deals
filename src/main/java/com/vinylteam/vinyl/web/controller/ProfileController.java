@@ -1,15 +1,12 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.LogoutService;
+import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.ProfileManagementService;
-import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
-import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
-import com.vinylteam.vinyl.web.dto.LoginRequest;
-import com.vinylteam.vinyl.web.dto.UserDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -18,7 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Optional;
+
 
 import static org.springframework.http.HttpStatus.OK;
 
@@ -30,20 +27,19 @@ public class ProfileController {
 
     private final UserMapper userMapper;
     private final ProfileManagementService profileService;
+    private final JwtService jwtService;
+    private LogoutService logoutService;
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<UserDto> submitProfileChanges(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
-        User userAfterEdit = profileService.changeDiscogsUserNameAndReturnUser(request, userProfileInfo);
-        return new ResponseEntity<>(userMapper.mapUserToDto(userAfterEdit), OK);
+    public ResponseEntity<UserSecurityResponse> submitProfileChanges(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
+        return new ResponseEntity<>(profileService.changeProfileAndReturnUser(request, userProfileInfo), OK);
     }
-
 
     @PutMapping(path = "/change-password", produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ChangePasswordResponse> changePassword(HttpServletRequest request, @RequestBody UserInfoRequest userProfileInfo) {
-        ChangePasswordResponse response = profileService.changeProfilePassword(request, userProfileInfo);
-        return new ResponseEntity<>(response, OK);
+        return new ResponseEntity<>(profileService.changeProfilePassword(request, userProfileInfo), OK);
     }
 
     @DeleteMapping(path = "/{userId}", produces = {MediaType.APPLICATION_JSON_VALUE})

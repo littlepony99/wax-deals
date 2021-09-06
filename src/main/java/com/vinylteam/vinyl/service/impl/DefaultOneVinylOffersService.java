@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +27,12 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     private final DiscogsService discogsService;
     private final OneVinylOfferMapper offerMapper;
 
-    public UniqueVinyl getUniqueVinyl(String id) {
+    public UniqueVinyl getUniqueVinyl(String id) throws NotFoundException {
         return uniqueVinylService.findById(id);
     }
 
     @Override
-    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) {
+    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) throws NotFoundException {
         String uniqueVinylId = identifier;
         // find vinyl
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);

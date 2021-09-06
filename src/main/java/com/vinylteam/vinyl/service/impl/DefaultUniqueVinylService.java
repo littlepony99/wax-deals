@@ -3,6 +3,8 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.NotFoundException;
+import com.vinylteam.vinyl.exception.entity.CatalogErrors;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public void updateOneUniqueVinyl(UniqueVinyl vinyl) {
-        if (vinyl.isHasOffers()) {
+        if (vinyl.hasOffers()) {
             return;
         }
         uniqueVinylRepository.save(vinyl);
@@ -69,13 +71,13 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     }
 
     @Override
-    public UniqueVinyl findById(String id) {
+    public UniqueVinyl findById(String id) throws NotFoundException {
         if (id == null) {
             log.error("Id is null");
             throw new IllegalArgumentException("Incorrect id value " + id);
         }
         UniqueVinyl uniqueVinyl = uniqueVinylRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No uniqueVinyl with that id in table {'id':{" + id + "}}"));
+                .orElseThrow(() -> new NotFoundException(CatalogErrors.VINYL_BY_ID_NOT_FOUND.getMessage()));
         log.debug("Resulting uniqueVinyl is {'uniqueVinyl':{}}", uniqueVinyl);
         return uniqueVinyl;
     }

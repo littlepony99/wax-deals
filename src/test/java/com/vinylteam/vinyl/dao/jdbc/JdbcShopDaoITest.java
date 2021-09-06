@@ -30,19 +30,6 @@ class JdbcShopDaoITest {
     @Autowired
     private ShopDao shopDao;
 
-/*
-    @Container
-    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
-*/
-
-/*    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        container.start();
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }*/
-
     @Test
     @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})
     @DisplayName("Gets list of shops with id-s with list of id-s from db")

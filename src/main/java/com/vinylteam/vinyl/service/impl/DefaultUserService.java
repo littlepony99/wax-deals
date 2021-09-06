@@ -4,7 +4,6 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.ConfirmationToken;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ServerException;
-import com.vinylteam.vinyl.exception.entity.EmailConfirmationErrors;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
@@ -15,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,10 +40,8 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(password)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
-        //securityService.emailFormatCheck(email);
         securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
-        User userToAdd = securityService
-                .createUserWithHashedPassword(email, password.toCharArray());
+        User userToAdd = securityService.createUserWithHashedPassword(email, password.toCharArray());
         userToAdd.setDiscogsUserName(userInfoRequest.getDiscogsUserName());
         long userId;
         try {
@@ -119,9 +117,17 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User changeDiscogsUserName(User user, String discogsUserName) {
-        userDao.changeDiscogsUserName(user, discogsUserName);
+    public User changeProfile(User user, String email, String discogsUserName) {
+        if (!isNotEmptyNotNull(email)) {
+            throw new RuntimeException(UserErrors.EMPTY_EMAIL_ERROR.getMessage());
+        }
+        try {
+            userDao.changeProfile(user, email, discogsUserName);
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage());
+        }
         user.setDiscogsUserName(discogsUserName);
+        user.setEmail(email);
         return user;
     }
 
@@ -133,7 +139,7 @@ public class DefaultUserService implements UserService {
         }
         boolean checkOldPassword = securityService.validateIfPasswordMatches(user, oldPassword.toCharArray());
         if (!checkOldPassword) {
-            throw new RuntimeException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
+            throw new BadCredentialsException(UserErrors.WRONG_PASSWORD_ERROR.getMessage());
         }
         String newPassword = changeRequest.getNewPassword();
         String newPasswordConfirmation = changeRequest.getNewPasswordConfirmation();
@@ -165,8 +171,7 @@ public class DefaultUserService implements UserService {
     }
 
     @Override
-    public User editProfile(UserInfoRequest userProfileInfo,
-                            User user) throws ServerException {
+    public User editProfile(UserInfoRequest userProfileInfo, User user) throws ServerException {
         String oldEmail = user.getEmail();
         String oldPassword = userProfileInfo.getPassword();
         if (!isNotEmptyNotNull(oldPassword)) {

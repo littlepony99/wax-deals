@@ -13,6 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import static java.util.Optional.ofNullable;
+
 @Repository
 @RequiredArgsConstructor
 public class JdbcUserDao implements UserDao {
@@ -30,8 +32,9 @@ public class JdbcUserDao implements UserDao {
     private static final String UPDATE = "UPDATE users" +
             " SET email = :email, password = :password, salt = :salt, iterations = :iterations, role = :role, status = :status, discogs_user_name = :discogs_user_name" +
             " WHERE email ILIKE :old_email";
-    private static final String UPDATE_DISCOGS = "UPDATE users" +
-            " SET discogs_user_name = :discogs_user_name" +
+    private static final String UPDATE_PROFILE_FIELDS = "UPDATE users SET " +
+            " discogs_user_name = :discogs_user_name, " +
+            " email = CASE WHEN email <> :new_email THEN :new_email ELSE email END" +
             " WHERE email ILIKE :email";
     private static final String UPDATE_PASSWORD = "UPDATE users" +
             " SET password = :password" +
@@ -41,7 +44,7 @@ public class JdbcUserDao implements UserDao {
 
     private static final ResultSetExtractor<User> RESULT_SET_EXTRACTOR = new UserResultSetExtractor();
 
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public long add(User user) {
@@ -54,16 +57,14 @@ public class JdbcUserDao implements UserDao {
                 .addValue("role", user.getRole().getName())
                 .addValue("status", user.getStatus())
                 .addValue("discogs_user_name", user.getDiscogsUserName());
-        namedParameterJdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
-        Long id = Long.parseLong(keyHolder.getKeys().get("id").toString());
-        return id;
+        jdbcTemplate.update(INSERT, sqlParameterSource, keyHolder);
+        return Long.parseLong(keyHolder.getKeys().get("id").toString());
     }
 
     @Override
     public void delete(User user) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", user.getEmail());
-        namedParameterJdbcTemplate.update(DELETE, sqlParameterSource);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("email", user.getEmail());
+        jdbcTemplate.update(DELETE, sqlParameterSource);
     }
 
     @Override
@@ -77,14 +78,13 @@ public class JdbcUserDao implements UserDao {
                 .addValue("status", user.getStatus())
                 .addValue("discogs_user_name", user.getDiscogsUserName())
                 .addValue("old_email", email);
-        namedParameterJdbcTemplate.update(UPDATE, sqlParameterSource);
+        jdbcTemplate.update(UPDATE, sqlParameterSource);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", email);
-        return Optional.ofNullable(namedParameterJdbcTemplate.query(
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("email", email);
+        return ofNullable(jdbcTemplate.query(
                 FIND_BY_EMAIL,
                 sqlParameterSource,
                 RESULT_SET_EXTRACTOR));
@@ -92,27 +92,23 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public Optional<User> findById(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("id", id);
-        return Optional.ofNullable(namedParameterJdbcTemplate.query(
-                FIND_BY_ID,
-                sqlParameterSource,
-                RESULT_SET_EXTRACTOR));
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        return ofNullable(jdbcTemplate.query(FIND_BY_ID, sqlParameterSource, RESULT_SET_EXTRACTOR));
     }
 
     @Override
     public void setUserStatusTrue(long id) {
-        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("id", id);
-        namedParameterJdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource().addValue("id", id);
+        jdbcTemplate.update(UPDATE_USER_STATUS, sqlParameterSource);
     }
 
     @Override
-    public void changeDiscogsUserName(User user, String discogsUserName) {
+    public void changeProfile(User user, String email, String discogsUserName) {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
-                .addValue("email", user.getEmail())
-                .addValue("discogs_user_name", discogsUserName);
-        namedParameterJdbcTemplate.update(UPDATE_DISCOGS, sqlParameterSource);
+                .addValue("new_email", email)
+                .addValue("discogs_user_name", discogsUserName)
+                .addValue("email", user.getEmail());
+        jdbcTemplate.update(UPDATE_PROFILE_FIELDS, sqlParameterSource);
     }
 
     @Override
@@ -120,7 +116,7 @@ public class JdbcUserDao implements UserDao {
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource()
                 .addValue("email", user.getEmail())
                 .addValue("password", user.getPassword());
-        namedParameterJdbcTemplate.update(UPDATE_PASSWORD, sqlParameterSource);
+        jdbcTemplate.update(UPDATE_PASSWORD, sqlParameterSource);
     }
 
 }
