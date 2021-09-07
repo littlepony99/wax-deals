@@ -8,4 +8,6 @@ public class SecurityConstants {
 
     public static final String ENCODE_ALGORITHM = "PBKDF2WithHmacSHA512";
 
+    public static final String TOKEN_PAIR_IDENTIFIER_NAME = "pairIdentifier";
+
 }

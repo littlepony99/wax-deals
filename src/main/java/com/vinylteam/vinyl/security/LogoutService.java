@@ -18,7 +18,7 @@ public class LogoutService implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         String token = jwtService.extractToken(request);
         if (jwtService.isTokenValid(token)) {
-            logoutStorageService.storeToken(token, jwtService.getExpirationDate(token));
+            logoutStorageService.storePairIdentifier(jwtService.getPairIdentifier(token), jwtService.getExpirationDate(token));
         }
     }
 

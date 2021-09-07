@@ -117,10 +117,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public JwtValidatorFilter jwtValidationFilter(UserService userService, JwtService jwtService) {
-        JwtValidatorFilter jwtValidationFilter = new JwtValidatorFilter(userService);
-        jwtValidationFilter.setJwtService(jwtService);
-        return jwtValidationFilter;
+    public JwtValidatorFilter jwtValidatorFilter(UserService userService, JwtService jwtService) {
+        JwtValidatorFilter jwtValidatorFilter = new JwtValidatorFilter(userService);
+        jwtValidatorFilter.setJwtService(jwtService);
+        return jwtValidatorFilter;
     }
 
     @Bean
@@ -142,7 +142,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected DelegatingFilterProxy getJwtValidatorFilterDelegatingProxy() {
         DelegatingFilterProxy delegateFilterProxy = new DelegatingFilterProxy();
         delegateFilterProxy.setServletContext(context);
-        delegateFilterProxy.setTargetBeanName("jwtValidationFilter");
+        delegateFilterProxy.setTargetBeanName("jwtValidatorFilter");
         return delegateFilterProxy;
     }
 

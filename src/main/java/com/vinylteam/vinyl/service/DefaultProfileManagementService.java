@@ -31,7 +31,9 @@ public class DefaultProfileManagementService implements ProfileManagementService
         userService.changeProfile(user, userProfileInfo.getEmail(), userProfileInfo.getDiscogsUserName());
         var response = ControllerResponseUtils.getResponseWithMessage("Your email and/or discogs username have been changed.");
         if (!user.getEmail().equals(oldEmail)) {
-            response.setAccessToken(jwtService.createToken(user.getEmail(), userMapper.mapToDto(user).getAuthorities()));
+            var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
+            response.setJwtToken(newTokenPair.getJwtToken());
+            response.setRefreshToken(newTokenPair.getRefreshToken());
             logoutService.logout(request, null, null);
         }
         return response;
@@ -43,7 +45,7 @@ public class DefaultProfileManagementService implements ProfileManagementService
         userService.changeUserPassword(userProfileInfo, user);
         String token = jwtService
                 .authenticateByRequest(new LoginRequest(user.getEmail(), userProfileInfo.getNewPassword()))
-                .getAccessToken();
+                .getJwtToken();
         logoutService.logout(request, null, null);
         return new ChangePasswordResponse("Your password has been changed.", token);
     }

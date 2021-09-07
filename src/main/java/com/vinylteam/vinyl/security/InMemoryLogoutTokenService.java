@@ -27,7 +27,7 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
     }
 
     private Expiry<String, LocalDateTime> getExpirationStrategy() {
-        return new Expiry<String, LocalDateTime>() {
+        return new Expiry<>() {
 
             private final ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
 
@@ -53,12 +53,12 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
     }
 
     @Override
-    public void storeToken(String token, LocalDateTime expirationDate) {
-        logoutTokensCache.put(token, expirationDate);
+    public boolean isTokenPairBlocked(String pairIdentifier) {
+        return logoutTokensCache.asMap().containsKey(pairIdentifier);
     }
 
     @Override
-    public boolean isTokenBlocked(String token) {
-        return logoutTokensCache.asMap().containsKey(token);
+    public void storePairIdentifier(String pairIdentifier, LocalDateTime expirationDate) {
+        logoutTokensCache.put(pairIdentifier, expirationDate);
     }
 }

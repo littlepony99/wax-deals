@@ -15,7 +15,9 @@ public class ControllerResponseUtils {
     public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap){
         UserSecurityResponse response = new UserSecurityResponse();
         response.setMessage((String)responseMap.get("message"));
-        response.setAccessToken((String)responseMap.get("token"));
+        response.setToken((String)responseMap.get("token"));
+        response.setJwtToken((String)responseMap.get("accessToken"));
+        response.setRefreshToken((String)responseMap.get("refreshToken"));
         response.setUser((UserDto)responseMap.get("user"));
         return response;
     }
@@ -35,12 +37,6 @@ public class ControllerResponseUtils {
 
     public static UserSecurityResponse setSuccessStatusInfo(UserSecurityResponse response) {
         return setStatusInfo(response,"0", "");
-    }
-
-    public static  Map<String, Object> getUserCredentialsMap(String token, User user) {
-        return Map.of(
-                "user", userMapper.mapUserToDto(user),
-                "token", token);
     }
 
 }
