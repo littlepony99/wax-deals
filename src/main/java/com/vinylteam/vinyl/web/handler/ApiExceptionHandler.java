@@ -14,7 +14,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {BadCredentialsException.class})
     public ResponseEntity<Object> handleBadCredentialsExceptionHandler(BadCredentialsException exception) {
-        return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
+        return ResponseEntity.status(UNAUTHORIZED).body(new ApiExceptionDto(exception.getMessage()));
     }
 
     @ExceptionHandler(value = {RuntimeException.class})
