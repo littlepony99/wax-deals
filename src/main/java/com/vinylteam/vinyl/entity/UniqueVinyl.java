@@ -28,16 +28,11 @@ public class UniqueVinyl {
     private String imageLink;
 
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @Field(type = FieldType.Boolean)
     @EqualsAndHashCode.Exclude
-    private Boolean offers;
+    private boolean hasOffers;
 
     public boolean hasOffers() {
-        return offers;
-    }
-
-    public void setHasOffers(boolean offers) {
-        this.offers = offers;
+        return hasOffers;
     }
 }
