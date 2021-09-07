@@ -92,8 +92,8 @@ public class JwtTokenProvider implements JwtService {
             return isTokenTypeExpected && !tokenStorageService.isTokenPairBlocked(pairIdentifier);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
-            throw new JwtAuthenticationException("JWT token is incorrect");
-            //return false;
+            //throw new JwtAuthenticationException("JWT token is incorrect");
+            return false;
         }
     }
 

@@ -37,7 +37,7 @@ public class JwtLoginController {
             return new ResponseEntity<>(setSuccessStatusInfo(responseObject), OK);
         } else {
             responseObject = setStatusInfo(responseObject, "1", "Token is expired");
-            return new ResponseEntity<>(responseObject, ACCEPTED);
+            return new ResponseEntity<>(responseObject, UNAUTHORIZED);
         }
     }
 
