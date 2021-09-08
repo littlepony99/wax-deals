@@ -1,16 +1,11 @@
 package com.vinylteam.vinyl.util;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.DefaultUserMapper;
-import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.dto.UserDto;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 
 import java.util.Map;
 
 public class ControllerResponseUtils {
-
-    private static final UserMapper userMapper = new DefaultUserMapper();
 
     public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap){
         UserSecurityResponse response = new UserSecurityResponse();

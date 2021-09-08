@@ -218,12 +218,6 @@ public class JwtTokenProvider implements JwtService {
                 .compact();
     }
 
-    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
-        String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
-        return Map.of("user", userMapper.mapUserToDto(byEmail), "token", token);
-    }
-
     private String getPairIdentifier(Jws<Claims> claims) {
         return (String) claims.getBody().get(TOKEN_PAIR_IDENTIFIER_NAME);
     }
@@ -235,13 +229,17 @@ public class JwtTokenProvider implements JwtService {
                 .toLocalDateTime();
     }
 
-    private Map<String, Object> getUserCredentialsMap(String token, String refreshToken, JwtUser authUser) {
-        String username = authUser.getUsername();
-        User byEmail = userService.findByEmail(username);
+    private Map<String, Object> getUserCredentialsMap(String accessToken, String refreshToken, JwtUser authUser) {
+        User byEmail = userService.findByEmail(authUser.getUsername());
         return Map.of(
                 "user", userMapper.mapUserToDto(byEmail),
                 "refreshToken", refreshToken,
-                "accessToken", token);
+                "accessToken", accessToken);
+    }
+
+    private Map<String, Object> getUserCredentialsMap(String token, JwtUser authUser) {
+        User byEmail = userService.findByEmail(authUser.getUsername());
+        return Map.of("user", userMapper.mapUserToDto(byEmail), "token", token);
     }
 
     private String getUsername(String token) {
