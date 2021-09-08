@@ -9,5 +9,6 @@ public class SecurityConstants {
     public static final String ENCODE_ALGORITHM = "PBKDF2WithHmacSHA512";
 
     public static final String TOKEN_PAIR_IDENTIFIER_NAME = "pairIdentifier";
+    public static final String JWT_VALIDATOR_FILTER_BEAN_NAME = "jwtValidatorFilter";
 
 }

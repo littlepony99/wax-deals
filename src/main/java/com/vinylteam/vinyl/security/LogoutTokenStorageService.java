@@ -7,4 +7,5 @@ public interface LogoutTokenStorageService {
     boolean isTokenPairBlocked(String pairIdentifier);
 
     void storePairIdentifier(String pairIdentifier, LocalDateTime expirationDate);
+
 }

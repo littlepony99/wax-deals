@@ -31,6 +31,7 @@ public class DefaultUserService implements UserService {
     private SecurityService securityService;
 
     private final EmailConfirmationService emailConfirmationService;
+    
     @Override
     @Transactional
     public void register(UserInfoRequest userInfoRequest) throws ServerException {

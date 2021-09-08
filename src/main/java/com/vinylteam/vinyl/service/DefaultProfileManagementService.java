@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.security.LogoutService;
+import com.vinylteam.vinyl.security.DefaultLogoutService;
 import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DefaultProfileManagementService implements ProfileManagementService {
 
     private final UserService userService;
-    private final LogoutService logoutService;
+    private final DefaultLogoutService logoutService;
     private final JwtTokenProvider jwtService;
     private final UserMapper userMapper;
 

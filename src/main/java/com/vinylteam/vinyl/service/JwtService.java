@@ -38,4 +38,5 @@ public interface JwtService {
     TokenPair getTokenPair(JwtUser user);
 
     UserSecurityResponse refreshByToken(String refreshToken);
+
 }
