@@ -13,7 +13,6 @@ import static org.springframework.http.HttpStatus.*;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
-
     @ExceptionHandler(value = {BadCredentialsException.class})
     public ResponseEntity<Object> handleBadCredentialsExceptionHandler(BadCredentialsException exception) {
         return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));

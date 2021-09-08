@@ -92,7 +92,7 @@ public class ProfileControllerITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
                 //then
-                .andExpect(status().isForbidden())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", not(empty())))
                 //.andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", not(emptyString())))
@@ -127,11 +127,11 @@ public class ProfileControllerITest {
     public void changeDiscogsUserTest() throws Exception {
         UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
-        Exception exception = assertThrows(JwtAuthenticationException.class,
-                () -> mockMvc.perform(put("/profile")
-                        .header("Authorization", "Bearer_badJWT")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest)));
+        mockMvc.perform(put("/profile")
+                .header("Authorization", "Bearer_badJWT")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
