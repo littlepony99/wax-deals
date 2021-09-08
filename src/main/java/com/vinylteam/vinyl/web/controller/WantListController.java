@@ -1,5 +1,8 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.service.UniqueVinylService;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.List;
+
 import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
@@ -18,11 +23,14 @@ import static org.springframework.http.HttpStatus.OK;
 @RestController
 @RequestMapping("/wantlist")
 public class WantListController {
+    private final UniqueVinylService uniqueVinylService;
+    private final UniqueVinylMapper uniqueVinylMapper;
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UniqueVinylDto> getUserWantListWantList(HttpServletRequest request) {
-        return new ResponseEntity<>(OK);
+    public List<UniqueVinylDto> getUserWantListWantList(HttpServletRequest request) {
+        List<UniqueVinyl> uniqueVinyls = uniqueVinylService.findRandom(10);
+        return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinyls);
     }
 
     @PostMapping
