@@ -12,6 +12,7 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,8 +27,13 @@ import java.util.Optional;
 public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
-    private final SecurityService securityService;
     private final EmailConfirmationService emailConfirmationService;
+    private SecurityService securityService;
+
+    @Autowired
+    public void setSecurityService(SecurityService securityService) {
+        this.securityService = securityService;
+    }
 
     @Override
     @Transactional
