@@ -5,11 +5,9 @@ import com.vinylteam.vinyl.entity.TokenPair;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.Collection;
 
 public interface JwtService {
 
@@ -23,9 +21,9 @@ public interface JwtService {
 
     String createRefreshToken(JwtUser user, String pairIdentifier);
 
-    void checkJwtAuthorization(HttpServletRequest request);
+    void tryJwtAuthorization(HttpServletRequest request);
 
-    void checkJwtAuthorization(HttpServletRequest request, String token);
+    boolean tryJwtAuthorization(HttpServletRequest request, String token);
 
     Authentication getAuthentication(String token);
 

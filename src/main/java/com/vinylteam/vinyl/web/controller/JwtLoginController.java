@@ -61,12 +61,12 @@ public class JwtLoginController {
     @PostMapping(value = "/token/refresh-token", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<UserSecurityResponse> refresh(HttpServletRequest request, @RequestBody Map<String, String> parameters) {
         String refreshToken = parameters.get("refreshToken");
-        jwtTokenProvider.checkJwtAuthorization(request, refreshToken);
         try {
-            UserSecurityResponse response = jwtTokenProvider.refreshByToken(refreshToken);
-            return ResponseEntity.ok(response);
-        } catch (JwtAuthenticationException e){
-            log.error("Error: ", e);
+            if (jwtTokenProvider.tryJwtAuthorization(request, refreshToken)) {
+                UserSecurityResponse response = jwtTokenProvider.refreshByToken(refreshToken);
+                return ResponseEntity.ok(response);
+            }
+            log.error("Refresh token is expired: {}: ", refreshToken);
             return new ResponseEntity<>(setStatusInfo(new UserSecurityResponse(), "1", "Refresh token is expired."), FORBIDDEN);
         } catch (Exception e) {
             log.error("Unexpected error during token refresh attempt", e);

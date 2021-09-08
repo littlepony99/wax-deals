@@ -9,7 +9,7 @@ import com.vinylteam.vinyl.security.LogoutTokenStorageService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
-import com.vinylteam.vinyl.web.controller.JwtTokenType;
+import com.vinylteam.vinyl.entity.JwtTokenType;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import io.jsonwebtoken.*;
@@ -92,7 +92,6 @@ public class JwtTokenProvider implements JwtService {
             return isTokenTypeExpected && !tokenStorageService.isTokenPairBlocked(pairIdentifier);
         } catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
-            //throw new JwtAuthenticationException("JWT token is incorrect");
             return false;
         }
     }
@@ -114,13 +113,13 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public void checkJwtAuthorization(HttpServletRequest request) {
+    public void tryJwtAuthorization(HttpServletRequest request) {
         String token = extractToken(request);
-        checkJwtAuthorization(request, token);
+        tryJwtAuthorization(request, token);
     }
 
     @Override
-    public void checkJwtAuthorization(HttpServletRequest request, String token) {
+    public boolean tryJwtAuthorization(HttpServletRequest request, String token) {
         String path = request.getRequestURI();
         String expectedTokenType = path.contains("/token/refresh-token") ? "refresh" : "access";
         if (isTokenValid(token, expectedTokenType)) {
@@ -131,8 +130,10 @@ public class JwtTokenProvider implements JwtService {
                 var user = userService.findByEmail(principal.getUsername());
                 request.setAttribute("jwtToken", token);
                 request.setAttribute("userEntity", user);
+                return true;
             }
         }
+        return false;
     }
 
     @Override

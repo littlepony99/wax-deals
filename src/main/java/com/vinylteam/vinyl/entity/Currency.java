@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
+import static java.util.Optional.*;
+
 public enum Currency {
 
     UAH("₴"),
@@ -37,8 +39,8 @@ public enum Currency {
             resultingCurrency = EUR;
         }
         logger.debug("Resulting optional with currency is {'resultingOptionalCurrency':{}}",
-                Optional.ofNullable(resultingCurrency));
-        return Optional.ofNullable(resultingCurrency);
+                ofNullable(resultingCurrency));
+        return ofNullable(resultingCurrency);
     }
 
 }

@@ -1,4 +1,4 @@
-package com.vinylteam.vinyl.web.controller;
+package com.vinylteam.vinyl.entity;
 
 public enum JwtTokenType {
     ACCESS("access"),

@@ -190,6 +190,7 @@ class JwtLoginControllerITest {
         //when
         mockMvc.perform(get("/token").header("Authorization", token))
                 //then
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$", hasKey("message")))
