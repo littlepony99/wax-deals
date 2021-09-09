@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 @Data
 @Builder
+@AllArgsConstructor
 @Document(indexName = "unique_vinyl_index")
 public class UniqueVinyl {
 
@@ -27,16 +28,11 @@ public class UniqueVinyl {
     private String imageLink;
 
     @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
     @Field(type = FieldType.Boolean)
     @EqualsAndHashCode.Exclude
-    private boolean offers;
+    private boolean hasOffers;
 
     public boolean hasOffers() {
-        return offers;
-    }
-
-    public void setHasOffers(boolean offers) {
-        this.offers = offers;
+        return hasOffers;
     }
 }

@@ -86,7 +86,7 @@ public class DefaultOfferServiceITest {
 
         UniqueVinyl newUniqueVinyl = UniqueVinyl.builder()
                 .id("10")
-                .offers(false)
+                .hasOffers(false)
                 .fullName("Test fullname")
                 .artist("Artist new")
                 .build();
