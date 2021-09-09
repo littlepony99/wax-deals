@@ -26,32 +26,6 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
                 .build();
     }
 
-    private Expiry<String, LocalDateTime> getExpirationStrategy() {
-        return new Expiry<>() {
-
-            private final ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
-
-            @Override
-            public long expireAfterCreate(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime) {
-                return getDifference(localDateTime);
-            }
-
-            @Override
-            public long expireAfterUpdate(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
-                return currentDuration;
-            }
-
-            @Override
-            public long expireAfterRead(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
-                return currentDuration;
-            }
-
-            private long getDifference(@NonNull LocalDateTime localDateTime) {
-                return TimeUnit.SECONDS.toNanos(1_000_000_000L * (localDateTime.toEpochSecond(offset) - LocalDateTime.now().toEpochSecond(offset)));
-            }
-        };
-    }
-
     @Override
     public boolean isTokenPairBlocked(String pairIdentifier) {
         return logoutTokensCache.asMap().containsKey(pairIdentifier);
@@ -60,5 +34,31 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
     @Override
     public void storePairIdentifier(String pairIdentifier, LocalDateTime expirationDate) {
         logoutTokensCache.put(pairIdentifier, expirationDate);
+    }
+
+    private Expiry<String, LocalDateTime> getExpirationStrategy() {
+        return new Expiry<>() {
+
+            private final ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
+
+            @Override
+            public long expireAfterCreate(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime) {
+                return getDifference(localDateTime);
+            }
+
+            @Override
+            public long expireAfterUpdate(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
+                return currentDuration;
+            }
+
+            @Override
+            public long expireAfterRead(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
+                return currentDuration;
+            }
+
+            private long getDifference(@NonNull LocalDateTime localDateTime) {
+                return TimeUnit.SECONDS.toNanos(1_000_000_000L * (localDateTime.toEpochSecond(offset) - LocalDateTime.now().toEpochSecond(offset)));
+            }
+        };
     }
 }
