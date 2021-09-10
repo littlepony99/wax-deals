@@ -31,9 +31,8 @@ public class WantListServiceImpl implements WantListService {
         if (wantList != null && !wantList.isEmpty()) {
             for (UniqueVinylDto foundVinyl : foundVinyls) {
                 for (WantedVinyl wantedVinyl : wantList) {
-                    if (foundVinyl.getId().equals(wantedVinyl.getVinylId())) {
-                        foundVinyl.setIsWantListItem(Boolean.TRUE);
-                    }
+                    boolean isInWantList = foundVinyl.getId().equals(wantedVinyl.getVinylId());
+                    foundVinyl.setIsWantListItem(isInWantList);
                 }
             }
         }
