@@ -26,7 +26,6 @@ public interface UserService {
 
     void signInCheck(UserInfoRequest userProfileInfo);
 
-    User editProfile(UserInfoRequest userProfileInfo,
-                     User user) throws ServerException;
+    User editProfile(UserInfoRequest userProfileInfo, User user) throws ServerException;
 
 }

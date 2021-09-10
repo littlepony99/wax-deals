@@ -14,17 +14,17 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Shop {
 
-    private int id;
+    private Integer id;
     private String mainPageLink;
     private String imageLink;
     private String smallImageLink;
     private String name;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

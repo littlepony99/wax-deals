@@ -30,13 +30,6 @@ class JdbcPasswordRecoveryDaoITest {
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
-/*    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        container.start();
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }*/
 
     @Test
     @DataSet(provider = TestRecoveryTokenProvider.RecoveryPasswordTokenProvider.class, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})

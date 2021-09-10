@@ -23,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.SecretKey;
@@ -36,7 +35,6 @@ import static com.vinylteam.vinyl.security.SecurityConstants.AUTHORIZATION_HEADE
 import static com.vinylteam.vinyl.security.SecurityConstants.TOKEN_PREFIX;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
 public class JwtTokenProvider implements JwtService {
@@ -47,6 +45,7 @@ public class JwtTokenProvider implements JwtService {
     private final UserMapper userMapper;
     private SecretKey secretKey;
 
+    @Autowired
     private LogoutTokenStorageService tokenStorageService;
 
     @Value("${jwt.token.expirationInSeconds:600}")
@@ -59,12 +58,6 @@ public class JwtTokenProvider implements JwtService {
         secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
-    @Autowired
-    public void setTokenStorageService(LogoutTokenStorageService tokenStorageService) {
-        this.tokenStorageService = tokenStorageService;
-    }
-
-    @Autowired
     public void setAuthenticationManager(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }

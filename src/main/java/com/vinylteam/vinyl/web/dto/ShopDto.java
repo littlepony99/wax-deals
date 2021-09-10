@@ -10,11 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShopDto {
-
-    private int id;
+    private Integer id;
     private String mainPageLink;
     private String imageLink;
     private String smallImageLink;
     private String name;
-
 }
