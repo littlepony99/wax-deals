@@ -14,4 +14,6 @@ public class UniqueVinylDto {
     private String release;
     private String artist;
     private String imageLink;
+    private Boolean isWantListItem;
+
 }
