@@ -35,21 +35,31 @@ public class WantListServiceImpl implements WantListService {
                     foundVinyl.setIsWantListItem(isInWantList);
                 }
             }
+        } else{
+            for (UniqueVinylDto foundVinyl : foundVinyls) {
+                foundVinyl.setIsWantListItem(Boolean.FALSE);
+            }
         }
         return foundVinyls;
     }
 
     @Override
     public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) {
-        WantedVinyl wantedVinyl = WantedVinyl.builder()
-                .userId(user.getId())
-                .addedAt(Date.from(Instant.now()))
-                .vinylId(vinylDto.getId())
-                .release(vinylDto.getRelease())
-                .artist(vinylDto.getArtist())
-                .imageLink(vinylDto.getImageLink())
-                .build();
-        return wantListRepository.save(wantedVinyl);
+        UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
+        if(null != existingVinyl){
+            WantedVinyl wantedVinyl = WantedVinyl.builder()
+                    .userId(user.getId())
+                    .addedAt(Date.from(Instant.now()))
+                    .vinylId(vinylDto.getId())
+                    .release(vinylDto.getRelease())
+                    .artist(vinylDto.getArtist())
+                    .imageLink(vinylDto.getImageLink())
+                    .build();
+            return wantListRepository.save(wantedVinyl);
+        }
+        log.error("Can't find vinyl with id={}", vinylDto.getId());
+        // TODO add not found vinyl exception
+        return null;
     }
 
     @Override
