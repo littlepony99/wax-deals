@@ -50,10 +50,10 @@ public class WantListServiceImpl implements WantListService {
             WantedVinyl wantedVinyl = WantedVinyl.builder()
                     .userId(user.getId())
                     .addedAt(Date.from(Instant.now()))
-                    .vinylId(vinylDto.getId())
-                    .release(vinylDto.getRelease())
-                    .artist(vinylDto.getArtist())
-                    .imageLink(vinylDto.getImageLink())
+                    .vinylId(existingVinyl.getId())
+                    .release(existingVinyl.getRelease())
+                    .artist(existingVinyl.getArtist())
+                    .imageLink(existingVinyl.getImageLink())
                     .build();
             return wantListRepository.save(wantedVinyl);
         }
