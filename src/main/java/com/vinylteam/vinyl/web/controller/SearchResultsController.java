@@ -34,7 +34,11 @@ public class SearchResultsController {
         if (null != request.getAttribute("userEntity")) {
             User user = (User) request.getAttribute("userEntity");
             List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);
-            return wantListService.mergeSearchResult(user, uniqueVinylDtos);
+            Long userId = null;
+            if (null != user) {
+                userId = user.getId();
+            }
+            return wantListService.mergeSearchResult(userId, uniqueVinylDtos);
         }
         return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);
     }

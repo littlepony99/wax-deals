@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface WantListService {
 
-    List<UniqueVinylDto> mergeSearchResult(User user, List<UniqueVinylDto> uniqueVinyls);
+    List<UniqueVinylDto> mergeSearchResult(Long userId, List<UniqueVinylDto> foundVinyls);
 
     WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto);
 
@@ -16,4 +16,5 @@ public interface WantListService {
 
     List<WantedVinyl> getWantList(Long userId);
 
+    List<UniqueVinylDto> getWantListUniqueVinyls(Long userId);
 }

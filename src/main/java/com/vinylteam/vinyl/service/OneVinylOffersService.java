@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface OneVinylOffersService {
 
-    OneVinylPageDto prepareOneVinylInfo(String id);
+    OneVinylPageDto prepareOneVinylInfo(String id, Long userId);
 
     HashMap<String, List> getSortedInStockOffersAndShops(String identifier);
 

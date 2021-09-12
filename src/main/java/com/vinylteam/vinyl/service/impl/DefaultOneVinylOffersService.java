@@ -8,6 +8,7 @@ import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
+import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
@@ -27,6 +28,7 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
+    private final WantListService wantListService;
 
     private final UniqueVinylMapper uniqueVinylMapper;
     private final OneVinylOfferMapper oneVinylOfferMapper;
@@ -36,7 +38,7 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     }
 
     @Override
-    public OneVinylPageDto prepareOneVinylInfo(String id) {
+    public OneVinylPageDto prepareOneVinylInfo(String id, Long userId) {
         UniqueVinyl uniqueVinyl = getUniqueVinyl(id);
         HashMap<String, List> offersAndShopsMap = getSortedInStockOffersAndShops(id);
         List<Shop> shops = offersAndShopsMap.get("shops");
@@ -47,11 +49,13 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
         List<UniqueVinyl> vinyls = addAuthorVinyls(uniqueVinyl);
         vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
+        List<UniqueVinylDto> artistVinyls = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls);
+        List<UniqueVinylDto> mergedVinyls = wantListService.mergeSearchResult(userId, artistVinyls);
         return OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
                 .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
                 .offersList(offerDtoList)
-                .vinylsByArtistList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
+                .vinylsByArtistList(mergedVinyls)
                 .build();
     }
 

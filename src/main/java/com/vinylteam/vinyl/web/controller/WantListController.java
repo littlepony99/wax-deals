@@ -1,8 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.entity.WantedVinyl;
 import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
@@ -15,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.List;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -34,8 +31,7 @@ public class WantListController {
     @PreAuthorize("hasRole('USER')")
     public List<UniqueVinylDto> getUserWantList(HttpServletRequest request) {
         User user = (User) request.getAttribute("userEntity");
-        List<WantedVinyl> wantLists = wantListService.getWantList(user.getId());
-        return uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantLists);
+        return wantListService.getWantListUniqueVinyls(user.getId());
     }
 
     @PostMapping

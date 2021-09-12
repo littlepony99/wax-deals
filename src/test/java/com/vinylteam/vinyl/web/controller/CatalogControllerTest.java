@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,8 @@ class CatalogControllerTest {
         when(mockedUniqueVinylService.findRandom(50)).thenReturn(uniqueVinyls);
         List<UniqueVinylDto> expectedUniqueVinylDtoList = dataGenerator.getUniqueVinylDtoListFromUniqueVinylList(uniqueVinyls);
         //when
-        List<UniqueVinylDto> actualUniqueVinylDtoList = catalogController.getCatalogPage();
+        HttpServletRequest request = new MockHttpServletRequest();
+        List<UniqueVinylDto> actualUniqueVinylDtoList = catalogController.getCatalogPage(request);
         //then
         assertEquals(expectedUniqueVinylDtoList, actualUniqueVinylDtoList);
         verify(mockedUniqueVinylService).findRandom(50);

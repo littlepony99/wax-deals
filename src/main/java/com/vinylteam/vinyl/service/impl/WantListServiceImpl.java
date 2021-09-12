@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.entity.WantedVinyl;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.WantListService;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -24,10 +26,11 @@ public class WantListServiceImpl implements WantListService {
     private final DiscogsService discogsService;
     private final UniqueVinylService uniqueVinylService;
     private final WantListRepository wantListRepository;
+    private final UniqueVinylMapper uniqueVinylMapper;
 
     @Override
-    public List<UniqueVinylDto> mergeSearchResult(User user, List<UniqueVinylDto> foundVinyls) {
-        List<WantedVinyl> wantList = getWantList(user.getId());
+    public List<UniqueVinylDto> mergeSearchResult(Long userId, List<UniqueVinylDto> foundVinyls) {
+        List<WantedVinyl> wantList = getWantList(userId);
         if (wantList != null && !wantList.isEmpty()) {
             for (UniqueVinylDto foundVinyl : foundVinyls) {
                 for (WantedVinyl wantedVinyl : wantList) {
@@ -35,7 +38,7 @@ public class WantListServiceImpl implements WantListService {
                     foundVinyl.setIsWantListItem(isInWantList);
                 }
             }
-        } else{
+        } else {
             for (UniqueVinylDto foundVinyl : foundVinyls) {
                 foundVinyl.setIsWantListItem(Boolean.FALSE);
             }
@@ -45,12 +48,18 @@ public class WantListServiceImpl implements WantListService {
 
     @Override
     public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) {
+        Optional<WantedVinyl> existingWantListItem = wantListRepository.findByVinylIdAndUserId(vinylDto.getId(), user.getId());
+        if (existingWantListItem.isPresent()) {
+            wantListRepository.deleteById(existingWantListItem.get().getId());
+            return WantedVinyl.builder().build();
+        }
         UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
-        if(null != existingVinyl){
+
+        if (null != existingVinyl) {
             WantedVinyl wantedVinyl = WantedVinyl.builder()
                     .userId(user.getId())
                     .addedAt(Date.from(Instant.now()))
-                    .vinylId(existingVinyl.getId())
+                    .vinylId(vinylDto.getId())
                     .release(existingVinyl.getRelease())
                     .artist(existingVinyl.getArtist())
                     .imageLink(existingVinyl.getImageLink())
@@ -87,6 +96,16 @@ public class WantListServiceImpl implements WantListService {
     @Override
     public List<WantedVinyl> getWantList(Long userId) {
         return wantListRepository.findAllByUserId(userId);
+    }
+
+    @Override
+    public List<UniqueVinylDto> getWantListUniqueVinyls(Long userId) {
+        List<WantedVinyl> wantList = getWantList(userId);
+        List<UniqueVinylDto> result = uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantList);
+        for (UniqueVinylDto uniqueVinylDto : result) {
+            uniqueVinylDto.setIsWantListItem(Boolean.TRUE);
+        }
+        return result;
     }
 
 }
