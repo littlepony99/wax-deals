@@ -72,7 +72,7 @@ public class JwtTokenProvider implements JwtService {
     }
 
     @Override
-    public boolean isTokenValid(String token, String expectedTokenType) {
+    public boolean isTokenValidAndNotExpired(String token, String expectedTokenType) {
         boolean isTokenTypeExpected = true;
         if (StringUtils.isBlank(token)) {
             log.debug("JWT token is invalid");
@@ -81,7 +81,7 @@ public class JwtTokenProvider implements JwtService {
         try {
             Jws<Claims> claims = getClaims(token);
             String pairIdentifier = getPairIdentifier(claims);
-            if (Objects.isNull(pairIdentifier) || getExpirationDate(claims).isBefore(LocalDateTime.now())) {
+            if (Objects.isNull(pairIdentifier)) {
                 return false;
             }
             if (!StringUtils.isBlank(expectedTokenType)) {
@@ -90,8 +90,21 @@ public class JwtTokenProvider implements JwtService {
                 isTokenTypeExpected = expectedTokenType.equals(actualTokenType);
             }
             return isTokenTypeExpected && !tokenStorageService.isTokenPairBlocked(pairIdentifier);
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException e){
+            log.debug("JWT token is expired", e);
+            throw e;
+        }
+        catch (JwtException | IllegalArgumentException e) {
             log.error("JWT token is expired or invalid", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isTokenValid(String token, String expectedTokenType) {
+        try {
+            return isTokenValidAndNotExpired(token, expectedTokenType);
+        } catch(ExpiredJwtException e){
             return false;
         }
     }
@@ -122,7 +135,7 @@ public class JwtTokenProvider implements JwtService {
     public boolean tryJwtAuthorization(HttpServletRequest request, String token) {
         String path = request.getRequestURI();
         String expectedTokenType = path.contains("/token/refresh-token") ? "refresh" : "access";
-        if (isTokenValid(token, expectedTokenType)) {
+        if (isTokenValidAndNotExpired(token, expectedTokenType)) {
             Authentication auth = getAuthentication(token);
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
