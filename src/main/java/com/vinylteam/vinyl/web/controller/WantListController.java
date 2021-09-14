@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
@@ -24,7 +25,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class WantListController {
 
     private final WantListService wantListService;
-    private final UniqueVinylMapper uniqueVinylMapper;
 
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -36,7 +36,8 @@ public class WantListController {
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<UniqueVinylDto> addVinylToUserWantList(HttpServletRequest request, @RequestBody UniqueVinylDto vinylDto) {
+    public ResponseEntity<UniqueVinylDto> addVinylToUserWantList(HttpServletRequest request,
+                                                                 @RequestBody UniqueVinylDto vinylDto) throws ForbiddenException {
         User user = (User) request.getAttribute("userEntity");
         wantListService.addWantedVinyl(user, vinylDto);
         return new ResponseEntity<>(OK);

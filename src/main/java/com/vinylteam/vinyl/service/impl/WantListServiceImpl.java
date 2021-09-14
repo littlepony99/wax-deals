@@ -4,6 +4,8 @@ import com.vinylteam.vinyl.dao.elasticsearch.WantListRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
+import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.entity.VinylErrors;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.WantListService;
@@ -47,7 +49,7 @@ public class WantListServiceImpl implements WantListService {
     }
 
     @Override
-    public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) {
+    public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) throws ForbiddenException {
         Optional<WantedVinyl> existingWantListItem = wantListRepository.findByVinylIdAndUserId(vinylDto.getId(), user.getId());
         if (existingWantListItem.isPresent()) {
             wantListRepository.deleteById(existingWantListItem.get().getId());
@@ -67,30 +69,37 @@ public class WantListServiceImpl implements WantListService {
             return wantListRepository.save(wantedVinyl);
         }
         log.error("Can't find vinyl with id={}", vinylDto.getId());
-        // TODO add not found vinyl exception
-        return null;
+        throw new ForbiddenException(VinylErrors.NOT_FOUND_ERROR.getMessage());
     }
 
     @Override
     public void importWantList(User user) {
+        log.info("WantList import. Start task, userId={}", user.getId());
         if (user.getDiscogsUserName() != null) {
             List<UniqueVinyl> allVinyls = uniqueVinylService.findAll();
             List<UniqueVinyl> discogsMatchList = discogsService.getDiscogsMatchList(user.getDiscogsUserName(), allVinyls);
+            log.info("WantList import. Matches {} items with our unique vinyls", discogsMatchList.size());
             saveImportedWantList(user.getId(), discogsMatchList);
         }
     }
 
-    private void saveImportedWantList(Long id, List<UniqueVinyl> wantList) {
-        for (UniqueVinyl wantedVinyl : wantList) {
-            wantListRepository.save(WantedVinyl.builder()
-                    .userId(id)
-                    .addedAt(Date.from(Instant.now()))
-                    .vinylId(wantedVinyl.getId())
-                    .release(wantedVinyl.getRelease())
-                    .artist(wantedVinyl.getArtist())
-                    .imageLink(wantedVinyl.getImageLink())
-                    .build());
+    private void saveImportedWantList(Long userId, List<UniqueVinyl> wantList) {
+        int counter = 0;
+        for (UniqueVinyl uniqueVinyl : wantList) {
+            Optional<WantedVinyl> existingItem = wantListRepository.findByVinylIdAndUserId(uniqueVinyl.getId(), userId);
+            if (existingItem.isEmpty()) {
+                wantListRepository.save(WantedVinyl.builder()
+                        .userId(userId)
+                        .addedAt(Date.from(Instant.now()))
+                        .vinylId(uniqueVinyl.getId())
+                        .release(uniqueVinyl.getRelease())
+                        .artist(uniqueVinyl.getArtist())
+                        .imageLink(uniqueVinyl.getImageLink())
+                        .build());
+                counter++;
+            }
         }
+        log.info("WantList import. Added {} new items ", counter);
     }
 
     @Override
