@@ -12,8 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,19 +27,6 @@ class JdbcShopDaoITest {
 
     @Autowired
     private ShopDao shopDao;
-
-/*
-    @Container
-    public static PostgreSQLContainer container = WaxDealsPostgresqlContainer.getInstance();
-*/
-
-/*    @DynamicPropertySource
-    static void properties(DynamicPropertyRegistry registry) {
-        container.start();
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }*/
 
     @Test
     @DataSet(provider = TestShopProvider.ShopProvider.class, cleanBefore = true, cleanAfter = true, skipCleaningFor = {"public.flyway_schema_history"})

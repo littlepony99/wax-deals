@@ -23,6 +23,7 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,13 +116,14 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", hasKey("user")))
                 .andExpect(jsonPath("$.user", not(empty())))
                 .andExpect(jsonPath("$.message", emptyString()))
-                .andExpect(jsonPath("$.token", not(empty())))
+                .andExpect(jsonPath("$.jwtToken", not(empty())))
+                .andExpect(jsonPath("$.refreshToken", not(empty())))
                 .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
                 .andExpect(jsonPath("$.user.role", equalTo("USER")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        String jwtToken = JsonPath.read(response, "$.token");
+        String jwtToken = JsonPath.read(response, "$.jwtToken");
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
         assertTrue(jwtService.isTokenValid(jwtToken));
@@ -157,7 +159,7 @@ class JwtLoginControllerITest {
         //prepare
         mockUserWithStatus(true);
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
-        String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
+        String token = jwtService.createAccessToken(jwtUser, UUID.randomUUID().toString());
         //when
         var response = mockMvc.perform(get("/token").header("Authorization", token))
                 //then
@@ -183,11 +185,12 @@ class JwtLoginControllerITest {
         mockUserWithStatus(true);
         //prepare
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
-        String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
+        String token = jwtService.createAccessToken(jwtUser, "122124");
         token = token.replace(token.substring(12,15),"");
         //when
         mockMvc.perform(get("/token").header("Authorization", token))
                 //then
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$", hasKey("message")))

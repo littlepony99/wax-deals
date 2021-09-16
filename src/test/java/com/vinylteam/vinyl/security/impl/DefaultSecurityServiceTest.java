@@ -7,23 +7,28 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest
 class DefaultSecurityServiceTest {
 
-    private final DefaultSecurityService securityService = new DefaultSecurityService();
+    @Autowired
+    private DefaultSecurityService securityService;
     private final String rightPassword = "existingUserRightPassword";
     private final String wrongPassword = "existingUserWrongPassword";
     private final String passwordToHash = "password";
-    private final byte[] salt = securityService.generateSalt();
+    private byte[] salt;
     private final User existingUser = new User();
 
     @BeforeAll
     void beforeAll() {
+        salt = securityService.generateSalt();
         existingUser.setEmail("testuser1@vinyl.com");
         existingUser.setPassword(securityService
                 .hashPassword(rightPassword.toCharArray(), salt, 10000));
@@ -33,11 +38,10 @@ class DefaultSecurityServiceTest {
     }
 
     @Test
-    @DisplayName("Checkes if the result of hashing with 10000 iterations is the same for equal inputs.")
+    @DisplayName("Checks if the result of hashing with 10000 iterations is the same for equal inputs.")
     void hashPasswordWithTenThousandIterationsTest() {
         String resultHash = securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000);
-        assertEquals(resultHash,
-                securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000));
+        assertEquals(resultHash, securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000));
     }
 
     @Test
@@ -50,22 +54,19 @@ class DefaultSecurityServiceTest {
     @Test
     @DisplayName("Checks if comparing hashed right password against user's stored hash returns true.")
     void checkPasswordAgainstExistingUserPasswordWithRightPasswordTest() {
-        assertTrue(securityService.validateIfPasswordMatches(
-                existingUser, rightPassword.toCharArray()));
+        assertTrue(securityService.validateIfPasswordMatches(existingUser, rightPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed wrong password against user's stored hash returns false.")
     void checkPasswordAgainstUserPasswordWithWrongPasswordTest() {
-        assertFalse(securityService.validateIfPasswordMatches(
-                existingUser, wrongPassword.toCharArray()));
+        assertFalse(securityService.validateIfPasswordMatches(existingUser, wrongPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed right password against null user returns false.")
     void checkPasswordAgainstUserPasswordNullUserTest() {
-        assertFalse(securityService.validateIfPasswordMatches(
-                null, rightPassword.toCharArray()));
+        assertFalse(securityService.validateIfPasswordMatches(null, rightPassword.toCharArray()));
     }
 
     @Test
@@ -91,9 +92,18 @@ class DefaultSecurityServiceTest {
 
     @Test
     @DisplayName("checks format for password that matches all requirements")
-    void checkFormatLatin() {
+    void checkFormatValid() {
         //prepare
         String password = "Qwerty1234";
+        //when
+        securityService.validatePassword(password);
+    }
+
+    @Test
+    @DisplayName("checks format for password that matches all requirements and has special characters")
+    void checkFormatValidWithSpecialCharacters() {
+        //prepare
+        String password = "Qwerty1234%$_-#@";
         //when
         securityService.validatePassword(password);
     }

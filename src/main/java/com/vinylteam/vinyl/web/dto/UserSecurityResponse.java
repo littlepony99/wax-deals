@@ -8,6 +8,8 @@ import lombok.Data;
 public class UserSecurityResponse {
 
     private String token;
+    private String jwtToken;
+    private String refreshToken;
     private UserDto user;
     private String message;
 

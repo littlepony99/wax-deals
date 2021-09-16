@@ -12,6 +12,7 @@ import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,7 +27,9 @@ import java.util.Optional;
 public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
-    private final SecurityService securityService;
+
+    private SecurityService securityService;
+
     private final EmailConfirmationService emailConfirmationService;
 
     @Override
@@ -54,6 +57,11 @@ public class DefaultUserService implements UserService {
         log.debug("Added created user to db {'user':{}}", userToAdd);
         ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
         emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
+    }
+
+    @Autowired
+    public void setSecurityService(SecurityService securityService) {
+        this.securityService = securityService;
     }
 
     @Transactional

@@ -1,14 +1,11 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.dao.ConfirmationTokenDao;
 import com.vinylteam.vinyl.dao.UserPostDao;
 import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.MailSenderErrors;
 import com.vinylteam.vinyl.exception.entity.UserPostErrors;
 import com.vinylteam.vinyl.service.CaptchaService;
-import com.vinylteam.vinyl.service.EmailConfirmationService;
 import com.vinylteam.vinyl.service.UserPostService;
-import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.MailSender;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +23,6 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;

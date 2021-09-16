@@ -10,13 +10,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class OneVinylPageDto {
-
     List<OneVinylOfferDto> offersList;
-
     UniqueVinylDto mainVinyl;
-
     List<UniqueVinylDto> vinylsByArtistList;
-
     String discogsLink;
-
 }

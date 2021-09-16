@@ -21,7 +21,7 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
 
     @Override
     public void updateOneUniqueVinyl(UniqueVinyl vinyl) {
-        if (vinyl.isHasOffers()) {
+        if (vinyl.hasOffers()) {
             return;
         }
         uniqueVinylRepository.save(vinyl);

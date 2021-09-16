@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.security.LogoutService;
+import com.vinylteam.vinyl.security.DefaultLogoutService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.ProfileManagementService;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 import static org.springframework.http.HttpStatus.OK;
 
 @Slf4j
@@ -28,7 +27,7 @@ public class ProfileController {
     private final UserMapper userMapper;
     private final ProfileManagementService profileService;
     private final JwtService jwtService;
-    private LogoutService logoutService;
+    private DefaultLogoutService logoutService;
 
     @PutMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")

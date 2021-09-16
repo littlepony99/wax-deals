@@ -31,7 +31,7 @@ class SearchResultsControllerTest {
     @Autowired
     private SearchResultsController searchResultsController;
     @Autowired
-    WebApplicationContext context;
+    private WebApplicationContext context;
     @MockBean
     private UniqueVinylService mockedUniqueVinylService;
 
@@ -53,7 +53,7 @@ class SearchResultsControllerTest {
         when(mockedUniqueVinylService.findByFilter(matcher)).thenReturn(uniqueVinyls);
         List<UniqueVinylDto> expectedUniqueVinylDtoList = dataGenerator.getUniqueVinylDtoListFromUniqueVinylList(uniqueVinyls);
         //when
-        List<UniqueVinylDto> actualUniqueVinylDtoList = searchResultsController.getSearchResultPage(matcher);
+        List<UniqueVinylDto> actualUniqueVinylDtoList = searchResultsController.getSearchResults(matcher);
         //then
         assertEquals(expectedUniqueVinylDtoList, actualUniqueVinylDtoList);
         verify(mockedUniqueVinylService).findByFilter(matcher);
@@ -68,8 +68,7 @@ class SearchResultsControllerTest {
         when(mockedUniqueVinylService.findByFilter(matcher)).thenReturn(uniqueVinyls);
         //when
         MockHttpServletResponse response = mockMvc
-                .perform(get("/search")
-                        .param("matcher", matcher))
+                .perform(get("/search").param("matcher", matcher))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").isNotEmpty())
                 .andExpect(jsonPath("$[0].release").isNotEmpty())

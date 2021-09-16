@@ -19,5 +19,4 @@ public class OneVinylOfferDto {
     private boolean inStock;
     private String offerLink;
     private String shopImageLink;
-
 }

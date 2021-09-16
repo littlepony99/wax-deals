@@ -5,6 +5,9 @@ import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
+import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
+import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
@@ -24,26 +27,42 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
-    private final OneVinylOfferMapper offerMapper;
+
+    private final UniqueVinylMapper uniqueVinylMapper;
+    private final OneVinylOfferMapper oneVinylOfferMapper;
 
     public UniqueVinyl getUniqueVinyl(String id) {
         return uniqueVinylService.findById(id);
     }
 
     @Override
+    public OneVinylPageDto prepareOneVinylInfo(String id) {
+        UniqueVinyl uniqueVinyl = getUniqueVinyl(id);
+        HashMap<String, List> offersAndShopsMap = getSortedInStockOffersAndShops(id);
+        List<Shop> shops = offersAndShopsMap.get("shops");
+        List<Offer> offers = offersAndShopsMap.get("offers");
+        List<OneVinylOfferDto> offerDtoList = offers.stream()
+                .map(offer -> oneVinylOfferMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shops, offer)))
+                .collect(Collectors.toList());
+        List<UniqueVinyl> vinyls = addAuthorVinyls(uniqueVinyl);
+        vinyls.remove(uniqueVinyl);
+        String discogsLink = getDiscogsLink(uniqueVinyl);
+        return OneVinylPageDto.builder()
+                .discogsLink(discogsLink)
+                .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
+                .offersList(offerDtoList)
+                .vinylsByArtistList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
+                .build();
+    }
+
+    @Override
     public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) {
         String uniqueVinylId = identifier;
-        // find vinyl
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
-        // find offers for uniqyeVinyl
         List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
-        // 1 prepare offers -- validate and parse
         List<Offer> sortedInStockOffers = getInStockOffersByPrice(offers);
-        // find shopIds for offers
         List<Integer> shopIds = offerService.findShopIds(sortedInStockOffers);
-        // find shops by their ids
         List<Shop> shopsFromOffers = shopService.findShopsByListOfIds(shopIds);
-        // if there is no offers
         checkIsVinylInStock(uniqueVinyl, sortedInStockOffers);
 
         HashMap<String, List> offersAndShopsMap = new HashMap<>();
@@ -55,7 +74,6 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
 
     @Override
     public List<UniqueVinyl> addAuthorVinyls(UniqueVinyl uniqueVinyl) {
-        // 2 add artists vinyls to searchable vinyl
         return prepareVinylsSection(uniqueVinyl);
     }
 

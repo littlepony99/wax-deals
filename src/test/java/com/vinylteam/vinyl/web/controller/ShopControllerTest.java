@@ -63,7 +63,7 @@ public class ShopControllerTest {
         shopList.add(discarik);
         when(shopService.findAll()).thenReturn(shopList);
         //when
-        List<ShopDto> shopDtoList = shopController.getShopPage();
+        List<ShopDto> shopDtoList = shopController.getShopInfo();
         //then
         Assertions.assertNotNull(shopDtoList);
         Assertions.assertFalse(shopDtoList.isEmpty());
@@ -103,11 +103,8 @@ public class ShopControllerTest {
         shopList.add(discarik);
         when(shopService.findAll()).thenReturn(shopList);
         //when
-//        MockHttpServletResponse response = MockMvcBuilders.webAppContextSetup(context).build().perform(get("/stores"))
         MockHttpServletResponse response = mockMvc.perform(get("/stores"))
-
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-//                .andExpect(content().string())
                 .andExpect(jsonPath("$[0].id").isNotEmpty())
                 .andExpect(jsonPath("$[0].name").isNotEmpty())
                 .andExpect(jsonPath("$[0].imageLink").isNotEmpty())
@@ -120,7 +117,6 @@ public class ShopControllerTest {
                 .andExpect(jsonPath("$[1].smallImageLink").isNotEmpty())
                 .andExpect(status().isOk()).andReturn().getResponse();
         //then
-
         Assertions.assertNotNull(response.getHeader("Content-Type"));
         Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
         Assertions.assertEquals("application/json", response.getContentType());
@@ -139,7 +135,7 @@ public class ShopControllerTest {
         //prepare
         when(shopService.findAll()).thenReturn(new ArrayList<>());
         //when
-        List<ShopDto> shopDtoList = shopController.getShopPage();
+        List<ShopDto> shopDtoList = shopController.getShopInfo();
         //then
         Assertions.assertNotNull(shopDtoList);
     }

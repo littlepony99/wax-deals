@@ -61,14 +61,7 @@ public class DataGeneratorForTests {
         if (number < 1) {
             throw new RuntimeException("Don't generate template unique vinyl from number < 1! number: " + number);
         }
-        UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
-                .id(Integer.toString(number))
-                .release("release" + number)
-                .artist("artist" + number)
-                .fullName("release" + number + " - " + "artist" + number)
-                .imageLink("/image" + number)
-                .hasOffers(false)
-                .build();
+        UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + number, number, "artist", false);
         return uniqueVinyl;
     }
 
@@ -140,15 +133,8 @@ public class DataGeneratorForTests {
 
     public List<UniqueVinyl> getUniqueVinylsList() {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
-                    .id(Integer.toString(i + 1))
-                    .release("release" + (i + 1))
-                    .artist("artist" + (i + 1))
-                    .fullName("release" + (i + 1) + " - " + "artist" + (i + 1))
-                    .imageLink("/image" + (i + 1))
-                    .hasOffers(true)
-                    .build();
+        for (int i = 1; i < 5; i++) {
+            UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + i, i, "artist", true);
             uniqueVinyls.add(uniqueVinyl);
         }
         uniqueVinyls.get(3).setHasOffers(false);
@@ -157,18 +143,22 @@ public class DataGeneratorForTests {
 
     public List<UniqueVinyl> getUniqueVinylsByArtistList(String artist) {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
-                    .id(Integer.toString(i + 1))
-                    .release("release" + (i + 1))
-                    .artist(artist)
-                    .fullName("release" + (i + 1) + " - " + artist + (i + 1))
-                    .imageLink("/image" + (i + 1))
-                    .hasOffers(true)
-                    .build();
+        for (int i = 1; i < 3; i++) {
+            UniqueVinyl uniqueVinyl = generateUniqueVinyl(artist, i, artist, true);
             uniqueVinyls.add(uniqueVinyl);
         }
         return uniqueVinyls;
+    }
+
+    private UniqueVinyl generateUniqueVinyl(String artist, int index, String releaseFullName, boolean hasOffers) {
+        return UniqueVinyl.builder()
+                .id(Integer.toString(index))
+                .release("release" + index)
+                .artist(artist)
+                .fullName("release" + index + " - " + releaseFullName + index)
+                .imageLink("/image" + index)
+                .hasOffers(hasOffers)
+                .build();
     }
 
     public List<Offer> getOffersList() {
