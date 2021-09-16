@@ -30,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import javax.servlet.ServletContext;
 import java.util.List;
 
+import static com.vinylteam.vinyl.security.SecurityConstants.JWT_VALIDATOR_FILTER_BEAN_NAME;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -40,7 +41,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private ServletContext context;
 
-    private LogoutService logoutHandlerService;
+    private DefaultLogoutService logoutHandlerService;
 
     @Value("#{${cors.allowedOrigins}}")
     private List<String> allowedOrigins;
@@ -49,7 +50,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private List<String> allowedMethods;
 
     @Autowired
-    void init(LogoutService logoutService) {
+    void init(DefaultLogoutService logoutService) {
         this.logoutHandlerService = logoutService;
     }
 
@@ -117,10 +118,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public JwtValidatorFilter jwtValidationFilter(UserService userService, JwtService jwtService) {
-        JwtValidatorFilter jwtValidationFilter = new JwtValidatorFilter(userService);
-        jwtValidationFilter.setJwtService(jwtService);
-        return jwtValidationFilter;
+    public JwtValidatorFilter jwtValidatorFilter(UserService userService, JwtService jwtService) {
+        JwtValidatorFilter jwtValidatorFilter = new JwtValidatorFilter(userService);
+        jwtValidatorFilter.setJwtService(jwtService);
+        return jwtValidatorFilter;
     }
 
     @Bean
@@ -134,15 +135,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public LogoutService logoutService(JwtService jwtService,
-                                       InMemoryLogoutTokenService logoutStorageService) {
-        return new LogoutService(jwtService, logoutStorageService);
+    public DefaultLogoutService logoutService(JwtService jwtService,
+                                              InMemoryLogoutTokenService logoutStorageService) {
+        return new DefaultLogoutService(jwtService, logoutStorageService);
     }
 
     protected DelegatingFilterProxy getJwtValidatorFilterDelegatingProxy() {
         DelegatingFilterProxy delegateFilterProxy = new DelegatingFilterProxy();
         delegateFilterProxy.setServletContext(context);
-        delegateFilterProxy.setTargetBeanName("jwtValidationFilter");
+        delegateFilterProxy.setTargetBeanName(JWT_VALIDATOR_FILTER_BEAN_NAME);
         return delegateFilterProxy;
     }
 

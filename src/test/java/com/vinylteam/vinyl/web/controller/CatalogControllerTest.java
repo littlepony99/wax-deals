@@ -1,14 +1,10 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.Offer;
-import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.exception.entity.CatalogErrors;
-import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.impl.DefaultCatalogService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
-import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
@@ -46,8 +41,6 @@ class CatalogControllerTest {
     private CatalogController catalogController;
     @Autowired
     private WebApplicationContext context;
-    @Autowired
-    private UniqueVinylMapper uniqueVinylMapper;
     @MockBean
     private DefaultCatalogService catalogService;
 
@@ -222,41 +215,6 @@ class CatalogControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo(CatalogErrors.VINYL_BY_ID_NOT_FOUND.getMessage())));
-    }
-
-    @Test
-    public void testUniqueVinylMapper() {
-        UniqueVinyl vinyl = UniqueVinyl.builder()
-                .release("RELEASE")
-                .imageLink("imageLine")
-                .id("123")
-                .offers(true)
-                .artist("artist")
-                .build();
-        UniqueVinylDto dto = uniqueVinylMapper.uniqueVinylToDto(vinyl);
-        assertEquals(dto.getId(), vinyl.getId());
-        assertEquals(dto.getArtist(), vinyl.getArtist());
-        assertEquals(dto.getImageLink(), vinyl.getImageLink());
-        assertEquals(dto.getRelease(), vinyl.getRelease());
-    }
-
-    @Test
-    public void testUniqueVinylMapperList() {
-        List<UniqueVinyl> vinylList = new ArrayList<>();
-        UniqueVinyl vinyl = UniqueVinyl.builder()
-                .release("RELEASE")
-                .imageLink("imageLine")
-                .id("123")
-                .offers(true)
-                .fullName("funn lame")
-                .artist("artist")
-                .build();
-        vinylList.add(vinyl);
-        List<UniqueVinylDto> dto = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinylList);
-        Assertions.assertEquals(dto.get(0).getId(), vinylList.get(0).getId());
-        Assertions.assertEquals(dto.get(0).getRelease(), vinylList.get(0).getRelease());
-        Assertions.assertEquals(dto.get(0).getImageLink(), vinylList.get(0).getImageLink());
-        Assertions.assertEquals(dto.get(0).getArtist(), vinylList.get(0).getArtist());
     }
 
 }

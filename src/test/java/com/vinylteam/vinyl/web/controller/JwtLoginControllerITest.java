@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -24,13 +23,14 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -79,8 +79,8 @@ class JwtLoginControllerITest {
         String json = new ObjectMapper().writeValueAsString(loginRequest);
         //when
         String response = mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -107,8 +107,8 @@ class JwtLoginControllerITest {
         String json = new ObjectMapper().writeValueAsString(loginRequest);
         //when
         String response = mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -116,13 +116,14 @@ class JwtLoginControllerITest {
                 .andExpect(jsonPath("$", hasKey("user")))
                 .andExpect(jsonPath("$.user", not(empty())))
                 .andExpect(jsonPath("$.message", emptyString()))
-                .andExpect(jsonPath("$.token", not(empty())))
+                .andExpect(jsonPath("$.jwtToken", not(empty())))
+                .andExpect(jsonPath("$.refreshToken", not(empty())))
                 .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
                 .andExpect(jsonPath("$.user.role", equalTo("USER")))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        String jwtToken = JsonPath.read(response, "$.token");
+        String jwtToken = JsonPath.read(response, "$.jwtToken");
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
         assertTrue(jwtService.isTokenValid(jwtToken));
@@ -140,8 +141,8 @@ class JwtLoginControllerITest {
         String json = new ObjectMapper().writeValueAsString(loginRequest);
         //when
         mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 //then
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -158,7 +159,7 @@ class JwtLoginControllerITest {
         //prepare
         mockUserWithStatus(true);
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
-        String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
+        String token = jwtService.createAccessToken(jwtUser, UUID.randomUUID().toString());
         //when
         var response = mockMvc.perform(get("/token").header("Authorization", token))
                 //then
@@ -184,11 +185,12 @@ class JwtLoginControllerITest {
         mockUserWithStatus(true);
         //prepare
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
-        String token = jwtService.createToken(jwtUser.getUsername(), jwtUser.getAuthorities());
-        token = token.replace(token.substring(12,15),"");
+        String token = jwtService.createAccessToken(jwtUser, "122124");
+        token = token.replace(token.substring(12, 15), "");
         //when
         mockMvc.perform(get("/token").header("Authorization", token))
                 //then
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
                 .andExpect(jsonPath("$", hasKey("message")))

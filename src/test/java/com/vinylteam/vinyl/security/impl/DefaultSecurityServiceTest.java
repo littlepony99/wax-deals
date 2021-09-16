@@ -9,20 +9,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest
 class DefaultSecurityServiceTest {
 
     @Autowired
-    private PasswordEncoder encoder;
-    @Autowired
-    private DefaultSecurityService securityService;// = new DefaultSecurityService();
+    private DefaultSecurityService securityService;
     private final String rightPassword = "existingUserRightPassword";
     private final String wrongPassword = "existingUserWrongPassword";
     private final String passwordToHash = "password";
@@ -44,28 +41,32 @@ class DefaultSecurityServiceTest {
     @DisplayName("Checks if the result of hashing with 10000 iterations is the same for equal inputs.")
     void hashPasswordWithTenThousandIterationsTest() {
         String resultHash = securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000);
-        assertTrue(encoder.matches(passwordToHash, securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000)));
+        assertEquals(resultHash, securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000));
+    }
+
+    @Test
+    @DisplayName("Checks if hashing with zero iterations throws an IllegalArgumentException.")
+    void hashPasswordWithZeroIterationsTest() {
+        assertThrows(IllegalArgumentException.class, () ->
+                securityService.hashPassword(passwordToHash.toCharArray(), salt, 0));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed right password against user's stored hash returns true.")
     void checkPasswordAgainstExistingUserPasswordWithRightPasswordTest() {
-        assertTrue(securityService.validateIfPasswordMatches(
-                existingUser, rightPassword.toCharArray()));
+        assertTrue(securityService.validateIfPasswordMatches(existingUser, rightPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed wrong password against user's stored hash returns false.")
     void checkPasswordAgainstUserPasswordWithWrongPasswordTest() {
-        assertFalse(securityService.validateIfPasswordMatches(
-                existingUser, wrongPassword.toCharArray()));
+        assertFalse(securityService.validateIfPasswordMatches(existingUser, wrongPassword.toCharArray()));
     }
 
     @Test
     @DisplayName("Checks if comparing hashed right password against null user returns false.")
     void checkPasswordAgainstUserPasswordNullUserTest() {
-        assertFalse(securityService.validateIfPasswordMatches(
-                null, rightPassword.toCharArray()));
+        assertFalse(securityService.validateIfPasswordMatches(null, rightPassword.toCharArray()));
     }
 
     @Test
@@ -91,9 +92,18 @@ class DefaultSecurityServiceTest {
 
     @Test
     @DisplayName("checks format for password that matches all requirements")
-    void checkFormatLatin() {
+    void checkFormatValid() {
         //prepare
         String password = "Qwerty1234";
+        //when
+        securityService.validatePassword(password);
+    }
+
+    @Test
+    @DisplayName("checks format for password that matches all requirements and has special characters")
+    void checkFormatValidWithSpecialCharacters() {
+        //prepare
+        String password = "Qwerty1234%$_-#@";
         //when
         securityService.validatePassword(password);
     }

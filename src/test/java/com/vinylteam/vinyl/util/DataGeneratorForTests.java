@@ -158,7 +158,7 @@ public class DataGeneratorForTests {
                 .artist(artist)
                 .fullName("release" + index + " - " + artist)
                 .imageLink("/image" + index)
-                .offers(hasOffers)
+                .hasOffers(hasOffers)
                 .build();
     }
 
@@ -246,7 +246,7 @@ public class DataGeneratorForTests {
                     .artist(rawOffers.get(i * 2).getArtist())
                     .fullName(rawOffers.get(i * 2).getRelease() + " - " + rawOffers.get(i * 2).getArtist())
                     .imageLink("/image" + (i + 1))
-                    .offers(true)
+                    .hasOffers(true)
                     .build();
             uniqueVinyls.add(uniqueVinyl);
         }

@@ -9,8 +9,11 @@ import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.ShopService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
+import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import org.json.simple.parser.ParseException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,9 @@ class DefaultCatalogServiceTest {
     @Autowired
     @MockBean
     private DiscogsService discogsService;
+
+    @Autowired
+    private UniqueVinylMapper uniqueVinylMapper;
 
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
@@ -211,6 +217,42 @@ class DefaultCatalogServiceTest {
         OneVinylPageDto actualOneVinylPageDto = catalogService.getOneVinylPageDto(id);
         //then
         assertEquals(expectedOneVinylPageDto, actualOneVinylPageDto);
+    }
+
+
+    @Test
+    public void testUniqueVinylMapper() {
+        UniqueVinyl vinyl = UniqueVinyl.builder()
+                .release("RELEASE")
+                .imageLink("imageLine")
+                .id("123")
+                .hasOffers(true)
+                .artist("artist")
+                .build();
+        UniqueVinylDto dto = uniqueVinylMapper.uniqueVinylToDto(vinyl);
+        assertEquals(dto.getId(), vinyl.getId());
+        assertEquals(dto.getArtist(), vinyl.getArtist());
+        assertEquals(dto.getImageLink(), vinyl.getImageLink());
+        assertEquals(dto.getRelease(), vinyl.getRelease());
+    }
+
+    @Test
+    public void testUniqueVinylMapperList() {
+        List<UniqueVinyl> vinylList = new ArrayList<>();
+        UniqueVinyl vinyl = UniqueVinyl.builder()
+                .release("RELEASE")
+                .imageLink("imageLine")
+                .id("123")
+                .hasOffers(true)
+                .fullName("funn lame")
+                .artist("artist")
+                .build();
+        vinylList.add(vinyl);
+        List<UniqueVinylDto> dto = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinylList);
+        Assertions.assertEquals(dto.get(0).getId(), vinylList.get(0).getId());
+        Assertions.assertEquals(dto.get(0).getRelease(), vinylList.get(0).getRelease());
+        Assertions.assertEquals(dto.get(0).getImageLink(), vinylList.get(0).getImageLink());
+        Assertions.assertEquals(dto.get(0).getArtist(), vinylList.get(0).getArtist());
     }
 
 }

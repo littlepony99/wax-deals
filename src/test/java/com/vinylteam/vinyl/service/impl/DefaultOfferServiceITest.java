@@ -10,11 +10,9 @@ import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +84,7 @@ public class DefaultOfferServiceITest {
 
         UniqueVinyl newUniqueVinyl = UniqueVinyl.builder()
                 .id("10")
-                .offers(false)
+                .hasOffers(false)
                 .fullName("Test fullname")
                 .artist("Artist new")
                 .build();
