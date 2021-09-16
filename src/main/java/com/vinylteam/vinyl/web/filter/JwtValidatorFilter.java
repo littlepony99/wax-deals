@@ -29,6 +29,8 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();

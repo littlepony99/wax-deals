@@ -7,9 +7,10 @@ import com.vinylteam.vinyl.web.dto.UserDto;
 import org.mapstruct.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Mapper(collectionMappingStrategy = CollectionMappingStrategy.SETTER_PREFERRED, componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, implementationName = "DefaultUserMapper")
+@Mapper(collectionMappingStrategy= CollectionMappingStrategy.SETTER_PREFERRED, componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR, implementationName = "DefaultUserMapper")
 public interface UserMapper {
 
     @Mappings({@Mapping(source = "email", target = "username"),
@@ -20,8 +21,8 @@ public interface UserMapper {
 
     UserDto mapUserToDto(User user);
 
-    default List<SimpleGrantedAuthority> roleToSimpleGrantedAuthoritiesList(Role role) {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+    default List<SimpleGrantedAuthority> roleToSimpleGrantedAuthoritiesList(Role role){
+        return List.of(new SimpleGrantedAuthority("ROLE_"+role.getName()));
     }
 
 }
