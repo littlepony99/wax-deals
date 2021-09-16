@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
@@ -8,13 +9,14 @@ import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,17 +30,11 @@ public class SearchResultsController {
 
     @GetMapping
     public List<UniqueVinylDto> getSearchResults(@RequestParam(value = "matcher") String matcher,
-                                                 HttpServletRequest request) {
+                                                 @AuthenticationPrincipal JwtUser authUser) {
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findByFilter(matcher);
-
-        if (null != request.getAttribute("userEntity")) {
-            User user = (User) request.getAttribute("userEntity");
+        if (!Objects.isNull(authUser)) {
             List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);
-            Long userId = null;
-            if (null != user) {
-                userId = user.getId();
-            }
-            return wantListService.mergeSearchResult(userId, uniqueVinylDtos);
+            return wantListService.mergeSearchResult(authUser.getId(), uniqueVinylDtos);
         }
         return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);
     }
