@@ -28,8 +28,6 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
 
-
-
     @ExceptionHandler(value = {ServerException.class})
     public ResponseEntity<Object> handleServerExceptionApiExceptionHandler(ServerException exception) {
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiExceptionDto(exception.getMessage()));
@@ -37,9 +35,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<Object> handleNotFoundExceptionApiExceptionHandler(NotFoundException exception) {
-        ApiExceptionDto apiExceptionDto = new ApiExceptionDto(
-                exception.getMessage());
-        return ResponseEntity.status(NOT_FOUND).body(apiExceptionDto);
+        return ResponseEntity.status(NOT_FOUND).body(new ApiExceptionDto(exception.getMessage()));
     }
 
 }

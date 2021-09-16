@@ -11,5 +11,4 @@ public enum CatalogErrors {
 
     private String message;
 
-
 }
