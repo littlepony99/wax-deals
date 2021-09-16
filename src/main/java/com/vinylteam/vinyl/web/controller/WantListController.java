@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.service.WantListService;
-import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +24,6 @@ import static org.springframework.http.HttpStatus.OK;
 public class WantListController {
 
     private final WantListService wantListService;
-
 
     @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('USER')")

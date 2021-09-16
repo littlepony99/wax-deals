@@ -1,20 +1,24 @@
 package com.vinylteam.vinyl.web.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.service.impl.DefaultOneVinylOffersService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,9 +27,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -41,6 +44,9 @@ public class OneVinylOfferControllerTest {
 
     @MockBean
     private DefaultOneVinylOffersService oneVinylOffersService;
+
+    @MockBean
+    private WantListService wantListService;
 
     DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
 
@@ -186,5 +192,18 @@ public class OneVinylOfferControllerTest {
         Assertions.assertEquals(dto.get(0).getRelease(), vinylList.get(0).getRelease());
         Assertions.assertEquals(dto.get(0).getImageLink(), vinylList.get(0).getImageLink());
         Assertions.assertEquals(dto.get(0).getArtist(), vinylList.get(0).getArtist());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Controller do not query watListService for anonymous user oneVinyl request")
+    void WantListImportRequestNonExistingUserTest() throws Exception {
+        UniqueVinylDto vinylDto = UniqueVinylDto.builder().id("1234").build();
+        String jsonRequest = (new ObjectMapper()).writeValueAsString(vinylDto);
+        mockMvc.perform(get("/oneVinyl/1").param("id", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest));
+                //then
+                verify(wantListService, never()).mergeSearchResult(any(Long.class), anyList());
     }
 }

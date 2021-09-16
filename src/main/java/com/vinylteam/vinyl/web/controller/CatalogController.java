@@ -31,7 +31,6 @@ public class CatalogController {
         List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinyls);
 
         if (null != request.getAttribute("userEntity")) {
-            log.info("Catalog. USER NOT NULL!!!!!!!!");
             User user = (User) request.getAttribute("userEntity");
             Long userId = null;
             if (null != user) {

@@ -33,16 +33,21 @@ public class WantListServiceImpl implements WantListService {
     @Override
     public List<UniqueVinylDto> mergeSearchResult(Long userId, List<UniqueVinylDto> foundVinyls) {
         List<WantedVinyl> wantList = getWantList(userId);
-        if (wantList != null && !wantList.isEmpty()) {
-            for (UniqueVinylDto foundVinyl : foundVinyls) {
-                for (WantedVinyl wantedVinyl : wantList) {
-                    boolean isInWantList = foundVinyl.getId().equals(wantedVinyl.getVinylId());
-                    foundVinyl.setIsWantListItem(isInWantList);
-                }
-            }
-        } else {
+        if (wantList == null || wantList.isEmpty()) {
             for (UniqueVinylDto foundVinyl : foundVinyls) {
                 foundVinyl.setIsWantListItem(Boolean.FALSE);
+            }
+            return foundVinyls;
+        }
+        for (UniqueVinylDto foundVinyl : foundVinyls) {
+            for (WantedVinyl wantedVinyl : wantList) {
+                boolean isInWantList = foundVinyl.getId().equals(wantedVinyl.getVinylId());
+                if (isInWantList) {
+                    foundVinyl.setIsWantListItem(Boolean.TRUE);
+                    break;
+                } else {
+                    foundVinyl.setIsWantListItem(Boolean.FALSE);
+                }
             }
         }
         return foundVinyls;
@@ -50,27 +55,29 @@ public class WantListServiceImpl implements WantListService {
 
     @Override
     public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) throws ForbiddenException {
+        UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
+        if (null == existingVinyl) {
+            log.error("Can't find vinyl with id={}", vinylDto.getId());
+            throw new ForbiddenException(VinylErrors.NOT_FOUND_ERROR.getMessage());
+        }
+
         Optional<WantedVinyl> existingWantListItem = wantListRepository.findByVinylIdAndUserId(vinylDto.getId(), user.getId());
         if (existingWantListItem.isPresent()) {
             wantListRepository.deleteById(existingWantListItem.get().getId());
             return WantedVinyl.builder().build();
         }
-        UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
 
-        if (null != existingVinyl) {
-            WantedVinyl wantedVinyl = WantedVinyl.builder()
-                    .userId(user.getId())
-                    .addedAt(Date.from(Instant.now()))
-                    .vinylId(vinylDto.getId())
-                    .release(existingVinyl.getRelease())
-                    .artist(existingVinyl.getArtist())
-                    .imageLink(existingVinyl.getImageLink())
-                    .build();
-            return wantListRepository.save(wantedVinyl);
-        }
-        log.error("Can't find vinyl with id={}", vinylDto.getId());
-        throw new ForbiddenException(VinylErrors.NOT_FOUND_ERROR.getMessage());
+        WantedVinyl wantedVinyl = WantedVinyl.builder()
+                .userId(user.getId())
+                .addedAt(Date.from(Instant.now()))
+                .vinylId(vinylDto.getId())
+                .release(existingVinyl.getRelease())
+                .artist(existingVinyl.getArtist())
+                .imageLink(existingVinyl.getImageLink())
+                .build();
+        return wantListRepository.save(wantedVinyl);
     }
+
 
     @Override
     public void importWantList(User user) {
@@ -81,6 +88,21 @@ public class WantListServiceImpl implements WantListService {
             log.info("WantList import. Matches {} items with our unique vinyls", discogsMatchList.size());
             saveImportedWantList(user.getId(), discogsMatchList);
         }
+    }
+
+    @Override
+    public List<WantedVinyl> getWantList(Long userId) {
+        return wantListRepository.findAllByUserId(userId);
+    }
+
+    @Override
+    public List<UniqueVinylDto> getWantListUniqueVinyls(Long userId) {
+        List<WantedVinyl> wantList = getWantList(userId);
+        List<UniqueVinylDto> result = uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantList);
+        for (UniqueVinylDto uniqueVinylDto : result) {
+            uniqueVinylDto.setIsWantListItem(Boolean.TRUE);
+        }
+        return result;
     }
 
     private void saveImportedWantList(Long userId, List<UniqueVinyl> wantList) {
@@ -100,21 +122,6 @@ public class WantListServiceImpl implements WantListService {
             }
         }
         log.info("WantList import. Added {} new items ", counter);
-    }
-
-    @Override
-    public List<WantedVinyl> getWantList(Long userId) {
-        return wantListRepository.findAllByUserId(userId);
-    }
-
-    @Override
-    public List<UniqueVinylDto> getWantListUniqueVinyls(Long userId) {
-        List<WantedVinyl> wantList = getWantList(userId);
-        List<UniqueVinylDto> result = uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantList);
-        for (UniqueVinylDto uniqueVinylDto : result) {
-            uniqueVinylDto.setIsWantListItem(Boolean.TRUE);
-        }
-        return result;
     }
 
 }

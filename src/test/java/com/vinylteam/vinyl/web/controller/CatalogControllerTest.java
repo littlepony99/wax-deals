@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.service.UniqueVinylService;
+import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -36,6 +38,8 @@ class CatalogControllerTest {
     private WebApplicationContext context;
     @MockBean
     private UniqueVinylService mockedUniqueVinylService;
+    @MockBean
+    private WantListService mockedWantListService;
 
     private MockMvc mockMvc;
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
@@ -111,6 +115,16 @@ class CatalogControllerTest {
         Assertions.assertEquals("application/json", response.getContentType());
         Assertions.assertNotNull(response.getContentAsString());
         Assertions.assertEquals("[]", response.getContentAsString());
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DisplayName("Controller do not query watListService for anonymous user catalog request")
+    void WantListImportRequestNonExistingUserTest() throws Exception {
+        //when
+        mockMvc.perform(get("/catalog"));
+        //then
+        verify(mockedWantListService, never()).mergeSearchResult(any(Long.class), anyList());
     }
 
 }
