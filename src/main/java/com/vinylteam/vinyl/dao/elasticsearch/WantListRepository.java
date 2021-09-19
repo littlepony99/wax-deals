@@ -11,4 +11,5 @@ public interface WantListRepository extends ElasticsearchRepository<WantedVinyl,
     List<WantedVinyl> findAllByUserId(Long userId);
 
     Optional<WantedVinyl> findByVinylIdAndUserId(String id, Long userId);
+
 }
