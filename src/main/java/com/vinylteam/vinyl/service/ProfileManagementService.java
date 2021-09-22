@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.service;
 
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;

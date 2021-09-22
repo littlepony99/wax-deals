@@ -1,26 +1,21 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.UserPostService;
 import com.vinylteam.vinyl.web.dto.AddUserPostDto;
-import com.vinylteam.vinyl.web.dto.CaptchaResponseDto;
-import com.vinylteam.vinyl.web.util.WebUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.vinylteam.vinyl.util.ControllerResponseUtils.getStatusInfoMap;
 
 @Slf4j
 @RequiredArgsConstructor

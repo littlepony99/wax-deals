@@ -34,7 +34,6 @@ public class ApiExceptionHandler {
     }
 
 
-
     @ExceptionHandler(value = {ServerException.class})
     public ResponseEntity<Object> handleServerExceptionApiExceptionHandler(ServerException exception) {
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiExceptionDto(exception.getMessage()));

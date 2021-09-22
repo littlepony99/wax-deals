@@ -25,7 +25,7 @@ public class JwtUser implements UserDetails {
         return authorities;
     }
 
-    public void setAuthorities(List<SimpleGrantedAuthority> authorities){
+    public void setAuthorities(List<SimpleGrantedAuthority> authorities) {
         this.authorities = authorities;
     }
 
