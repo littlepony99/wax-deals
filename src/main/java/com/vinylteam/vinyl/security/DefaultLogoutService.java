@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.security;
 import com.vinylteam.vinyl.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 

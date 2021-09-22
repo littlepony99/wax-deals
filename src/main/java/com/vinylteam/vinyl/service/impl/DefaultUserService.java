@@ -27,10 +27,13 @@ import java.util.Optional;
 public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
-
+    private final EmailConfirmationService emailConfirmationService;
     private SecurityService securityService;
 
-    private final EmailConfirmationService emailConfirmationService;
+    @Autowired
+    public void setSecurityService(SecurityService securityService) {
+        this.securityService = securityService;
+    }
 
     @Override
     @Transactional
@@ -57,11 +60,6 @@ public class DefaultUserService implements UserService {
         log.debug("Added created user to db {'user':{}}", userToAdd);
         ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
         emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
-    }
-
-    @Autowired
-    public void setSecurityService(SecurityService securityService) {
-        this.securityService = securityService;
     }
 
     @Transactional

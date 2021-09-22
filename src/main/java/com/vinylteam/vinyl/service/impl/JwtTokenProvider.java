@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
+import com.vinylteam.vinyl.entity.JwtTokenType;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.TokenPair;
 import com.vinylteam.vinyl.entity.User;
@@ -9,7 +10,6 @@ import com.vinylteam.vinyl.security.LogoutTokenStorageService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
-import com.vinylteam.vinyl.entity.JwtTokenType;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import io.jsonwebtoken.*;
@@ -31,7 +31,10 @@ import javax.crypto.SecretKey;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 import static com.vinylteam.vinyl.security.SecurityConstants.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
