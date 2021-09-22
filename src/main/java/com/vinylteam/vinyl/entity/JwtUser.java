@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.entity;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 public class JwtUser implements UserDetails {
 
     private String username;

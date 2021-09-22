@@ -7,20 +7,25 @@ import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.JwtUser;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
+import com.vinylteam.vinyl.security.InMemoryLogoutTokenService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.web.dto.UserDto;
+import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +33,7 @@ import java.util.UUID;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -39,6 +45,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class JwtLoginControllerITest {
 
     @Autowired
+    private InMemoryLogoutTokenService logoutStorageService;
+
+    @Autowired
     private UserMapper userMapper;
 
     @Autowired
@@ -47,7 +56,8 @@ class JwtLoginControllerITest {
     @MockBean
     private UserDao userDao;
 
-    @Autowired
+    //@Autowired
+    @SpyBean
     private JwtService jwtService;
 
     @Autowired
@@ -180,13 +190,67 @@ class JwtLoginControllerITest {
     }
 
     @Test
+    @DisplayName("Correct Refresh Token: Login controller takes refresh token and returns new token pair in response")
+    public void checkCorrectRefreshToken() throws Exception {
+        //prepare
+        mockUserWithStatus(true);
+        JwtUser jwtUser = userMapper.mapToDto(builtUser);
+        var tokenPair = jwtService.getTokenPair(jwtUser);
+        var newTokenPair = jwtService.getTokenPair(jwtUser);
+        var requestParameters = Map.of("refreshToken", tokenPair.getRefreshToken());
+        //when
+        Mockito.doReturn(newTokenPair).when(jwtService).getTokenPair(eq(jwtUser));
+        String json = new ObjectMapper().writeValueAsString(requestParameters);
+        var response = mockMvc.perform(post("/token/refresh-token").header("Authorization", "")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                //then
+                .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$", hasKey("jwtToken")))
+                .andExpect(jsonPath("$", hasKey("refreshToken")))
+                .andExpect(jsonPath("$.user", not(empty())))
+                .andExpect(jsonPath("$.user.email", equalTo(testUserEmail)))
+                .andExpect(jsonPath("$.user.role", equalTo("USER")))
+                .andExpect(jsonPath("$.jwtToken", not(emptyString())))
+                .andExpect(jsonPath("$.refreshToken", not(emptyString())))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        var objectResponse = new ObjectMapper().readValue(response, UserSecurityResponse.class);
+        log.info("Response for refresh token request {}", response);
+        assertEquals(newTokenPair.getJwtToken(), objectResponse.getJwtToken());
+        assertEquals(newTokenPair.getRefreshToken(), objectResponse.getRefreshToken());
+    }
+
+    @Test
+    @DisplayName("Used Refresh Token: Login controller takes refresh token and returns Http 4xx code in response")
+    public void checkUsedRefreshToken() throws Exception {
+        //prepare
+        mockUserWithStatus(true);
+        JwtUser jwtUser = userMapper.mapToDto(builtUser);
+        var tokenPair = jwtService.getTokenPair(jwtUser);
+        logoutStorageService.storePairIdentifier(tokenPair.getId(), LocalDateTime.MAX);
+        var requestParameters = Map.of("refreshToken", tokenPair.getRefreshToken());
+        //when
+        String json = new ObjectMapper().writeValueAsString(requestParameters);
+        mockMvc.perform(post("/token/refresh-token").header("Authorization", "")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                //then
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$", not(empty())))
+                .andExpect(jsonPath("$", hasKey("message")))
+                .andExpect(jsonPath("$.message", equalTo("Refresh token is expired.")));
+    }
+
+    @Test
     @DisplayName("Incorrect Token: Login controller checks token and does not return it in response")
     public void checkIncorrectToken() throws Exception {
         mockUserWithStatus(true);
         //prepare
         JwtUser jwtUser = userMapper.mapToDto(builtUser);
         String token = jwtService.createAccessToken(jwtUser, "122124");
-        token = token.replace(token.substring(12,15),"");
+        token = token.replace(token.substring(12, 15), "");
         //when
         mockMvc.perform(get("/token").header("Authorization", token))
                 //then
