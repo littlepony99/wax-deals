@@ -25,7 +25,7 @@ public class SearchResultsController {
 
     @GetMapping
     public List<UniqueVinylDto> getSearchResults(@RequestParam(value = "matcher") String matcher,
-                                                 @RequestAttribute("userEntity") User user) {
+                                                 @RequestAttribute(value = "userEntity", required = false) User user) {
         List<UniqueVinyl> filteredUniqueVinyls = vinylService.findByFilter(matcher);
         if (!Objects.isNull(user)) {
             List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(filteredUniqueVinyls);

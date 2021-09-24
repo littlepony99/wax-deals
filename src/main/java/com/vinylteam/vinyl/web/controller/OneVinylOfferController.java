@@ -5,12 +5,7 @@ import com.vinylteam.vinyl.service.impl.DefaultOneVinylOffersService;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,8 +16,8 @@ public class OneVinylOfferController {
     private final DefaultOneVinylOffersService oneVinylOffersService;
 
     @GetMapping("/{id}")
-    public OneVinylPageDto getOneVinylOfferPage(@PathVariable("id") String id, HttpServletRequest request) {
-        User user = (User) request.getAttribute("userEntity");
+    public OneVinylPageDto getOneVinylOfferPage(@PathVariable("id") String id,
+                                                @RequestAttribute(value = "userEntity", required = false) User user) {
         Long userId = null;
         if (null != user) {
             userId = user.getId();

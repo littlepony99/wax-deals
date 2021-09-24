@@ -62,7 +62,7 @@ class SearchResultsControllerTest {
                 .addFilters(jwtValidatorFilter)
                 .build();
         String encPassword = encoder.encode(testUserPassword);
-        testUserEmail = "user_email@gmail.com";
+        testUserEmail = "search_result@gmail.com";
         createTestUser(testUserEmail, encPassword);
     }
 

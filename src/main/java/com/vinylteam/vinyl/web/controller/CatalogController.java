@@ -26,7 +26,7 @@ public class CatalogController {
     private final WantListService wantListService;
 
     @GetMapping
-    public List<UniqueVinylDto> getCatalogPage(@RequestAttribute("userEntity") User user) {
+    public List<UniqueVinylDto> getCatalogPage(@RequestAttribute(value = "userEntity", required = false) User user) {
         List<UniqueVinyl> uniqueVinyls = uniqueVinylService.findRandom(50);
         List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinyls);
 
