@@ -32,7 +32,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,8 +69,8 @@ class SignupControllerITest {
                 "discogsUserName", "");
         String json = new ObjectMapper().writeValueAsString(signUpRequest);
         mockMvc.perform(post("/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", not(emptyString())));
     }
@@ -122,8 +123,8 @@ class SignupControllerITest {
         String json = new ObjectMapper().writeValueAsString(signUpRequest);
         sendAndCheckSignUpRequest(json, testExistingUserEmail);
         var response = mockMvc.perform(post("/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("Invalid credentials. Please check your credentials and try again. Contact us through form or social media if you still encounter trouble.")))
@@ -140,7 +141,7 @@ class SignupControllerITest {
         Mockito.doReturn(Optional.of(dataGenerator.getConfirmationTokenWithUserId(1))).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
         mockMvc.perform((put("/email-confirmation-old"))
-                        .param("confirmToken", token))
+                .param("confirmToken", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo("Your email is confirmed. Now you can log in.")));
@@ -155,8 +156,8 @@ class SignupControllerITest {
         var bodyMap = Map.of("confirmToken", token);
         String json = new ObjectMapper().writeValueAsString(bodyMap);
         mockMvc.perform((put("/email-confirmation")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(json)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo("Your email is confirmed. Now you can log in.")));
@@ -171,8 +172,8 @@ class SignupControllerITest {
         Mockito.doReturn(Optional.empty()).when(confirmationTokenDao).findByToken(eq(UUID.fromString(token)));
         Mockito.doReturn(Optional.of(dataGenerator.getUserWithNumber(1))).when(userService).findById(1);
         mockMvc.perform((put("/email-confirmation")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_FOUND.getMessage())));
@@ -185,8 +186,8 @@ class SignupControllerITest {
         var bodyMap = Map.of("confirmToken", token);
         String json = new ObjectMapper().writeValueAsString(bodyMap);
         mockMvc.perform((put("/email-confirmation")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$.message", equalTo(EmailConfirmationErrors.TOKEN_FROM_LINK_NOT_UUID.getMessage())));
@@ -194,8 +195,8 @@ class SignupControllerITest {
 
     private void sendAndCheckSignUpRequest(String json, String email) throws Exception {
         var response = mockMvc.perform(post("/sign-up")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("In order to confirm your email click on the confirmation link we sent to your mailbox. Might be in \"spam\"!")))

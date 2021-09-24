@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.web.controller;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class WantListController {
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public void addVinylToUserWantList(@RequestAttribute(value = "userEntity", required = false) User user,
-                                       @RequestBody UniqueVinylDto vinylDto) throws ForbiddenException {
+                                       @RequestBody UniqueVinylDto vinylDto) throws ForbiddenException, NotFoundException {
         wantListService.addWantedVinyl(user, vinylDto);
     }
 

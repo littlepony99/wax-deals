@@ -13,11 +13,8 @@ public interface UniqueVinylMapper {
 
     UniqueVinylDto uniqueVinylToDto(UniqueVinyl uniqueVinyl);
 
-    @Mapping(source = "vinylId", target = "id")
-    UniqueVinylDto wantedVinylToUniqueVinylDto(WantedVinyl wantedVinyls);
-
     List<UniqueVinylDto> uniqueVinylsToUniqueVinylDtoList(List<UniqueVinyl> uniqueVinyls);
 
-    List<UniqueVinylDto> wantedVinylsToUniqueVinylDtoList(List<WantedVinyl> wantedVinyls);
-
+    @Mapping(target = "id", source = "vinylId")
+    UniqueVinylDto wantedVinylToUniqueVinylDto(WantedVinyl wantedVinyls);
 }

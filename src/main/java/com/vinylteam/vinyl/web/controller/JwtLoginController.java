@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.vinylteam.vinyl.exception.JwtAuthenticationException;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
@@ -15,7 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
-import static com.vinylteam.vinyl.util.ControllerResponseUtils.*;
+import static com.vinylteam.vinyl.util.ControllerResponseUtils.setStatusInfo;
+import static com.vinylteam.vinyl.util.ControllerResponseUtils.setSuccessStatusInfo;
 import static org.springframework.http.HttpStatus.*;
 
 @RestController

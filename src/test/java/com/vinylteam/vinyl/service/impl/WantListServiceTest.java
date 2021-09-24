@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
 import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
@@ -123,7 +124,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Add vinyl, not yet added to wantList")
-    void addNewVinylToWantListTest() throws ForbiddenException {
+    void addNewVinylToWantListTest() throws ForbiddenException, NotFoundException {
         // before
         UniqueVinylDto vinylDto = UniqueVinylDto.builder()
                 .id("id")
@@ -167,7 +168,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Add existing vinyl in wantList(delete vinyl from wantList")
-    void deleteVinylFromWantListTest() throws ForbiddenException {
+    void deleteVinylFromWantListTest() throws ForbiddenException, NotFoundException {
         // before
         UniqueVinylDto vinylDto = UniqueVinylDto.builder()
                 .id("id")
@@ -202,7 +203,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Add vinyl with wrong id to watchList")
-    void addNonWrongVinylToWantListTest() {
+    void addNonWrongVinylToWantListTest() throws NotFoundException {
         // before
         UniqueVinylDto vinylDto = UniqueVinylDto.builder()
                 .id("wrong")
@@ -244,7 +245,8 @@ public class WantListServiceTest {
 
         // when
         when(wantListRepository.findAllByUserId(userId)).thenReturn(wantList);
-        when(uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantList)).thenReturn(uniqueDtoVinylList);
+        when(uniqueVinylMapper.wantedVinylToUniqueVinylDto(any())).thenReturn(uniqueVinylDto);
+//        when(wantListService.wantedVinylsToUniqueVinylDtoList(wantList)).thenReturn(uniqueDtoVinylList);
         List<UniqueVinylDto> resultList = wantListService.getWantListUniqueVinyls(userId);
 
         // then
@@ -314,7 +316,7 @@ public class WantListServiceTest {
                 .email("test_user@gmail.com")
                 .role(Role.USER)
                 .id(1L)
-                .discogsUserName("shelberg")
+                .discogsUserName(null)
                 .build();
         assertThrows(DiscogsUserNotFoundException.class, () -> wantListService.importWantList(user));
     }

@@ -30,7 +30,6 @@ public class JwtValidatorFilter extends OncePerRequestFilter {
     }
 
 
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();

@@ -4,6 +4,7 @@ package com.vinylteam.vinyl.util;
 import com.vinylteam.vinyl.entity.Currency;
 import com.vinylteam.vinyl.entity.*;
 import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
+import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 
@@ -61,7 +62,7 @@ public class DataGeneratorForTests {
         if (number < 1) {
             throw new RuntimeException("Don't generate template unique vinyl from number < 1! number: " + number);
         }
-        UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + number, number, "artist", false);
+        UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + number, number, "release", false);
         return uniqueVinyl;
     }
 
@@ -124,8 +125,8 @@ public class DataGeneratorForTests {
         return shops;
     }
 
-    public HashMap<String, List> getOneVinylOffersAndShopsMap() {
-        HashMap<String, List> offersAndShopsMap = new HashMap<>();
+    public Map<String, List<?>> getOneVinylOffersAndShopsMap() {
+        Map<String, List<?>> offersAndShopsMap = new HashMap<>();
         offersAndShopsMap.put("offers", getOffersList().subList(0, 2));
         offersAndShopsMap.put("shops", getShopsList().subList(0, 2));
         return offersAndShopsMap;
@@ -134,7 +135,7 @@ public class DataGeneratorForTests {
     public List<UniqueVinyl> getUniqueVinylsList() {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
         for (int i = 1; i < 5; i++) {
-            UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + i, i, "artist", true);
+            UniqueVinyl uniqueVinyl = generateUniqueVinyl("artist" + i, i, "release", true);
             uniqueVinyls.add(uniqueVinyl);
         }
         uniqueVinyls.get(3).setHasOffers(false);
@@ -144,7 +145,7 @@ public class DataGeneratorForTests {
     public List<UniqueVinyl> getUniqueVinylsByArtistList(String artist) {
         List<UniqueVinyl> uniqueVinyls = new ArrayList<>();
         for (int i = 1; i < 3; i++) {
-            UniqueVinyl uniqueVinyl = generateUniqueVinyl(artist, i, artist, true);
+            UniqueVinyl uniqueVinyl = generateUniqueVinyl(artist, i, "release" + (i + 1), true);
             uniqueVinyls.add(uniqueVinyl);
         }
         return uniqueVinyls;
@@ -155,7 +156,7 @@ public class DataGeneratorForTests {
                 .id(Integer.toString(index))
                 .release("release" + index)
                 .artist(artist)
-                .fullName("release" + index + " - " + releaseFullName + index)
+                .fullName("release" + index + " - " + artist)
                 .imageLink("/image" + index)
                 .hasOffers(hasOffers)
                 .build();
@@ -274,6 +275,7 @@ public class DataGeneratorForTests {
                 .artist(uniqueVinyl.getArtist())
                 .release(uniqueVinyl.getRelease())
                 .imageLink(uniqueVinyl.getImageLink())
+                .isWantListItem(false)
                 .build();
     }
 
@@ -294,8 +296,9 @@ public class DataGeneratorForTests {
 
         if (offer != null) {
             if (offer.getCurrency() != null) {
-                oneVinylOfferDto.currency(offer.getCurrency().toString());
+                oneVinylOfferDto.currency(offer.getCurrency().get().toString());
             }
+            oneVinylOfferDto.id(offer.getId());
             oneVinylOfferDto.price(offer.getPrice());
             oneVinylOfferDto.catNumber(offer.getCatNumber());
             oneVinylOfferDto.inStock(offer.isInStock());
@@ -306,6 +309,29 @@ public class DataGeneratorForTests {
         }
 
         return oneVinylOfferDto.build();
+    }
+
+    public OneVinylPageDto getOneVinylPageDto(String discogsLink, UniqueVinyl mainVinyl, Map<String, List<?>> offersAndShops, List<UniqueVinyl> otherVinylsByArtist) {
+        if (mainVinyl == null || offersAndShops == null) {
+            throw new RuntimeException("Unique vinyl or map of offers and shops is null!");
+        }
+        List<OneVinylOfferDto> offerDtoList = new ArrayList<>();
+        List<Offer> offers = (List<Offer>) offersAndShops.get("offers");
+        List<Shop> shops = (List<Shop>) offersAndShops.get("shops");
+        for (Offer offer : offers) {
+            Shop shopById = shops
+                    .stream()
+                    .filter(shop -> shop.getId() == offer.getShopId())
+                    .findFirst()
+                    .get();
+            offerDtoList.add(getOneVinylOfferDtoFromOfferAndShop(offer, shopById));
+        }
+        return OneVinylPageDto.builder()
+                .discogsLink(discogsLink)
+                .mainVinyl(getUniqueVinylDtoFromUniqueVinyl(mainVinyl))
+                .offersList(offerDtoList)
+                .vinylsByArtistList(getUniqueVinylDtoListFromUniqueVinylList(otherVinylsByArtist))
+                .build();
     }
 
 }

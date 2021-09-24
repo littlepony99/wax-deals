@@ -3,7 +3,6 @@ package com.vinylteam.vinyl.web.filter;
 
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;

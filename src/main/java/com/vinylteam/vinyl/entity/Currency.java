@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.entity;
 
 import java.util.Optional;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 public enum Currency {
 

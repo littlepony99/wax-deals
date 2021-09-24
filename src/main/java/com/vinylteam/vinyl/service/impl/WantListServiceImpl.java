@@ -6,6 +6,7 @@ import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
 import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.exception.entity.VinylErrors;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +57,7 @@ public class WantListServiceImpl implements WantListService {
     }
 
     @Override
-    public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) throws ForbiddenException {
+    public WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) throws ForbiddenException, NotFoundException {
         UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
         if (null == existingVinyl) {
             log.error("Can't find vinyl with id={}", vinylDto.getId());
@@ -100,7 +102,7 @@ public class WantListServiceImpl implements WantListService {
     @Override
     public List<UniqueVinylDto> getWantListUniqueVinyls(Long userId) {
         List<WantedVinyl> wantList = getWantList(userId);
-        List<UniqueVinylDto> result = uniqueVinylMapper.wantedVinylsToUniqueVinylDtoList(wantList);
+        List<UniqueVinylDto> result = wantedVinylsToUniqueVinylDtoList(wantList);
         for (UniqueVinylDto uniqueVinylDto : result) {
             uniqueVinylDto.setIsWantListItem(Boolean.TRUE);
         }
@@ -124,6 +126,18 @@ public class WantListServiceImpl implements WantListService {
             }
         }
         log.info("WantList import. Added {} new items ", counter);
+    }
+
+    protected List<UniqueVinylDto> wantedVinylsToUniqueVinylDtoList(List<WantedVinyl> wantedVinyls) {
+        if (wantedVinyls == null) {
+            return null;
+        }
+
+        List<UniqueVinylDto> list = new ArrayList<>(wantedVinyls.size());
+        for (WantedVinyl wantedVinyl : wantedVinyls) {
+            list.add(uniqueVinylMapper.wantedVinylToUniqueVinylDto(wantedVinyl));
+        }
+        return list;
     }
 
 }

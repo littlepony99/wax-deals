@@ -20,6 +20,8 @@ public class DefaultSecurityService implements SecurityService {
     private final Random random = new SecureRandom();
     private final SecretKeyFactory secretKeyFactory;
     private PasswordEncoder encoder;
+    private static final String PASSWORD_PATTERN = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]{8,}$";
+    private static final String EMAIL_PATTERN = "/^[^\\s@]+@[^\\s@]+$/";
 
     public DefaultSecurityService() {
         log.debug("Started initializer in DefaultSecurityService");
@@ -72,14 +74,14 @@ public class DefaultSecurityService implements SecurityService {
 
     @Override
     public void emailFormatCheck(String email) {
-        if (!email.matches("/^[^\\s@]+@[^\\s@]+$/")) {
+        if (!email.matches(EMAIL_PATTERN)) {
             throw new RuntimeException(UserErrors.INVALID_EMAIL_ERROR.getMessage());
         }
     }
 
     @Override
     public void validatePassword(String password) {
-        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
+        if (!password.matches(PASSWORD_PATTERN)) {
             throw new RuntimeException(UserErrors.INVALID_PASSWORD_ERROR.getMessage());
         }
     }
