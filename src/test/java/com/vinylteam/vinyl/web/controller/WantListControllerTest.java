@@ -88,6 +88,7 @@ public class WantListControllerTest {
     }
 
     @Test
+    @DisplayName("Get wanted vinyls list for authenticated user")
     void getUserWantListTest() throws Exception {
         //before
         UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
@@ -116,6 +117,7 @@ public class WantListControllerTest {
     }
 
     @Test
+    @DisplayName("Add wanted vinyl for authenticated user")
     void addWantedVinylTest() throws Exception {
         //before
         UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));
@@ -144,6 +146,7 @@ public class WantListControllerTest {
     }
 
     @Test
+    @DisplayName("Controller calls wantList import method for authenticated user")
     void importWantListTest() throws Exception {
         //before
         UserSecurityResponse loginResponse = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, testUserPassword));

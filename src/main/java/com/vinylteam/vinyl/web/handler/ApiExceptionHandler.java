@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.handler;
 
+import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.ServerException;
 import org.springframework.http.ResponseEntity;
@@ -33,11 +34,14 @@ public class ApiExceptionHandler {
         return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
 
-
-
     @ExceptionHandler(value = {ServerException.class})
     public ResponseEntity<Object> handleServerExceptionApiExceptionHandler(ServerException exception) {
         return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ApiExceptionDto(exception.getMessage()));
+    }
+
+    @ExceptionHandler(value = {DiscogsUserNotFoundException.class})
+    public ResponseEntity<Object> handleDiscogsUserNotFoundExceptionHandler(DiscogsUserNotFoundException exception) {
+        return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
 //FIXME: Fix situation with exceptions in a smart way.
 /*    @ExceptionHandler(RuntimeException.class)
@@ -46,6 +50,7 @@ public class ApiExceptionHandler {
         modelAndView.setStatus(BAD_REQUEST);
         modelAndView.addObject("message", exception.getMessage());
         return modelAndView;
-    }*/
+    }
+*/
 
 }

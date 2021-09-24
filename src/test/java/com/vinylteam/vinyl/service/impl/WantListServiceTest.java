@@ -5,6 +5,7 @@ import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
+import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
@@ -57,7 +58,7 @@ public class WantListServiceTest {
         vinylsList.add(vinylDto);
         // when
         when(wantListRepository.findAllByUserId(userId)).thenReturn(null);
-        List<UniqueVinylDto> resultList = wantListService.mergeSearchResult(userId, vinylsList);
+        List<UniqueVinylDto> resultList = wantListService.mergeVinylsWithWantList(userId, vinylsList);
         // then
         Assertions.assertNotNull(resultList);
         Assertions.assertFalse(resultList.isEmpty());
@@ -103,7 +104,7 @@ public class WantListServiceTest {
         wantList.add(wantedItem);
         // when
         when(wantListRepository.findAllByUserId(userId)).thenReturn(wantList);
-        List<UniqueVinylDto> resultList = wantListService.mergeSearchResult(userId, vinylsList);
+        List<UniqueVinylDto> resultList = wantListService.mergeVinylsWithWantList(userId, vinylsList);
         // then
         Assertions.assertNotNull(resultList);
         Assertions.assertFalse(resultList.isEmpty());
@@ -259,7 +260,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Import wantList, check that all matches added to wantList")
-    void importTaskAllMatchesAddedToWantListTest() {
+    void importTaskAllMatchesAddedToWantListTest() throws DiscogsUserNotFoundException {
         // before
         UniqueVinyl firstUniqueVinyl = UniqueVinyl.builder()
                 .id("id")
@@ -303,6 +304,19 @@ public class WantListServiceTest {
 
         // then
         verify(wantListRepository, times(2)).save(any(WantedVinyl.class));
+    }
+
+    @Test
+    @DisplayName("Import wantList, non existing discogsUser name case")
+    void importTaskWrongDiscogsUserNameTest() {
+        // before
+        User user = User.builder()
+                .email("test_user@gmail.com")
+                .role(Role.USER)
+                .id(1L)
+                .discogsUserName("shelberg")
+                .build();
+        assertThrows(DiscogsUserNotFoundException.class, () -> wantListService.importWantList(user));
     }
 
     @Test

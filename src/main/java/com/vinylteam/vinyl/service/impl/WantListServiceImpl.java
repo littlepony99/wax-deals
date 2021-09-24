@@ -4,6 +4,7 @@ import com.vinylteam.vinyl.dao.elasticsearch.WantListRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
+import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.entity.VinylErrors;
 import com.vinylteam.vinyl.service.DiscogsService;
@@ -31,11 +32,11 @@ public class WantListServiceImpl implements WantListService {
     private final UniqueVinylMapper uniqueVinylMapper;
 
     @Override
-    public List<UniqueVinylDto> mergeSearchResult(Long userId, List<UniqueVinylDto> foundVinyls) {
+    public List<UniqueVinylDto> mergeVinylsWithWantList(Long userId, List<UniqueVinylDto> foundVinyls) {
         List<WantedVinyl> wantList = getWantList(userId);
         if (wantList == null || wantList.isEmpty()) {
             for (UniqueVinylDto foundVinyl : foundVinyls) {
-                foundVinyl.setIsWantListItem(Boolean.FALSE);
+                foundVinyl.setIsWantListItem(false);
             }
             return foundVinyls;
         }
@@ -43,10 +44,10 @@ public class WantListServiceImpl implements WantListService {
             for (WantedVinyl wantedVinyl : wantList) {
                 boolean isInWantList = foundVinyl.getId().equals(wantedVinyl.getVinylId());
                 if (isInWantList) {
-                    foundVinyl.setIsWantListItem(Boolean.TRUE);
+                    foundVinyl.setIsWantListItem(true);
                     break;
                 } else {
-                    foundVinyl.setIsWantListItem(Boolean.FALSE);
+                    foundVinyl.setIsWantListItem(false);
                 }
             }
         }
@@ -80,14 +81,15 @@ public class WantListServiceImpl implements WantListService {
 
 
     @Override
-    public void importWantList(User user) {
+    public void importWantList(User user) throws DiscogsUserNotFoundException {
         log.info("WantList import. Start task, userId={}", user.getId());
-        if (user.getDiscogsUserName() != null) {
-            List<UniqueVinyl> allVinyls = uniqueVinylService.findAll();
-            List<UniqueVinyl> discogsMatchList = discogsService.getDiscogsMatchList(user.getDiscogsUserName(), allVinyls);
-            log.info("WantList import. Matches {} items with our unique vinyls", discogsMatchList.size());
-            saveImportedWantList(user.getId(), discogsMatchList);
+        if (user.getDiscogsUserName() == null) {
+            throw new DiscogsUserNotFoundException("Discogs userName should be presented!");
         }
+        List<UniqueVinyl> allVinyls = uniqueVinylService.findAll();
+        List<UniqueVinyl> discogsMatchList = discogsService.getDiscogsMatchList(user.getDiscogsUserName(), allVinyls);
+        log.info("WantList import. Matches {} items with our unique vinyls", discogsMatchList.size());
+        saveImportedWantList(user.getId(), discogsMatchList);
     }
 
     @Override

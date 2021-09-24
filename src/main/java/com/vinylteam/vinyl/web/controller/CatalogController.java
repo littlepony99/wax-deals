@@ -9,10 +9,10 @@ import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Slf4j
@@ -26,16 +26,12 @@ public class CatalogController {
     private final WantListService wantListService;
 
     @GetMapping
-    public List<UniqueVinylDto> getCatalogPage(HttpServletRequest request) {
+    public List<UniqueVinylDto> getCatalogPage(@RequestAttribute("userEntity") User user) {
         List<UniqueVinyl> uniqueVinyls = uniqueVinylService.findRandom(50);
         List<UniqueVinylDto> uniqueVinylDtos = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinyls);
 
-        if (null != request.getAttribute("userEntity")) {
-            User user = (User) request.getAttribute("userEntity");
-            Long userId = null;
-            if (null != user) {
-                uniqueVinylDtos = wantListService.mergeSearchResult(userId, uniqueVinylDtos);
-            }
+        if (null != user) {
+            uniqueVinylDtos = wantListService.mergeVinylsWithWantList(user.getId(), uniqueVinylDtos);
         }
         return uniqueVinylDtos;
     }

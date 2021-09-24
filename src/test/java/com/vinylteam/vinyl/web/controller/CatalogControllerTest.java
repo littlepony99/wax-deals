@@ -1,9 +1,11 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.WantListService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
+import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,14 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +40,8 @@ class CatalogControllerTest {
     private UniqueVinylService mockedUniqueVinylService;
     @MockBean
     private WantListService mockedWantListService;
+    @MockBean
+    private UniqueVinylMapper mockedUniqueVinylMapper;
 
     private MockMvc mockMvc;
     private final DataGeneratorForTests dataGenerator = new DataGeneratorForTests();
@@ -55,12 +57,13 @@ class CatalogControllerTest {
     void getCatalogPage() {
         //prepare
         List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
-        when(mockedUniqueVinylService.findRandom(50)).thenReturn(uniqueVinyls);
+        User user = dataGenerator.getUserWithNumber(1);
         List<UniqueVinylDto> expectedUniqueVinylDtoList = dataGenerator.getUniqueVinylDtoListFromUniqueVinylList(uniqueVinyls);
+        when(mockedUniqueVinylService.findRandom(50)).thenReturn(uniqueVinyls);
+        when(mockedWantListService.mergeVinylsWithWantList(any(), any())).thenReturn(expectedUniqueVinylDtoList);
         //when
-        HttpServletRequest request = new MockHttpServletRequest();
-        List<UniqueVinylDto> actualUniqueVinylDtoList = catalogController.getCatalogPage(request);
-        //then
+        List<UniqueVinylDto> actualUniqueVinylDtoList = catalogController.getCatalogPage(user);
+//        then
         assertEquals(expectedUniqueVinylDtoList, actualUniqueVinylDtoList);
         verify(mockedUniqueVinylService).findRandom(50);
     }
@@ -70,7 +73,9 @@ class CatalogControllerTest {
     void getCataloguePageJsonFilledList() throws Exception {
         //prepare
         List<UniqueVinyl> uniqueVinyls = dataGenerator.getUniqueVinylsList();
+        List<UniqueVinylDto> expectedUniqueVinylDtoList = dataGenerator.getUniqueVinylDtoListFromUniqueVinylList(uniqueVinyls);
         when(mockedUniqueVinylService.findRandom(50)).thenReturn(uniqueVinyls);
+        when(mockedUniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(anyList())).thenReturn(expectedUniqueVinylDtoList);
         //when
         MockHttpServletResponse response = mockMvc.perform(get("/catalog"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -93,9 +98,6 @@ class CatalogControllerTest {
                 .andExpect(status().isOk()).andReturn().getResponse();
         //then
         verify(mockedUniqueVinylService).findRandom(50);
-        Assertions.assertNotNull(response.getHeader("Content-Type"));
-        Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
-        Assertions.assertEquals("application/json", response.getContentType());
         Assertions.assertNotNull(response.getContentAsString());
     }
 
@@ -104,6 +106,7 @@ class CatalogControllerTest {
     void getCatalogPageJsonEmptyList() throws Exception {
         //prepare
         when(mockedUniqueVinylService.findRandom(50)).thenReturn(new ArrayList<>());
+        when(mockedUniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(any())).thenReturn(new ArrayList<>());
         //when
         MockHttpServletResponse response = mockMvc.perform(get("/catalog"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -111,10 +114,10 @@ class CatalogControllerTest {
         //then
         verify(mockedUniqueVinylService).findRandom(50);
         Assertions.assertNotNull(response.getHeader("Content-Type"));
-        Assertions.assertEquals("application/json", response.getHeader("Content-Type"));
-        Assertions.assertEquals("application/json", response.getContentType());
+        assertEquals("application/json", response.getHeader("Content-Type"));
+        assertEquals("application/json", response.getContentType());
         Assertions.assertNotNull(response.getContentAsString());
-        Assertions.assertEquals("[]", response.getContentAsString());
+        assertEquals("[]", response.getContentAsString());
     }
 
     @Test
@@ -124,7 +127,7 @@ class CatalogControllerTest {
         //when
         mockMvc.perform(get("/catalog"));
         //then
-        verify(mockedWantListService, never()).mergeSearchResult(any(Long.class), anyList());
+        verify(mockedWantListService, never()).mergeVinylsWithWantList(any(Long.class), anyList());
     }
 
 }

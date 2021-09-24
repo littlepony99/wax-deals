@@ -1,10 +1,13 @@
 package com.vinylteam.vinyl.discogs4j.client;
 
 import com.vinylteam.vinyl.discogs4j.util.HttpRequest;
+import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class DiscogsClient {
 
     //Authorization
@@ -453,16 +456,19 @@ public class DiscogsClient {
      * URL   : https://api.discogs.com/users/{username}/wants
      * params: username
      */
-    public String wantlist(String username, Map<String, String> extraParams) {
+    public String wantlist(String username, Map<String, String> extraParams) throws DiscogsUserNotFoundException {
         Map<String, String> params = new HashMap<String, String>();
         params.put("username", username);
         HttpRequest request = HttpRequest.get(replaceURLParams(URL_WANTLIST, params), extraParams, true).authorization(authenticatedHeader()).userAgent(userAgent);
         System.out.println(request.toString());
-
+        if (404 == request.code()) {
+            log.info("Discogs username={} is invalid", username);
+            throw new DiscogsUserNotFoundException("Invalid discogs username");
+        }
         return request.body();
     }
 
-    public String wantlist(String username) {
+    public String wantlist(String username) throws DiscogsUserNotFoundException {
         return wantlist(username, null);
     }
 

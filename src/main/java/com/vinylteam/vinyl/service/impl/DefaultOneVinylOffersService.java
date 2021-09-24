@@ -50,12 +50,14 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
         vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
         List<UniqueVinylDto> artistVinyls = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls);
-        List<UniqueVinylDto> mergedVinyls = wantListService.mergeSearchResult(userId, artistVinyls);
+        List<UniqueVinylDto> mergedArtistVinyls = wantListService.mergeVinylsWithWantList(userId, artistVinyls);
+        UniqueVinylDto mainVinyl = uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl);
+        List<UniqueVinylDto> mergedMainVinyl = wantListService.mergeVinylsWithWantList(userId, List.of(mainVinyl));
         return OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
-                .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
+                .mainVinyl(mergedMainVinyl.get(0))
                 .offersList(offerDtoList)
-                .vinylsByArtistList(mergedVinyls)
+                .vinylsByArtistList(mergedArtistVinyls)
                 .build();
     }
 
