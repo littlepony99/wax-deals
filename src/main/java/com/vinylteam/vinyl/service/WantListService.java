@@ -2,7 +2,7 @@ package com.vinylteam.vinyl.service;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
-import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
@@ -15,7 +15,7 @@ public interface WantListService {
 
     WantedVinyl addWantedVinyl(User user, UniqueVinylDto vinylDto) throws ForbiddenException, NotFoundException;
 
-    void importWantList(User user) throws DiscogsUserNotFoundException;
+    void importWantList(User user) throws DiscogsBadRequestException;
 
     List<WantedVinyl> getWantList(Long userId);
 

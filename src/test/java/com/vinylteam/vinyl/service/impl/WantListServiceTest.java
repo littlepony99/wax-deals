@@ -5,7 +5,7 @@ import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
-import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.DiscogsService;
@@ -95,7 +95,7 @@ public class WantListServiceTest {
         vinylsList.add(secondVinylDto);
         List<WantedVinyl> wantList = new ArrayList<>();
         WantedVinyl wantedItem = WantedVinyl.builder()
-                .id("wantListId")
+                .id(1L)
                 .vinylId("id")
                 .artist("artist")
                 .release("release")
@@ -137,7 +137,7 @@ public class WantListServiceTest {
                 .fullName("fullName")
                 .build();
         WantedVinyl wantedItem = WantedVinyl.builder()
-                .id("wantedId")
+                .id(1L)
                 .userId(1L)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -224,7 +224,7 @@ public class WantListServiceTest {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
-                .id("id")
+                .id(1L)
                 .userId(userId)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -262,7 +262,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Import wantList, check that all matches added to wantList")
-    void importTaskAllMatchesAddedToWantListTest() throws DiscogsUserNotFoundException {
+    void importTaskAllMatchesAddedToWantListTest() throws DiscogsBadRequestException {
         // before
         UniqueVinyl firstUniqueVinyl = UniqueVinyl.builder()
                 .id("id")
@@ -318,7 +318,7 @@ public class WantListServiceTest {
                 .id(1L)
                 .discogsUserName(null)
                 .build();
-        assertThrows(DiscogsUserNotFoundException.class, () -> wantListService.importWantList(user));
+        assertThrows(DiscogsBadRequestException.class, () -> wantListService.importWantList(user));
     }
 
     @Test
@@ -327,7 +327,7 @@ public class WantListServiceTest {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
-                .id("id")
+                .id(1L)
                 .userId(userId)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -335,7 +335,7 @@ public class WantListServiceTest {
                 .release("release")
                 .build();
         WantedVinyl secondWantedVinyl = WantedVinyl.builder()
-                .id("secondId")
+                .id(2L)
                 .userId(userId)
                 .vinylId("secondVinylId")
                 .artist("secondArtist")

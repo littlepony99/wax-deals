@@ -1,7 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.WantListService;
@@ -38,7 +38,7 @@ public class WantListController {
     @PostMapping(path = "/import")
     @PreAuthorize("hasRole('USER')")
     public void importDiscogsWantList(@RequestAttribute(value = "userEntity", required = false) User user)
-            throws DiscogsUserNotFoundException {
+            throws DiscogsBadRequestException {
         wantListService.importWantList(user);
     }
 

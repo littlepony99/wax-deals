@@ -129,7 +129,7 @@ public class WantListControllerTest {
         String jsonRequest = (new ObjectMapper()).writeValueAsString(wantedVinyl);
         // when
         WantedVinyl wantItem = WantedVinyl.builder()
-                .id("1234")
+                .id(1234L)
                 .vinylId("12")
                 .addedAt(Date.valueOf(LocalDate.now()))
                 .artist("artist")

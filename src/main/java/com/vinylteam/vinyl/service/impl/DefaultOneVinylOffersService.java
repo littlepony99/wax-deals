@@ -110,7 +110,7 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
                 .collect(Collectors.toList());
     }
 
-    public Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
         return shopsList
                 .stream()
                 .filter(store -> store.getId() == offer.getShopId())

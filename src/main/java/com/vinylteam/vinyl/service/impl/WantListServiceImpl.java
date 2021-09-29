@@ -4,10 +4,10 @@ import com.vinylteam.vinyl.dao.elasticsearch.WantListRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.entity.WantedVinyl;
-import com.vinylteam.vinyl.exception.DiscogsUserNotFoundException;
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.NotFoundException;
-import com.vinylteam.vinyl.exception.entity.VinylErrors;
+import com.vinylteam.vinyl.exception.entity.CatalogErrors;
 import com.vinylteam.vinyl.service.DiscogsService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.WantListService;
@@ -61,7 +61,7 @@ public class WantListServiceImpl implements WantListService {
         UniqueVinyl existingVinyl = uniqueVinylService.findById(vinylDto.getId());
         if (null == existingVinyl) {
             log.error("Can't find vinyl with id={}", vinylDto.getId());
-            throw new ForbiddenException(VinylErrors.NOT_FOUND_ERROR.getMessage());
+            throw new ForbiddenException(CatalogErrors.VINYL_BY_ID_NOT_FOUND.getMessage());
         }
 
         Optional<WantedVinyl> existingWantListItem = wantListRepository.findByVinylIdAndUserId(vinylDto.getId(), user.getId());
@@ -83,10 +83,10 @@ public class WantListServiceImpl implements WantListService {
 
 
     @Override
-    public void importWantList(User user) throws DiscogsUserNotFoundException {
+    public void importWantList(User user) throws DiscogsBadRequestException {
         log.info("WantList import. Start task, userId={}", user.getId());
         if (user.getDiscogsUserName() == null) {
-            throw new DiscogsUserNotFoundException("Discogs userName should be presented!");
+            throw new DiscogsBadRequestException("Discogs userName should be presented!");
         }
         List<UniqueVinyl> allVinyls = uniqueVinylService.findAll();
         List<UniqueVinyl> discogsMatchList = discogsService.getDiscogsMatchList(user.getDiscogsUserName(), allVinyls);

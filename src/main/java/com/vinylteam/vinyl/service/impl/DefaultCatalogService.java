@@ -46,9 +46,12 @@ public class DefaultCatalogService implements CatalogService {
     @Override
     public OneVinylPageDto getOneVinylPageDto(String id, Long userId) throws NotFoundException {
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
+        log.info("Found unique vinyl by id. vinyl={}", uniqueVinyl);
         Map<String, List<?>> offersAndShopsMap = getSortedInStockOffersAndShops(id);
         List<Shop> shops = (List<Shop>) offersAndShopsMap.get("shops");
+        log.info("Found {} shops for vinylId={}", shops.size(), id);
         List<Offer> offers = (List<Offer>) offersAndShopsMap.get("offers");
+        log.info("Found {} offers for vinylId={}", offers.size(), id);
         List<OneVinylOfferDto> offerDtoList = offers.stream()
                 .map(offer -> offerMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shops, offer)))
                 .collect(Collectors.toList());
@@ -56,6 +59,7 @@ public class DefaultCatalogService implements CatalogService {
         vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
         List<UniqueVinylDto> artistVinyls = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls);
+        log.info("Found {} artistVinyls for vinylId={}", artistVinyls.size(), id);
         List<UniqueVinylDto> mergedArtistVinyls = wantListService.mergeVinylsWithWantList(userId, artistVinyls);
         UniqueVinylDto mainVinyl = uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl);
         List<UniqueVinylDto> mergedMainVinyl = wantListService.mergeVinylsWithWantList(userId, List.of(mainVinyl));

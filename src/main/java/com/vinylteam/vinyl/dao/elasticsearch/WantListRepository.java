@@ -6,7 +6,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 import java.util.List;
 import java.util.Optional;
 
-public interface WantListRepository extends ElasticsearchRepository<WantedVinyl, String> {
+public interface WantListRepository extends ElasticsearchRepository<WantedVinyl, Long> {
 
     List<WantedVinyl> findAllByUserId(Long userId);
 
