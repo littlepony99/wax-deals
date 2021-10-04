@@ -30,8 +30,11 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.Filter;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -129,7 +132,7 @@ public class WantListControllerTest {
         String jsonRequest = (new ObjectMapper()).writeValueAsString(wantedVinyl);
         // when
         WantedVinyl wantItem = WantedVinyl.builder()
-                .id(1234L)
+                .id("1234")
                 .vinylId("12")
                 .addedAt(Date.valueOf(LocalDate.now()))
                 .artist("artist")

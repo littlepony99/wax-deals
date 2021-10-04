@@ -17,7 +17,7 @@ import java.util.Date;
 public class WantedVinyl {
 
     @Id
-    private Long id;
+    private String id;
 
     @Field(type = FieldType.Integer)
     private Long userId;

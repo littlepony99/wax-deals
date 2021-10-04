@@ -95,7 +95,7 @@ public class WantListServiceTest {
         vinylsList.add(secondVinylDto);
         List<WantedVinyl> wantList = new ArrayList<>();
         WantedVinyl wantedItem = WantedVinyl.builder()
-                .id(1L)
+                .id("1")
                 .vinylId("id")
                 .artist("artist")
                 .release("release")
@@ -137,7 +137,7 @@ public class WantListServiceTest {
                 .fullName("fullName")
                 .build();
         WantedVinyl wantedItem = WantedVinyl.builder()
-                .id(1L)
+                .id("1")
                 .userId(1L)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -224,7 +224,7 @@ public class WantListServiceTest {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
-                .id(1L)
+                .id("1")
                 .userId(userId)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -327,7 +327,7 @@ public class WantListServiceTest {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
-                .id(1L)
+                .id("1")
                 .userId(userId)
                 .vinylId("vinylId")
                 .artist("artist")
@@ -335,7 +335,7 @@ public class WantListServiceTest {
                 .release("release")
                 .build();
         WantedVinyl secondWantedVinyl = WantedVinyl.builder()
-                .id(2L)
+                .id("2")
                 .userId(userId)
                 .vinylId("secondVinylId")
                 .artist("secondArtist")
