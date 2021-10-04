@@ -3,7 +3,9 @@ package com.vinylteam.vinyl.security;
 import java.time.LocalDateTime;
 
 public interface LogoutTokenStorageService {
-    void storeToken(String token, LocalDateTime expirationDate);
 
-    boolean isTokenBlocked(String token);
+    boolean isTokenPairBlocked(String pairIdentifier);
+
+    void storePairIdentifier(String pairIdentifier, LocalDateTime expirationDate);
+
 }

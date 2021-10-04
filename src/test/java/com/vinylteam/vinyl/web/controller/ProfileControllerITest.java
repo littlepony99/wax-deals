@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.exception.JwtAuthenticationException;
 import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.web.dto.LoginRequest;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
@@ -25,8 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.Filter;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.emptyString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -89,10 +88,10 @@ public class ProfileControllerITest {
         UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         var response = mockMvc.perform(put("/profile")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 //then
-                .andExpect(status().isForbidden())
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$", not(empty())))
                 //.andExpect(jsonPath("$.resultCode", equalTo("1")))
                 .andExpect(jsonPath("$.message", not(emptyString())))
@@ -113,9 +112,9 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         mockMvc.perform(put("/profile")
-                        .header("Authorization", loginResponse.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .header("Authorization", loginResponse.getJwtToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("Error. Email is empty. Please enter email correctly.")));
@@ -127,11 +126,11 @@ public class ProfileControllerITest {
     public void changeDiscogsUserTest() throws Exception {
         UserInfoRequest userChangeRequest = UserInfoRequest.builder().discogsUserName("discogsUserName").build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
-        Exception exception = assertThrows(JwtAuthenticationException.class,
-                () -> mockMvc.perform(put("/profile")
-                        .header("Authorization", "Bearer_badJWT")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest)));
+        mockMvc.perform(put("/profile")
+                .header("Authorization", "Bearer_badJWT")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -148,9 +147,9 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         mockMvc.perform(put("/profile")
-                        .header("Authorization", loginResponse.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .header("Authorization", loginResponse.getJwtToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$", not(hasKey("token"))))
@@ -175,12 +174,12 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         mockMvc.perform(put("/profile")
-                        .header("Authorization", loginResponse.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .header("Authorization", loginResponse.getJwtToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", not(emptyString())))
-                .andExpect(jsonPath("$.token", not(emptyString())))
+                .andExpect(jsonPath("$.jwtToken", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("Your email and/or discogs username have been changed.")));
         User user = userDao.findByEmail(newTestUserEmail).get();
         assertEquals(changedDiscogsUserName, user.getDiscogsUserName());
@@ -202,14 +201,14 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         var response = mockMvc.perform(put("/profile/change-password")
-                        .header("Authorization", loginResponse.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .header("Authorization", loginResponse.getJwtToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
         UserSecurityResponse loginResponseForNewPassword = jwtService.authenticateByRequest(new LoginRequest(testUserEmail, newUserPassword));
-        assertTrue(!loginResponseForNewPassword.getToken().isEmpty());
+        assertTrue(!loginResponseForNewPassword.getJwtToken().isEmpty());
     }
 
     @Test
@@ -226,9 +225,9 @@ public class ProfileControllerITest {
                 .build();
         String jsonRequest = (new ObjectMapper()).writeValueAsString(userChangeRequest);
         mockMvc.perform(put("/profile/change-password")
-                        .header("Authorization", loginResponse.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
+                .header("Authorization", loginResponse.getJwtToken())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonRequest))
                 .andExpect(status().isBadRequest());
     }
 }

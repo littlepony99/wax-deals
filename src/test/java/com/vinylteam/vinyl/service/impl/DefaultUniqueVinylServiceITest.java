@@ -2,6 +2,7 @@ package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.elasticsearch.UniqueVinylRepository;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import org.junit.jupiter.api.BeforeEach;
@@ -238,7 +239,7 @@ public class DefaultUniqueVinylServiceITest {
 
     @Test
     @DisplayName("Checks that when id is not null UniqueVinylDao.findById(id) is called, it's result is returned")
-    void findByValidIdTest() {
+    void findByValidIdTest() throws NotFoundException {
         //prepare
         UniqueVinyl expectedUniqueVinyl = uniqueVinyls.get(0);
         //when
@@ -251,7 +252,7 @@ public class DefaultUniqueVinylServiceITest {
     @DisplayName("Throws RuntimeException when id has no matches")
     void findByNoMatchIdTest() {
         //when
-        assertThrows(RuntimeException.class, () -> uniqueVinylService.findById("100"));
+        assertThrows(NotFoundException.class, () -> uniqueVinylService.findById("100"));
     }
 
 }

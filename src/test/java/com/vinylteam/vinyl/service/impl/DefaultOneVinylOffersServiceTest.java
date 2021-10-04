@@ -3,6 +3,7 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.OfferService;
 import com.vinylteam.vinyl.service.ShopService;
 import com.vinylteam.vinyl.service.UniqueVinylService;
@@ -107,7 +108,7 @@ class DefaultOneVinylOffersServiceTest {
 
     @Test
     @DisplayName("gets  in-stock offers and shops for them when unique vinyl has valid offers")
-    void getInStockOffersAndShops_whenUniqueVinylHasValidOffers_thenCorrect() {
+    void getInStockOffersAndShops_whenUniqueVinylHasValidOffers_thenCorrect() throws NotFoundException {
         //prepare
         String id = "1";
         UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);

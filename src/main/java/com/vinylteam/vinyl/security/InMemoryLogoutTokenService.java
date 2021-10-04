@@ -3,10 +3,8 @@ package com.vinylteam.vinyl.security;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-import com.vinylteam.vinyl.service.JwtService;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -26,23 +24,33 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
                 .build();
     }
 
+    @Override
+    public boolean isTokenPairBlocked(String pairIdentifier) {
+        return logoutTokensCache.asMap().containsKey(pairIdentifier);
+    }
+
+    @Override
+    public void storePairIdentifier(String pairIdentifier, LocalDateTime expirationDate) {
+        logoutTokensCache.put(pairIdentifier, expirationDate);
+    }
+
     private Expiry<String, LocalDateTime> getExpirationStrategy() {
-        return new Expiry<String, LocalDateTime>() {
+        return new Expiry<>() {
 
             private final ZoneOffset offset = ZoneOffset.ofTotalSeconds(0);
 
             @Override
-            public long expireAfterCreate(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime) {
+            public long expireAfterCreate(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime) {
                 return getDifference(localDateTime);
             }
 
             @Override
-            public long expireAfterUpdate(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
+            public long expireAfterUpdate(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
                 return currentDuration;
             }
 
             @Override
-            public long expireAfterRead(@NonNull String s, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
+            public long expireAfterRead(@NonNull String entryKey, @NonNull LocalDateTime localDateTime, long currentTime, @NonNegative long currentDuration) {
                 return currentDuration;
             }
 
@@ -50,15 +58,5 @@ public class InMemoryLogoutTokenService implements LogoutTokenStorageService {
                 return TimeUnit.SECONDS.toNanos(1_000_000_000L * (localDateTime.toEpochSecond(offset) - LocalDateTime.now().toEpochSecond(offset)));
             }
         };
-    }
-
-    @Override
-    public void storeToken(String token, LocalDateTime expirationDate) {
-        logoutTokensCache.put(token, expirationDate);
-    }
-
-    @Override
-    public boolean isTokenBlocked(String token) {
-        return logoutTokensCache.asMap().containsKey(token);
     }
 }

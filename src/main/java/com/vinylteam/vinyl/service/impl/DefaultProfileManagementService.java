@@ -1,8 +1,10 @@
-package com.vinylteam.vinyl.service;
+package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.security.LogoutService;
+import com.vinylteam.vinyl.security.DefaultLogoutService;
+import com.vinylteam.vinyl.service.ProfileManagementService;
+import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;
@@ -19,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DefaultProfileManagementService implements ProfileManagementService {
 
     private final UserService userService;
-    private final LogoutService logoutService;
+    private final DefaultLogoutService logoutService;
     private final JwtTokenProvider jwtService;
     private final UserMapper userMapper;
 
@@ -31,7 +33,9 @@ public class DefaultProfileManagementService implements ProfileManagementService
         userService.changeProfile(user, userProfileInfo.getEmail(), userProfileInfo.getDiscogsUserName());
         var response = ControllerResponseUtils.getResponseWithMessage("Your email and/or discogs username have been changed.");
         if (!user.getEmail().equals(oldEmail)) {
-            response.setToken(jwtService.createToken(user.getEmail(), userMapper.mapToDto(user).getAuthorities()));
+            var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
+            response.setJwtToken(newTokenPair.getJwtToken());
+            response.setRefreshToken(newTokenPair.getRefreshToken());
             logoutService.logout(request, null, null);
         }
         return response;
@@ -43,7 +47,7 @@ public class DefaultProfileManagementService implements ProfileManagementService
         userService.changeUserPassword(userProfileInfo, user);
         String token = jwtService
                 .authenticateByRequest(new LoginRequest(user.getEmail(), userProfileInfo.getNewPassword()))
-                .getToken();
+                .getJwtToken();
         logoutService.logout(request, null, null);
         return new ChangePasswordResponse("Your password has been changed.", token);
     }

@@ -51,4 +51,5 @@ class DefaultUniqueVinylServiceTest {
         //when
         assertThrows(IllegalArgumentException.class, () -> uniqueVinylService.findById(null));
     }
+
 }

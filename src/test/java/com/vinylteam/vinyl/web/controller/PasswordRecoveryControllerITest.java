@@ -23,14 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -80,8 +77,8 @@ class PasswordRecoveryControllerITest {
         request.setEmail("IAmNotExisting@google.com");
         String json = new ObjectMapper().writeValueAsString(request);
         mockMvc.perform(post("/password-recovery")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message", not(emptyString())))
                 .andExpect(jsonPath("$.message", equalTo("We can't find matching email. Please check your email or contact us.")));
@@ -105,8 +102,8 @@ class PasswordRecoveryControllerITest {
         String json = new ObjectMapper().writeValueAsString(request);
         //when
         mockMvc.perform(post("/password-recovery")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
@@ -120,8 +117,8 @@ class PasswordRecoveryControllerITest {
         String stage2JsonRequest = new ObjectMapper().writeValueAsString(stage2Request);
 
         mockMvc.perform(put("/password-recovery")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(stage2JsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(stage2JsonRequest))
                 //then
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", not(empty())))
@@ -178,8 +175,8 @@ class PasswordRecoveryControllerITest {
         String stage2JsonRequest = new ObjectMapper().writeValueAsString(stage2Request);
         //when
         mockMvc.perform(put("/password-recovery")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(stage2JsonRequest))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(stage2JsonRequest))
                 //then
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$", not(empty())))

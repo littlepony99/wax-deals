@@ -14,6 +14,7 @@ import java.util.List;
 @Setter
 public class JwtUser implements UserDetails {
 
+    private Long id;
     private String username;
     private String password;
     private boolean enabled;
@@ -25,7 +26,7 @@ public class JwtUser implements UserDetails {
         return authorities;
     }
 
-    public void setAuthorities(List<SimpleGrantedAuthority> authorities){
+    public void setAuthorities(List<SimpleGrantedAuthority> authorities) {
         this.authorities = authorities;
     }
 

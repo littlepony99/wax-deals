@@ -12,4 +12,5 @@ public class ChangePasswordResponse {
     private final String message;
     private final String jwtToken;
     private String refreshToken;
+
 }

@@ -1,8 +1,5 @@
 package com.vinylteam.vinyl.util;
 
-import com.vinylteam.vinyl.dao.jdbc.extractor.DefaultUserMapper;
-import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
-import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.web.dto.UserDto;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 
@@ -10,13 +7,13 @@ import java.util.Map;
 
 public class ControllerResponseUtils {
 
-    private static final UserMapper userMapper = new DefaultUserMapper();
-
-    public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap){
+    public static UserSecurityResponse getResponseFromMap(Map<String, Object> responseMap) {
         UserSecurityResponse response = new UserSecurityResponse();
-        response.setMessage((String)responseMap.get("message"));
-        response.setToken((String)responseMap.get("token"));
-        response.setUser((UserDto)responseMap.get("user"));
+        response.setMessage((String) responseMap.get("message"));
+        response.setToken((String) responseMap.get("token"));
+        response.setJwtToken((String) responseMap.get("accessToken"));
+        response.setRefreshToken((String) responseMap.get("refreshToken"));
+        response.setUser((UserDto) responseMap.get("user"));
         return response;
     }
 
@@ -34,13 +31,7 @@ public class ControllerResponseUtils {
     }
 
     public static UserSecurityResponse setSuccessStatusInfo(UserSecurityResponse response) {
-        return setStatusInfo(response,"0", "");
-    }
-
-    public static  Map<String, Object> getUserCredentialsMap(String token, User user) {
-        return Map.of(
-                "user", userMapper.mapUserToDto(user),
-                "token", token);
+        return setStatusInfo(response, "0", "");
     }
 
 }

@@ -3,11 +3,13 @@ package com.vinylteam.vinyl.service.impl;
 import com.vinylteam.vinyl.entity.Offer;
 import com.vinylteam.vinyl.entity.Shop;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.service.*;
 import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
 import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylOfferDto;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
+import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.parser.ParseException;
@@ -27,16 +29,17 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
+    private final WantListService wantListService;
 
     private final UniqueVinylMapper uniqueVinylMapper;
     private final OneVinylOfferMapper oneVinylOfferMapper;
 
-    public UniqueVinyl getUniqueVinyl(String id) {
+    public UniqueVinyl getUniqueVinyl(String id) throws NotFoundException {
         return uniqueVinylService.findById(id);
     }
 
     @Override
-    public OneVinylPageDto prepareOneVinylInfo(String id) {
+    public OneVinylPageDto prepareOneVinylInfo(String id, Long userId) throws NotFoundException {
         UniqueVinyl uniqueVinyl = getUniqueVinyl(id);
         HashMap<String, List> offersAndShopsMap = getSortedInStockOffersAndShops(id);
         List<Shop> shops = offersAndShopsMap.get("shops");
@@ -47,16 +50,20 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
         List<UniqueVinyl> vinyls = addAuthorVinyls(uniqueVinyl);
         vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
+        List<UniqueVinylDto> artistVinyls = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls);
+        List<UniqueVinylDto> mergedArtistVinyls = wantListService.mergeVinylsWithWantList(userId, artistVinyls);
+        UniqueVinylDto mainVinyl = uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl);
+        List<UniqueVinylDto> mergedMainVinyl = wantListService.mergeVinylsWithWantList(userId, List.of(mainVinyl));
         return OneVinylPageDto.builder()
                 .discogsLink(discogsLink)
-                .mainVinyl(uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl))
+                .mainVinyl(mergedMainVinyl.get(0))
                 .offersList(offerDtoList)
-                .vinylsByArtistList(uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls))
+                .vinylsByArtistList(mergedArtistVinyls)
                 .build();
     }
 
     @Override
-    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) {
+    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) throws NotFoundException {
         String uniqueVinylId = identifier;
         UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
         List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
@@ -103,7 +110,7 @@ public class DefaultOneVinylOffersService implements OneVinylOffersService {
                 .collect(Collectors.toList());
     }
 
-    public Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
         return shopsList
                 .stream()
                 .filter(store -> store.getId() == offer.getShopId())
