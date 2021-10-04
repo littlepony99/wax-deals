@@ -1,8 +1,10 @@
-package com.vinylteam.vinyl.service;
+package com.vinylteam.vinyl.service.impl;
 
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.security.DefaultLogoutService;
+import com.vinylteam.vinyl.service.ProfileManagementService;
+import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.service.impl.JwtTokenProvider;
 import com.vinylteam.vinyl.util.ControllerResponseUtils;
 import com.vinylteam.vinyl.web.dto.ChangePasswordResponse;

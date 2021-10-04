@@ -275,6 +275,7 @@ public class DataGeneratorForTests {
                 .artist(uniqueVinyl.getArtist())
                 .release(uniqueVinyl.getRelease())
                 .imageLink(uniqueVinyl.getImageLink())
+                .isWantListItem(false)
                 .build();
     }
 

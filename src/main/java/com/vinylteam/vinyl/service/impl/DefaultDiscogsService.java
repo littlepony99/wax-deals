@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.discogs4j.entity.DiscogsVinylInfo;
 import com.vinylteam.vinyl.discogs4j.entity.RawResponse;
 import com.vinylteam.vinyl.discogs4j.util.HttpRequest;
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.service.DiscogsService;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
@@ -55,7 +56,7 @@ public class DefaultDiscogsService implements DiscogsService {
     }
 
     @Override
-    public List<UniqueVinyl> getDiscogsMatchList(String discogsUserName, List<UniqueVinyl> allUniqueVinyl) {
+    public List<UniqueVinyl> getDiscogsMatchList(String discogsUserName, List<UniqueVinyl> allUniqueVinyl) throws DiscogsBadRequestException {
         List<UniqueVinyl> forShowing = new ArrayList<>();
         if (discogsUserName == null || allUniqueVinyl == null || discogsUserName.isEmpty() || allUniqueVinyl.isEmpty()) {
             return forShowing;
@@ -155,7 +156,7 @@ public class DefaultDiscogsService implements DiscogsService {
         return discogsLink;
     }
 
-    Optional<List<DiscogsVinylInfo>> getDiscogsVinylInfo(String discogsUserName) {
+    Optional<List<DiscogsVinylInfo>> getDiscogsVinylInfo(String discogsUserName) throws DiscogsBadRequestException {
         if (discogsUserName == null || discogsUserName.isEmpty()) {
             return Optional.empty();
         }

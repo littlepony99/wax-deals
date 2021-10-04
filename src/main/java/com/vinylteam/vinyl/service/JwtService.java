@@ -13,6 +13,8 @@ public interface JwtService {
 
     boolean isTokenValid(String token);
 
+    boolean isTokenValidAndNotExpired(String token, String expectedTokenType);
+
     boolean isTokenValid(String token, String tokenType);
 
     String extractToken(HttpServletRequest request);
