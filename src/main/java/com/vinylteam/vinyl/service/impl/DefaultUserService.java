@@ -29,8 +29,13 @@ public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
     private final EmailConfirmationService emailConfirmationService;
-    private final PasswordRecoveryService passwordRecoveryService;
+    private PasswordRecoveryService passwordRecoveryService;
     private SecurityService securityService;
+
+    @Autowired
+    public void setPasswordRecoveryService(PasswordRecoveryService passwordRecoveryService) {
+        this.passwordRecoveryService = passwordRecoveryService;
+    }
 
     @Autowired
     public void setSecurityService(SecurityService securityService) {
