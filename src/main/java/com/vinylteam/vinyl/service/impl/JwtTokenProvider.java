@@ -127,6 +127,8 @@ public class JwtTokenProvider implements JwtService {
         String expectedTokenType = path.contains("/token/refresh-token") ? "refresh" : "access";
         if (isTokenValid(token, expectedTokenType)) {
             Authentication auth = getAuthentication(token);
+
+            //TODO: check can it be null
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUser principal = (JwtUser) auth.getPrincipal();
@@ -141,6 +143,7 @@ public class JwtTokenProvider implements JwtService {
 
     @Override
     public Authentication getAuthentication(String token) {
+        //TODO: check what if the user in the token does not exist in DB
         UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
@@ -196,6 +199,7 @@ public class JwtTokenProvider implements JwtService {
 
     private UserSecurityResponse prepareUserSecurityResponse(Authentication authentication) {
         if (!(authentication.getPrincipal() instanceof JwtUser)) {
+            //TODO: is the message proper? to be checked
             throw new JwtAuthenticationException("JWT Token is not valid");
         }
         var authUser = (JwtUser) authentication.getPrincipal();
