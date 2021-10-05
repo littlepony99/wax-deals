@@ -129,7 +129,7 @@ class CatalogControllerTest {
         artistVinyls.remove(uniqueVinyl);
         String discogsLink = "link";
         OneVinylPageDto oneVinylPageDto = dataGenerator.getOneVinylPageDto(discogsLink, uniqueVinyl, offersAndShopsMap, artistVinyls);
-        when(catalogService.getOneVinylPageDto(id)).thenReturn(oneVinylPageDto);
+        when(catalogService.getOneVinylPageDto(eq(id), any())).thenReturn(oneVinylPageDto);
         // when
         MockHttpServletResponse response = mockMvc.perform(get("/catalog/1").param("id", "1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -173,7 +173,7 @@ class CatalogControllerTest {
         Map<String, List<?>> offersAndShopsMap = dataGenerator.getOneVinylOffersAndShopsMap();
         String discogsLink = "link";
         OneVinylPageDto oneVinylPageDto = dataGenerator.getOneVinylPageDto(discogsLink, uniqueVinyl, offersAndShopsMap, new ArrayList<>());
-        when(catalogService.getOneVinylPageDto(id)).thenReturn(oneVinylPageDto);
+        when(catalogService.getOneVinylPageDto(eq(id), any())).thenReturn(oneVinylPageDto);
         // when
         MockHttpServletResponse response = mockMvc.perform(get("/catalog/1").param("id", "1"))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -209,7 +209,7 @@ class CatalogControllerTest {
     @Test
     void getOneVinylNoVinylById() throws Exception {
         String wrongId = "id";
-        when(catalogService.getOneVinylPageDto(eq(wrongId))).thenThrow(new NotFoundException(CatalogErrors.VINYL_BY_ID_NOT_FOUND.getMessage()));
+        when(catalogService.getOneVinylPageDto(eq(wrongId), any())).thenThrow(new NotFoundException(CatalogErrors.VINYL_BY_ID_NOT_FOUND.getMessage()));
         var response = mockMvc.perform(get("/catalog/" + wrongId))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())

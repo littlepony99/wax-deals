@@ -18,48 +18,39 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DefaultCatalogService implements CatalogService {
+public class DefaultOneVinylOffersService implements OneVinylOffersService {
 
     private final UniqueVinylService uniqueVinylService;
     private final OfferService offerService;
     private final ShopService shopService;
     private final DiscogsService discogsService;
     private final WantListService wantListService;
-    private final OneVinylOfferMapper offerMapper;
+
     private final UniqueVinylMapper uniqueVinylMapper;
+    private final OneVinylOfferMapper oneVinylOfferMapper;
 
     public UniqueVinyl getUniqueVinyl(String id) throws NotFoundException {
         return uniqueVinylService.findById(id);
     }
 
     @Override
-    public List<UniqueVinylDto> findRandomUniqueVinyls(int amount) {
-        return uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(uniqueVinylService.findRandom(amount));
-    }
-
-    @Override
-    public OneVinylPageDto getOneVinylPageDto(String id, Long userId) throws NotFoundException {
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
-        log.info("Found unique vinyl by id. vinyl={}", uniqueVinyl);
-        Map<String, List<?>> offersAndShopsMap = getSortedInStockOffersAndShops(id);
-        List<Shop> shops = (List<Shop>) offersAndShopsMap.get("shops");
-        log.info("Found {} shops for vinylId={}", shops.size(), id);
-        List<Offer> offers = (List<Offer>) offersAndShopsMap.get("offers");
-        log.info("Found {} offers for vinylId={}", offers.size(), id);
+    public OneVinylPageDto prepareOneVinylInfo(String id, Long userId) throws NotFoundException {
+        UniqueVinyl uniqueVinyl = getUniqueVinyl(id);
+        HashMap<String, List> offersAndShopsMap = getSortedInStockOffersAndShops(id);
+        List<Shop> shops = offersAndShopsMap.get("shops");
+        List<Offer> offers = offersAndShopsMap.get("offers");
         List<OneVinylOfferDto> offerDtoList = offers.stream()
-                .map(offer -> offerMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shops, offer)))
+                .map(offer -> oneVinylOfferMapper.offerAndShopToVinylOfferDto(offer, findOfferShop(shops, offer)))
                 .collect(Collectors.toList());
-        List<UniqueVinyl> vinyls = getOtherUniqueVinylsByVinylArtist(uniqueVinyl);
+        List<UniqueVinyl> vinyls = addAuthorVinyls(uniqueVinyl);
         vinyls.remove(uniqueVinyl);
         String discogsLink = getDiscogsLink(uniqueVinyl);
         List<UniqueVinylDto> artistVinyls = uniqueVinylMapper.uniqueVinylsToUniqueVinylDtoList(vinyls);
-        log.info("Found {} artistVinyls for vinylId={}", artistVinyls.size(), id);
         List<UniqueVinylDto> mergedArtistVinyls = wantListService.mergeVinylsWithWantList(userId, artistVinyls);
         UniqueVinylDto mainVinyl = uniqueVinylMapper.uniqueVinylToDto(uniqueVinyl);
         List<UniqueVinylDto> mergedMainVinyl = wantListService.mergeVinylsWithWantList(userId, List.of(mainVinyl));
@@ -72,21 +63,16 @@ public class DefaultCatalogService implements CatalogService {
     }
 
     @Override
-    public Map<String, List<?>> getSortedInStockOffersAndShops(String identifier) throws NotFoundException {
-        // find vinyl
-        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(identifier);
-        // find offers for uniqueVinyl
+    public HashMap<String, List> getSortedInStockOffersAndShops(String identifier) throws NotFoundException {
+        String uniqueVinylId = identifier;
+        UniqueVinyl uniqueVinyl = uniqueVinylService.findById(uniqueVinylId);
         List<Offer> offers = offerService.findByUniqueVinylId(uniqueVinyl.getId());
-        // 1 prepare offers -- validate and parse
-        List<Offer> sortedInStockOffers = getActualizedInStockOffersByPrice(offers);
-        // find shopIds for offers
+        List<Offer> sortedInStockOffers = getInStockOffersByPrice(offers);
         List<Integer> shopIds = offerService.findShopIds(sortedInStockOffers);
-        // find shops by their ids
         List<Shop> shopsFromOffers = shopService.findShopsByListOfIds(shopIds);
-        // if there is no offers
         checkIsVinylInStock(uniqueVinyl, sortedInStockOffers);
 
-        Map<String, List<?>> offersAndShopsMap = new HashMap<>();
+        HashMap<String, List> offersAndShopsMap = new HashMap<>();
         offersAndShopsMap.put("offers", sortedInStockOffers);
         offersAndShopsMap.put("shops", shopsFromOffers);
 
@@ -94,13 +80,8 @@ public class DefaultCatalogService implements CatalogService {
     }
 
     @Override
-    public List<UniqueVinyl> getOtherUniqueVinylsByVinylArtist(UniqueVinyl uniqueVinyl) {
-        List<UniqueVinyl> preparedListById = new ArrayList<>();
-        uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
-                .stream()
-                .filter(v -> v.getId() != uniqueVinyl.getId())
-                .forEach(preparedListById::add);
-        return preparedListById;
+    public List<UniqueVinyl> addAuthorVinyls(UniqueVinyl uniqueVinyl) {
+        return prepareVinylsSection(uniqueVinyl);
     }
 
     @Override
@@ -121,7 +102,7 @@ public class DefaultCatalogService implements CatalogService {
         }
     }
 
-    List<Offer> getActualizedInStockOffersByPrice(List<Offer> dbOffers) {
+    List<Offer> getInStockOffersByPrice(List<Offer> dbOffers) {
         return dbOffers.stream()
                 .map(offerService::actualizeOffer)
                 .filter(Offer::isInStock)
@@ -129,12 +110,23 @@ public class DefaultCatalogService implements CatalogService {
                 .collect(Collectors.toList());
     }
 
-    public Shop findOfferShop(List<Shop> shopsList, Offer offer) {
+    Shop findOfferShop(List<Shop> shopsList, Offer offer) {
         return shopsList
                 .stream()
                 .filter(store -> store.getId() == offer.getShopId())
                 .findFirst()
                 .get();
+    }
+
+    List<UniqueVinyl> prepareVinylsSection(UniqueVinyl uniqueVinyl) {
+        List<UniqueVinyl> preparedListById = new ArrayList<>();
+
+        uniqueVinylService.findByArtist(uniqueVinyl.getArtist())
+                .stream()
+                .filter(v -> v.getId() != uniqueVinyl.getId())
+                .forEach(preparedListById::add);
+
+        return preparedListById;
     }
 
 }

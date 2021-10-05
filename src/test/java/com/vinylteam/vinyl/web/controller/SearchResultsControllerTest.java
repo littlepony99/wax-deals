@@ -1,6 +1,7 @@
 package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.UniqueVinyl;
+import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.util.DataGeneratorForTests;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
@@ -53,7 +54,8 @@ class SearchResultsControllerTest {
         when(mockedUniqueVinylService.findByFilter(matcher)).thenReturn(uniqueVinyls);
         List<UniqueVinylDto> expectedUniqueVinylDtoList = dataGenerator.getUniqueVinylDtoListFromUniqueVinylList(uniqueVinyls);
         //when
-        List<UniqueVinylDto> actualUniqueVinylDtoList = searchResultsController.getSearchResults(matcher);
+        User user = dataGenerator.getUserWithNumber(1);
+        List<UniqueVinylDto> actualUniqueVinylDtoList = searchResultsController.getSearchResults(matcher, user);
         //then
         assertEquals(expectedUniqueVinylDtoList, actualUniqueVinylDtoList);
         verify(mockedUniqueVinylService).findByFilter(matcher);

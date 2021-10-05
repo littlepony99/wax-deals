@@ -2,10 +2,7 @@ package com.vinylteam.vinyl.web.controller;
 
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.NotFoundException;
-import com.vinylteam.vinyl.service.UniqueVinylService;
 import com.vinylteam.vinyl.service.impl.DefaultCatalogService;
-import com.vinylteam.vinyl.util.impl.OneVinylOfferMapper;
-import com.vinylteam.vinyl.util.impl.UniqueVinylMapper;
 import com.vinylteam.vinyl.web.dto.OneVinylPageDto;
 import com.vinylteam.vinyl.web.dto.UniqueVinylDto;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +17,7 @@ import java.util.List;
 @RequestMapping("/catalog")
 public class CatalogController {
 
-    private final UniqueVinylService uniqueVinylService;
     private final DefaultCatalogService catalogService;
-
-    private final UniqueVinylMapper uniqueVinylMapper;
-    private final OneVinylOfferMapper oneVinylOfferMapper;
 
     private final int amountOfRandomVinyls = 50;
 
@@ -34,9 +27,10 @@ public class CatalogController {
     }
 
     @GetMapping("/{id}")
-    public OneVinylPageDto getOneVinylOfferPage(@SessionAttribute(value = "user", required = false) User user,
+    public OneVinylPageDto getOneVinylOfferPage(@RequestAttribute(value = "userEntity", required = false) User user,
                                                 @PathVariable("id") String id) throws NotFoundException {
-        return catalogService.getOneVinylPageDto(id);
+        Long userId = user == null ? null : user.getId();
+        return catalogService.getOneVinylPageDto(id, userId);
     }
 
 }
