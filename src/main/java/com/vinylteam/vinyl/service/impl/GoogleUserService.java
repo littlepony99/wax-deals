@@ -39,8 +39,6 @@ public class GoogleUserService implements ExternalUserService {
 
     private final UserMapper userMapper;
 
-    private final PasswordRecoveryService passwordRecoveryService;
-
     private PasswordGenerator generator;
 
     @Autowired
@@ -56,11 +54,11 @@ public class GoogleUserService implements ExternalUserService {
             return response;
         }
         var idToken = googleIdToken.get();
-        var appUser = getApplicationUser(idToken);
         Optional<String> newUserEmail = getEmailFromToken(idToken);
         if (newUserEmail.isEmpty()) {
             return response;
         }
+        var appUser = getAppUserIfExists(idToken);
         if (appUser.isEmpty()) {//no user yet
             log.info("No user exists");
             String emailToRegister = newUserEmail.get();
@@ -70,15 +68,12 @@ public class GoogleUserService implements ExternalUserService {
                     .password(newPassword)
                     .passwordConfirmation(newPassword)
                     .build();
-            userService.register(registerRequest);
-            appUser = userDao.findByEmail(emailToRegister);
-            userDao.setUserStatusTrue(appUser.get().getId());
-            passwordRecoveryService.sendLink(emailToRegister);
+            appUser = userService.registerExternally(registerRequest);
         }
         var user = appUser.get();
         response.setMessage(user.getEmail());
-        var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
         response.setUser(userMapper.mapUserToDto(user));
+        var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
         response.setJwtToken(newTokenPair.getJwtToken());
         response.setRefreshToken(newTokenPair.getRefreshToken());
         return response;
@@ -95,31 +90,18 @@ public class GoogleUserService implements ExternalUserService {
         return Optional.ofNullable(verifier.verify(token));
     }
 
-    public Optional<User> getApplicationUser(GoogleIdToken idToken) {
+    public Optional<User> getAppUserIfExists(GoogleIdToken idToken) {
         GoogleIdToken.Payload payload = idToken.getPayload();
 
-        // Print user identifier
         String userId = payload.getSubject();
         log.info("User ID: " + userId);
 
-        // Get profile information from payload
         String email = payload.getEmail();
         boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
         if (emailVerified) {
             return userDao.findByEmail(email);
         }
         return Optional.empty();
-/*        String name = (String) payload.get("name");
-        String pictureUrl = (String) payload.get("picture");
-        String locale = (String) payload.get("locale");
-        String familyName = (String) payload.get("family_name");
-        String givenName = (String) payload.get("given_name");*/
-
-        // Use or store profile information
-        // ...
-
-/*        z.setMessage(email);
-        return null;*/
     }
 
     public Optional<String> getEmailFromToken(GoogleIdToken idToken) {
