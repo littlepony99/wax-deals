@@ -188,7 +188,7 @@ public class JwtTokenProvider implements JwtService {
     @Override
     public UserSecurityResponse authenticateByRequest(LoginRequest loginRequest) {
         Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-        return prepareUserSecurityResponse(authenticationManager.authenticate(preparedAuth));
+        return prepareUserSecurityResponse(authenticationManager.authenticate(preparedAuth), "Bad Credentials");
     }
 
     @Override
@@ -207,13 +207,12 @@ public class JwtTokenProvider implements JwtService {
         String pairIdentifier = getPairIdentifier(claims);
         LocalDateTime expirationDate = getExpirationDate(claims);
         tokenStorageService.storePairIdentifier(pairIdentifier, expirationDate);
-        return prepareUserSecurityResponse(SecurityContextHolder.getContext().getAuthentication());
+        return prepareUserSecurityResponse(SecurityContextHolder.getContext().getAuthentication(),"JWT Token is not valid");
     }
 
-    private UserSecurityResponse prepareUserSecurityResponse(Authentication authentication) {
+    private UserSecurityResponse prepareUserSecurityResponse(Authentication authentication, String failureMessage) {
         if (!(authentication.getPrincipal() instanceof JwtUser)) {
-            //TODO: is the message proper? to be checked
-            throw new JwtAuthenticationException("JWT Token is not valid");
+            throw new JwtAuthenticationException(failureMessage);
         }
         var authUser = (JwtUser) authentication.getPrincipal();
         var newTokenPair = getTokenPair(authUser);
