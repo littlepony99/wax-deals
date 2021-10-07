@@ -105,6 +105,7 @@ public class WantListServiceImpl implements WantListService {
         List<UniqueVinylDto> result = wantedVinylsToUniqueVinylDtoList(wantList);
         for (UniqueVinylDto uniqueVinylDto : result) {
             uniqueVinylDto.setIsWantListItem(Boolean.TRUE);
+            uniqueVinylDto.setHasOffers(hasUniqueVinylOffers(uniqueVinylDto.getId()));
         }
         return result;
     }
@@ -126,6 +127,15 @@ public class WantListServiceImpl implements WantListService {
             }
         }
         log.info("WantList import. Added {} new items ", counter);
+    }
+
+    private Boolean hasUniqueVinylOffers(String id) {
+        try {
+            UniqueVinyl uniqueVinyl = uniqueVinylService.findById(id);
+            return uniqueVinyl.hasOffers();
+        } catch (NotFoundException e) {
+            return null;
+        }
     }
 
     protected List<UniqueVinylDto> wantedVinylsToUniqueVinylDtoList(List<WantedVinyl> wantedVinyls) {

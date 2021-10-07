@@ -220,7 +220,7 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Get unique vinyls from wantList, with valid fields")
-    void getUniqueVinylWantListTest() {
+    void getUniqueVinylWantListTest() throws NotFoundException {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
@@ -240,13 +240,21 @@ public class WantListServiceTest {
                 .imageLink("imageLink")
                 .artist("artist")
                 .build();
+
+        UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                .id("vinylId")
+                .release("release")
+                .imageLink("imageLink")
+                .artist("artist")
+                .hasOffers(true)
+                .build();
         List<UniqueVinylDto> uniqueDtoVinylList = new ArrayList<>();
         uniqueDtoVinylList.add(uniqueVinylDto);
 
         // when
         when(wantListRepository.findAllByUserId(userId)).thenReturn(wantList);
         when(uniqueVinylMapper.wantedVinylToUniqueVinylDto(any())).thenReturn(uniqueVinylDto);
-//        when(wantListService.wantedVinylsToUniqueVinylDtoList(wantList)).thenReturn(uniqueDtoVinylList);
+        when(uniqueVinylService.findById(any())).thenReturn(uniqueVinyl);
         List<UniqueVinylDto> resultList = wantListService.getWantListUniqueVinyls(userId);
 
         // then
@@ -256,6 +264,7 @@ public class WantListServiceTest {
         Assertions.assertEquals(uniqueVinylDto.getRelease(), resultList.get(0).getRelease());
         Assertions.assertEquals(uniqueVinylDto.getImageLink(), resultList.get(0).getImageLink());
         Assertions.assertEquals(uniqueVinylDto.getArtist(), resultList.get(0).getArtist());
+        Assertions.assertTrue(uniqueVinylDto.getHasOffers());
         Assertions.assertTrue(resultList.get(0).getIsWantListItem());
 
     }

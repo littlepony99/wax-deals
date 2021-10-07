@@ -28,6 +28,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -80,18 +81,22 @@ class CatalogControllerTest {
                 .andExpect(jsonPath("$[0].release").isNotEmpty())
                 .andExpect(jsonPath("$[0].artist").isNotEmpty())
                 .andExpect(jsonPath("$[0].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$[0].hasOffers").isNotEmpty())
                 .andExpect(jsonPath("$[1].id").isNotEmpty())
                 .andExpect(jsonPath("$[1].release").isNotEmpty())
                 .andExpect(jsonPath("$[1].artist").isNotEmpty())
                 .andExpect(jsonPath("$[1].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$[1].hasOffers").isNotEmpty())
                 .andExpect(jsonPath("$[2].id").isNotEmpty())
                 .andExpect(jsonPath("$[2].release").isNotEmpty())
                 .andExpect(jsonPath("$[2].artist").isNotEmpty())
                 .andExpect(jsonPath("$[2].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$[2].hasOffers").isNotEmpty())
                 .andExpect(jsonPath("$[3].id").isNotEmpty())
                 .andExpect(jsonPath("$[3].release").isNotEmpty())
                 .andExpect(jsonPath("$[3].artist").isNotEmpty())
                 .andExpect(jsonPath("$[3].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$[3].hasOffers").isNotEmpty())
                 .andExpect(status().isOk()).andReturn().getResponse();
         //then
         verify(catalogService).findRandomUniqueVinyls(50);
@@ -151,11 +156,13 @@ class CatalogControllerTest {
                 .andExpect(jsonPath("$.mainVinyl.release").isNotEmpty())
                 .andExpect(jsonPath("$.mainVinyl.artist").isNotEmpty())
                 .andExpect(jsonPath("$.mainVinyl.imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.mainVinyl.hasOffers").isNotEmpty())
                 .andExpect(jsonPath("$.vinylsByArtistList").isNotEmpty())
                 .andExpect(jsonPath("$.vinylsByArtistList[0].id").isNotEmpty())
                 .andExpect(jsonPath("$.vinylsByArtistList[0].release").isNotEmpty())
                 .andExpect(jsonPath("$.vinylsByArtistList[0].artist").isNotEmpty())
                 .andExpect(jsonPath("$.vinylsByArtistList[0].imageLink").isNotEmpty())
+                .andExpect(jsonPath("$.vinylsByArtistList[0].hasOffers").isNotEmpty())
                 .andExpect(jsonPath("$.discogsLink").isNotEmpty())
                 .andExpect(status().isOk()).andReturn().getResponse();
         // then
