@@ -276,6 +276,7 @@ public class DataGeneratorForTests {
                 .release(uniqueVinyl.getRelease())
                 .imageLink(uniqueVinyl.getImageLink())
                 .isWantListItem(false)
+                .hasOffers(uniqueVinyl.hasOffers())
                 .build();
     }
 

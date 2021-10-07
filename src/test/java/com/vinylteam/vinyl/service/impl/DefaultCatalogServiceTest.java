@@ -193,7 +193,6 @@ class DefaultCatalogServiceTest {
         //prepare
         String id = "1";
         UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
-        uniqueVinyl.setHasOffers(true);
         List<Offer> outOfStockOffers = dataGenerator.getOffersList().subList(0, 2);
         outOfStockOffers.get(0).setInStock(false);
         outOfStockOffers.get(1).setInStock(false);

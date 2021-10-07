@@ -11,6 +11,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface UniqueVinylMapper {
 
+    @Mapping(target = "hasOffers", expression = "java(uniqueVinyl.hasOffers())")
     UniqueVinylDto uniqueVinylToDto(UniqueVinyl uniqueVinyl);
 
     List<UniqueVinylDto> uniqueVinylsToUniqueVinylDtoList(List<UniqueVinyl> uniqueVinyls);

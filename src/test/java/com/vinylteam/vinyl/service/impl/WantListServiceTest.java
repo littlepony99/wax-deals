@@ -220,19 +220,28 @@ public class WantListServiceTest {
 
     @Test
     @DisplayName("Get unique vinyls from wantList, with valid fields")
-    void getUniqueVinylWantListTest() {
+    void getUniqueVinylWantListTest() throws NotFoundException {
         // before
         Long userId = 1L;
         WantedVinyl wantedVinyl = WantedVinyl.builder()
                 .id("1")
                 .userId(userId)
                 .vinylId("vinylId")
-                .artist("artist")
-                .imageLink("imageLink")
-                .release("release")
+                .artist("artist1")
+                .imageLink("imageLink1")
+                .release("release1")
+                .build();
+        WantedVinyl wantedVinylHasOffersFalse = WantedVinyl.builder()
+                .id("2")
+                .userId(userId)
+                .vinylId("vinylHasOffersFalseId")
+                .artist("artist2")
+                .imageLink("imageLink2")
+                .release("release2")
                 .build();
         List<WantedVinyl> wantList = new ArrayList<>();
         wantList.add(wantedVinyl);
+        wantList.add(wantedVinylHasOffersFalse);
 
         UniqueVinylDto uniqueVinylDto = UniqueVinylDto.builder()
                 .id("vinylId")
@@ -240,13 +249,38 @@ public class WantListServiceTest {
                 .imageLink("imageLink")
                 .artist("artist")
                 .build();
+
+        UniqueVinylDto uniqueVinylHasOffersFalseDto = UniqueVinylDto.builder()
+                .id("vinylHasOffersFalseId")
+                .release("release2")
+                .imageLink("imageLink2")
+                .artist("artist2")
+                .build();
+
+        UniqueVinyl uniqueVinyl = UniqueVinyl.builder()
+                .id("vinylId")
+                .release("release")
+                .imageLink("imageLink")
+                .artist("artist")
+                .hasOffers(true)
+                .build();
+        UniqueVinyl uniqueVinylHasOffersFalse = UniqueVinyl.builder()
+                .id("vinylHasOffersFalseId")
+                .release("release2")
+                .imageLink("imageLink2")
+                .artist("artist2")
+                .hasOffers(false)
+                .build();
         List<UniqueVinylDto> uniqueDtoVinylList = new ArrayList<>();
         uniqueDtoVinylList.add(uniqueVinylDto);
+        uniqueDtoVinylList.add(uniqueVinylHasOffersFalseDto);
 
-        // when
         when(wantListRepository.findAllByUserId(userId)).thenReturn(wantList);
-        when(uniqueVinylMapper.wantedVinylToUniqueVinylDto(any())).thenReturn(uniqueVinylDto);
-//        when(wantListService.wantedVinylsToUniqueVinylDtoList(wantList)).thenReturn(uniqueDtoVinylList);
+        when(uniqueVinylMapper.wantedVinylToUniqueVinylDto(wantedVinyl)).thenReturn(uniqueVinylDto);
+        when(uniqueVinylMapper.wantedVinylToUniqueVinylDto(wantedVinylHasOffersFalse)).thenReturn(uniqueVinylHasOffersFalseDto);
+        when(uniqueVinylService.findById("vinylId")).thenReturn(uniqueVinyl);
+        when(uniqueVinylService.findById("vinylHasOffersFalseId")).thenReturn(uniqueVinylHasOffersFalse);
+        // when
         List<UniqueVinylDto> resultList = wantListService.getWantListUniqueVinyls(userId);
 
         // then
@@ -256,8 +290,14 @@ public class WantListServiceTest {
         Assertions.assertEquals(uniqueVinylDto.getRelease(), resultList.get(0).getRelease());
         Assertions.assertEquals(uniqueVinylDto.getImageLink(), resultList.get(0).getImageLink());
         Assertions.assertEquals(uniqueVinylDto.getArtist(), resultList.get(0).getArtist());
+        Assertions.assertTrue(uniqueVinylDto.getHasOffers());
         Assertions.assertTrue(resultList.get(0).getIsWantListItem());
-
+        Assertions.assertEquals(uniqueVinylHasOffersFalseDto.getId(), resultList.get(1).getId());
+        Assertions.assertEquals(uniqueVinylHasOffersFalseDto.getRelease(), resultList.get(1).getRelease());
+        Assertions.assertEquals(uniqueVinylHasOffersFalseDto.getImageLink(), resultList.get(1).getImageLink());
+        Assertions.assertEquals(uniqueVinylHasOffersFalseDto.getArtist(), resultList.get(1).getArtist());
+        Assertions.assertFalse(uniqueVinylHasOffersFalseDto.getHasOffers());
+        Assertions.assertTrue(resultList.get(1).getIsWantListItem());
     }
 
     @Test
