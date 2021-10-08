@@ -30,11 +30,8 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.servlet.Filter;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -103,6 +100,7 @@ public class WantListControllerTest {
                 .artist("artist")
                 .imageLink("link")
                 .isWantListItem(Boolean.TRUE)
+                .hasOffers(Boolean.TRUE)
                 .build();
         resultList.add(wantedVinyl);
 
@@ -116,6 +114,7 @@ public class WantListControllerTest {
                 .andExpect(jsonPath("$[0].artist").value(wantedVinyl.getArtist()))
                 .andExpect(jsonPath("$[0].imageLink").value(wantedVinyl.getImageLink()))
                 .andExpect(jsonPath("$[0].isWantListItem").value(wantedVinyl.getIsWantListItem()))
+                .andExpect(jsonPath("$[0].hasOffers").value(wantedVinyl.getHasOffers()))
                 .andExpect(status().isOk()).andReturn().getResponse();
     }
 

@@ -16,5 +16,6 @@ public class UniqueVinylDto {
     private String artist;
     private String imageLink;
     private Boolean isWantListItem;
+    private Boolean hasOffers;
 
 }
