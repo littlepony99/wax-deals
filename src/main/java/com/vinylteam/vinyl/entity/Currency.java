@@ -9,7 +9,8 @@ public enum Currency {
     UAH("₴"),
     USD("$"),
     GBP("£"),
-    EUR("€");
+    EUR("€"),
+    AUD("$");
 
     private final String symbol;
 
@@ -22,6 +23,9 @@ public enum Currency {
     }
 
     public static Optional<Currency> getCurrency(String currencyDescription) {
+        if (currencyDescription == null) {
+            return Optional.empty();
+        }
         Currency resultingCurrency = null;
         if ("грн".equals(currencyDescription) || "грн.".equals(currencyDescription) || "₴".equals(currencyDescription)) {
             resultingCurrency = UAH;
@@ -32,6 +36,8 @@ public enum Currency {
         } else if ("EUR".equals(currencyDescription.trim()) || "€".equals(currencyDescription)
                 || "&nbsp;€".equals(currencyDescription)) {
             resultingCurrency = EUR;
+        } else if ("AUD".equals(currencyDescription)) {
+            resultingCurrency = AUD;
         }
         return ofNullable(resultingCurrency);
     }

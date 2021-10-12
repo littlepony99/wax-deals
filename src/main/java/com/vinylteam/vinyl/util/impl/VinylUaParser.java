@@ -100,6 +100,7 @@ public class VinylUaParser extends VinylParser {
             }
             log.debug("Parsed page link {'pageLink':{}}", pageLink);
         }
+        log.info("Collected all offer links from shop by id {'offerLinksSize':{}, 'shopId':{}}", offerLinks.size(), SHOP_ID);
         log.debug("Resulting hash set of offer links is {'offerLinks':{}}", offerLinks);
         return offerLinks;
     }

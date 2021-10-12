@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.util.ParserConfiguration;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -16,6 +17,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toSet;
 
 @Slf4j
+@Service
 public class HardWaxParser extends VinylParser {
 
     protected static final String BASE_LINK = "https://hardwax.com";

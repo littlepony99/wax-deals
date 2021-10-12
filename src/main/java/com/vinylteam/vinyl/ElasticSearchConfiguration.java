@@ -45,7 +45,8 @@ public class ElasticSearchConfiguration extends AbstractElasticsearchConfigurati
             CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY,
                     new UsernamePasswordCredentials(elasticsearchUser, elasticsearchUserPassword));
-            builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+            builder.setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                    .setRequestConfigCallback(requestConfigBuilder -> requestConfigBuilder.setConnectTimeout(300000));
         }
         return new RestHighLevelClient(builder);
     }

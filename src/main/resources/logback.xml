@@ -28,8 +28,11 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+    <logger name="org.springframework.data.elasticsearch.client.WIRE" level="info" />
+
+    <root level="trace">
         <appender-ref ref="ROLLING"/>
         <appender-ref ref="STDOUT"/>
     </root>
+
 </configuration>
