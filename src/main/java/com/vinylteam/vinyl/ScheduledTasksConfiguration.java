@@ -18,7 +18,7 @@ public class ScheduledTasksConfiguration {
     private Updater updater;
 
     //Equals to amount of milliseconds in one day
-    private static final long UPDATE_PERIOD = 518400000;
+    private static final long UPDATE_PERIOD = 1000 * 60 * 60 * 24;
 
     @Scheduled(fixedRate = UPDATE_PERIOD)
     public void run() {
