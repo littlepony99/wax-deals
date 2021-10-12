@@ -82,7 +82,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(allowedOrigins.get(0), allowedOrigins.get(1))
+                        .allowedOrigins(allowedOrigins.get(0), allowedOrigins.get(1), allowedOrigins.get(2), allowedOrigins.get(3))
                         .allowedMethods(allowedMethods.get(0), allowedMethods.get(1), allowedMethods.get(2), allowedMethods.get(3));
             }
         };
