@@ -1,5 +1,6 @@
 package com.vinylteam.vinyl.web.handler;
 
+import com.vinylteam.vinyl.exception.DiscogsBadRequestException;
 import com.vinylteam.vinyl.exception.ForbiddenException;
 import com.vinylteam.vinyl.exception.NotFoundException;
 import com.vinylteam.vinyl.exception.ServerException;
@@ -42,6 +43,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {NotFoundException.class})
     public ResponseEntity<Object> handleNotFoundExceptionApiExceptionHandler(NotFoundException exception) {
         return ResponseEntity.status(NOT_FOUND).body(new ApiExceptionDto(exception.getMessage()));
+    }
+
+    @ExceptionHandler(value = {DiscogsBadRequestException.class})
+    public ResponseEntity<Object> handleDiscogsUserNotFoundExceptionHandler(DiscogsBadRequestException exception) {
+        return ResponseEntity.status(BAD_REQUEST).body(new ApiExceptionDto(exception.getMessage()));
     }
 
 }

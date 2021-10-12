@@ -10,9 +10,9 @@ import java.util.Map;
 
 public interface CatalogService {
 
-    OneVinylPageDto getOneVinylPageDto(String id) throws NotFoundException;
-
     List<UniqueVinylDto> findRandomUniqueVinyls(int amount);
+
+    OneVinylPageDto getOneVinylPageDto(String id, Long userId) throws NotFoundException;
 
     Map<String, List<?>> getSortedInStockOffersAndShops(String identifier) throws NotFoundException;
 

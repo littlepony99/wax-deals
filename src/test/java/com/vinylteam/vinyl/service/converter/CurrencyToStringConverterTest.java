@@ -9,13 +9,14 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CurrencyToStringConverterTest {
+
     private CurrencyToStringConverter currencyToStringConverter = new CurrencyToStringConverter();
 
     @Test
     @DisplayName("convert currency to string")
     void convert() {
         String actual = currencyToStringConverter.convert(Optional.of(Currency.UAH));
-        assertEquals("₴", actual);
+        assertEquals("UAH", actual);
     }
 
     @Test

@@ -12,7 +12,7 @@ public class CurrencyToStringConverter implements Converter<Optional<Currency>, 
     @Override
     public String convert(Optional<Currency> source) {
         return source
-                .map(Currency::getSymbol)
+                .map(Currency::toString)
                 .orElse("");
     }
 

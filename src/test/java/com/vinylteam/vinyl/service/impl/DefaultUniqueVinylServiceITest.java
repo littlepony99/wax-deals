@@ -252,7 +252,7 @@ public class DefaultUniqueVinylServiceITest {
     @DisplayName("Throws RuntimeException when id has no matches")
     void findByNoMatchIdTest() {
         //when
-        assertThrows(RuntimeException.class, () -> uniqueVinylService.findById("100"));
+        assertThrows(NotFoundException.class, () -> uniqueVinylService.findById("100"));
     }
 
 }

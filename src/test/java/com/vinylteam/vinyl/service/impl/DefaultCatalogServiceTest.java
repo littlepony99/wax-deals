@@ -182,7 +182,7 @@ class DefaultCatalogServiceTest {
         when(discogsService.getDiscogsLink(uniqueVinyl.getArtist(), uniqueVinyl.getRelease(), uniqueVinyl.getFullName())).thenReturn(expectedDiscogsLink);
         OneVinylPageDto expectedOneVinylPageDto = dataGenerator.getOneVinylPageDto(expectedDiscogsLink, uniqueVinyl, sortedOffersAndShopsMap, expectedOtherVinylsByArtist);
         //when
-        OneVinylPageDto actualOneVinylPageDto = catalogService.getOneVinylPageDto(id);
+        OneVinylPageDto actualOneVinylPageDto = catalogService.getOneVinylPageDto(id, null);
         //then
         assertEquals(expectedOneVinylPageDto, actualOneVinylPageDto);
     }
@@ -193,7 +193,6 @@ class DefaultCatalogServiceTest {
         //prepare
         String id = "1";
         UniqueVinyl uniqueVinyl = dataGenerator.getUniqueVinylWithNumber(1);
-        uniqueVinyl.setHasOffers(true);
         List<Offer> outOfStockOffers = dataGenerator.getOffersList().subList(0, 2);
         outOfStockOffers.get(0).setInStock(false);
         outOfStockOffers.get(1).setInStock(false);
@@ -214,7 +213,7 @@ class DefaultCatalogServiceTest {
         when(discogsService.getDiscogsLink(uniqueVinyl.getArtist(), uniqueVinyl.getRelease(), uniqueVinyl.getFullName())).thenReturn(expectedDiscogsLink);
         OneVinylPageDto expectedOneVinylPageDto = dataGenerator.getOneVinylPageDto(expectedDiscogsLink, uniqueVinyl, sortedOffersAndShopsMap, expectedOtherVinylsByArtist);
         //when
-        OneVinylPageDto actualOneVinylPageDto = catalogService.getOneVinylPageDto(id);
+        OneVinylPageDto actualOneVinylPageDto = catalogService.getOneVinylPageDto(id, null);
         //then
         assertEquals(expectedOneVinylPageDto, actualOneVinylPageDto);
     }

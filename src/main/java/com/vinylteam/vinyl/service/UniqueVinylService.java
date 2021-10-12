@@ -21,6 +21,4 @@ public interface UniqueVinylService {
 
     void updateOneUniqueVinyl(UniqueVinyl vinyl);
 
-    void prepareCatalog(User user, Model model, String wantList);
-
 }

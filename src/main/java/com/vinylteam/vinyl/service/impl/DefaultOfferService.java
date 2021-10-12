@@ -21,9 +21,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class DefaultOfferService implements OfferService {
+
     private final OfferRepository offerRepository;
     private final UniqueVinylRepository uniqueVinylRepository;
     private final ParserHolder parserHolder;
+    private static final int AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST = 1000;
 
     @Override
     public List<Offer> findByUniqueVinylId(String uniqueVinylId) {
@@ -52,9 +54,39 @@ public class DefaultOfferService implements OfferService {
     }
 
     public void save(List<UniqueVinyl> uniqueVinyls, List<Offer> offers) {
-        uniqueVinylRepository.saveAll(uniqueVinyls);
+        int uniqueVinylsSize = uniqueVinyls.size();
+        int offersSize = offers.size();
+        int amountOfSaveUniqueVinylsIterations = uniqueVinylsSize / AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST;
+        int amountOfSaveOffersIterations = offersSize / AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST;
+        if (uniqueVinylsSize > amountOfSaveUniqueVinylsIterations * AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST) {
+            amountOfSaveUniqueVinylsIterations++;
+        }
+        if (offersSize > amountOfSaveOffersIterations * AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST) {
+            amountOfSaveOffersIterations++;
+        }
+        //uniqueVinylRepository.saveAll(uniqueVinyls);
+        for(int i = 0; i < amountOfSaveUniqueVinylsIterations; i++) {
+            int startIndex = AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST * i;
+            int endIndex = startIndex;
+            if (i < amountOfSaveUniqueVinylsIterations - 1) {
+                endIndex = endIndex + AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST;
+            } else {
+                endIndex = uniqueVinylsSize;
+            }
+            uniqueVinylRepository.saveAll(uniqueVinyls.subList(startIndex, endIndex));
+        }
         offerRepository.deleteAll();
-        offerRepository.saveAll(offers);
+        //offerRepository.saveAll(offers);
+        for(int i = 0; i < amountOfSaveOffersIterations; i++) {
+            int startIndex = AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST * i;
+            int endIndex = startIndex;
+            if (i < amountOfSaveOffersIterations - 1) {
+                endIndex = endIndex + AMOUNT_OF_ENTITIES_PER_WRITE_REQUEST;
+            } else {
+                endIndex = offersSize;
+            }
+            offerRepository.saveAll(offers.subList(startIndex, endIndex));
+        }
     }
 
     public Offer actualizeOffer(Offer dbOffer) {

@@ -4,11 +4,12 @@ import com.vinylteam.vinyl.entity.UniqueVinyl;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface UniqueVinylRepository
         extends ElasticsearchRepository<UniqueVinyl, String>, CustomUniqueVinylRepository {
 
-    List<UniqueVinyl> findAll();
+    Stream<UniqueVinyl> findBy();
 
     default List<UniqueVinyl> findByArtist(String artist) {
         return findByArtistIgnoreCaseAndHasOffers(artist, true);

@@ -38,20 +38,6 @@ class DefaultSecurityServiceTest {
     }
 
     @Test
-    @DisplayName("Checks if the result of hashing with 10000 iterations is the same for equal inputs.")
-    void hashPasswordWithTenThousandIterationsTest() {
-        String resultHash = securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000);
-        assertEquals(resultHash, securityService.hashPassword(passwordToHash.toCharArray(), salt, 10000));
-    }
-
-    @Test
-    @DisplayName("Checks if hashing with zero iterations throws an IllegalArgumentException.")
-    void hashPasswordWithZeroIterationsTest() {
-        assertThrows(IllegalArgumentException.class, () ->
-                securityService.hashPassword(passwordToHash.toCharArray(), salt, 0));
-    }
-
-    @Test
     @DisplayName("Checks if comparing hashed right password against user's stored hash returns true.")
     void checkPasswordAgainstExistingUserPasswordWithRightPasswordTest() {
         assertTrue(securityService.validateIfPasswordMatches(existingUser, rightPassword.toCharArray()));

@@ -17,6 +17,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -104,7 +105,7 @@ public class DefaultOfferServiceITest {
         //when
         offerService.updateUniqueVinylsRewriteAll(vinylsToUpdate, offersToUpdate);
         //then
-        List<UniqueVinyl> vinylsAfterUpdate = uniqueVinylRepository.findAll();
+        List<UniqueVinyl> vinylsAfterUpdate = uniqueVinylRepository.findBy().collect(Collectors.toList());
         assertTrue(vinylsAfterUpdate.containsAll(vinylsToUpdate));
         assertTrue(vinylsAfterUpdate.contains(uniqueVinyls.get(0)));
 
