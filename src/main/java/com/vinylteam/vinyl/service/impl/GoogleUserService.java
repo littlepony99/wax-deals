@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Random;
 
-@Service
+@Service("googleUserService")
 @RequiredArgsConstructor
 @Slf4j
 public class GoogleUserService implements ExternalUserService {

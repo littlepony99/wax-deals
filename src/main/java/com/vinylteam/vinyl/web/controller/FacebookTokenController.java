@@ -1,6 +1,5 @@
 package com.vinylteam.vinyl.web.controller;
 
-
 import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.ExternalUserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
@@ -20,19 +19,19 @@ import java.util.Objects;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @RestController
-@RequestMapping("/google")
+@RequestMapping("/facebook")
 @Slf4j
-public class GoogleTokenController {
+public class FacebookTokenController {
 
-    private final ExternalUserService googleService;
+    private final ExternalUserService facebookService;
 
-    public GoogleTokenController(@Qualifier("googleUserService")ExternalUserService googleService) {
-        this.googleService = googleService;
+    public FacebookTokenController(@Qualifier("facebookUserService")ExternalUserService facebookService) {
+        this.facebookService = facebookService;
     }
 
     @PostMapping("/auth")
     public ResponseEntity<UserSecurityResponse> loginByGoogle(@RequestBody UserInfoRequest request) throws GeneralSecurityException, IOException, ServerException {
-        var response = googleService.processExternalAuthorization(request.getToken());
+        var response = facebookService.processExternalAuthorization(request.getToken());
         if (!Objects.isNull(response.getUser())) {
             return ResponseEntity.ok(response);
         } else {
@@ -41,6 +40,4 @@ public class GoogleTokenController {
             return ResponseEntity.status(BAD_REQUEST).body(response);
         }
     }
-
-
 }
