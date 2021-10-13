@@ -65,6 +65,7 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(password)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
+        securityService.emailFormatCheck(email);
         securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService.createUserWithHashedPassword(email, password.toCharArray());
         userToAdd.setDiscogsUserName(userInfoRequest.getDiscogsUserName());
@@ -105,6 +106,7 @@ public class DefaultUserService implements UserService {
         if (!isNotEmptyNotNull(newPassword)) {
             throw new RuntimeException(UserErrors.EMPTY_PASSWORD_ERROR.getMessage());
         }
+        securityService.emailFormatCheck(newEmail);
         securityService.validatePassword(newPassword);
         User changedUser = securityService.createUserWithHashedPassword(newEmail, newPassword.toCharArray());
         if (oldEmail.equalsIgnoreCase(newEmail)) {

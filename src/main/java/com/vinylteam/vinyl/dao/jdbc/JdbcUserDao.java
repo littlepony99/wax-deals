@@ -19,6 +19,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor
 public class JdbcUserDao implements UserDao {
 
+    //ILIKE - to compare emails regardless of register.
     private static final String FIND_BY_EMAIL = "SELECT id, email, password, salt, iterations, role, status, discogs_user_name" +
             " FROM users" +
             " WHERE email ILIKE :email";

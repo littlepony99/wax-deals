@@ -78,10 +78,12 @@ class SignupControllerITest {
     @Test
     @DisplayName("Failure during sending confirmation link to email")
     void signUpUserWithMailSenderFailure() throws Exception {
+        //adding new email to avoid saving user with same email as in another test to test db - which causes exception.
+        String newEmail = "new" + testUserEmail;
         UUID token = UUID.randomUUID();
         when(emailConfirmationService.generateConfirmationToken()).thenReturn(token);
         doThrow(new ServerException(MailSenderErrors.FAILED_TO_SEND_EMAIL.getMessage())).when(mailSender).sendMail(anyString(), anyString(), anyString());
-        var signUpRequest = Map.of("email", testUserEmail,
+        var signUpRequest = Map.of("email", newEmail,
                 "password", testUserPassword,
                 "confirmPassword", testUserPassword,
                 "discogsUserName", "");

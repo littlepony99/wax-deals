@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -30,13 +31,9 @@ public class DefaultUniqueVinylService implements UniqueVinylService {
     }
 
     @Override
-    public void prepareCatalog(User user, Model model, String wantList) {
-    }
-
-    @Override
     public List<UniqueVinyl> findAll() {
-        List<UniqueVinyl> gottenUniqueVinyls = new ArrayList<>(uniqueVinylRepository.findAll());
-        log.debug("Resulting list with that amount of unique vinyls from db is {'uniqueVinyls':{}}", gottenUniqueVinyls);
+        List<UniqueVinyl> gottenUniqueVinyls = uniqueVinylRepository.findBy().collect(Collectors.toList());
+        log.debug("Resulting list with that amount of unique vinyls from db is {'uniqueVinylsSize':{}}", gottenUniqueVinyls.size());
         return gottenUniqueVinyls;
     }
 
