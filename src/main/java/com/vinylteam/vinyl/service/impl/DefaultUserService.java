@@ -7,6 +7,7 @@ import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.exception.entity.UserErrors;
 import com.vinylteam.vinyl.security.SecurityService;
 import com.vinylteam.vinyl.service.EmailConfirmationService;
+import com.vinylteam.vinyl.service.PasswordRecoveryService;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,11 +30,29 @@ public class DefaultUserService implements UserService {
 
     private final UserDao userDao;
     private final EmailConfirmationService emailConfirmationService;
+    private PasswordRecoveryService passwordRecoveryService;
     private SecurityService securityService;
+
+    @Autowired
+    public void setPasswordRecoveryService(PasswordRecoveryService passwordRecoveryService) {
+        this.passwordRecoveryService = passwordRecoveryService;
+    }
 
     @Autowired
     public void setSecurityService(SecurityService securityService) {
         this.securityService = securityService;
+    }
+
+    @Override
+    public Optional<User> registerExternally(UserInfoRequest userInfoRequest) throws ServerException {
+        String email = userInfoRequest.getEmail();
+        String password = UUID.randomUUID().toString();
+        User userToAdd = securityService.createUserWithHashedPassword(email, password.toCharArray());
+        long userId = addUserToDb(userToAdd);
+        var appUser = userDao.findByEmail(email);
+        userDao.setUserStatusTrue(userId);
+        passwordRecoveryService.sendLink(email);
+        return appUser;
     }
 
     @Override
@@ -50,15 +70,8 @@ public class DefaultUserService implements UserService {
         securityService.validatePassword(password, userInfoRequest.getPasswordConfirmation());
         User userToAdd = securityService.createUserWithHashedPassword(email, password.toCharArray());
         userToAdd.setDiscogsUserName(userInfoRequest.getDiscogsUserName());
-        long userId;
-        try {
-            userId = userDao.add(userToAdd);
-        } catch (DuplicateKeyException e) {
-            throw new RuntimeException(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage());
-        } catch (DataIntegrityViolationException e) {
-            throw new RuntimeException(UserErrors.ADD_USER_INVALID_VALUES_ERROR.getMessage());
-        }
-        log.debug("Added created user to db {'user':{}}", userToAdd);
+        long userId = addUserToDb(userToAdd);
+
         ConfirmationToken confirmationToken = emailConfirmationService.addByUserId(userId);
         emailConfirmationService.sendMessageWithLinkToUserEmail(userToAdd.getEmail(), confirmationToken.getToken().toString());
     }
@@ -215,6 +228,18 @@ public class DefaultUserService implements UserService {
 
     boolean isNotEmptyNotNull(String string) {
         return !StringUtils.isBlank(string);
+    }
+
+    private long addUserToDb(User userToAdd) {
+        try {
+            long userId = userDao.add(userToAdd);
+            log.debug("Added created user to db {'user':{}}", userToAdd);
+            return userId;
+        } catch (DuplicateKeyException e) {
+            throw new RuntimeException(UserErrors.ADD_USER_EXISTING_EMAIL_ERROR.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new RuntimeException(UserErrors.ADD_USER_INVALID_VALUES_ERROR.getMessage());
+        }
     }
 
 }

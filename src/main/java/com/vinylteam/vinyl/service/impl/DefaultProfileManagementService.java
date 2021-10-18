@@ -34,8 +34,7 @@ public class DefaultProfileManagementService implements ProfileManagementService
         var response = ControllerResponseUtils.getResponseWithMessage("Your email and/or discogs username have been changed.");
         if (!user.getEmail().equals(oldEmail)) {
             var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
-            response.setJwtToken(newTokenPair.getJwtToken());
-            response.setRefreshToken(newTokenPair.getRefreshToken());
+            response.setTokenPair(newTokenPair);
             logoutService.logout(request, null, null);
         }
         return response;

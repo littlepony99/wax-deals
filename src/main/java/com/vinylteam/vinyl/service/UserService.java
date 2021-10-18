@@ -8,7 +8,9 @@ import java.util.Optional;
 
 public interface UserService {
 
-    void register(UserInfoRequest userProfileInfo) throws ServerException;
+    void register(UserInfoRequest userInfoRequest) throws ServerException;
+
+    Optional<User> registerExternally(UserInfoRequest userInfoRequest) throws ServerException;
 
     void confirmEmailByToken(String token);
 

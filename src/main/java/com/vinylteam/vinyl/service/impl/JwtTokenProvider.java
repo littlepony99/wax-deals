@@ -140,6 +140,8 @@ public class JwtTokenProvider implements JwtService {
         String expectedTokenType = path.contains("/token/refresh-token") ? "refresh" : "access";
         if (isTokenValidAndNotExpired(token, expectedTokenType)) {
             Authentication auth = getAuthentication(token);
+
+            //TODO: check can it be null
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 JwtUser principal = (JwtUser) auth.getPrincipal();
@@ -154,6 +156,7 @@ public class JwtTokenProvider implements JwtService {
 
     @Override
     public Authentication getAuthentication(String token) {
+        //TODO: check what if the user in the token does not exist in DB
         UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
@@ -185,7 +188,7 @@ public class JwtTokenProvider implements JwtService {
     @Override
     public UserSecurityResponse authenticateByRequest(LoginRequest loginRequest) {
         Authentication preparedAuth = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
-        return prepareUserSecurityResponse(authenticationManager.authenticate(preparedAuth));
+        return prepareUserSecurityResponse(authenticationManager.authenticate(preparedAuth), "Bad Credentials");
     }
 
     @Override
@@ -204,12 +207,12 @@ public class JwtTokenProvider implements JwtService {
         String pairIdentifier = getPairIdentifier(claims);
         LocalDateTime expirationDate = getExpirationDate(claims);
         tokenStorageService.storePairIdentifier(pairIdentifier, expirationDate);
-        return prepareUserSecurityResponse(SecurityContextHolder.getContext().getAuthentication());
+        return prepareUserSecurityResponse(SecurityContextHolder.getContext().getAuthentication(),"JWT Token is not valid");
     }
 
-    private UserSecurityResponse prepareUserSecurityResponse(Authentication authentication) {
+    private UserSecurityResponse prepareUserSecurityResponse(Authentication authentication, String failureMessage) {
         if (!(authentication.getPrincipal() instanceof JwtUser)) {
-            throw new JwtAuthenticationException("JWT Token is not valid");
+            throw new JwtAuthenticationException(failureMessage);
         }
         var authUser = (JwtUser) authentication.getPrincipal();
         var newTokenPair = getTokenPair(authUser);
