@@ -36,11 +36,10 @@ public class GoogleTokenController {
         if (!Objects.isNull(response.getUser())) {
             return ResponseEntity.ok(response);
         } else {
-            log.info("Invalid ID token.");
+            log.info("Invalid google ID token {'token':{}}", request.getToken());
             response.setMessage("Invalid ID token.");
             return ResponseEntity.status(BAD_REQUEST).body(response);
         }
     }
-
 
 }

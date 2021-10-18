@@ -8,12 +8,13 @@ import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.entity.User;
 import com.vinylteam.vinyl.exception.ServerException;
-import com.vinylteam.vinyl.service.*;
+import com.vinylteam.vinyl.service.ExternalUserService;
+import com.vinylteam.vinyl.service.JwtService;
+import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ import java.util.Random;
 @Slf4j
 public class GoogleUserService implements ExternalUserService {
 
-    @Value("${google.client-id}")
+    @Value("${google.client.id}")
     private String clientId;
 
     private final UserService userService;
@@ -38,13 +39,6 @@ public class GoogleUserService implements ExternalUserService {
     private final JwtService jwtService;
 
     private final UserMapper userMapper;
-
-    private PasswordGenerator generator;
-
-    @Autowired
-    public void setGenerator(PasswordGenerator generator) {
-        this.generator = generator;
-    }
 
     @Override
     public UserSecurityResponse processExternalAuthorization(String token) throws GeneralSecurityException, IOException, ServerException {
@@ -60,13 +54,10 @@ public class GoogleUserService implements ExternalUserService {
         }
         var appUser = getAppUserIfExists(idToken);
         if (appUser.isEmpty()) {//no user yet
-            log.info("No user exists");
+            log.info("Couldn't get user by googleIdToken {'googleIdToken':{}}", idToken);
             String emailToRegister = newUserEmail.get();
-            String newPassword = generator.generatePassword();
             UserInfoRequest registerRequest = UserInfoRequest.builder()
                     .email(emailToRegister)
-                    .password(newPassword)
-                    .passwordConfirmation(newPassword)
                     .build();
             appUser = userService.registerExternally(registerRequest);
         }

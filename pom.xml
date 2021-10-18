@@ -25,6 +25,7 @@
         <json.simple.version>1.1</json.simple.version>
         <jsonwebtoken.version>0.11.2</jsonwebtoken.version>
         <awaitility.version>4.1.0</awaitility.version>
+        <restfb.version>3.22.0</restfb.version>
 
         <!--Test Dependencies-->
         <dbrider.version>1.26.0</dbrider.version>
@@ -134,7 +135,7 @@
         <dependency>
             <groupId>com.restfb</groupId>
             <artifactId>restfb</artifactId>
-            <version>3.22.0</version>
+            <version>${restfb.version}</version>
         </dependency>
 
 

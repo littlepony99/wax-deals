@@ -10,14 +10,12 @@ import com.vinylteam.vinyl.dao.jdbc.extractor.UserMapper;
 import com.vinylteam.vinyl.exception.ServerException;
 import com.vinylteam.vinyl.service.ExternalUserService;
 import com.vinylteam.vinyl.service.JwtService;
-import com.vinylteam.vinyl.service.PasswordGenerator;
 import com.vinylteam.vinyl.service.UserService;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import com.vinylteam.vinyl.web.dto.UserSecurityResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -33,13 +31,6 @@ public class FacebookUserServiceImpl implements ExternalUserService {
     private final UserService userService;
 
     private final JwtService jwtService;
-
-    private PasswordGenerator generator;
-
-    @Autowired
-    public void setGenerator(PasswordGenerator generator) {
-        this.generator = generator;
-    }
 
     @Override
     public UserSecurityResponse processExternalAuthorization(String token) throws ServerException {
@@ -57,13 +48,10 @@ public class FacebookUserServiceImpl implements ExternalUserService {
         }
         var appUser = userDao.findByEmail(newUserEmail);
         if (appUser.isEmpty()) {//no appUser yet
-            log.info("No appUser exists");
+            log.info("No user by this email, creating new user {'email':{}}", newUserEmail);
             String emailToRegister = newUserEmail;
-            String newPassword = generator.generatePassword();
             UserInfoRequest registerRequest = UserInfoRequest.builder()
                     .email(emailToRegister)
-                    .password(newPassword)
-                    .passwordConfirmation(newPassword)
                     .build();
             appUser = userService.registerExternally(registerRequest);
         }

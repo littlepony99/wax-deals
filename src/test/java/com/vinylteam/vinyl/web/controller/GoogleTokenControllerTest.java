@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,12 +46,6 @@ class GoogleTokenControllerTest {
     @Autowired
     private PasswordEncoder encoder;
 
-/*
-    @MockBean
-    private ExternalUserService externalUserService;
-*/
-
-    //@MockBean
     @Autowired
     private UserDao userDao;
 
@@ -72,11 +67,15 @@ class GoogleTokenControllerTest {
                 .password(encoder.encode(testUserPassword))
                 .status(status)
                 .build();
-        //when(userDao.findByEmail(testUserEmail)).thenReturn(Optional.of(builtUser));
+        when(userDao.findByEmail(testUserEmail)).thenReturn(Optional.of(builtUser));
         /*GoogleIdToken googleIdToken = new GoogleIdToken(new GoogleIdToken.Payload());
         when(externalUserService.verifyToken(ArgumentMatchers.any())).thenReturn(googleIdToken)*/
     }
 
+    //TODO: fix issue with inability to put google.client.id in discreet property file
+    /* Can't put property google.client.id in test/application-dev.properties, it doesn't get parsed.
+    google.client.id in test/application.properties is invalid but at least allows to run tests.
+     */
     @Test
     @DisplayName("Login by Google test")
     void loginByGoogle() throws Exception {
@@ -111,4 +110,5 @@ class GoogleTokenControllerTest {
         //assertEquals(testUserEmail, responseUser.getEmail());
         assertEquals(Role.USER, responseUser.getRole());
     }
+
 }

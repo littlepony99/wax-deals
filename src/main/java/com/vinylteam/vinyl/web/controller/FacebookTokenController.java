@@ -30,12 +30,12 @@ public class FacebookTokenController {
     }
 
     @PostMapping("/auth")
-    public ResponseEntity<UserSecurityResponse> loginByGoogle(@RequestBody UserInfoRequest request) throws GeneralSecurityException, IOException, ServerException {
+    public ResponseEntity<UserSecurityResponse> loginByFacebook(@RequestBody UserInfoRequest request) throws GeneralSecurityException, IOException, ServerException {
         var response = facebookService.processExternalAuthorization(request.getToken());
         if (!Objects.isNull(response.getUser())) {
             return ResponseEntity.ok(response);
         } else {
-            log.info("Invalid ID token.");
+            log.info("Invalid facebook ID token {'token':{}}", request.getToken());
             response.setMessage("Invalid ID token.");
             return ResponseEntity.status(BAD_REQUEST).body(response);
         }

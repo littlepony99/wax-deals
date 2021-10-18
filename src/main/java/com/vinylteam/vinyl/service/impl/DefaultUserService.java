@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public class DefaultUserService implements UserService {
     @Override
     public Optional<User> registerExternally(UserInfoRequest userInfoRequest) throws ServerException {
         String email = userInfoRequest.getEmail();
-        String password = userInfoRequest.getPassword();
+        String password = UUID.randomUUID().toString();
         User userToAdd = securityService.createUserWithHashedPassword(email, password.toCharArray());
         long userId = addUserToDb(userToAdd);
         var appUser = userDao.findByEmail(email);
