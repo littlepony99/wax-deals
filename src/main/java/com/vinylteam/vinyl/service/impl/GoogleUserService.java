@@ -44,7 +44,7 @@ public class GoogleUserService implements ExternalUserService {
     public UserSecurityResponse processExternalAuthorization(String token) throws GeneralSecurityException, IOException, ServerException {
         var googleIdToken = verifyToken(token);
         var response = new UserSecurityResponse();
-        if (!googleIdToken.isPresent()) {
+        if (googleIdToken.isEmpty()) {
             return response;
         }
         var idToken = googleIdToken.get();
@@ -65,8 +65,7 @@ public class GoogleUserService implements ExternalUserService {
         response.setMessage(user.getEmail());
         response.setUser(userMapper.mapUserToDto(user));
         var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
-        response.setJwtToken(newTokenPair.getJwtToken());
-        response.setRefreshToken(newTokenPair.getRefreshToken());
+        response.setTokenPair(newTokenPair);
         return response;
     }
 

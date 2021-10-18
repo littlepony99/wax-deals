@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import static com.restfb.Version.VERSION_12_0;
+
 
 @Service("facebookUserService")
 @RequiredArgsConstructor
@@ -38,7 +40,7 @@ public class FacebookUserServiceImpl implements ExternalUserService {
         if (StringUtils.isBlank(token)) {
             return response;
         }
-        FacebookClient facebookClient = new DefaultFacebookClient(Version.VERSION_12_0);
+        FacebookClient facebookClient = new DefaultFacebookClient(VERSION_12_0);
 
         FacebookClient tokenizedClient = facebookClient.createClientWithAccessToken(token);
         User fbUser = tokenizedClient.fetchObject("/me", User.class, Parameter.with("fields", "email,first_name,last_name,gender"));
@@ -48,19 +50,16 @@ public class FacebookUserServiceImpl implements ExternalUserService {
         }
         var appUser = userDao.findByEmail(newUserEmail);
         if (appUser.isEmpty()) {//no appUser yet
-            log.info("No user by this email, creating new user {'email':{}}", newUserEmail);
-            String emailToRegister = newUserEmail;
+            log.info("No appUser exists for token {}", token);
             UserInfoRequest registerRequest = UserInfoRequest.builder()
-                    .email(emailToRegister)
+                    .email(newUserEmail)
                     .build();
             appUser = userService.registerExternally(registerRequest);
         }
-        com.vinylteam.vinyl.entity.User user = appUser.get();
-        response.setMessage(user.getEmail());
-        response.setUser(userMapper.mapUserToDto(user));
-        var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(user));
-        response.setJwtToken(newTokenPair.getJwtToken());
-        response.setRefreshToken(newTokenPair.getRefreshToken());
+        response.setUser(userMapper.mapUserToDto(appUser.get()));
+        response.setMessage(response.getUser().getEmail());
+        var newTokenPair = jwtService.getTokenPair(userMapper.mapToDto(appUser.get()));
+        response.setTokenPair(newTokenPair);
         return response;
     }
 }

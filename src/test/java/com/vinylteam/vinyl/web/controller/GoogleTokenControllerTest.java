@@ -1,39 +1,27 @@
 package com.vinylteam.vinyl.web.controller;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.vinylteam.vinyl.dao.UserDao;
 import com.vinylteam.vinyl.entity.Role;
 import com.vinylteam.vinyl.entity.User;
-import com.vinylteam.vinyl.service.ExternalUserService;
 import com.vinylteam.vinyl.service.JwtService;
 import com.vinylteam.vinyl.web.dto.UserDto;
 import com.vinylteam.vinyl.web.dto.UserInfoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -42,6 +30,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Slf4j
 class GoogleTokenControllerTest {
+
+    private final String testUserEmail = "testuser2@gmail.com";
+    private final String testUserPassword = "password";
 
     @Autowired
     private PasswordEncoder encoder;
@@ -55,11 +46,9 @@ class GoogleTokenControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final String testUserEmail = "testuser2@gmail.com";
-    private final String testUserPassword = "password";
     private User builtUser;
 
-    public void mockUserWithStatus(boolean status) throws GeneralSecurityException, IOException {
+    public void mockUserWithStatus(boolean status) {
         builtUser = User
                 .builder()
                 .role(Role.USER)
@@ -67,15 +56,8 @@ class GoogleTokenControllerTest {
                 .password(encoder.encode(testUserPassword))
                 .status(status)
                 .build();
-        when(userDao.findByEmail(testUserEmail)).thenReturn(Optional.of(builtUser));
-        /*GoogleIdToken googleIdToken = new GoogleIdToken(new GoogleIdToken.Payload());
-        when(externalUserService.verifyToken(ArgumentMatchers.any())).thenReturn(googleIdToken)*/
     }
 
-    //TODO: fix issue with inability to put google.client.id in discreet property file
-    /* Can't put property google.client.id in test/application-dev.properties, it doesn't get parsed.
-    google.client.id in test/application.properties is invalid but at least allows to run tests.
-     */
     @Test
     @DisplayName("Login by Google test")
     void loginByGoogle() throws Exception {
@@ -95,7 +77,6 @@ class GoogleTokenControllerTest {
                 .andExpect(jsonPath("$", not(empty())))
                 .andExpect(jsonPath("$", hasKey("user")))
                 .andExpect(jsonPath("$.user", not(empty())))
-//                .andExpect(jsonPath("$.message", emptyString()))
                 .andExpect(jsonPath("$.jwtToken", not(empty())))
                 .andExpect(jsonPath("$.refreshToken", not(empty())))
                 .andExpect(jsonPath("$.user.email", not(empty())))
@@ -107,7 +88,6 @@ class GoogleTokenControllerTest {
         DocumentContext context = JsonPath.parse(response);
         UserDto responseUser = context.read("$['user']", UserDto.class);
         assertTrue(jwtService.isTokenValid(jwtToken));
-        //assertEquals(testUserEmail, responseUser.getEmail());
         assertEquals(Role.USER, responseUser.getRole());
     }
 

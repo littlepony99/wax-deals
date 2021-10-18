@@ -40,4 +40,5 @@ public class FacebookTokenController {
             return ResponseEntity.status(BAD_REQUEST).body(response);
         }
     }
+
 }
